@@ -1,8 +1,6 @@
 package discord
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models"
 	"github.com/rs/zerolog/log"
@@ -33,6 +31,7 @@ func New(token string, shardID, shardCount int) (*DiscordServiceImpl, error) {
 	dg.Identify.Intents = models.Intents
 	dg.AddHandler(service.ready)
 	dg.AddHandler(service.messageCreate)
+	dg.AddHandler(service.interactionCreate)
 
 	return &service, nil
 }
@@ -49,7 +48,15 @@ func (service *DiscordServiceImpl) Listen() error {
 }
 
 func (service *DiscordServiceImpl) RegisterCommands() error {
-	// TODO
+	for _, command := range discordCommands {
+		_, err := service.session.ApplicationCommandCreate(service.session.State.User.ID, "299167247279194112", &command.Identity)
+		if err != nil {
+			log.Error().Err(err).Str(models.LogCommand, command.Identity.Name).Msgf("Failed to create command, registration stopped")
+			return err
+		}
+		log.Info().Str(models.LogCommand, command.Identity.Name).Msgf("Successfully registered!")
+	}
+
 	return nil
 }
 
@@ -64,31 +71,32 @@ func (service *DiscordServiceImpl) ready(session *discordgo.Session, event *disc
 }
 
 func (service *DiscordServiceImpl) messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
-	defer service.handlePanicSilently()
+	// TODO defer service.handlePanic()
+}
 
-	if !event.Author.Bot {
-		// do stuff
-		if event.Author.ID == "162842827183751169" {
-			session.ChannelMessageSend(event.ChannelID, "coucou")
-		}
+func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session, event *discordgo.InteractionCreate) {
+	defer service.handlePanic(session, event)
+
+	// TODO not always ApplicationCommandData
+	if command, ok := discordCommands[event.ApplicationCommandData().Name]; ok && event != nil {
+		command.Handler(session, event)
 	}
 }
 
-func (service *DiscordServiceImpl) handlePanicSilently() {
+func (service *DiscordServiceImpl) handlePanic(session *discordgo.Session, event *discordgo.InteractionCreate) {
 	r := recover()
 	if r == nil {
 		return
 	}
-	log.Error().Msgf("Panic detected: %v", r)
-}
 
-func (service *DiscordServiceImpl) handlePanic(channelID string) {
-	r := recover()
-	if r == nil {
-		return
-	}
-	log.Error().Msgf("Panic detected: %v", r)
-	_, err := service.session.ChannelMessageSend(channelID, fmt.Sprintf("oops, an error occurred: %v", r))
+	// TODO not always ApplicationCommandData
+	log.Error().Str(models.LogCommand, event.ApplicationCommandData().Name).Interface(models.LogPanic, r).Msgf("")
+	err := session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "Oops, je viens de crash!",
+		},
+	})
 	if err != nil {
 		log.Warn().Err(err).Msgf("Could not respond to caller after panicking")
 	}

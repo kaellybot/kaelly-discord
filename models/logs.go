@@ -6,4 +6,5 @@ const (
 	LogInteractionType = "interactionType"
 	LogShard           = "shard"
 	LogConfigFileName  = "configFileName"
+	LogPanic           = "Panic"
 )

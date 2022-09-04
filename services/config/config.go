@@ -23,11 +23,11 @@ func New() (*ConfigServiceImpl, error) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Error().Err(err).Str(models.LogConfigFileName, models.ConfigFileName).Msgf("Failed to read config")
+		log.Error().Err(err).Str(models.LogFileName, models.ConfigFileName).Msgf("Failed to read config")
 		return nil, err
 	}
 
-	log.Info().Str(models.LogConfigFileName, models.ConfigFileName).Msgf("Config read!")
+	log.Info().Str(models.LogFileName, models.ConfigFileName).Msgf("Config read!")
 	return &ConfigServiceImpl{}, err
 }
 

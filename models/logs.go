@@ -5,6 +5,7 @@ const (
 	LogGuildCount      = "guildCount"
 	LogInteractionType = "interactionType"
 	LogShard           = "shard"
-	LogConfigFileName  = "configFileName"
-	LogPanic           = "Panic"
+	LogFileName        = "fileName"
+	LogLocale          = "locale"
+	LogPanic           = "panic"
 )

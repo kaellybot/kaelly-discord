@@ -1,0 +1,22 @@
+{
+    "about.title":["{{ .name }} version {{ .version }}"],
+    "about.desc":["Discord bot dedicated to the {{ .game }} game!"],
+    "about.invite.title":[":electric_plug: Invite link:"],
+    "about.invite.desc":["I can be invited to your servers with this [link]({{ .invite }}). You will need to have sufficient rights to perform the action!"],
+    "about.support.title":[":bulb: Support server:"],
+    "about.support.desc":["You have a problem with its use? A suggestion ? An improvement to propose? Feel free to join the [Discord server]({{ .discord }}) !"],
+    "about.twitter.title":["<:twitter:383237199925215232> Twitter:"],
+    "about.twitter.desc":["I'm also on [Twitter]({{ .twitter }}): you will find the news or reports of failure!"],
+    "about.opensource.title":["<:github:372093338628784148> Open source:"],
+    "about.opensource.desc":["All source code is licensed under GPL-3.0 and accessible on [Github]({{ .github }})."],
+    "about.free.title":[":money_with_wings: Free:"],
+    "about.free.desc":["All features are free. You can participate financially but do not go into the red! [Paypal]({{ .paypal }})"],
+    "about.graphist.title":[":art: Visuals:"],
+    "about.graphist.desc":["Visuals made by the great {{ .graphist }}!"],
+    "about.donators.title":[":ok_woman: Donors:"],
+    "about.donators.desc":["No donor for now!", "//TODO"],
+    "panic":[
+        "I have encountered an error :frowning:... This will be processed as soon as possible!", 
+        "Oops, it seems I've crashed... I'm reporting this event to my creators, sorry!"
+    ]
+}

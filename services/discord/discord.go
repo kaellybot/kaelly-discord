@@ -3,6 +3,7 @@ package discord
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models"
+	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -94,7 +95,7 @@ func (service *DiscordServiceImpl) handlePanic(session *discordgo.Session, event
 	err := session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Oops, je viens de crash!",
+			Content: i18n.Get(event.Locale, "panic"),
 		},
 	})
 	if err != nil {

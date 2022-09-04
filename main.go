@@ -9,12 +9,13 @@ import (
 	"github.com/kaellybot/kaelly-discord/models"
 	"github.com/kaellybot/kaelly-discord/services/config"
 	"github.com/kaellybot/kaelly-discord/services/discord"
+	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 func init() {
-	zerolog.CallerMarshalFunc = func(file string, line int) string {
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		short := file
 		for i := len(file) - 1; i > 0; i-- {
 			if file[i] == '/' {
@@ -25,6 +26,15 @@ func init() {
 		return fmt.Sprintf("%s:%d", short, line)
 	}
 	log.Logger = log.With().Caller().Logger()
+
+	for locale, file := range models.TranslationFiles {
+		if err := i18n.LoadBundle(locale, file); err != nil {
+			log.Warn().Err(err).
+				Str(models.LogLocale, locale.String()).
+				Str(models.LogFileName, file).
+				Msgf("Cannot load translation file, continue...")
+		}
+	}
 }
 
 func main() {

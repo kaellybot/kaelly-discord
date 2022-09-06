@@ -7,15 +7,20 @@ import (
 	"syscall"
 
 	"github.com/kaellybot/kaelly-discord/models"
-	"github.com/kaellybot/kaelly-discord/services/config"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 func init() {
-	// Log
+	initConfig()
+	initLog()
+	initI18n()
+}
+
+func initLog() {
 	zerolog.SetGlobalLevel(models.LogLevelFallback)
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		short := file
@@ -29,7 +34,29 @@ func init() {
 	}
 	log.Logger = log.With().Caller().Logger()
 
-	// i18n
+	logLevel, err := zerolog.ParseLevel(viper.GetString(models.LogLevel))
+	if err != nil {
+		log.Warn().Err(err).Msgf("Log level not set, continue with %s...", models.LogLevelFallback)
+	} else {
+		zerolog.SetGlobalLevel(logLevel)
+		log.Debug().Msgf("Logger level set to '%s'", logLevel)
+	}
+}
+
+func initConfig() {
+	viper.SetConfigFile(models.ConfigFileName)
+
+	for configName, defaultValue := range models.DefaultConfigValues {
+		viper.SetDefault(configName, defaultValue)
+	}
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal().Err(err).Str(models.LogFileName, models.ConfigFileName).Msgf("Failed to read config, shutting down.")
+	}
+}
+
+func initI18n() {
 	for locale, file := range models.TranslationFiles {
 		if err := i18n.LoadBundle(locale, file); err != nil {
 			log.Warn().Err(err).
@@ -41,23 +68,10 @@ func init() {
 }
 
 func main() {
-	configService, err := config.New()
-	if err != nil {
-		log.Fatal().Msgf("Config service instanciation failed, shutting down.")
-	}
-
-	logLevel, err := zerolog.ParseLevel(configService.GetString(models.LogLevel))
-	if err != nil {
-		log.Warn().Err(err).Msgf("Log level not set, continue with %s...", models.LogLevelFallback)
-	} else {
-		zerolog.SetGlobalLevel(logLevel)
-		log.Debug().Msgf("Logger level set to '%s'", logLevel)
-	}
-
 	discordService, err := discord.New(
-		configService.GetString(models.Token),
-		configService.GetInt(models.ShardId),
-		configService.GetInt(models.ShardCount))
+		viper.GetString(models.Token),
+		viper.GetInt(models.ShardId),
+		viper.GetInt(models.ShardCount))
 	if err != nil {
 		log.Fatal().Msgf("Discord service instanciation failed, shutting down.")
 	}

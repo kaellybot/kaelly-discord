@@ -23,6 +23,6 @@ var (
 		Token:      "",
 		ShardId:    0,
 		ShardCount: 1,
-		LogLevel:   zerolog.InfoLevel,
+		LogLevel:   zerolog.InfoLevel.String(),
 	}
 )

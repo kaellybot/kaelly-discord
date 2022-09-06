@@ -64,7 +64,7 @@ func getAboutEmbed(locale discordgo.Locale) *discordgo.MessageEmbed {
 			},
 			{
 				Name:   i18n.Get(locale, "about.donors.title"),
-				Value:  i18n.Get(locale, "about.donors.desc", i18n.Vars{"donors": models.Donators}),
+				Value:  i18n.Get(locale, "about.donors.desc", i18n.Vars{"donors": models.Donors}),
 				Inline: false,
 			},
 		},

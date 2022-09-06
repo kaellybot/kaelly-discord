@@ -1,7 +1,7 @@
 package models
 
 var (
-	Donators = []string{
+	Donors = []string{
 		"Hart69#0001",
 		"Elder-Master#7684",
 		"Darkrai#8780",

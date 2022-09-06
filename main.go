@@ -15,6 +15,8 @@ import (
 )
 
 func init() {
+	// Log
+	zerolog.SetGlobalLevel(models.LogLevelFallback)
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		short := file
 		for i := len(file) - 1; i > 0; i-- {
@@ -27,6 +29,7 @@ func init() {
 	}
 	log.Logger = log.With().Caller().Logger()
 
+	// i18n
 	for locale, file := range models.TranslationFiles {
 		if err := i18n.LoadBundle(locale, file); err != nil {
 			log.Warn().Err(err).
@@ -41,6 +44,14 @@ func main() {
 	configService, err := config.New()
 	if err != nil {
 		log.Fatal().Msgf("Config service instanciation failed, shutting down.")
+	}
+
+	logLevel, err := zerolog.ParseLevel(configService.GetString(models.LogLevel))
+	if err != nil {
+		log.Warn().Err(err).Msgf("Log level not set, continue with %s...", models.LogLevelFallback)
+	} else {
+		zerolog.SetGlobalLevel(logLevel)
+		log.Debug().Msgf("Logger level set to '%s'", logLevel)
 	}
 
 	discordService, err := discord.New(

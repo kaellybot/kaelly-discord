@@ -27,7 +27,7 @@ func New() (*ConfigServiceImpl, error) {
 		return nil, err
 	}
 
-	log.Info().Str(models.LogFileName, models.ConfigFileName).Msgf("Config read!")
+	log.Debug().Str(models.LogFileName, models.ConfigFileName).Msgf("Config read!")
 	return &ConfigServiceImpl{}, err
 }
 

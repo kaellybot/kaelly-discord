@@ -1,5 +1,7 @@
 package models
 
+import "github.com/rs/zerolog"
+
 const (
 	LogCommand         = "command"
 	LogGuildCount      = "guildCount"
@@ -8,4 +10,6 @@ const (
 	LogFileName        = "fileName"
 	LogLocale          = "locale"
 	LogPanic           = "panic"
+
+	LogLevelFallback = zerolog.InfoLevel
 )

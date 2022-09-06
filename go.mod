@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/bwmarrin/discordgo v0.26.1
-	github.com/kaysoro/discordgo-i18n v0.0.1
+	github.com/kaysoro/discordgo-i18n v1.0.0
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/viper v1.12.0
 )

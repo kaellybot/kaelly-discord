@@ -1,5 +1,7 @@
 package models
 
+import "github.com/rs/zerolog"
+
 const (
 	ConfigFileName = ".env"
 
@@ -11,6 +13,9 @@ const (
 
 	// Total number of shards used to run the entire application
 	ShardCount = "SHARD_COUNT"
+
+	// Zerolog values from [trace, debug, info, warn, error, fatal, panic]
+	LogLevel = "LOG_LEVEL"
 )
 
 var (
@@ -18,5 +23,6 @@ var (
 		Token:      "",
 		ShardId:    0,
 		ShardCount: 1,
+		LogLevel:   zerolog.InfoLevel,
 	}
 )

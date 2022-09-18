@@ -20,6 +20,19 @@ func init() {
 	initI18n()
 }
 
+func initConfig() {
+	viper.SetConfigFile(models.ConfigFileName)
+
+	for configName, defaultValue := range models.DefaultConfigValues {
+		viper.SetDefault(configName, defaultValue)
+	}
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal().Err(err).Str(models.LogFileName, models.ConfigFileName).Msgf("Failed to read config, shutting down.")
+	}
+}
+
 func initLog() {
 	zerolog.SetGlobalLevel(models.LogLevelFallback)
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
@@ -43,20 +56,9 @@ func initLog() {
 	}
 }
 
-func initConfig() {
-	viper.SetConfigFile(models.ConfigFileName)
-
-	for configName, defaultValue := range models.DefaultConfigValues {
-		viper.SetDefault(configName, defaultValue)
-	}
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal().Err(err).Str(models.LogFileName, models.ConfigFileName).Msgf("Failed to read config, shutting down.")
-	}
-}
-
 func initI18n() {
+
+	i18n.SetDefault(models.DefaultLocale)
 	for locale, file := range models.TranslationFiles {
 		if err := i18n.LoadBundle(locale, file); err != nil {
 			log.Warn().Err(err).

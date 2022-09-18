@@ -1,35 +1,51 @@
 {
     "about":{
-       "title":"{{ .name }} version {{ .version }}",
-       "desc":"Discord bot dedicated to the {{ .game }} game!",
-       "invite":{
-          "title":":electric_plug: Invite link",
-          "desc":"I can be invited to your servers with this [link]({{ .invite }}). You will need to have sufficient rights to perform the action!"
-       },
-       "support":{
-          "title":":bulb: Support server",
-          "desc":"You have a problem with its use? A suggestion ? An improvement to propose? Feel free to join the [Discord server]({{ .discord }}) !"
-       },
-       "twitter":{
-          "title":"<:twitter:383237199925215232> Twitter",
-          "desc":"I'm also on [Twitter]({{ .twitter }}): you will find the news or reports of failure!"
-       },
-       "opensource":{
-          "title":"<:github:372093338628784148> Open source",
-          "desc":"All source code is licensed under GPL-3.0 and accessible on [Github]({{ .github }})."
-       },
-       "free":{
-          "title":":money_with_wings: Free",
-          "desc":"All features are free. You can participate financially but do not go into the red! [Paypal]({{ .paypal }})"
-       },
-       "graphist":{
-          "title":":art: Visuals",
-          "desc":"Visuals made by the great [{{ .graphist.Name }}]({{ .graphist.Url }})!"
-       },
-       "donors":{
-          "title":":ok_woman: Donors",
-          "desc":"{{ if .donors }}{{$first := true}}{{ range .donors}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ else }} No donor for now!{{ end }}"
-       }
+      "name": "about",
+      "description": "Gives information about Kaelly and a way to get help",
+      "title":"{{ .name }} version {{ .version }}",
+      "desc":"Discord bot dedicated to the {{ .game }} game!",
+      "invite":{
+         "title":":electric_plug: Invite link",
+         "desc":"I can be invited to your servers with this [link]({{ .invite }}). You will need to have sufficient rights to perform the action!"
+      },
+      "support":{
+         "title":":bulb: Support server",
+         "desc":"You have a problem with its use? A suggestion ? An improvement to propose? Feel free to join the [Discord server]({{ .discord }}) !"
+      },
+      "twitter":{
+         "title":"<:twitter:383237199925215232> Twitter",
+         "desc":"I'm also on [Twitter]({{ .twitter }}): you will find the news or reports of failure!"
+      },
+      "opensource":{
+         "title":"<:github:372093338628784148> Open source",
+         "desc":"All source code is licensed under GPL-3.0 and accessible on [Github]({{ .github }})."
+      },
+      "free":{
+         "title":":money_with_wings: Free",
+         "desc":"All features are free. You can participate financially but do not go into the red! [Paypal]({{ .paypal }})"
+      },
+      "graphist":{
+         "title":":art: Visuals",
+         "desc":"Visuals made by the great [{{ .graphist.Name }}]({{ .graphist.Url }})!"
+      },
+      "donors":{
+         "title":":ok_woman: Donors",
+         "desc":"{{ if .donors }}{{$first := true}}{{ range .donors}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ else }} No donor for now!{{ end }}"
+      }
+    },
+    "pos": {
+      "name": "pos",
+      "description": "Gives the most recent dimension portal positions",
+      "dimension": { 
+            "name": "dimension",
+            "description": "Dimension name"
+      }
+    },
+    "dimensions": {
+      "enutrosor": "Enurado",
+      "srambad": "Srambad",
+      "xelorium": "Xelorium",
+      "ecaflipus": "Ecaflipus"
     },
     "panic":[
        "I have encountered an error :frowning:... This will be processed as soon as possible!",

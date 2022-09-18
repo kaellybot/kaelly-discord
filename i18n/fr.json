@@ -1,3 +1,20 @@
 {
-    
+    "about":{
+        "name": "about",
+        "description": "Donne des informations sur Kaelly et un moyen d'obtenir de l'aide"
+    },
+    "pos": {
+        "name": "pos",
+        "description": "Donne les positions de portail de dimension les plus récentes",
+        "dimension": { 
+            "name": "dimension",
+            "description": "Nom de la dimension"
+        }
+    },
+    "dimensions": {
+        "enutrosor": "Enutrosor",
+        "srambad": "Srambad",
+        "xelorium": "Xélorium",
+        "ecaflipus": "Ecaflipus"
+      }
 }

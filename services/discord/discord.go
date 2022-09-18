@@ -3,6 +3,7 @@ package discord
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models"
+	"github.com/kaellybot/kaelly-discord/services/discord/commands"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
@@ -14,8 +15,16 @@ type DiscordService interface {
 }
 
 type DiscordServiceImpl struct {
-	session *discordgo.Session
+	session  *discordgo.Session
+	commands []*models.DiscordCommand
 }
+
+var (
+	discordCommandFactories = []models.DiscordCommandFactory{
+		commands.About,
+		commands.Pos,
+	}
+)
 
 func New(token string, shardID, shardCount int) (*DiscordServiceImpl, error) {
 	dg, err := discordgo.New("Bot " + token)
@@ -25,7 +34,12 @@ func New(token string, shardID, shardCount int) (*DiscordServiceImpl, error) {
 	}
 
 	service := DiscordServiceImpl{
-		session: dg,
+		session:  dg,
+		commands: make([]*models.DiscordCommand, 0),
+	}
+
+	for _, commandFactory := range discordCommandFactories {
+		service.commands = append(service.commands, commandFactory())
 	}
 
 	dg.Identify.Shard = &[2]int{shardID, shardCount}
@@ -49,7 +63,7 @@ func (service *DiscordServiceImpl) Listen() error {
 }
 
 func (service *DiscordServiceImpl) RegisterCommands() error {
-	for _, command := range discordCommands {
+	for _, command := range service.commands {
 		_, err := service.session.ApplicationCommandCreate(service.session.State.User.ID, "299167247279194112", &command.Identity)
 		if err != nil {
 			log.Error().Err(err).Str(models.LogCommand, command.Identity.Name).Msgf("Failed to create command, registration stopped")
@@ -78,9 +92,15 @@ func (service *DiscordServiceImpl) messageCreate(session *discordgo.Session, eve
 func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session, event *discordgo.InteractionCreate) {
 	defer service.handlePanic(session, event)
 
-	// TODO not always ApplicationCommandData
-	if command, ok := discordCommands[event.ApplicationCommandData().Name]; ok && event != nil {
-		command.Handler(session, event)
+	if event == nil {
+		return
+	}
+
+	for _, command := range service.commands {
+		// TODO not always ApplicationCommandData
+		if event.ApplicationCommandData().Name == command.Identity.Name {
+			command.Handler(session, event)
+		}
 	}
 }
 

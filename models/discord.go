@@ -4,7 +4,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const (
+type DiscordCommand struct {
+	Identity discordgo.ApplicationCommand
+	Handler  DiscordHandler
+}
+
+type DiscordCommandFactory func() *DiscordCommand
+
+type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)
+
+var (
 	DMPermission = false
 
 	DefaultPermission int64 = discordgo.PermissionSendMessages |

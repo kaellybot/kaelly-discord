@@ -11,6 +11,8 @@ const (
 
 	frenchFile  = "fr.json"
 	englishFile = "en.json"
+
+	DefaultLocale = discordgo.EnglishUS
 )
 
 var (

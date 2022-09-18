@@ -7,11 +7,30 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const (
-	CommandNameAbout = "about"
-)
+func About() *models.DiscordCommand {
+	return &models.DiscordCommand{
+		Identity: discordgo.ApplicationCommand{
+			Name:                     i18n.Get(models.DefaultLocale, "about.name"),
+			Description:              i18n.Get(models.DefaultLocale, "about.description"),
+			Type:                     discordgo.ChatApplicationCommand,
+			DefaultMemberPermissions: &models.DefaultPermission,
+			DMPermission:             &models.DMPermission,
+			NameLocalizations: &map[discordgo.Locale]string{
+				discordgo.EnglishGB: i18n.Get(discordgo.EnglishGB, "about.name"),
+				discordgo.EnglishUS: i18n.Get(discordgo.EnglishUS, "about.name"),
+				discordgo.French:    i18n.Get(discordgo.French, "about.name"),
+			},
+			DescriptionLocalizations: &map[discordgo.Locale]string{
+				discordgo.EnglishGB: i18n.Get(discordgo.EnglishGB, "about.description"),
+				discordgo.EnglishUS: i18n.Get(discordgo.EnglishUS, "about.description"),
+				discordgo.French:    i18n.Get(discordgo.French, "about.description"),
+			},
+		},
+		Handler: about,
+	}
+}
 
-func About(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func about(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

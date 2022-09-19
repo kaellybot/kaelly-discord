@@ -15,16 +15,8 @@ func About() *models.DiscordCommand {
 			Type:                     discordgo.ChatApplicationCommand,
 			DefaultMemberPermissions: &models.DefaultPermission,
 			DMPermission:             &models.DMPermission,
-			NameLocalizations: &map[discordgo.Locale]string{
-				discordgo.EnglishGB: i18n.Get(discordgo.EnglishGB, "about.name"),
-				discordgo.EnglishUS: i18n.Get(discordgo.EnglishUS, "about.name"),
-				discordgo.French:    i18n.Get(discordgo.French, "about.name"),
-			},
-			DescriptionLocalizations: &map[discordgo.Locale]string{
-				discordgo.EnglishGB: i18n.Get(discordgo.EnglishGB, "about.description"),
-				discordgo.EnglishUS: i18n.Get(discordgo.EnglishUS, "about.description"),
-				discordgo.French:    i18n.Get(discordgo.French, "about.description"),
-			},
+			NameLocalizations:        i18n.GetLocalizations("about.name"),
+			DescriptionLocalizations: i18n.GetLocalizations("about.description"),
 		},
 		Handler: about,
 	}

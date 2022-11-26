@@ -38,17 +38,15 @@
       "description": "Gives the most recent dimension portal positions",
       "dimension": { 
             "name": "dimension",
-            "description": "Dimension name"
+            "description": "Dimension name. If not filled, all dimensions are retrieved"
+      },
+      "server": { 
+            "name": "server",
+            "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
       }
-    },
-    "dimensions": {
-      "enutrosor": "Enurado",
-      "srambad": "Srambad",
-      "xelorium": "Xelorium",
-      "ecaflipus": "Ecaflipus"
     },
     "panic":[
        "I have encountered an error :frowning:... This will be processed as soon as possible!",
        "Oops, it seems I've crashed... I'm reporting this event to my creators, sorry!"
-    ]
+   ]
  }

@@ -9,12 +9,10 @@
         "dimension": { 
             "name": "dimension",
             "description": "Nom de la dimension"
+        },
+        "server": { 
+            "name": "serveur",
+            "description": "Nom du serveur"
         }
-    },
-    "dimensions": {
-        "enutrosor": "Enutrosor",
-        "srambad": "Srambad",
-        "xelorium": "Xélorium",
-        "ecaflipus": "Ecaflipus"
-      }
+    }
 }

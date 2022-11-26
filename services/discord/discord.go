@@ -2,10 +2,11 @@ package discord
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models"
-	"github.com/kaellybot/kaelly-discord/services/discord/commands"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 type DiscordService interface {
@@ -19,14 +20,7 @@ type DiscordServiceImpl struct {
 	commands []*models.DiscordCommand
 }
 
-var (
-	discordCommandFactories = []models.DiscordCommandFactory{
-		commands.About,
-		commands.Pos,
-	}
-)
-
-func New(token string, shardID, shardCount int) (*DiscordServiceImpl, error) {
+func New(token string, shardID, shardCount int, commands []commands.Command) (*DiscordServiceImpl, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Error().Err(err).Msgf("Connecting to Discord gateway failed")
@@ -38,8 +32,8 @@ func New(token string, shardID, shardCount int) (*DiscordServiceImpl, error) {
 		commands: make([]*models.DiscordCommand, 0),
 	}
 
-	for _, commandFactory := range discordCommandFactories {
-		service.commands = append(service.commands, commandFactory())
+	for _, command := range commands {
+		service.commands = append(service.commands, command.GetDiscordCommand())
 	}
 
 	dg.Identify.Shard = &[2]int{shardID, shardCount}
@@ -63,14 +57,24 @@ func (service *DiscordServiceImpl) Listen() error {
 }
 
 func (service *DiscordServiceImpl) RegisterCommands() error {
-	for _, command := range service.commands {
-		_, err := service.session.ApplicationCommandCreate(service.session.State.User.ID, "299167247279194112", &command.Identity)
-		if err != nil {
-			log.Error().Err(err).Str(models.LogCommand, command.Identity.Name).Msgf("Failed to create command, registration stopped")
-			return err
-		}
-		log.Info().Str(models.LogCommand, command.Identity.Name).Msgf("Successfully registered!")
+
+	guildId := ""
+	if !viper.GetBool(models.Production) {
+		log.Info().Msgf("Development mode enabled, registering commands in dedicated development guild")
+		guildId = models.DevelopmentGuildId
 	}
+
+	identities := make([]*discordgo.ApplicationCommand, 0)
+	for _, command := range service.commands {
+		identities = append(identities, &command.Identity)
+	}
+
+	_, err := service.session.ApplicationCommandBulkOverwrite(service.session.State.User.ID, guildId, identities)
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to create commands, registration stopped")
+		return err
+	}
+	log.Info().Msgf("Commands successfully registered!")
 
 	return nil
 }

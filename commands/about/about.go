@@ -1,4 +1,4 @@
-package commands
+package about
 
 import (
 	"github.com/bwmarrin/discordgo"
@@ -7,10 +7,20 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func About() *models.DiscordCommand {
+const (
+	commandName = "about"
+)
+
+type AboutCommand struct{}
+
+func New() *AboutCommand {
+	return &AboutCommand{}
+}
+
+func (command *AboutCommand) GetDiscordCommand() *models.DiscordCommand {
 	return &models.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
-			Name:                     i18n.Get(models.DefaultLocale, "about.name"),
+			Name:                     commandName,
 			Description:              i18n.Get(models.DefaultLocale, "about.description"),
 			Type:                     discordgo.ChatApplicationCommand,
 			DefaultMemberPermissions: &models.DefaultPermission,
@@ -18,16 +28,16 @@ func About() *models.DiscordCommand {
 			NameLocalizations:        i18n.GetLocalizations("about.name"),
 			DescriptionLocalizations: i18n.GetLocalizations("about.description"),
 		},
-		Handler: about,
+		Handler: command.handler,
 	}
 }
 
-func about(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *AboutCommand) handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{getAboutEmbed(i.Locale)},
+			Embeds: []*discordgo.MessageEmbed{command.getAboutEmbed(i.Locale)},
 		},
 	})
 	if err != nil {
@@ -35,7 +45,7 @@ func about(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 }
 
-func getAboutEmbed(locale discordgo.Locale) *discordgo.MessageEmbed {
+func (command *AboutCommand) getAboutEmbed(locale discordgo.Locale) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       i18n.Get(locale, "about.title", i18n.Vars{"name": models.Name, "version": models.Version}),
 		Description: i18n.Get(locale, "about.desc", i18n.Vars{"game": models.Game}),

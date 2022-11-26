@@ -16,6 +16,9 @@ const (
 
 	// Zerolog values from [trace, debug, info, warn, error, fatal, panic]
 	LogLevel = "LOG_LEVEL"
+
+	// Boolean; used to register commands at development guild level or globally.
+	Production = "PRODUCTION"
 )
 
 var (
@@ -24,5 +27,6 @@ var (
 		ShardId:    0,
 		ShardCount: 1,
 		LogLevel:   zerolog.InfoLevel.String(),
+		Production: false,
 	}
 )

@@ -6,8 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/kaellybot/kaelly-discord/commands"
+	"github.com/kaellybot/kaelly-discord/commands/about"
+	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/models"
+	"github.com/kaellybot/kaelly-discord/services/dimension"
 	"github.com/kaellybot/kaelly-discord/services/discord"
+	"github.com/kaellybot/kaelly-discord/services/server"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -70,10 +75,26 @@ func initI18n() {
 }
 
 func main() {
+	dimensionService, err := dimension.New()
+	if err != nil {
+		log.Fatal().Msgf("Dimension service instanciation failed, shutting down.")
+	}
+
+	serverService, err := server.New()
+	if err != nil {
+		log.Fatal().Msgf("Server service instanciation failed, shutting down.")
+	}
+
+	commands := []commands.Command{
+		about.New(),
+		pos.New(dimensionService, serverService),
+	}
+
 	discordService, err := discord.New(
 		viper.GetString(models.Token),
 		viper.GetInt(models.ShardId),
-		viper.GetInt(models.ShardCount))
+		viper.GetInt(models.ShardCount),
+		commands)
 	if err != nil {
 		log.Fatal().Msgf("Discord service instanciation failed, shutting down.")
 	}

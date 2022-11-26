@@ -9,8 +9,6 @@ type DiscordCommand struct {
 	Handler  DiscordHandler
 }
 
-type DiscordCommandFactory func() *DiscordCommand
-
 type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)
 
 var (

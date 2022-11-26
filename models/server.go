@@ -1,5 +1,5 @@
 package models
 
-type Dimension struct {
+type Server struct {
 	Name string
 }

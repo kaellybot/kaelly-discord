@@ -8,11 +8,11 @@
         "description": "Donne les positions de portail de dimension les plus récentes",
         "dimension": { 
             "name": "dimension",
-            "description": "Nom de la dimension"
+            "description": "Nom de la dimension. Si non renseigné, toutes les dimensions sont remontées"
         },
         "server": { 
             "name": "serveur",
-            "description": "Nom du serveur"
+            "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
         }
     }
 }

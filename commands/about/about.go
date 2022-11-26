@@ -7,12 +7,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const (
-	commandName = "about"
-)
-
-type AboutCommand struct{}
-
 func New() *AboutCommand {
 	return &AboutCommand{}
 }
@@ -28,11 +22,13 @@ func (command *AboutCommand) GetDiscordCommand() *models.DiscordCommand {
 			NameLocalizations:        i18n.GetLocalizations("about.name"),
 			DescriptionLocalizations: i18n.GetLocalizations("about.description"),
 		},
-		Handler: command.handler,
+		Handlers: models.DiscordHandlers{
+			discordgo.InteractionApplicationCommand: command.about,
+		},
 	}
 }
 
-func (command *AboutCommand) handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *AboutCommand) about(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

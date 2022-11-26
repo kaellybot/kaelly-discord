@@ -3,24 +3,14 @@ package pos
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models"
-	"github.com/kaellybot/kaelly-discord/services/dimension"
-	"github.com/kaellybot/kaelly-discord/services/server"
+	"github.com/kaellybot/kaelly-discord/services/dimensions"
+	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
-const (
-	commandName         = "pos"
-	dimensionOptionName = "dimension"
-	serverOptionName    = "server"
-)
-
-type PosCommand struct {
-	dimensionService dimension.DimensionService
-	serverService    server.ServerService
-}
-
-func New(dimensionService dimension.DimensionService, serverService server.ServerService) *PosCommand {
+func New(dimensionService dimensions.DimensionService, serverService servers.ServerService) *PosCommand {
 	return &PosCommand{
 		dimensionService: dimensionService,
 		serverService:    serverService,
@@ -49,7 +39,7 @@ func (command *PosCommand) GetDiscordCommand() *models.DiscordCommand {
 				},
 				{
 					Name:                     serverOptionName,
-					Description:              i18n.Get(models.DefaultLocale, "pos.server.description"),
+					Description:              i18n.Get(models.DefaultLocale, "pos.server.description", i18n.Vars{"game": models.Game}),
 					NameLocalizations:        *i18n.GetLocalizations("pos.server.name"),
 					DescriptionLocalizations: *i18n.GetLocalizations("pos.server.description", i18n.Vars{"game": models.Game}),
 					Type:                     discordgo.ApplicationCommandOptionString,
@@ -58,22 +48,14 @@ func (command *PosCommand) GetDiscordCommand() *models.DiscordCommand {
 				},
 			},
 		},
-		Handler: command.handler,
+		Handlers: models.DiscordHandlers{
+			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkDimension, command.checkServer, command.respond),
+			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+		},
 	}
 }
 
-func (command *PosCommand) handler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	switch i.Type {
-	case discordgo.InteractionApplicationCommand:
-		command.respond(s, i)
-	case discordgo.InteractionApplicationCommandAutocomplete:
-		command.autocomplete(s, i)
-	default:
-		log.Error().Uint32(models.LogInteractionType, uint32(i.Type)).Msgf("Interaction not handled, ignoring it")
-	}
-}
-
-func (command *PosCommand) respond(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *PosCommand) respond(s *discordgo.Session, i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
@@ -100,50 +82,5 @@ func (command *PosCommand) respond(s *discordgo.Session, i *discordgo.Interactio
 	})
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle pos reponse")
-	}
-}
-
-func (command *PosCommand) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	data := i.ApplicationCommandData()
-	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-
-	for _, option := range data.Options {
-		if option.Focused {
-			switch option.Name {
-			case dimensionOptionName:
-				dimensions := command.dimensionService.FindDimensions(option.StringValue(), i.Locale)
-
-				for _, dimension := range dimensions {
-					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-						Name:              dimension.Name,
-						NameLocalizations: *i18n.GetLocalizations(dimension.Name),
-						Value:             dimension.Name,
-					})
-				}
-			case serverOptionName:
-				servers := command.serverService.FindServers(option.StringValue(), i.Locale)
-
-				for _, server := range servers {
-					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-						Name:              server.Name,
-						NameLocalizations: *i18n.GetLocalizations(server.Name),
-						Value:             server.Name,
-					})
-				}
-			default:
-				log.Error().Str(models.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
-			}
-			break
-		}
-	}
-
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
-		Data: &discordgo.InteractionResponseData{
-			Choices: choices,
-		},
-	})
-	if err != nil {
-		log.Error().Err(err).Msg("Autocomplete request ignored")
 	}
 }

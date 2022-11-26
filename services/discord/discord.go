@@ -103,7 +103,15 @@ func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session,
 	for _, command := range service.commands {
 		// TODO not always ApplicationCommandData
 		if event.ApplicationCommandData().Name == command.Identity.Name {
-			command.Handler(session, event)
+			handler, found := command.Handlers[event.Type]
+			if found {
+				handler(session, event)
+			} else {
+				log.Error().
+					Str(models.LogCommand, command.Identity.Name).
+					Uint32(models.LogInteractionType, uint32(event.Type)).
+					Msgf("Interaction not handled, ignoring it")
+			}
 		}
 	}
 }

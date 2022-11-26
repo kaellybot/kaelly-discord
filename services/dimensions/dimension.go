@@ -1,4 +1,4 @@
-package dimension
+package dimensions
 
 import (
 	"strings"
@@ -33,9 +33,10 @@ func (service *DimensionServiceImpl) GetDimensions() []models.Dimension {
 
 func (service *DimensionServiceImpl) FindDimensions(name string, locale discordgo.Locale) []models.Dimension {
 	dimensionsFound := make([]models.Dimension, 0)
+	cleanedName := strings.ToLower(name)
 
 	for _, dimension := range service.dimensions {
-		if strings.HasPrefix(dimension.Name, name) {
+		if strings.HasPrefix(strings.ToLower(dimension.Name), cleanedName) {
 			dimensionsFound = append(dimensionsFound, dimension)
 		}
 	}

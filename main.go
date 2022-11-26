@@ -10,9 +10,9 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/about"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/models"
-	"github.com/kaellybot/kaelly-discord/services/dimension"
+	"github.com/kaellybot/kaelly-discord/services/dimensions"
 	"github.com/kaellybot/kaelly-discord/services/discord"
-	"github.com/kaellybot/kaelly-discord/services/server"
+	"github.com/kaellybot/kaelly-discord/services/servers"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -75,12 +75,12 @@ func initI18n() {
 }
 
 func main() {
-	dimensionService, err := dimension.New()
+	dimensionService, err := dimensions.New()
 	if err != nil {
 		log.Fatal().Msgf("Dimension service instanciation failed, shutting down.")
 	}
 
-	serverService, err := server.New()
+	serverService, err := servers.New()
 	if err != nil {
 		log.Fatal().Msgf("Server service instanciation failed, shutting down.")
 	}

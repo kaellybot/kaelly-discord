@@ -4,12 +4,13 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+type DiscordHandlers map[discordgo.InteractionType]DiscordHandler
+type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)
+
 type DiscordCommand struct {
 	Identity discordgo.ApplicationCommand
-	Handler  DiscordHandler
+	Handlers DiscordHandlers
 }
-
-type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)
 
 var (
 	DMPermission = false

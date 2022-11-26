@@ -1,4 +1,4 @@
-package server
+package servers
 
 import (
 	"strings"
@@ -36,9 +36,10 @@ func (service *ServerServiceImpl) GetServers() []models.Server {
 
 func (service *ServerServiceImpl) FindServers(name string, locale discordgo.Locale) []models.Server {
 	serversFound := make([]models.Server, 0)
+	cleanedName := strings.ToLower(name)
 
 	for _, server := range service.servers {
-		if strings.HasPrefix(server.Name, name) {
+		if strings.HasPrefix(strings.ToLower(server.Name), cleanedName) {
 			serversFound = append(serversFound, server)
 		}
 	}

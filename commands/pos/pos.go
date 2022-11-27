@@ -55,7 +55,7 @@ func (command *PosCommand) GetDiscordCommand() *models.DiscordCommand {
 	}
 }
 
-func (command *PosCommand) respond(s *discordgo.Session, i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+func (command *PosCommand) respond(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})

@@ -38,11 +38,20 @@
       "description": "Gives the most recent dimension portal positions",
       "dimension": { 
             "name": "dimension",
-            "description": "Dimension name. If not filled, all dimensions are retrieved"
+            "description": "Dimension name. If not filled, all dimensions are retrieved",
+            "check": {
+               "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
+               "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .dimensions }}{{$first := true}}{{ range .dimensions}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
+            }
       },
       "server": { 
             "name": "server",
-            "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
+            "description": "{{ .game }} Server name. If not filled, the guild server is used instead",
+            "check": {
+               "": "",
+               "not_found": "",
+               "too_many": ""
+            }
       }
     },
     "panic":[

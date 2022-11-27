@@ -28,12 +28,12 @@ func (command *AboutCommand) GetDiscordCommand() *models.DiscordCommand {
 	}
 }
 
-func (command *AboutCommand) about(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *AboutCommand) about(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{command.getAboutEmbed(i.Locale)},
+			Embeds: []*discordgo.MessageEmbed{command.getAboutEmbed(lg)},
 		},
 	})
 	if err != nil {

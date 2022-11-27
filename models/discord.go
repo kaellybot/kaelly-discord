@@ -5,7 +5,7 @@ import (
 )
 
 type DiscordHandlers map[discordgo.InteractionType]DiscordHandler
-type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)
+type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale)
 
 type DiscordCommand struct {
 	Identity discordgo.ApplicationCommand

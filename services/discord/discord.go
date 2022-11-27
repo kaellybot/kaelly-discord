@@ -100,12 +100,17 @@ func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session,
 		return
 	}
 
+	locale := event.Locale
+	if event.GuildLocale != nil {
+		locale = *event.GuildLocale
+	}
+
 	for _, command := range service.commands {
 		// TODO not always ApplicationCommandData
 		if event.ApplicationCommandData().Name == command.Identity.Name {
 			handler, found := command.Handlers[event.Type]
 			if found {
-				handler(session, event)
+				handler(session, event, locale)
 			} else {
 				log.Error().
 					Str(models.LogCommand, command.Identity.Name).

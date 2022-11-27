@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *PosCommand) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *PosCommand) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	data := i.ApplicationCommandData()
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
 
@@ -15,7 +15,7 @@ func (command *PosCommand) autocomplete(s *discordgo.Session, i *discordgo.Inter
 		if option.Focused {
 			switch option.Name {
 			case dimensionOptionName:
-				dimensions := command.dimensionService.FindDimensions(option.StringValue(), i.Locale)
+				dimensions := command.dimensionService.FindDimensions(option.StringValue(), lg)
 
 				for _, dimension := range dimensions {
 					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
@@ -25,7 +25,7 @@ func (command *PosCommand) autocomplete(s *discordgo.Session, i *discordgo.Inter
 					})
 				}
 			case serverOptionName:
-				servers := command.serverService.FindServers(option.StringValue(), i.Locale)
+				servers := command.serverService.FindServers(option.StringValue(), lg)
 
 				for _, server := range servers {
 					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{

@@ -65,11 +65,11 @@ func initLog() {
 func initI18n() {
 
 	i18n.SetDefault(models.DefaultLocale)
-	for locale, file := range models.TranslationFiles {
-		if err := i18n.LoadBundle(locale, file); err != nil {
+	for _, language := range models.Languages {
+		if err := i18n.LoadBundle(language.Locale, language.TranslationFile); err != nil {
 			log.Warn().Err(err).
-				Str(models.LogLocale, locale.String()).
-				Str(models.LogFileName, file).
+				Str(models.LogLocale, language.Locale.String()).
+				Str(models.LogFileName, language.TranslationFile).
 				Msgf("Cannot load translation file, continue...")
 		}
 	}

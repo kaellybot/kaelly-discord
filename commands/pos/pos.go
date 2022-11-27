@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models"
 	"github.com/kaellybot/kaelly-discord/services/dimensions"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
-	"github.com/rs/zerolog/log"
 )
 
 func New(guildService guilds.GuildService, dimensionService dimensions.DimensionService, serverService servers.ServerService) *PosCommand {
@@ -63,33 +64,51 @@ func (command *PosCommand) GetDiscordCommand() *models.DiscordCommand {
 func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
-	// Deferred message
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-	})
+	commands.DeferInteraction(s, i)
+	dimension, server, err := command.getOptions(ctx)
 	if err != nil {
-		log.Error().Err(err).Msgf("Cannot handle pos defer reponse, trying to continue")
+		panic(err)
 	}
 
-	server, ok := ctx.Value(serverOptionName).(models.Server)
-	if !ok {
-		panic(fmt.Errorf("Cannot cast %v as models.Server", ctx.Value(serverOptionName)))
+	msg, err := command.publishPortalPositionRequest(i.ID, dimension, server, lg)
+	if err != nil {
+		panic(err)
 	}
 
-	dimension, ok := ctx.Value(dimensionOptionName).(models.Dimension)
-	if !ok {
-		panic(fmt.Errorf("Cannot cast %v as models.Dimension", ctx.Value(dimensionOptionName)))
-	}
-
-	// TODO send models to rabbitmq, retrieve response when possible
-
+	// TODO  retrieve response when possible from rabbitmq
 	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{
-			{Title: "Server", Description: fmt.Sprintf("%v", server.Name)},
-			{Title: "Dimension", Description: fmt.Sprintf("%v", dimension.Name)},
+			{
+				Title:       "PortalPositionRequest",
+				Description: fmt.Sprintf("%v", msg),
+			},
 		},
 	})
 	if err != nil {
-		log.Error().Err(err).Msgf("Cannot handle pos reponse")
+		panic(err)
 	}
+}
+
+func (command *PosCommand) getOptions(ctx context.Context) (models.Dimension, models.Server, error) {
+	server, ok := ctx.Value(serverOptionName).(models.Server)
+	if !ok {
+		return models.Dimension{}, models.Server{}, fmt.Errorf("Cannot cast %v as models.Server", ctx.Value(serverOptionName))
+	}
+
+	dimension := models.Dimension{}
+	if ctx.Value(dimensionOptionName) != nil {
+		dimension, ok = ctx.Value(dimensionOptionName).(models.Dimension)
+		if !ok {
+			return models.Dimension{}, models.Server{}, fmt.Errorf("Cannot cast %v as models.Dimension", ctx.Value(dimensionOptionName))
+		}
+	}
+
+	return dimension, server, nil
+}
+
+func (command *PosCommand) publishPortalPositionRequest(id string, dimension models.Dimension,
+	server models.Server, lg discordgo.Locale) (*amqp.RabbitMQMessage, error) {
+	msg := models.MapPortalPositionRequest(dimension, server, lg)
+	//return service.broker.Publish(msg, "request", "request.portal", id)
+	return msg, nil
 }

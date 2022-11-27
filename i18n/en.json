@@ -52,7 +52,8 @@
                "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
                "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
             }
-      }
+      },
+      "footer": "Added by {{ .createdBy}} at {{ .createdAt }} - Updated by {{ .updatedBy }} at {{ .updatedAt }} via {{ .source }}"
     },
     "panic":[
        "I have encountered an error :frowning:... This will be processed as soon as possible!",

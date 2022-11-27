@@ -1,6 +1,8 @@
 package pos
 
 import (
+	"context"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -9,7 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *PosCommand) checkDimension(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+func (command *PosCommand) checkDimension(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
 	data := i.ApplicationCommandData()
 
@@ -19,7 +22,7 @@ func (command *PosCommand) checkDimension(s *discordgo.Session, i *discordgo.Int
 			dimensions := command.dimensionService.FindDimensions(option.StringValue(), lg)
 			response, checkSuccess := validators.ExpectOnlyOneElement("pos.dimension.check", option.StringValue(), dimensions, lg)
 			if checkSuccess {
-				next()
+				next(context.WithValue(ctx, dimensionOptionName, dimensions[0]))
 			} else {
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -35,10 +38,11 @@ func (command *PosCommand) checkDimension(s *discordgo.Session, i *discordgo.Int
 	}
 
 	// Option not filled, ANY dimension is then retrieved
-	next()
+	next(ctx)
 }
 
-func (command *PosCommand) checkServer(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+func (command *PosCommand) checkServer(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
 	data := i.ApplicationCommandData()
 
@@ -48,7 +52,7 @@ func (command *PosCommand) checkServer(s *discordgo.Session, i *discordgo.Intera
 			servers := command.serverService.FindServers(option.StringValue(), lg)
 			response, checkSuccess := validators.ExpectOnlyOneElement("pos.server.check", option.StringValue(), servers, lg)
 			if checkSuccess {
-				next()
+				next(context.WithValue(ctx, serverOptionName, servers[0]))
 			} else {
 				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -77,6 +81,6 @@ func (command *PosCommand) checkServer(s *discordgo.Session, i *discordgo.Intera
 			log.Error().Err(err).Msg("Server check response ignored")
 		}
 	} else {
-		next()
+		next(context.WithValue(ctx, serverOptionName, &server))
 	}
 }

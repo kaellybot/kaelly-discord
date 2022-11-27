@@ -1,6 +1,9 @@
 package pos
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models"
 	"github.com/kaellybot/kaelly-discord/services/dimensions"
@@ -57,7 +60,10 @@ func (command *PosCommand) GetDiscordCommand() *models.DiscordCommand {
 	}
 }
 
-func (command *PosCommand) respond(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+
+	// Deferred message
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
@@ -65,22 +71,23 @@ func (command *PosCommand) respond(s *discordgo.Session, i *discordgo.Interactio
 		log.Error().Err(err).Msgf("Cannot handle pos defer reponse, trying to continue")
 	}
 
-	// TODO send models to rabbitmq, retrieve response when possible
-
-	data := make([]*discordgo.MessageEmbed, 0)
-	if len(i.ApplicationCommandData().Options) > 0 {
-		data = append(data, &discordgo.MessageEmbed{Title: i.ApplicationCommandData().Options[0].StringValue()})
-	} else {
-		data = append(data,
-			&discordgo.MessageEmbed{Title: "ça"},
-			&discordgo.MessageEmbed{Title: "fonctionne"},
-			&discordgo.MessageEmbed{Title: "plutôt"},
-			&discordgo.MessageEmbed{Title: "bien"},
-		)
+	server, ok := ctx.Value(serverOptionName).(models.Server)
+	if !ok {
+		panic(fmt.Errorf("Cannot cast %v as models.Server", ctx.Value(serverOptionName)))
 	}
 
+	dimension, ok := ctx.Value(dimensionOptionName).(models.Dimension)
+	if !ok {
+		panic(fmt.Errorf("Cannot cast %v as models.Dimension", ctx.Value(dimensionOptionName)))
+	}
+
+	// TODO send models to rabbitmq, retrieve response when possible
+
 	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-		Embeds: &data,
+		Embeds: &[]*discordgo.MessageEmbed{
+			{Title: "Server", Description: fmt.Sprintf("%v", server.Name)},
+			{Title: "Dimension", Description: fmt.Sprintf("%v", dimension.Name)},
+		},
 	})
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle pos reponse")

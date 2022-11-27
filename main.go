@@ -12,6 +12,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models"
 	"github.com/kaellybot/kaelly-discord/services/dimensions"
 	"github.com/kaellybot/kaelly-discord/services/discord"
+	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog"
@@ -75,6 +76,9 @@ func initI18n() {
 }
 
 func main() {
+
+	guildService := guilds.New()
+
 	dimensionService, err := dimensions.New()
 	if err != nil {
 		log.Fatal().Msgf("Dimension service instanciation failed, shutting down.")
@@ -87,7 +91,7 @@ func main() {
 
 	commands := []commands.Command{
 		about.New(),
-		pos.New(dimensionService, serverService),
+		pos.New(guildService, dimensionService, serverService),
 	}
 
 	discordService, err := discord.New(

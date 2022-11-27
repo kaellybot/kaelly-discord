@@ -41,16 +41,16 @@
             "description": "Dimension name. If not filled, all dimensions are retrieved",
             "check": {
                "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
-               "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .dimensions }}{{$first := true}}{{ range .dimensions}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
+               "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
             }
       },
       "server": { 
             "name": "server",
             "description": "{{ .game }} Server name. If not filled, the guild server is used instead",
             "check": {
-               "": "",
-               "not_found": "",
-               "too_many": ""
+               "required": "Oops! It seems no {{ .game }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/server` command :grin:",
+               "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
+               "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
             }
       }
     },

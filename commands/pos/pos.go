@@ -4,14 +4,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models"
 	"github.com/kaellybot/kaelly-discord/services/dimensions"
+	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
-func New(dimensionService dimensions.DimensionService, serverService servers.ServerService) *PosCommand {
+func New(guildService guilds.GuildService, dimensionService dimensions.DimensionService, serverService servers.ServerService) *PosCommand {
 	return &PosCommand{
+		guildService:     guildService,
 		dimensionService: dimensionService,
 		serverService:    serverService,
 	}

@@ -12,21 +12,19 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
-)
-
-const (
-	portalRequestRoutingKey = "requests.portals"
+	"github.com/rs/zerolog/log"
 )
 
 func New(guildService guilds.GuildService, dimensionService dimensions.DimensionService,
-	serverService servers.ServerService, broker amqp.MessageBrokerInterface) *PosCommand {
+	serverService servers.ServerService, requestManager requests.RequestManager) *PosCommand {
 
 	return &PosCommand{
 		guildService:     guildService,
 		dimensionService: dimensionService,
 		serverService:    serverService,
-		broker:           broker,
+		requestManager:   requestManager,
 	}
 }
 
@@ -62,13 +60,13 @@ func (command *PosCommand) GetDiscordCommand() *models.DiscordCommand {
 			},
 		},
 		Handlers: models.DiscordHandlers{
-			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkDimension, command.checkServer, command.respond),
+			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkDimension, command.checkServer, command.request),
 			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
 		},
 	}
 }
 
-func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
+func (command *PosCommand) request(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
 	err := commands.DeferInteraction(s, i)
@@ -81,11 +79,11 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	err = command.publishPortalPositionRequest(i.ID, dimension, server, lg)
+	msg := models.MapPortalPositionRequest(dimension, server, lg)
+	err = command.requestManager.Request(s, i, portalRequestRoutingKey, msg, command.respond)
 	if err != nil {
 		panic(err)
 	}
-	// TODO Add message in request manager
 }
 
 func (command *PosCommand) getOptions(ctx context.Context) (models.Dimension, models.Server, error) {
@@ -105,8 +103,28 @@ func (command *PosCommand) getOptions(ctx context.Context) (models.Dimension, mo
 	return dimension, server, nil
 }
 
-func (command *PosCommand) publishPortalPositionRequest(id string, dimension models.Dimension,
-	server models.Server, lg discordgo.Locale) error {
-	msg := models.MapPortalPositionRequest(dimension, server, lg)
-	return command.broker.Publish(msg, amqp.ExchangeRequest, portalRequestRoutingKey, id)
+func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+
+	if !isAnswerValid(message) {
+		panic("TODO handle panic on the other side")
+	}
+
+	embeds := make([]*discordgo.MessageEmbed, 0)
+	for _, position := range message.GetPortalPositionAnswer().GetPositions() {
+		embeds = append(embeds, models.MapToEmbed(position, message.Language))
+	}
+
+	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Embeds: &embeds,
+	})
+	if err != nil {
+		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+	}
+}
+
+func isAnswerValid(message *amqp.RabbitMQMessage) bool {
+	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
+		message.Type == amqp.RabbitMQMessage_PORTAL_POSITION_ANSWER &&
+		message.PortalPositionAnswer != nil
 }

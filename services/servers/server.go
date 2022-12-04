@@ -19,13 +19,13 @@ type ServerServiceImpl struct {
 func New() (*ServerServiceImpl, error) {
 	return &ServerServiceImpl{
 		servers: []models.Server{
-			{Name: "Hell Mina"},
-			{Name: "Draconiros"},
-			{Name: "Imagiro"},
-			{Name: "Orukam"},
-			{Name: "Ombre"},
-			{Name: "Tal Kasha"},
-			{Name: "Tylezia"},
+			{Name: "hellmina"},
+			{Name: "draconiros"},
+			{Name: "imagiro"},
+			{Name: "orukam"},
+			{Name: "ombre"},
+			{Name: "talKasha"},
+			{Name: "tylezia"},
 		},
 	}, nil
 }

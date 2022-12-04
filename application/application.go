@@ -12,6 +12,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -32,13 +33,16 @@ type Application struct {
 	serverService    servers.ServerService
 	discordService   discord.DiscordService
 	commands         []commands.Command
+	requestManager   requests.RequestManager
 }
 
 func New() (*Application, error) {
-	broker, err := amqp.New(models.GetRabbitMQClientId(), viper.GetString(models.RabbitMqAddress), models.GetBindings())
+	broker, err := amqp.New(models.GetRabbitMQClientId(), viper.GetString(models.RabbitMqAddress), getBindings())
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Broker instantiation failed, shutting down.")
 	}
+
+	requestsManager := requests.New(broker)
 
 	guildService := guilds.New()
 
@@ -54,7 +58,7 @@ func New() (*Application, error) {
 
 	commands := []commands.Command{
 		about.New(),
-		pos.New(guildService, dimensionService, serverService, broker),
+		pos.New(guildService, dimensionService, serverService, requestsManager),
 	}
 
 	discordService, err := discord.New(
@@ -68,6 +72,7 @@ func New() (*Application, error) {
 
 	return &Application{
 		broker:           broker,
+		requestManager:   requestsManager,
 		guildService:     guildService,
 		dimensionService: dimensionService,
 		serverService:    serverService,
@@ -77,7 +82,13 @@ func New() (*Application, error) {
 }
 
 func (app *Application) Run() error {
-	err := app.discordService.Listen()
+
+	err := app.requestManager.Listen()
+	if err != nil {
+		return err
+	}
+
+	err = app.discordService.Listen()
 	if err != nil {
 		return err
 	}
@@ -94,4 +105,10 @@ func (app *Application) Shutdown() {
 	app.broker.Shutdown()
 	app.discordService.Shutdown()
 	log.Info().Msgf("Application is no longer running")
+}
+
+func getBindings() []amqp.Binding {
+	return []amqp.Binding{
+		requests.GetBinding(),
+	}
 }

@@ -17,7 +17,8 @@ func MapPortalPositionRequest(dimension Dimension, server Server, lg discordgo.L
 	}
 }
 
-func MapToEmbed(portal amqp.PortalPositionAnswer_PortalPosition, lg discordgo.Locale) *discordgo.MessageEmbed {
+func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, locale amqp.RabbitMQMessage_Language) *discordgo.MessageEmbed {
+	lg := MapAmqpLocale(locale)
 	return &discordgo.MessageEmbed{
 		Title: portal.Dimension,
 		Author: &discordgo.MessageEmbedAuthor{

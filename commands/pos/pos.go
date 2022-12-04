@@ -107,7 +107,7 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
 
 	if !isAnswerValid(message) {
-		panic("TODO handle panic on the other side")
+		panic(commands.ErrInvalidAnswerMessage)
 	}
 
 	embeds := make([]*discordgo.MessageEmbed, 0)
@@ -115,9 +115,7 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 		embeds = append(embeds, models.MapToEmbed(position, message.Language))
 	}
 
-	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-		Embeds: &embeds,
-	})
+	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &embeds})
 	if err != nil {
 		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-discord/utils/panics"
 	"github.com/rs/zerolog/log"
 )
 
@@ -47,6 +48,7 @@ func (manager *RequestManagerImpl) Listen() error {
 func (manager *RequestManagerImpl) consume(ctx context.Context, message *amqp.RabbitMQMessage, correlationId string) {
 	request, found := manager.requests[correlationId]
 	if found {
+		defer panics.HandlePanic(request.session, request.interaction)
 		delete(manager.requests, correlationId)
 		request.callback(ctx, request.session, request.interaction, message)
 	}

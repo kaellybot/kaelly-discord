@@ -113,6 +113,6 @@ func (command *PosCommand) getOptions(ctx context.Context) (models.Dimension, mo
 func (command *PosCommand) publishPortalPositionRequest(id string, dimension models.Dimension,
 	server models.Server, lg discordgo.Locale) (*amqp.RabbitMQMessage, error) {
 	msg := models.MapPortalPositionRequest(dimension, server, lg)
-	//return service.broker.Publish(msg, "request", "request.portal", id)
+	//return service.broker.Publish(msg, "request", "requests.portals", id)
 	return msg, nil
 }

@@ -14,6 +14,9 @@ const (
 	// Total number of shards used to run the entire application
 	ShardCount = "SHARD_COUNT"
 
+	// RabbitMQ address
+	RabbitMqAddress = "RABBITMQ_ADDRESS"
+
 	// Zerolog values from [trace, debug, info, warn, error, fatal, panic]
 	LogLevel = "LOG_LEVEL"
 
@@ -23,10 +26,11 @@ const (
 
 var (
 	DefaultConfigValues = map[string]interface{}{
-		Token:      "",
-		ShardId:    0,
-		ShardCount: 1,
-		LogLevel:   zerolog.InfoLevel.String(),
-		Production: false,
+		Token:           "",
+		ShardId:         0,
+		ShardCount:      1,
+		RabbitMqAddress: "amqp://localhost:5672",
+		LogLevel:        zerolog.InfoLevel.String(),
+		Production:      false,
 	}
 )

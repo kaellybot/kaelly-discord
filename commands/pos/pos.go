@@ -15,11 +15,18 @@ import (
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
-func New(guildService guilds.GuildService, dimensionService dimensions.DimensionService, serverService servers.ServerService) *PosCommand {
+const (
+	portalRequestRoutingKey = "requests.portals"
+)
+
+func New(guildService guilds.GuildService, dimensionService dimensions.DimensionService,
+	serverService servers.ServerService, broker amqp.MessageBrokerInterface) *PosCommand {
+
 	return &PosCommand{
 		guildService:     guildService,
 		dimensionService: dimensionService,
 		serverService:    serverService,
+		broker:           broker,
 	}
 }
 
@@ -74,23 +81,11 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg, err := command.publishPortalPositionRequest(i.ID, dimension, server, lg)
+	err = command.publishPortalPositionRequest(i.ID, dimension, server, lg)
 	if err != nil {
 		panic(err)
 	}
-
-	// TODO  retrieve response when possible from rabbitmq
-	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-		Embeds: &[]*discordgo.MessageEmbed{
-			{
-				Title:       "PortalPositionRequest",
-				Description: fmt.Sprintf("%v", msg),
-			},
-		},
-	})
-	if err != nil {
-		panic(err)
-	}
+	// TODO Add message in request manager
 }
 
 func (command *PosCommand) getOptions(ctx context.Context) (models.Dimension, models.Server, error) {
@@ -111,8 +106,7 @@ func (command *PosCommand) getOptions(ctx context.Context) (models.Dimension, mo
 }
 
 func (command *PosCommand) publishPortalPositionRequest(id string, dimension models.Dimension,
-	server models.Server, lg discordgo.Locale) (*amqp.RabbitMQMessage, error) {
+	server models.Server, lg discordgo.Locale) error {
 	msg := models.MapPortalPositionRequest(dimension, server, lg)
-	//return service.broker.Publish(msg, "request", "requests.portals", id)
-	return msg, nil
+	return command.broker.Publish(msg, amqp.ExchangeRequest, portalRequestRoutingKey, id)
 }

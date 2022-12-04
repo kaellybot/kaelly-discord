@@ -6,14 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/kaellybot/kaelly-discord/commands"
-	"github.com/kaellybot/kaelly-discord/commands/about"
-	"github.com/kaellybot/kaelly-discord/commands/pos"
+	"github.com/kaellybot/kaelly-discord/application"
 	"github.com/kaellybot/kaelly-discord/models"
-	"github.com/kaellybot/kaelly-discord/services/dimensions"
-	"github.com/kaellybot/kaelly-discord/services/discord"
-	"github.com/kaellybot/kaelly-discord/services/guilds"
-	"github.com/kaellybot/kaelly-discord/services/servers"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -76,41 +70,14 @@ func initI18n() {
 }
 
 func main() {
-
-	guildService := guilds.New()
-
-	dimensionService, err := dimensions.New()
+	app, err := application.New()
 	if err != nil {
-		log.Fatal().Msgf("Dimension service instanciation failed, shutting down.")
+		log.Fatal().Err(err).Msgf("Shutting down after failing to instantiate application")
 	}
 
-	serverService, err := servers.New()
+	err = app.Run()
 	if err != nil {
-		log.Fatal().Msgf("Server service instanciation failed, shutting down.")
-	}
-
-	commands := []commands.Command{
-		about.New(),
-		pos.New(guildService, dimensionService, serverService),
-	}
-
-	discordService, err := discord.New(
-		viper.GetString(models.Token),
-		viper.GetInt(models.ShardId),
-		viper.GetInt(models.ShardCount),
-		commands)
-	if err != nil {
-		log.Fatal().Msgf("Discord service instanciation failed, shutting down.")
-	}
-
-	err = discordService.Listen()
-	if err != nil {
-		log.Fatal().Msgf("Discord service failed to listen events, shutting down.")
-	}
-
-	err = discordService.RegisterCommands()
-	if err != nil {
-		log.Fatal().Msgf("Discord service failed to register commands, shutting down.")
+		log.Fatal().Err(err).Msgf("Shutting down after failing to run application.")
 	}
 
 	sc := make(chan os.Signal, 1)
@@ -119,5 +86,5 @@ func main() {
 	<-sc
 
 	log.Info().Msgf("Gracefully shutting down %s...", models.Name)
-	discordService.Shutdown()
+	app.Shutdown()
 }

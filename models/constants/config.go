@@ -14,6 +14,18 @@ const (
 	// Total number of shards used to run the entire application
 	ShardCount = "SHARD_COUNT"
 
+	// MySQL URL with the following format: HOST:PORT
+	MySqlUrl = "MYSQL_URL"
+
+	// MySQL user
+	MySqlUser = "MYSQL_USER"
+
+	// MySQL password
+	MySqlPassword = "MYSQL_PASSWORD"
+
+	// MySQL database name
+	MySqlDatabase = "MYSQL_DATABASE"
+
 	// RabbitMQ address
 	RabbitMqAddress = "RABBITMQ_ADDRESS"
 
@@ -29,6 +41,10 @@ var (
 		Token:           "",
 		ShardId:         0,
 		ShardCount:      1,
+		MySqlUrl:        "localhost:3306",
+		MySqlUser:       "",
+		MySqlPassword:   "",
+		MySqlDatabase:   "kaellybot",
 		RabbitMqAddress: "amqp://localhost:5672",
 		LogLevel:        zerolog.InfoLevel.String(),
 		Production:      false,

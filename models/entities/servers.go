@@ -1,8 +1,13 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"github.com/kaellybot/kaelly-discord/models/constants"
+)
 
 type Server struct {
-	gorm.Model
-	Id string
+	Id                  string `gorm:"primaryKey"`
+	DofusPortalsId      string `gorm:"unique"`
+	DofusEncyclopediaId string `gorm:"unique"`
+	Icon                string
+	Game                constants.AnkamaGame
 }

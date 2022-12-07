@@ -8,10 +8,13 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/about"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	dimensionRepo "github.com/kaellybot/kaelly-discord/repositories/dimensions"
+	serverRepo "github.com/kaellybot/kaelly-discord/repositories/servers"
 	"github.com/kaellybot/kaelly-discord/services/dimensions"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/databases"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -27,6 +30,7 @@ type ApplicationInterface interface {
 }
 
 type Application struct {
+	db               databases.MySQLConnection
 	broker           amqp.MessageBrokerInterface
 	guildService     guilds.GuildService
 	dimensionService dimensions.DimensionService
@@ -37,25 +41,31 @@ type Application struct {
 }
 
 func New() (*Application, error) {
+	db, err := databases.New()
+	if err != nil {
+		log.Fatal().Err(err).Msgf("DB instantiation failed, shutting down.")
+	}
+
 	broker, err := amqp.New(constants.GetRabbitMQClientId(), viper.GetString(constants.RabbitMqAddress), getBindings())
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Broker instantiation failed, shutting down.")
 	}
 
-	requestsManager := requests.New(broker)
+	dimensionRepo := dimensionRepo.New(db)
+	dimensionService, err := dimensions.New(dimensionRepo)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Dimension Service instantiation failed, shutting down.")
+	}
+
+	serverRepo := serverRepo.New(db)
+	serverService, err := servers.New(serverRepo)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Server Service instantiation failed, shutting down.")
+	}
 
 	guildService := guilds.New()
 
-	dimensionService, err := dimensions.New()
-	if err != nil {
-		return nil, err
-	}
-
-	serverService, err := servers.New()
-	if err != nil {
-		return nil, err
-	}
-
+	requestsManager := requests.New(broker)
 	commands := []commands.Command{
 		about.New(),
 		pos.New(guildService, dimensionService, serverService, requestsManager),
@@ -71,6 +81,7 @@ func New() (*Application, error) {
 	}
 
 	return &Application{
+		db:               db,
 		broker:           broker,
 		requestManager:   requestsManager,
 		guildService:     guildService,
@@ -82,7 +93,6 @@ func New() (*Application, error) {
 }
 
 func (app *Application) Run() error {
-
 	err := app.requestManager.Listen()
 	if err != nil {
 		return err
@@ -102,6 +112,7 @@ func (app *Application) Run() error {
 }
 
 func (app *Application) Shutdown() {
+	app.db.Shutdown()
 	app.broker.Shutdown()
 	app.discordService.Shutdown()
 	log.Info().Msgf("Application is no longer running")

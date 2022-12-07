@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	repository "github.com/kaellybot/kaelly-discord/repositories/servers"
 )
 
 type ServerService interface {
@@ -13,20 +14,18 @@ type ServerService interface {
 }
 
 type ServerServiceImpl struct {
-	servers []entities.Server
+	servers    []entities.Server
+	repository repository.ServerRepository
 }
 
-func New() (*ServerServiceImpl, error) {
+func New(repository repository.ServerRepository) (*ServerServiceImpl, error) {
+	servers, err := repository.GetServers()
+	if err != nil {
+		return nil, err
+	}
 	return &ServerServiceImpl{
-		servers: []entities.Server{
-			{Id: "hell mina"},
-			{Id: "draconiros"},
-			{Id: "imagiro"},
-			{Id: "orukam"},
-			{Id: "ombre"},
-			{Id: "talKasha"},
-			{Id: "tylezia"},
-		},
+		servers:    servers,
+		repository: repository,
 	}, nil
 }
 
@@ -37,6 +36,8 @@ func (service *ServerServiceImpl) GetServers() []entities.Server {
 func (service *ServerServiceImpl) FindServers(name string, locale discordgo.Locale) []entities.Server {
 	serversFound := make([]entities.Server, 0)
 	cleanedName := strings.ToLower(name)
+
+	// TODO not based on id
 
 	for _, server := range service.servers {
 		if strings.HasPrefix(strings.ToLower(server.Id), cleanedName) {

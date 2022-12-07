@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	repository "github.com/kaellybot/kaelly-discord/repositories/dimensions"
 )
 
 type DimensionService interface {
@@ -14,16 +15,17 @@ type DimensionService interface {
 
 type DimensionServiceImpl struct {
 	dimensions []entities.Dimension
+	repository repository.DimensionRepository
 }
 
-func New() (*DimensionServiceImpl, error) {
+func New(repository repository.DimensionRepository) (*DimensionServiceImpl, error) {
+	dimensions, err := repository.GetDimensions()
+	if err != nil {
+		return nil, err
+	}
 	return &DimensionServiceImpl{
-		dimensions: []entities.Dimension{
-			{Id: "Enutrosor"},
-			{Id: "Srambad"},
-			{Id: "Xelorium"},
-			{Id: "Ecaflipus"},
-		},
+		dimensions: dimensions,
+		repository: repository,
 	}, nil
 }
 
@@ -34,6 +36,8 @@ func (service *DimensionServiceImpl) GetDimensions() []entities.Dimension {
 func (service *DimensionServiceImpl) FindDimensions(name string, locale discordgo.Locale) []entities.Dimension {
 	dimensionsFound := make([]entities.Dimension, 0)
 	cleanedName := strings.ToLower(name)
+
+	// TODO not based on id
 
 	for _, dimension := range service.dimensions {
 		if strings.HasPrefix(strings.ToLower(dimension.Id), cleanedName) {

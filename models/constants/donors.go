@@ -1,4 +1,4 @@
-package models
+package constants
 
 var (
 	Donors = []string{

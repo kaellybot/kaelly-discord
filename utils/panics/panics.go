@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/kaellybot/kaelly-discord/models"
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
@@ -16,7 +16,7 @@ func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate)
 	}
 
 	// TODO not always ApplicationCommandData
-	log.Error().Str(models.LogCommand, event.ApplicationCommandData().Name).Str(models.LogPanic, fmt.Sprintf("%v", r)).Msgf("Panic occurred, sending an error message to user")
+	log.Error().Str(constants.LogCommand, event.ApplicationCommandData().Name).Str(constants.LogPanic, fmt.Sprintf("%v", r)).Msgf("Panic occurred, sending an error message to user")
 	err := session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

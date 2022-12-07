@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/kaellybot/kaelly-discord/models"
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -74,7 +74,7 @@ func (command *PosCommand) checkServer(ctx context.Context, s *discordgo.Session
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
 				Flags:   discordgo.MessageFlagsEphemeral,
-				Content: i18n.Get(lg, "pos.server.check.required", i18n.Vars{"game": models.Game}),
+				Content: i18n.Get(lg, "pos.server.check.required", i18n.Vars{"game": constants.Game}),
 			},
 		})
 		if err != nil {

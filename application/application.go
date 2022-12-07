@@ -7,7 +7,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/commands/about"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
-	"github.com/kaellybot/kaelly-discord/models"
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/dimensions"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
@@ -37,7 +37,7 @@ type Application struct {
 }
 
 func New() (*Application, error) {
-	broker, err := amqp.New(models.GetRabbitMQClientId(), viper.GetString(models.RabbitMqAddress), getBindings())
+	broker, err := amqp.New(constants.GetRabbitMQClientId(), viper.GetString(constants.RabbitMqAddress), getBindings())
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Broker instantiation failed, shutting down.")
 	}
@@ -62,9 +62,9 @@ func New() (*Application, error) {
 	}
 
 	discordService, err := discord.New(
-		viper.GetString(models.Token),
-		viper.GetInt(models.ShardId),
-		viper.GetInt(models.ShardCount),
+		viper.GetString(constants.Token),
+		viper.GetInt(constants.ShardId),
+		viper.GetInt(constants.ShardCount),
 		commands)
 	if err != nil {
 		return nil, err

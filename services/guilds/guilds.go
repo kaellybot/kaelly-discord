@@ -1,9 +1,9 @@
 package guilds
 
-import "github.com/kaellybot/kaelly-discord/models"
+import "github.com/kaellybot/kaelly-discord/models/entities"
 
 type GuildService interface {
-	GetServer() *models.Server
+	GetServer() *entities.Server
 }
 
 type GuildServiceImpl struct {
@@ -13,7 +13,7 @@ func New() *GuildServiceImpl {
 	return &GuildServiceImpl{}
 }
 
-func (service *GuildServiceImpl) GetServer() *models.Server {
+func (service *GuildServiceImpl) GetServer() *entities.Server {
 	// TODO
 	return nil
 }

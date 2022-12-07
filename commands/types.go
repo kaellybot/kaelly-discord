@@ -1,9 +1,7 @@
 package commands
 
-import (
-	"github.com/kaellybot/kaelly-discord/models"
-)
+import "github.com/kaellybot/kaelly-discord/models/constants"
 
 type Command interface {
-	GetDiscordCommand() *models.DiscordCommand
+	GetDiscordCommand() *constants.DiscordCommand
 }

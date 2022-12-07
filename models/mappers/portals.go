@@ -1,24 +1,26 @@
-package models
+package mappers
 
 import (
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/entities"
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
-func MapPortalPositionRequest(dimension Dimension, server Server, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapPortalPositionRequest(dimension entities.Dimension, server entities.Server, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_PORTAL_POSITION_REQUEST,
-		Language: MapDiscordLocale(lg),
+		Language: constants.MapDiscordLocale(lg),
 		PortalPositionRequest: &amqp.PortalPositionRequest{
-			Dimension: dimension.Name,
-			Server:    server.Name,
+			Dimension: dimension.Id,
+			Server:    server.Id,
 		},
 	}
 }
 
 func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, locale amqp.RabbitMQMessage_Language) *discordgo.MessageEmbed {
-	lg := MapAmqpLocale(locale)
+	lg := constants.MapAmqpLocale(locale)
 	return &discordgo.MessageEmbed{
 		Title: portal.Dimension,
 		Author: &discordgo.MessageEmbedAuthor{

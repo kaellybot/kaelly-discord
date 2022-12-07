@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/kaellybot/kaelly-discord/application"
-	"github.com/kaellybot/kaelly-discord/models"
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -21,20 +21,20 @@ func init() {
 }
 
 func initConfig() {
-	viper.SetConfigFile(models.ConfigFileName)
+	viper.SetConfigFile(constants.ConfigFileName)
 
-	for configName, defaultValue := range models.DefaultConfigValues {
+	for configName, defaultValue := range constants.DefaultConfigValues {
 		viper.SetDefault(configName, defaultValue)
 	}
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatal().Err(err).Str(models.LogFileName, models.ConfigFileName).Msgf("Failed to read config, shutting down.")
+		log.Fatal().Err(err).Str(constants.LogFileName, constants.ConfigFileName).Msgf("Failed to read config, shutting down.")
 	}
 }
 
 func initLog() {
-	zerolog.SetGlobalLevel(models.LogLevelFallback)
+	zerolog.SetGlobalLevel(constants.LogLevelFallback)
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		short := file
 		for i := len(file) - 1; i > 0; i-- {
@@ -47,9 +47,9 @@ func initLog() {
 	}
 	log.Logger = log.With().Caller().Logger()
 
-	logLevel, err := zerolog.ParseLevel(viper.GetString(models.LogLevel))
+	logLevel, err := zerolog.ParseLevel(viper.GetString(constants.LogLevel))
 	if err != nil {
-		log.Warn().Err(err).Msgf("Log level not set, continue with %s...", models.LogLevelFallback)
+		log.Warn().Err(err).Msgf("Log level not set, continue with %s...", constants.LogLevelFallback)
 	} else {
 		zerolog.SetGlobalLevel(logLevel)
 		log.Debug().Msgf("Logger level set to '%s'", logLevel)
@@ -58,12 +58,12 @@ func initLog() {
 
 func initI18n() {
 
-	i18n.SetDefault(models.DefaultLocale)
-	for _, language := range models.Languages {
+	i18n.SetDefault(constants.DefaultLocale)
+	for _, language := range constants.Languages {
 		if err := i18n.LoadBundle(language.Locale, language.TranslationFile); err != nil {
 			log.Warn().Err(err).
-				Str(models.LogLocale, language.Locale.String()).
-				Str(models.LogFileName, language.TranslationFile).
+				Str(constants.LogLocale, language.Locale.String()).
+				Str(constants.LogFileName, language.TranslationFile).
 				Msgf("Cannot load translation file, continue...")
 		}
 	}
@@ -82,9 +82,9 @@ func main() {
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	log.Info().Msgf("%s v%s is now running. Press CTRL-C to exit.", models.Name, models.Version)
+	log.Info().Msgf("%s v%s is now running. Press CTRL-C to exit.", constants.Name, constants.Version)
 	<-sc
 
-	log.Info().Msgf("Gracefully shutting down %s...", models.Name)
+	log.Info().Msgf("Gracefully shutting down %s...", constants.Name)
 	app.Shutdown()
 }

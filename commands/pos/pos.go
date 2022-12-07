@@ -7,7 +7,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
-	"github.com/kaellybot/kaelly-discord/models"
+	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/dimensions"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -28,20 +30,20 @@ func New(guildService guilds.GuildService, dimensionService dimensions.Dimension
 	}
 }
 
-func (command *PosCommand) GetDiscordCommand() *models.DiscordCommand {
-	return &models.DiscordCommand{
+func (command *PosCommand) GetDiscordCommand() *constants.DiscordCommand {
+	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     commandName,
-			Description:              i18n.Get(models.DefaultLocale, "pos.description"),
+			Description:              i18n.Get(constants.DefaultLocale, "pos.description"),
 			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: &models.DefaultPermission,
-			DMPermission:             &models.DMPermission,
+			DefaultMemberPermissions: &constants.DefaultPermission,
+			DMPermission:             &constants.DMPermission,
 			NameLocalizations:        i18n.GetLocalizations("pos.name"),
 			DescriptionLocalizations: i18n.GetLocalizations("pos.description"),
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:                     dimensionOptionName,
-					Description:              i18n.Get(models.DefaultLocale, "pos.dimension.description"),
+					Description:              i18n.Get(constants.DefaultLocale, "pos.dimension.description"),
 					NameLocalizations:        *i18n.GetLocalizations("pos.dimension.name"),
 					DescriptionLocalizations: *i18n.GetLocalizations("pos.dimension.description"),
 					Type:                     discordgo.ApplicationCommandOptionString,
@@ -50,16 +52,16 @@ func (command *PosCommand) GetDiscordCommand() *models.DiscordCommand {
 				},
 				{
 					Name:                     serverOptionName,
-					Description:              i18n.Get(models.DefaultLocale, "pos.server.description", i18n.Vars{"game": models.Game}),
+					Description:              i18n.Get(constants.DefaultLocale, "pos.server.description", i18n.Vars{"game": constants.Game}),
 					NameLocalizations:        *i18n.GetLocalizations("pos.server.name"),
-					DescriptionLocalizations: *i18n.GetLocalizations("pos.server.description", i18n.Vars{"game": models.Game}),
+					DescriptionLocalizations: *i18n.GetLocalizations("pos.server.description", i18n.Vars{"game": constants.Game}),
 					Type:                     discordgo.ApplicationCommandOptionString,
 					Required:                 false,
 					Autocomplete:             true,
 				},
 			},
 		},
-		Handlers: models.DiscordHandlers{
+		Handlers: constants.DiscordHandlers{
 			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkDimension, command.checkServer, command.request),
 			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
 		},
@@ -79,24 +81,24 @@ func (command *PosCommand) request(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := models.MapPortalPositionRequest(dimension, server, lg)
+	msg := mappers.MapPortalPositionRequest(dimension, server, lg)
 	err = command.requestManager.Request(s, i, portalRequestRoutingKey, msg, command.respond)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *PosCommand) getOptions(ctx context.Context) (models.Dimension, models.Server, error) {
-	server, ok := ctx.Value(serverOptionName).(models.Server)
+func (command *PosCommand) getOptions(ctx context.Context) (entities.Dimension, entities.Server, error) {
+	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
-		return models.Dimension{}, models.Server{}, fmt.Errorf("Cannot cast %v as models.Server", ctx.Value(serverOptionName))
+		return entities.Dimension{}, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
-	dimension := models.Dimension{}
+	dimension := entities.Dimension{}
 	if ctx.Value(dimensionOptionName) != nil {
-		dimension, ok = ctx.Value(dimensionOptionName).(models.Dimension)
+		dimension, ok = ctx.Value(dimensionOptionName).(entities.Dimension)
 		if !ok {
-			return models.Dimension{}, models.Server{}, fmt.Errorf("Cannot cast %v as models.Dimension", ctx.Value(dimensionOptionName))
+			return entities.Dimension{}, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Dimension", ctx.Value(dimensionOptionName))
 		}
 	}
 
@@ -112,7 +114,7 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 
 	embeds := make([]*discordgo.MessageEmbed, 0)
 	for _, position := range message.GetPortalPositionAnswer().GetPositions() {
-		embeds = append(embeds, models.MapToEmbed(position, message.Language))
+		embeds = append(embeds, mappers.MapToEmbed(position, message.Language))
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &embeds})

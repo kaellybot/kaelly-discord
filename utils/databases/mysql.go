@@ -32,7 +32,15 @@ func New() (*MySQLConnectionImpl, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&entities.Dimension{}, &entities.Server{})
+	err = db.AutoMigrate(
+		&entities.Dimension{},
+		&entities.DimensionLabel{},
+		&entities.Server{},
+		&entities.ServerLabel{},
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	return &MySQLConnectionImpl{db: db}, nil
 }

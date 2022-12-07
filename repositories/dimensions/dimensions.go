@@ -19,6 +19,6 @@ func New(db databases.MySQLConnection) *DimensionRepositoryImpl {
 
 func (repo *DimensionRepositoryImpl) GetDimensions() ([]entities.Dimension, error) {
 	var dimensions []entities.Dimension
-	response := repo.db.GetDB().Find(&dimensions)
+	response := repo.db.GetDB().Model(&entities.Dimension{}).Preload("Labels").Find(&dimensions)
 	return dimensions, response.Error
 }

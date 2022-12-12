@@ -15,3 +15,17 @@ type DimensionLabel struct {
 	DimensionId string           `gorm:"primaryKey"`
 	Label       string
 }
+
+func (dimension Dimension) GetId() string {
+	return dimension.Id
+}
+
+func (dimension Dimension) GetLabels() map[discordgo.Locale]string {
+	labels := make(map[discordgo.Locale]string)
+
+	for _, label := range dimension.Labels {
+		labels[label.Locale] = label.Label
+	}
+
+	return labels
+}

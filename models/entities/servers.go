@@ -19,3 +19,17 @@ type ServerLabel struct {
 	ServerId string           `gorm:"primaryKey"`
 	Label    string
 }
+
+func (server Server) GetId() string {
+	return server.Id
+}
+
+func (server Server) GetLabels() map[discordgo.Locale]string {
+	labels := make(map[discordgo.Locale]string)
+
+	for _, label := range server.Labels {
+		labels[label.Locale] = label.Label
+	}
+
+	return labels
+}

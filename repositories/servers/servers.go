@@ -19,6 +19,6 @@ func New(db databases.MySQLConnection) *ServerRepositoryImpl {
 
 func (repo *ServerRepositoryImpl) GetServers() ([]entities.Server, error) {
 	var servers []entities.Server
-	response := repo.db.GetDB().Find(&servers)
+	response := repo.db.GetDB().Model(&entities.Server{}).Preload("Labels").Find(&servers)
 	return servers, response.Error
 }

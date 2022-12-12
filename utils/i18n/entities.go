@@ -28,6 +28,6 @@ func GetEntityLabel(entity entities.LabelledEntity, locale discordgo.Locale) str
 	log.Warn().
 		Str(constants.LogEntity, entity.GetId()).
 		Str(constants.LogLocale, string(constants.DefaultLocale)).
-		Msgf("Entity i18n default value is empty, returning empty string")
-	return ""
+		Msgf("Entity i18n default value is empty, returning id")
+	return entity.GetId()
 }

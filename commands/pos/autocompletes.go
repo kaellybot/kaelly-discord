@@ -3,7 +3,7 @@ package pos
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
-	"github.com/kaellybot/kaelly-discord/utils/i18n"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/rs/zerolog/log"
 )
 
@@ -18,7 +18,7 @@ func (command *PosCommand) autocomplete(s *discordgo.Session, i *discordgo.Inter
 				dimensions := command.dimensionService.FindDimensions(option.StringValue(), lg)
 
 				for _, dimension := range dimensions {
-					label := i18n.GetEntityLabel(dimension, lg)
+					label := translators.GetEntityLabel(dimension, lg)
 					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 						Name:  label,
 						Value: label,
@@ -28,7 +28,7 @@ func (command *PosCommand) autocomplete(s *discordgo.Session, i *discordgo.Inter
 				servers := command.serverService.FindServers(option.StringValue(), lg)
 
 				for _, server := range servers {
-					label := i18n.GetEntityLabel(server, lg)
+					label := translators.GetEntityLabel(server, lg)
 					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 						Name:  label,
 						Value: label,

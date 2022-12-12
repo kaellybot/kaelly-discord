@@ -1,4 +1,4 @@
-package i18n
+package translators
 
 import (
 	"github.com/bwmarrin/discordgo"

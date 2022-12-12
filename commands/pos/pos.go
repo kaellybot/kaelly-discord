@@ -114,7 +114,12 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 
 	embeds := make([]*discordgo.MessageEmbed, 0)
 	for _, position := range message.GetPortalPositionAnswer().GetPositions() {
-		embeds = append(embeds, mappers.MapToEmbed(position, message.Language))
+		dimension, found := command.dimensionService.GetDimension(position.Dimension)
+		if !found {
+			log.Error().Str(constants.LogDimension, position.Dimension).Msgf("Cannot find dimension based on ID sent internally, panicking")
+			panic(commands.ErrInvalidAnswerMessage)
+		}
+		embeds = append(embeds, mappers.MapToEmbed(position, dimension, message.Language))
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &embeds})

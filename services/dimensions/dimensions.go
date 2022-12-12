@@ -2,11 +2,16 @@ package dimensions
 
 import (
 	"strings"
+	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	repository "github.com/kaellybot/kaelly-discord/repositories/dimensions"
-	"github.com/kaellybot/kaelly-discord/utils/i18n"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 type DimensionService interface {
@@ -16,6 +21,7 @@ type DimensionService interface {
 }
 
 type DimensionServiceImpl struct {
+	transformer   transform.Transformer
 	dimensionsMap map[string]entities.Dimension
 	dimensions    []entities.Dimension
 	repository    repository.DimensionRepository
@@ -33,6 +39,7 @@ func New(repository repository.DimensionRepository) (*DimensionServiceImpl, erro
 	}
 
 	return &DimensionServiceImpl{
+		transformer:   transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
 		dimensionsMap: dimensionsMap,
 		dimensions:    dimensions,
 		repository:    repository,
@@ -50,12 +57,15 @@ func (service *DimensionServiceImpl) GetDimension(id string) (entities.Dimension
 
 func (service *DimensionServiceImpl) FindDimensions(name string, locale discordgo.Locale) []entities.Dimension {
 	dimensionsFound := make([]entities.Dimension, 0)
-	cleanedName := strings.ToLower(name)
-
-	// TODO normalize names
+	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
+	if err != nil {
+		log.Error().Err(err).Msgf("Cannot normalize dimension name, returning empty dimension list")
+		return dimensionsFound
+	}
 
 	for _, dimension := range service.dimensions {
-		if strings.HasPrefix(strings.ToLower(i18n.GetEntityLabel(dimension, locale)), cleanedName) {
+		currentCleanedName, _, err := transform.String(service.transformer, strings.ToLower(translators.GetEntityLabel(dimension, locale)))
+		if err == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
 			dimensionsFound = append(dimensionsFound, dimension)
 		}
 	}

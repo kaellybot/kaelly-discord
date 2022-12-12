@@ -5,6 +5,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
@@ -19,21 +20,43 @@ func MapPortalPositionRequest(dimension entities.Dimension, server entities.Serv
 	}
 }
 
-func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, locale amqp.RabbitMQMessage_Language) *discordgo.MessageEmbed {
+func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, dimension entities.Dimension, locale amqp.RabbitMQMessage_Language) *discordgo.MessageEmbed {
 	lg := constants.MapAmqpLocale(locale)
-	return &discordgo.MessageEmbed{
-		Title: portal.Dimension,
-		Author: &discordgo.MessageEmbedAuthor{
-			Name:    portal.Source.Name,
-			IconURL: portal.Source.Icon,
-			URL:     portal.Source.Url,
-		},
-		//TODO color, dimension name, etc.
+	embed := discordgo.MessageEmbed{
+		Title:     translators.GetEntityLabel(dimension, lg),
+		Color:     dimension.Color,
+		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: dimension.Icon},
 		Footer: &discordgo.MessageEmbedFooter{
-			Text: i18n.Get(lg, "pos.footer", i18n.Vars{
-				"createdBy": portal.CreatedBy, "createdAt": portal.CreatedAt,
-				"updatedBy": portal.UpdatedBy, "updatedAt": portal.UpdatedAt,
-			}),
+			Text:    i18n.Get(lg, "pos.embed.footer", i18n.Vars{"source": portal.Source.Name}),
+			IconURL: portal.Source.Icon,
 		},
 	}
+
+	if portal.Position != nil {
+		embed.Fields = []*discordgo.MessageEmbedField{
+			{
+				Name:   i18n.Get(lg, "pos.embed.position.name"),
+				Value:  i18n.Get(lg, "pos.embed.position.value", i18n.Vars{"position": portal.Position}),
+				Inline: true,
+			},
+			{
+				Name:   i18n.Get(lg, "pos.embed.uses.name"),
+				Value:  i18n.Get(lg, "pos.embed.uses.value", i18n.Vars{"uses": portal.RemainingUses}),
+				Inline: true,
+			},
+			{
+				Name: i18n.Get(lg, "pos.embed.hunters.name"),
+				Value: i18n.Get(lg, "pos.embed.hunters.value", i18n.Vars{
+					"createdBy": portal.CreatedBy, "createdAt": portal.CreatedAt,
+					"updatedBy": portal.UpdatedBy, "updatedAt": portal.UpdatedAt,
+				}),
+				Inline: true,
+			},
+		}
+		//TODO zaap nearby, private
+	} else {
+		embed.Description = i18n.Get(lg, "pos.embed.unknown")
+	}
+
+	return &embed
 }

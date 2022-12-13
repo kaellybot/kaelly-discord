@@ -67,6 +67,10 @@
             "name": ":cowboy: Hunters",
             "value": "**{{ .createdBy}}** (added <t:{{ .createdAt.Seconds }}:R>){{ if .updatedBy }}\n**{{ .updatedBy }}** (updated <t:{{ .updatedAt.Seconds }}:R>){{end}}"
          },
+         "transport": {
+            "name": "{{ if .conditional }}:airplane_small:{{ else }}:airplane:{{ end}} {{ .type }} nearby",
+            "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
+         },
          "footer": "Built with ❤ in partnership with {{ .source }}"
       }
     },

@@ -15,7 +15,7 @@ func (command *PosCommand) autocomplete(s *discordgo.Session, i *discordgo.Inter
 		if option.Focused {
 			switch option.Name {
 			case dimensionOptionName:
-				dimensions := command.dimensionService.FindDimensions(option.StringValue(), lg)
+				dimensions := command.portalService.FindDimensions(option.StringValue(), lg)
 
 				for _, dimension := range dimensions {
 					label := translators.GetEntityLabel(dimension, lg)

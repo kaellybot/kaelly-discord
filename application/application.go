@@ -8,11 +8,11 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/about"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/models/constants"
-	dimensionRepo "github.com/kaellybot/kaelly-discord/repositories/dimensions"
+	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
 	serverRepo "github.com/kaellybot/kaelly-discord/repositories/servers"
-	"github.com/kaellybot/kaelly-discord/services/dimensions"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
+	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
@@ -30,14 +30,14 @@ type ApplicationInterface interface {
 }
 
 type Application struct {
-	db               databases.MySQLConnection
-	broker           amqp.MessageBrokerInterface
-	guildService     guilds.GuildService
-	dimensionService dimensions.DimensionService
-	serverService    servers.ServerService
-	discordService   discord.DiscordService
-	commands         []commands.Command
-	requestManager   requests.RequestManager
+	db             databases.MySQLConnection
+	broker         amqp.MessageBrokerInterface
+	guildService   guilds.GuildService
+	portalService  portals.PortalService
+	serverService  servers.ServerService
+	discordService discord.DiscordService
+	commands       []commands.Command
+	requestManager requests.RequestManager
 }
 
 func New() (*Application, error) {
@@ -51,8 +51,8 @@ func New() (*Application, error) {
 		log.Fatal().Err(err).Msgf("Broker instantiation failed, shutting down.")
 	}
 
-	dimensionRepo := dimensionRepo.New(db)
-	dimensionService, err := dimensions.New(dimensionRepo)
+	dimensionRepo := dimensions.New(db)
+	portalService, err := portals.New(dimensionRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Dimension Service instantiation failed, shutting down.")
 	}
@@ -68,7 +68,7 @@ func New() (*Application, error) {
 	requestsManager := requests.New(broker)
 	commands := []commands.Command{
 		about.New(),
-		pos.New(guildService, dimensionService, serverService, requestsManager),
+		pos.New(guildService, portalService, serverService, requestsManager),
 	}
 
 	discordService, err := discord.New(
@@ -81,14 +81,14 @@ func New() (*Application, error) {
 	}
 
 	return &Application{
-		db:               db,
-		broker:           broker,
-		requestManager:   requestsManager,
-		guildService:     guildService,
-		dimensionService: dimensionService,
-		serverService:    serverService,
-		discordService:   discordService,
-		commands:         commands,
+		db:             db,
+		broker:         broker,
+		requestManager: requestsManager,
+		guildService:   guildService,
+		portalService:  portalService,
+		serverService:  serverService,
+		discordService: discordService,
+		commands:       commands,
 	}, nil
 }
 

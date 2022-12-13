@@ -37,6 +37,12 @@ func New() (*MySQLConnectionImpl, error) {
 		&entities.DimensionLabel{},
 		&entities.Server{},
 		&entities.ServerLabel{},
+		&entities.TransportType{},
+		&entities.TransportTypeLabel{},
+		&entities.Area{},
+		&entities.AreaLabel{},
+		&entities.SubArea{},
+		&entities.SubAreaLabel{},
 	)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package dimensions
+package portals
 
 import (
 	"strings"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/entities"
-	repository "github.com/kaellybot/kaelly-discord/repositories/dimensions"
+	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/runes"
@@ -14,21 +14,24 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-type DimensionService interface {
+type PortalService interface {
 	GetDimension(id string) (entities.Dimension, bool)
+	GetArea(id string) (entities.Area, bool)
+	GetSubArea(id string) (entities.SubArea, bool)
+	GetTransportType(id string) (entities.TransportType, bool)
 	GetDimensions() []entities.Dimension
 	FindDimensions(name string, locale discordgo.Locale) []entities.Dimension
 }
 
-type DimensionServiceImpl struct {
+type PortalServiceImpl struct {
 	transformer   transform.Transformer
 	dimensionsMap map[string]entities.Dimension
 	dimensions    []entities.Dimension
-	repository    repository.DimensionRepository
+	dimensionRepo dimensions.DimensionRepository
 }
 
-func New(repository repository.DimensionRepository) (*DimensionServiceImpl, error) {
-	dimensions, err := repository.GetDimensions()
+func New(dimensionRepo dimensions.DimensionRepository) (*PortalServiceImpl, error) {
+	dimensions, err := dimensionRepo.GetDimensions()
 	if err != nil {
 		return nil, err
 	}
@@ -38,24 +41,24 @@ func New(repository repository.DimensionRepository) (*DimensionServiceImpl, erro
 		dimensionsMap[dimension.Id] = dimension
 	}
 
-	return &DimensionServiceImpl{
+	return &PortalServiceImpl{
 		transformer:   transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
 		dimensionsMap: dimensionsMap,
 		dimensions:    dimensions,
-		repository:    repository,
+		dimensionRepo: dimensionRepo,
 	}, nil
 }
 
-func (service *DimensionServiceImpl) GetDimensions() []entities.Dimension {
+func (service *PortalServiceImpl) GetDimensions() []entities.Dimension {
 	return service.dimensions
 }
 
-func (service *DimensionServiceImpl) GetDimension(id string) (entities.Dimension, bool) {
+func (service *PortalServiceImpl) GetDimension(id string) (entities.Dimension, bool) {
 	dimension, found := service.dimensionsMap[id]
 	return dimension, found
 }
 
-func (service *DimensionServiceImpl) FindDimensions(name string, locale discordgo.Locale) []entities.Dimension {
+func (service *PortalServiceImpl) FindDimensions(name string, locale discordgo.Locale) []entities.Dimension {
 	dimensionsFound := make([]entities.Dimension, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -71,4 +74,19 @@ func (service *DimensionServiceImpl) FindDimensions(name string, locale discordg
 	}
 
 	return dimensionsFound
+}
+
+func (service *PortalServiceImpl) GetArea(id string) (entities.Area, bool) {
+	// TODO
+	return entities.Area{}, false
+}
+
+func (service *PortalServiceImpl) GetSubArea(id string) (entities.SubArea, bool) {
+	// TODO
+	return entities.SubArea{}, false
+}
+
+func (service *PortalServiceImpl) GetTransportType(id string) (entities.TransportType, bool) {
+	// TODO
+	return entities.TransportType{}, false
 }

@@ -10,8 +10,8 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
-	"github.com/kaellybot/kaelly-discord/services/dimensions"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
+	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
@@ -19,14 +19,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func New(guildService guilds.GuildService, dimensionService dimensions.DimensionService,
+func New(guildService guilds.GuildService, portalService portals.PortalService,
 	serverService servers.ServerService, requestManager requests.RequestManager) *PosCommand {
 
 	return &PosCommand{
-		guildService:     guildService,
-		dimensionService: dimensionService,
-		serverService:    serverService,
-		requestManager:   requestManager,
+		guildService:   guildService,
+		portalService:  portalService,
+		serverService:  serverService,
+		requestManager: requestManager,
 	}
 }
 
@@ -114,7 +114,7 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 
 	embeds := make([]*discordgo.MessageEmbed, 0)
 	for _, position := range message.GetPortalPositionAnswer().GetPositions() {
-		dimension, found := command.dimensionService.GetDimension(position.Dimension)
+		dimension, found := command.portalService.GetDimension(position.Dimension)
 		if !found {
 			log.Error().Str(constants.LogDimension, position.Dimension).Msgf("Cannot find dimension based on ID sent internally, panicking")
 			panic(commands.ErrInvalidAnswerMessage)

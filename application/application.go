@@ -8,8 +8,11 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/about"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/repositories/areas"
 	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
 	serverRepo "github.com/kaellybot/kaelly-discord/repositories/servers"
+	"github.com/kaellybot/kaelly-discord/repositories/subareas"
+	"github.com/kaellybot/kaelly-discord/repositories/transports"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
@@ -52,7 +55,10 @@ func New() (*Application, error) {
 	}
 
 	dimensionRepo := dimensions.New(db)
-	portalService, err := portals.New(dimensionRepo)
+	areaRepo := areas.New(db)
+	subAreaRepo := subareas.New(db)
+	transportTypeRepo := transports.New(db)
+	portalService, err := portals.New(dimensionRepo, areaRepo, subAreaRepo, transportTypeRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Dimension Service instantiation failed, shutting down.")
 	}

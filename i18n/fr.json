@@ -1,18 +1,85 @@
 {
     "about":{
         "name": "about",
-        "description": "Donne des informations sur Kaelly et un moyen d'obtenir de l'aide"
+        "description": "Donne des informations sur Kaelly et un moyen d'obtenir de l'aide",
+        "title":"{{ .name }} version {{ .version }}",
+        "desc":"Bot Discord dédié au jeu {{ .game }} !",
+        "invite":{
+           "title":":electric_plug: Lien d'invitation",
+           "desc":"Je peux être invitée sur vos serveurs grâce à ce [lien]({{ .invite }}). Vous devrez avoir les droits suffisants pour effectuer l'action !"
+        },
+        "support":{
+           "title":":bulb: Serveur de support",
+           "desc":"Vous rencontrez un problème quant à mon utilisation ? Une suggestion ? Une amélioration à proposer ? N'hésitez pas à rejoindre le [serveur Discord]({{ .discord }}) !"
+        },
+        "twitter":{
+           "title":"<:twitter:383237199925215232> Twitter",
+           "desc":"Je suis aussi sur [Twitter]({{ .twitter }}) : tu y trouveras les dernières nouveautés !"
+        },
+        "opensource":{
+           "title":"<:github:372093338628784148> Open source",
+           "desc":"L'intégralité de mon code source est sous licence GPL-3.0 et accessible sur [Github]({{ .github }})"
+        },
+        "free":{
+           "title":":money_with_wings: Gratuit",
+           "desc":"L'ensemble des fonctionnalités sont gratuites. Il est possible de participer financièrement mais ne te mets pas dans le rouge ! [Paypal]({{ .paypal }})"
+        },
+        "privacy":{
+            "title":":shield: Confidentialité des données",
+            "desc":"Je prends soin de ne collecter que le strict minimum de données pour fonctionner. Plus d'informations sur le serveur de support !"
+        },
+        "graphist":{
+           "title":":art: Visuels",
+           "desc":"Visuels réalisés par la géniale [{{ .graphist.Name }}]({{ .graphist.Url }})!"
+        },
+        "donors":{
+           "title":":ok_woman: Donateurs",
+           "desc":"{{ if .donors }}{{$first := true}}{{ range .donors}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ else }} Aucun donateur pour le moment !{{ end }}"
+        }
     },
     "pos": {
         "name": "pos",
         "description": "Donne les positions de portail de dimension les plus récentes",
         "dimension": { 
             "name": "dimension",
-            "description": "Nom de la dimension. Si non renseigné, toutes les dimensions sont remontées"
+            "description": "Nom de la dimension. Si non renseigné, toutes les dimensions sont remontées",
+            "check": {
+               "not_found": "Aie! '*{{ .value }}*' ne correspond à aucune dimension que je connaisse ! :pensive:",
+               "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Si tu veux toute les afficher, ne renseigne pas cette option :slight_smile:"
+            }
         },
         "server": { 
-            "name": "serveur",
-            "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
+                "name": "server",
+                "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place",
+                "check": {
+                "required": "Oops! Il semble qu'il n'y a pas de serveur {{ .game }} lié à ta guilde (ou au salon), utilise l'option *server* (exemple: `/pos server Djaul`) ou lie ta guilde à un serveur avec la commande `/server` :grin:",
+                "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun serveur que je connaisse ! :pensive:",
+                "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs serveurs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Réessaie en sélectionnant un serveur de la liste :slight_smile:"
+                }
+        },
+        "embed": {
+            "unknown": "Aucune position récente trouvée.",
+            "position": {
+                "name": ":cyclone: Position",
+                "value": "**[{{ .position.X }}, {{ .position.Y }}]**"
+            },
+            "uses": {
+                "name": ":eye: Utilisations",
+                "value": "{{ .uses }} utilisations"
+            },
+            "hunters": {
+                "name": ":cowboy: Chasseurs",
+                "value": "**{{ .createdBy}}** (ajoutée <t:{{ .createdAt.Seconds }}:R>){{ if .updatedBy }}\n**{{ .updatedBy }}** (éditée <t:{{ .updatedAt.Seconds }}:R>){{end}}"
+            },
+            "transport": {
+                "name": "{{ if .conditional }}:airplane_small:{{ else }}:airplane:{{ end}} {{ .type }} à proximité",
+                "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
+            },
+            "footer": "Généré avec ❤ en partenariat avec {{ .source }}"
         }
-    }
+    },
+    "panic":[
+       "J'ai rencontré une erreur :frowning:... Cela sera étudiée et corrigée le plus tôt possible !",
+       "Oops, il semble que j'ai crashé... Je reporte cet évènement à mes créateurs, désolée !"
+   ]
 }

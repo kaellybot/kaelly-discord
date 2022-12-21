@@ -14,15 +14,19 @@
       },
       "twitter":{
          "title":"<:twitter:383237199925215232> Twitter",
-         "desc":"I'm also on [Twitter]({{ .twitter }}): you will find the news or reports of failure!"
+         "desc":"I'm also on [Twitter]({{ .twitter }}): you will find the last news!"
       },
       "opensource":{
          "title":"<:github:372093338628784148> Open source",
-         "desc":"All source code is licensed under GPL-3.0 and accessible on [Github]({{ .github }})."
+         "desc":"All my source code is licensed under GPL-3.0 and accessible on [Github]({{ .github }})"
       },
       "free":{
          "title":":money_with_wings: Free",
          "desc":"All features are free. You can participate financially but do not go into the red! [Paypal]({{ .paypal }})"
+      },
+      "privacy":{
+         "title":":shield: Data privacy",
+         "desc":"I take care to collect the strict minimum data needed to run. More informations on the support server!"
       },
       "graphist":{
          "title":":art: Visuals",

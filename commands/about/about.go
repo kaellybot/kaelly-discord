@@ -75,6 +75,11 @@ func (command *AboutCommand) getAboutEmbed(locale discordgo.Locale) *discordgo.M
 				Inline: false,
 			},
 			{
+				Name:   i18n.Get(locale, "about.privacy.title"),
+				Value:  i18n.Get(locale, "about.privacy.desc"),
+				Inline: false,
+			},
+			{
 				Name:   i18n.Get(locale, "about.graphist.title"),
 				Value:  i18n.Get(locale, "about.graphist.desc", i18n.Vars{"graphist": constants.Elycann}),
 				Inline: false,

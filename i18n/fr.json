@@ -1,61 +1,117 @@
 {
-    "about":{
+    "about": {
         "name": "about",
         "description": "Donne des informations sur Kaelly et un moyen d'obtenir de l'aide",
-        "title":"{{ .name }} version {{ .version }}",
-        "desc":"Bot Discord dédié au jeu {{ .game }} !",
-        "invite":{
-           "title":":electric_plug: Lien d'invitation",
-           "desc":"Je peux être invitée sur vos serveurs grâce à ce [lien]({{ .invite }}). Vous devrez avoir les droits suffisants pour effectuer l'action !"
+        "title": "{{ .name }} version {{ .version }}",
+        "desc": "Bot Discord dédié au jeu {{ .game }} !",
+        "invite": {
+            "title": ":electric_plug: Lien d'invitation",
+            "desc": "Je peux être invitée sur vos serveurs grâce à ce [lien]({{ .invite }}). Vous devrez avoir les droits suffisants pour effectuer l'action !"
         },
-        "support":{
-           "title":":bulb: Serveur de support",
-           "desc":"Vous rencontrez un problème quant à mon utilisation ? Une suggestion ? Une amélioration à proposer ? N'hésitez pas à rejoindre le [serveur Discord]({{ .discord }}) !"
+        "support": {
+            "title": ":bulb: Serveur de support",
+            "desc": "Vous rencontrez un problème quant à mon utilisation ? Une suggestion ? Une amélioration à proposer ? N'hésitez pas à rejoindre le [serveur Discord]({{ .discord }}) !"
         },
-        "twitter":{
-           "title":"<:twitter:383237199925215232> Twitter",
-           "desc":"Je suis aussi sur [Twitter]({{ .twitter }}) : tu y trouveras les dernières nouveautés !"
+        "twitter": {
+            "title": "<:twitter:383237199925215232> Twitter",
+            "desc": "Je suis aussi sur [Twitter]({{ .twitter }}) : tu y trouveras les dernières nouveautés !"
         },
-        "opensource":{
-           "title":"<:github:372093338628784148> Open source",
-           "desc":"L'intégralité de mon code source est sous licence GPL-3.0 et accessible sur [Github]({{ .github }})"
+        "opensource": {
+            "title": "<:github:372093338628784148> Open source",
+            "desc": "L'intégralité de mon code source est sous licence GPL-3.0 et accessible sur [Github]({{ .github }})"
         },
-        "free":{
-           "title":":money_with_wings: Gratuit",
-           "desc":"L'ensemble des fonctionnalités sont gratuites. Il est possible de participer financièrement mais ne te mets pas dans le rouge ! [Paypal]({{ .paypal }})"
+        "free": {
+            "title": ":money_with_wings: Gratuit",
+            "desc": "L'ensemble des fonctionnalités sont gratuites. Il est possible de participer financièrement mais ne te mets pas dans le rouge ! [Paypal]({{ .paypal }})"
         },
-        "privacy":{
-            "title":":shield: Confidentialité des données",
-            "desc":"Je prends soin de ne collecter que le strict minimum de données pour fonctionner. Plus d'informations sur le serveur de support !"
+        "privacy": {
+            "title": ":shield: Confidentialité des données",
+            "desc": "Je prends soin de ne collecter que le strict minimum de données pour fonctionner. Plus d'informations sur le serveur de support !"
         },
-        "graphist":{
-           "title":":art: Visuels",
-           "desc":"Visuels réalisés par la géniale [{{ .graphist.Name }}]({{ .graphist.Url }})!"
+        "graphist": {
+            "title": ":art: Visuels",
+            "desc": "Visuels réalisés par la géniale [{{ .graphist.Name }}]({{ .graphist.Url }})!"
         },
-        "donors":{
-           "title":":ok_woman: Donateurs",
-           "desc":"{{ if .donors }}{{$first := true}}{{ range .donors}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ else }} Aucun donateur pour le moment !{{ end }}"
+        "donors": {
+            "title": ":ok_woman: Donateurs",
+            "desc": "{{ if .donors }}{{$first := true}}{{ range .donors}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ else }} Aucun donateur pour le moment !{{ end }}"
         }
     },
+    "config": {
+        "name": "config",
+        "description": "Permet de me configurer : serveur {{ .game }}, l'envoi d'Almanax, de flux RSS ou de tweets",
+        "display": {
+           "name": "display",
+           "description": "Affiche ma configuration actuelle du serveur Discord"
+        },
+        "almanax": {
+           "name": "almanax",
+           "description": "Active ou désactive l'envoi de l'Almanax dans le salon",
+           "enabled": {
+              "name": "enabled",
+              "description": "Active l'envoi de l'Almanax dans un salon"
+           },
+           "channel": {
+              "name": "channel",
+              "description": "Si non renseigné, le salon courant sera utilisé"
+           }
+        },
+        "rss": {
+           "name": "rss",
+           "description": "Active l'envoi de flux RSS dans un salon",
+           "enabled": {
+              "name": "enabled",
+              "description": "Active ou désactive l'envoi de flux RSS dans le salon"
+           },
+           "channel": {
+              "name": "channel",
+              "description": "Si non renseigné, le salon courant sera utilisé"
+           }
+        },
+        "server": {
+           "name": "server",
+           "description": "Lie le serveur Discord à un serveur {{ .game }}",
+           "server": {
+              "name": "server",
+              "description": "Nom du serveur {{ .game }}"
+           },
+           "channel": {
+              "name": "channel",
+              "description": "Le serveur {{ .game }} lié au salon sera prioritaire à celui lié au serveur Discord"
+           }
+        },
+        "twitter": {
+           "name": "twitter",
+           "description": "Active l'envoi de tweets dans un salon",
+           "enabled": {
+              "name": "enabled",
+              "description": "Active ou désactive l'envoi de tweets dans le salon"
+           },
+           "channel": {
+              "name": "channel",
+              "description": "Si non renseigné, le salon courant sera utilisé"
+           }
+        }
+     },
     "pos": {
         "name": "pos",
         "description": "Donne les positions de portail de dimension les plus récentes",
-        "dimension": { 
+        "dimension": {
             "name": "dimension",
             "description": "Nom de la dimension. Si non renseigné, toutes les dimensions sont remontées",
             "check": {
-               "not_found": "Aie! '*{{ .value }}*' ne correspond à aucune dimension que je connaisse ! :pensive:",
-               "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Si tu veux toute les afficher, ne renseigne pas cette option :slight_smile:"
+                "not_found": "Aie! '*{{ .value }}*' ne correspond à aucune dimension que je connaisse ! :pensive:",
+                "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Si tu veux toute les afficher, ne renseigne pas cette option :slight_smile:"
             }
         },
-        "server": { 
-                "name": "server",
-                "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place",
-                "check": {
+        "server": {
+            "name": "server",
+            "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place",
+            "check": {
                 "required": "Oops! Il semble qu'il n'y a pas de serveur {{ .game }} lié à ta guilde (ou au salon), utilise l'option *server* (exemple: `/pos server Djaul`) ou lie ta guilde à un serveur avec la commande `/server` :grin:",
                 "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun serveur que je connaisse ! :pensive:",
                 "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs serveurs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Réessaie en sélectionnant un serveur de la liste :slight_smile:"
-                }
+            }
         },
         "embed": {
             "unknown": "Aucune position récente trouvée.",
@@ -78,8 +134,8 @@
             "footer": "Généré avec ❤ en partenariat avec {{ .source }}"
         }
     },
-    "panic":[
-       "J'ai rencontré une erreur :frowning:... Cela sera étudiée et corrigée le plus tôt possible !",
-       "Oops, il semble que j'ai crashé... Je reporte cet évènement à mes créateurs, désolée !"
-   ]
+    "panic": [
+        "J'ai rencontré une erreur :frowning:... Cela sera étudiée et corrigée le plus tôt possible !",
+        "Oops, il semble que j'ai crashé... Je reporte cet évènement à mes créateurs, désolée !"
+    ]
 }

@@ -6,6 +6,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/commands/about"
+	"github.com/kaellybot/kaelly-discord/commands/config"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
@@ -74,6 +75,7 @@ func New() (*Application, error) {
 	requestsManager := requests.New(broker)
 	commands := []commands.Command{
 		about.New(),
+		config.New(guildService, serverService, requestsManager),
 		pos.New(guildService, portalService, serverService, requestsManager),
 	}
 

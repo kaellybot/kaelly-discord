@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
+	"github.com/kaellybot/kaelly-discord/models/mappers"
 )
 
 func (command *ConfigCommand) displayRequest(ctx context.Context, s *discordgo.Session,
@@ -15,18 +17,15 @@ func (command *ConfigCommand) displayRequest(ctx context.Context, s *discordgo.S
 		panic(err)
 	}
 
-	/** TODO
 	msg := mappers.MapConfigurationDisplayRequest(i.Interaction.GuildID, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.displayRespond)
 	if err != nil {
 		panic(err)
 	}
-	**/
-	content := "display config"
-	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-		Content: &content,
-	})
-	if err != nil {
-		panic(err)
-	}
+}
+
+func (command *ConfigCommand) displayRespond(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+
+	// TODO respond
 }

@@ -2,9 +2,11 @@ package config
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -170,4 +172,35 @@ func (command *ConfigCommand) request(ctx context.Context, s *discordgo.Session,
 			log.Error().Msgf("")
 		}
 	}
+}
+
+func (command *ConfigCommand) getServerOptions(ctx context.Context) (entities.Server, string, error) {
+	server, ok := ctx.Value(serverOptionName).(entities.Server)
+	if !ok {
+		return entities.Server{}, "", fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+	}
+
+	channelId := ""
+	if ctx.Value(channelOptionName) != nil {
+		channelId, ok = ctx.Value(channelOptionName).(string)
+		if !ok {
+			return entities.Server{}, "", fmt.Errorf("Cannot cast %v as string", ctx.Value(channelOptionName))
+		}
+	}
+
+	return server, channelId, nil
+}
+
+func (command *ConfigCommand) getWebhookOptions(ctx context.Context) (string, bool, error) {
+	channelId, ok := ctx.Value(channelOptionName).(string)
+	if !ok {
+		return "", false, fmt.Errorf("Cannot cast %v as string", ctx.Value(channelOptionName))
+	}
+
+	enabled, ok := ctx.Value(enabledOptionName).(bool)
+	if !ok {
+		return "", false, fmt.Errorf("Cannot cast %v as bool", ctx.Value(enabledOptionName))
+	}
+
+	return channelId, enabled, nil
 }

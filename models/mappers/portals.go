@@ -16,18 +16,18 @@ func MapPortalPositionRequest(dimension entities.Dimension, server entities.Serv
 		Type:     amqp.RabbitMQMessage_PORTAL_POSITION_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		PortalPositionRequest: &amqp.PortalPositionRequest{
-			Dimension: dimension.Id,
-			Server:    server.Id,
+			DimensionId: dimension.Id,
+			ServerId:    server.Id,
 		},
 	}
 }
 
 func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.PortalService, locale amqp.RabbitMQMessage_Language) *discordgo.MessageEmbed {
 	lg := constants.MapAmqpLocale(locale)
-	dimension, found := portalService.GetDimension(portal.Dimension)
+	dimension, found := portalService.GetDimension(portal.DimensionId)
 	if !found {
-		log.Warn().Str(constants.LogEntity, portal.Dimension).Msgf("Cannot find dimension based on ID sent internally, continuing with empty dimension")
-		dimension = entities.Dimension{Id: portal.Dimension}
+		log.Warn().Str(constants.LogEntity, portal.DimensionId).Msgf("Cannot find dimension based on ID sent internally, continuing with empty dimension")
+		dimension = entities.Dimension{Id: portal.DimensionId}
 	}
 
 	embed := discordgo.MessageEmbed{
@@ -78,28 +78,28 @@ func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService 
 func mapTransportToEmbed(transport *amqp.PortalPositionAnswer_PortalPosition_Position_Transport,
 	portalService portals.PortalService, lg discordgo.Locale, isConditional bool) *discordgo.MessageEmbedField {
 
-	transportType, found := portalService.GetTransportType(transport.Type)
+	transportType, found := portalService.GetTransportType(transport.TypeId)
 	if !found {
 		log.Warn().
-			Str(constants.LogEntity, transport.Type).
+			Str(constants.LogEntity, transport.TypeId).
 			Msgf("Cannot find transport type based on ID sent internally, continuing with empty transport")
-		transportType = entities.TransportType{Id: transport.Type}
+		transportType = entities.TransportType{Id: transport.TypeId}
 	}
 
-	area, found := portalService.GetArea(transport.Area)
+	area, found := portalService.GetArea(transport.AreaId)
 	if !found {
 		log.Warn().
-			Str(constants.LogEntity, transport.Area).
+			Str(constants.LogEntity, transport.AreaId).
 			Msgf("Cannot find area based on ID sent internally, continuing with empty area")
-		area = entities.Area{Id: transport.Area}
+		area = entities.Area{Id: transport.AreaId}
 	}
 
-	subArea, found := portalService.GetSubArea(transport.SubArea)
+	subArea, found := portalService.GetSubArea(transport.SubAreaId)
 	if !found {
 		log.Warn().
-			Str(constants.LogEntity, transport.SubArea).
+			Str(constants.LogEntity, transport.SubAreaId).
 			Msgf("Cannot find sub area based on ID sent internally, continuing with empty sub area")
-		subArea = entities.SubArea{Id: transport.SubArea}
+		subArea = entities.SubArea{Id: transport.SubAreaId}
 	}
 
 	return &discordgo.MessageEmbedField{

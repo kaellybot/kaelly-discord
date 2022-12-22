@@ -13,8 +13,6 @@ func (command *ConfigCommand) checkServer(ctx context.Context, s *discordgo.Sess
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
 	data := i.ApplicationCommandData()
-
-	// Filled case, expecting [1, 1] server
 	for _, subCommand := range data.Options {
 		if subCommand.Name == serverSubCommandName {
 			for _, option := range subCommand.Options {
@@ -33,6 +31,46 @@ func (command *ConfigCommand) checkServer(ctx context.Context, s *discordgo.Sess
 						}
 					}
 
+					return
+				}
+			}
+		}
+	}
+
+	next(ctx)
+}
+
+func (command *ConfigCommand) checkChannelId(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+
+	data := i.ApplicationCommandData()
+	for _, subCommand := range data.Options {
+		for _, option := range subCommand.Options {
+			if option.Name == channelOptionName {
+				next(context.WithValue(ctx, channelOptionName, option.ChannelValue(s).ID))
+				return
+			}
+		}
+
+		// If option not found, guess we're using the current channel for webhook queries
+		if subCommand.Name != serverSubCommandName {
+			next(context.WithValue(ctx, channelOptionName, i.ChannelID))
+			return
+		}
+	}
+
+	next(ctx)
+}
+
+func (command *ConfigCommand) checkEnabled(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+
+	data := i.ApplicationCommandData()
+	for _, subCommand := range data.Options {
+		if subCommand.Name != serverSubCommandName {
+			for _, option := range subCommand.Options {
+				if option.Name == enabledOptionName {
+					next(context.WithValue(ctx, enabledOptionName, option.BoolValue()))
 					return
 				}
 			}

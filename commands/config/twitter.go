@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
+	"github.com/kaellybot/kaelly-discord/models/mappers"
 )
 
 func (command *ConfigCommand) twitterRequest(ctx context.Context, s *discordgo.Session,
@@ -15,18 +17,21 @@ func (command *ConfigCommand) twitterRequest(ctx context.Context, s *discordgo.S
 		panic(err)
 	}
 
-	/** TODO
-	msg := mappers.MapConfigurationTwitterRequest(i.Interaction.GuildID, lg)
+	channelId, enabled, err := command.getWebhookOptions(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	msg := mappers.MapConfigurationWebhookRequest(i.Interaction.GuildID, channelId,
+		enabled, amqp.ConfigurationWebhookRequest_TWITTER, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.twitterRespond)
 	if err != nil {
 		panic(err)
 	}
-	**/
-	content := "twitter config"
-	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-		Content: &content,
-	})
-	if err != nil {
-		panic(err)
-	}
+}
+
+func (command *ConfigCommand) twitterRespond(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+
+	// TODO respond
 }

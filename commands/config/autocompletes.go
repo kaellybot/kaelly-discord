@@ -11,23 +11,27 @@ func (command *ConfigCommand) autocomplete(s *discordgo.Session, i *discordgo.In
 	data := i.ApplicationCommandData()
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
 
-	for _, option := range data.Options {
-		if option.Focused {
-			switch option.Name {
-			case serverOptionName:
-				servers := command.serverService.FindServers(option.StringValue(), lg)
+	for _, subCommand := range data.Options {
+		if subCommand.Name == serverSubCommandName {
+			for _, option := range subCommand.Options {
+				if option.Focused {
+					switch option.Name {
+					case serverOptionName:
+						servers := command.serverService.FindServers(option.StringValue(), lg)
 
-				for _, server := range servers {
-					label := translators.GetEntityLabel(server, lg)
-					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-						Name:  label,
-						Value: label,
-					})
+						for _, server := range servers {
+							label := translators.GetEntityLabel(server, lg)
+							choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+								Name:  label,
+								Value: label,
+							})
+						}
+					default:
+						log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
+					}
+					break
 				}
-			default:
-				log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
 			}
-			break
 		}
 	}
 

@@ -15,23 +15,29 @@ func (command *ConfigCommand) checkServer(ctx context.Context, s *discordgo.Sess
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] server
-	for _, option := range data.Options {
-		if option.Name == serverOptionName {
-			servers := command.serverService.FindServers(option.StringValue(), lg)
-			response, checkSuccess := validators.ExpectOnlyOneElement("server.server.check", option.StringValue(), servers, lg)
-			if checkSuccess {
-				next(context.WithValue(ctx, serverOptionName, servers[0]))
-			} else {
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &response,
-				})
-				if err != nil {
-					log.Error().Err(err).Msg("Server check response ignored")
+	for _, subCommand := range data.Options {
+		if subCommand.Name == serverSubCommandName {
+			for _, option := range subCommand.Options {
+				if option.Name == serverOptionName {
+					servers := command.serverService.FindServers(option.StringValue(), lg)
+					response, checkSuccess := validators.ExpectOnlyOneElement("config.server.check", option.StringValue(), servers, lg)
+					if checkSuccess {
+						next(context.WithValue(ctx, serverOptionName, servers[0]))
+					} else {
+						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+							Type: discordgo.InteractionResponseChannelMessageWithSource,
+							Data: &response,
+						})
+						if err != nil {
+							log.Error().Err(err).Msg("Server check response ignored")
+						}
+					}
+
+					return
 				}
 			}
-
-			return
 		}
 	}
+
+	next(ctx)
 }

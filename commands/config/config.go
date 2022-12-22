@@ -2,16 +2,15 @@ package config
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
+	"github.com/rs/zerolog/log"
 )
 
 func New(guildService guilds.GuildService, serverService servers.ServerService,
@@ -155,17 +154,20 @@ func (command *ConfigCommand) GetDiscordCommand() *constants.DiscordCommand {
 func (command *ConfigCommand) request(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
-	// TODO switch case to dispatch handlers
-	err := commands.DeferInteraction(s, i)
-	if err != nil {
-		panic(err)
-	}
-
-	interaction := fmt.Sprintf("%v", i)
-	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-		Content: &interaction,
-	})
-	if err != nil {
-		panic(err)
+	for _, subCommand := range i.ApplicationCommandData().Options {
+		switch subCommand.Name {
+		case displaySubCommandName:
+			command.displayRequest(ctx, s, i, lg)
+		case almanaxSubCommandName:
+			command.almanaxRequest(ctx, s, i, lg)
+		case rssSubCommandName:
+			command.rssRequest(ctx, s, i, lg)
+		case twitterSubCommandName:
+			command.twitterRequest(ctx, s, i, lg)
+		case serverSubCommandName:
+			command.serverRequest(ctx, s, i, lg)
+		default:
+			log.Error().Msgf("")
+		}
 	}
 }

@@ -147,7 +147,7 @@ func (command *ConfigCommand) GetDiscordCommand() *constants.DiscordCommand {
 			},
 		},
 		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkServer, command.request),
+			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkServer, command.checkChannelId, command.request),
 			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
 		},
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
 	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
+	guildRepo "github.com/kaellybot/kaelly-discord/repositories/guilds"
 	serverRepo "github.com/kaellybot/kaelly-discord/repositories/servers"
 	"github.com/kaellybot/kaelly-discord/repositories/subareas"
 	"github.com/kaellybot/kaelly-discord/repositories/transports"
@@ -70,7 +71,8 @@ func New() (*Application, error) {
 		log.Fatal().Err(err).Msgf("Server Service instantiation failed, shutting down.")
 	}
 
-	guildService := guilds.New()
+	guildRepo := guildRepo.New(db)
+	guildService := guilds.New(guildRepo)
 
 	requestsManager := requests.New(broker)
 	commands := []commands.Command{

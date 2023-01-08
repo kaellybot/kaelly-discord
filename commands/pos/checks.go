@@ -68,7 +68,11 @@ func (command *PosCommand) checkServer(ctx context.Context, s *discordgo.Session
 	}
 
 	// Option not filled (refers to guild and/or channel)
-	server := command.guildService.GetServer()
+	server, err := command.guildService.GetServer(i.GuildID, i.ChannelID)
+	if err != nil {
+		panic(err)
+	}
+
 	if server == nil {
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,

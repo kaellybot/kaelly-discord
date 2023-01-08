@@ -23,7 +23,7 @@ func (command *ConfigCommand) almanaxRequest(ctx context.Context, s *discordgo.S
 	}
 
 	msg := mappers.MapConfigurationWebhookRequest(i.Interaction.GuildID, channelId,
-		enabled, amqp.ConfigurationWebhookRequest_ALMANAX, lg)
+		enabled, amqp.ConfigurationRequest_WebhookField_ALMANAX, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.almanaxRespond)
 	if err != nil {
 		panic(err)

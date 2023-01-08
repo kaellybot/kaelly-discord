@@ -23,7 +23,7 @@ func (command *ConfigCommand) twitterRequest(ctx context.Context, s *discordgo.S
 	}
 
 	msg := mappers.MapConfigurationWebhookRequest(i.Interaction.GuildID, channelId,
-		enabled, amqp.ConfigurationWebhookRequest_TWITTER, lg)
+		enabled, amqp.ConfigurationRequest_WebhookField_TWITTER, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.twitterRespond)
 	if err != nil {
 		panic(err)

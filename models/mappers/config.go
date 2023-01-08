@@ -6,39 +6,37 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 )
 
-func MapConfigurationDisplayRequest(guildId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_DISPLAY_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		ConfigurationDisplayRequest: &amqp.ConfigurationDisplayRequest{
-			GuildId: guildId,
-		},
-	}
-}
-
 func MapConfigurationServerRequest(guildId, channelId, serverId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SERVER_REQUEST,
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		ConfigurationServerRequest: &amqp.ConfigurationServerRequest{
+		ConfigurationRequest: &amqp.ConfigurationRequest{
 			GuildId:   guildId,
 			ChannelId: channelId,
-			ServerId:  serverId,
+			Field:     amqp.ConfigurationRequest_SERVER,
+			ServerField: &amqp.ConfigurationRequest_ServerField{
+				ServerId: serverId,
+			},
 		},
 	}
 }
 
 func MapConfigurationWebhookRequest(guildId, channelId string, enabled bool,
-	provider amqp.ConfigurationWebhookRequest_Provider, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	provider amqp.ConfigurationRequest_WebhookField_Provider, lg discordgo.Locale) *amqp.RabbitMQMessage {
 
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_WEBHOOK_REQUEST,
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		ConfigurationWebhookRequest: &amqp.ConfigurationWebhookRequest{
+		ConfigurationRequest: &amqp.ConfigurationRequest{
 			GuildId:   guildId,
 			ChannelId: channelId,
-			Enabled:   enabled,
-			Provider:  provider,
+			Field:     amqp.ConfigurationRequest_WEBHOOK,
+			WebhookField: &amqp.ConfigurationRequest_WebhookField{
+				WebhookId:    "TODO",
+				WebhookToken: "TODO",
+				Enabled:      enabled,
+				Provider:     provider,
+			},
 		},
 	}
 }

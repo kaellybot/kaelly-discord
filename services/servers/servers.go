@@ -7,25 +7,13 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	repository "github.com/kaellybot/kaelly-discord/repositories/servers"
+
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 )
-
-type ServerService interface {
-	GetServer(id string) (entities.Server, bool)
-	GetServers() []entities.Server
-	FindServers(name string, locale discordgo.Locale) []entities.Server
-}
-
-type ServerServiceImpl struct {
-	transformer transform.Transformer
-	serversMap  map[string]entities.Server
-	servers     []entities.Server
-	repository  repository.ServerRepository
-}
 
 func New(repository repository.ServerRepository) (*ServerServiceImpl, error) {
 	servers, err := repository.GetServers()

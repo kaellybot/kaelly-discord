@@ -23,7 +23,7 @@ func (command *ConfigCommand) rssRequest(ctx context.Context, s *discordgo.Sessi
 	}
 
 	msg := mappers.MapConfigurationWebhookRequest(i.Interaction.GuildID, channelId,
-		enabled, amqp.ConfigurationWebhookRequest_RSS, lg)
+		enabled, amqp.ConfigurationRequest_WebhookField_RSS, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.rssRespond)
 	if err != nil {
 		panic(err)

@@ -91,7 +91,8 @@
               "name": "channel",
               "description": "Si non renseigné, le salon courant sera utilisé"
            }
-        }
+        },
+        "success": "Modification prise en compte !"
      },
     "pos": {
         "name": "pos",

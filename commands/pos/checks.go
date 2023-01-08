@@ -85,6 +85,6 @@ func (command *PosCommand) checkServer(ctx context.Context, s *discordgo.Session
 			log.Error().Err(err).Msg("Server check response ignored")
 		}
 	} else {
-		next(context.WithValue(ctx, serverOptionName, &server))
+		next(context.WithValue(ctx, serverOptionName, *server))
 	}
 }

@@ -91,7 +91,8 @@
             "name": "channel",
             "description": "If not filled, the current channel is used instead"
          }
-      }
+      },
+      "success": "Change taken in account!"
    },
    "pos": {
       "name": "pos",

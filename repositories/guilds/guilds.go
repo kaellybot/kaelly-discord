@@ -18,18 +18,18 @@ func New(db databases.MySQLConnection) *GuildRepositoryImpl {
 }
 
 func (repo *GuildRepositoryImpl) GetServer(guildId, channelId string) (*entities.Server, error) {
-	var serverId string
-	err := repo.db.GetDB().Table("guild").
-		Select("COALESCE(channel_servers.server_id, guild.server_id) as server").
-		Joins("LEFT JOIN channel_servers ON guild.id = channel_servers.guild_id AND channel_servers.channel_id = ?", channelId).
-		Where("guild.id = ?", guildId).
-		First(&serverId).Error
+	var serverIds []string
+	err := repo.db.GetDB().Table("guilds").
+		Select("COALESCE(channel_servers.server_id, guilds.server_id) as server").
+		Joins("LEFT JOIN channel_servers ON guilds.id = channel_servers.guild_id AND channel_servers.channel_id = ?", channelId).
+		Where("guilds.id = ?", guildId).
+		Pluck("server", &serverIds).Error
 	if err != nil {
 		return nil, err
 	}
-	if len(serverId) == 0 {
+	if len(serverIds) == 0 {
 		return nil, nil
 	}
 
-	return &entities.Server{Id: serverId}, nil
+	return &entities.Server{Id: serverIds[0]}, nil
 }

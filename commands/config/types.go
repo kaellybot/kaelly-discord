@@ -18,7 +18,7 @@ const (
 	channelOptionName = "channel"
 	enabledOptionName = "enabled"
 
-	configurationRequestRoutingKey = "configuration.request"
+	configurationRequestRoutingKey = "requests.configuration"
 )
 
 type ConfigCommand struct {

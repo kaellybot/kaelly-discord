@@ -15,11 +15,8 @@ type DiscordCommand struct {
 var (
 	DMPermission = false
 
-	DefaultPermission int64 = discordgo.PermissionSendMessages |
-		discordgo.PermissionEmbedLinks |
-		discordgo.PermissionAttachFiles |
-		discordgo.PermissionUseExternalEmojis |
-		discordgo.PermissionSendMessagesInThreads
+	DefaultPermission      int64 = discordgo.PermissionViewChannel
+	ManageServerPermission int64 = discordgo.PermissionManageServer
 
 	Intents discordgo.Intent = discordgo.IntentMessageContent |
 		discordgo.IntentGuildMembers |

@@ -31,7 +31,7 @@ func (command *ConfigCommand) GetDiscordCommand() *constants.DiscordCommand {
 			Name:                     commandName,
 			Description:              i18n.Get(constants.DefaultLocale, "config.description", i18n.Vars{"game": constants.Game}),
 			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: &constants.DefaultPermission,
+			DefaultMemberPermissions: &constants.ManageServerPermission,
 			DMPermission:             &constants.DMPermission,
 			NameLocalizations:        i18n.GetLocalizations("config.name"),
 			DescriptionLocalizations: i18n.GetLocalizations("config.description", i18n.Vars{"game": constants.Game}),

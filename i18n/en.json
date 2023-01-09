@@ -94,25 +94,48 @@
       },
       "success": "Change taken in account!"
    },
+   "job": {
+      "name": "job",
+      "description": "Handles the craftsmen book",
+      "display": {
+         "name": "display",
+         "description": "Displays the specified job craftsmen book",
+         "job": {
+            "name": "job",
+            "description": "Game job"
+         },
+         "server": {
+            "name": "server",
+            "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
+         }
+      },
+      "set": {
+         "name": "set",
+         "description": "Registers your job in the specified server craftsmen book",
+         "job": {
+            "name": "job",
+            "description": "Game job"
+         },
+         "level": {
+            "name": "level",
+            "description": "Job level between 0 and 200. Indicate 0 to unregister"
+         },
+         "server": {
+            "name": "server",
+            "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
+         }
+      }
+   },
    "pos": {
       "name": "pos",
       "description": "Gives the most recent dimension portal positions",
       "dimension": {
          "name": "dimension",
-         "description": "Dimension name. If not filled, all dimensions are retrieved",
-         "check": {
-            "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
-         }
+         "description": "Dimension name. If not filled, all dimensions are retrieved"
       },
       "server": {
          "name": "server",
-         "description": "{{ .game }} Server name. If not filled, the guild server is used instead",
-         "check": {
-            "required": "Oops! It seems no {{ .game }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/server` command :grin:",
-            "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
-         }
+         "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
       },
       "embed": {
          "unknown": "No recent position found.",
@@ -133,6 +156,24 @@
             "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
          },
          "footer": "Built with ❤ in partnership with {{ .source }}"
+      }
+   },
+   "checks": {
+      "dimension": {
+         "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
+         "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
+      },
+      "job": {
+         "not_found": "Aie! '*{{ .value }}*' does not correspond to any jobs I know! :pensive:",
+         "too_many": "Outch! '*{{ .value }}*' matches too many jobs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+      },
+      "level": {
+         "constraints": "The level must be between {{ .min }} and {{ .max }}! :grin:"
+     },
+      "server": {
+         "required": "Oops! It seems no {{ .game }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/config server` command :grin:",
+         "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
+         "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
       }
    },
    "panic": [

@@ -7,14 +7,17 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/commands/about"
 	"github.com/kaellybot/kaelly-discord/commands/config"
+	"github.com/kaellybot/kaelly-discord/commands/job"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
 	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
 	guildRepo "github.com/kaellybot/kaelly-discord/repositories/guilds"
+	"github.com/kaellybot/kaelly-discord/repositories/jobs"
 	serverRepo "github.com/kaellybot/kaelly-discord/repositories/servers"
 	"github.com/kaellybot/kaelly-discord/repositories/subareas"
 	"github.com/kaellybot/kaelly-discord/repositories/transports"
+	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
@@ -38,6 +41,7 @@ type Application struct {
 	db             databases.MySQLConnection
 	broker         amqp.MessageBrokerInterface
 	guildService   guilds.GuildService
+	bookService    books.BookService
 	portalService  portals.PortalService
 	serverService  servers.ServerService
 	discordService discord.DiscordService
@@ -71,6 +75,12 @@ func New() (*Application, error) {
 		log.Fatal().Err(err).Msgf("Server Service instantiation failed, shutting down.")
 	}
 
+	jobRepo := jobs.New(db)
+	bookService, err := books.New(jobRepo)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Book Service instantiation failed, shutting down.")
+	}
+
 	guildRepo := guildRepo.New(db)
 	guildService := guilds.New(guildRepo)
 
@@ -78,6 +88,7 @@ func New() (*Application, error) {
 	commands := []commands.Command{
 		about.New(),
 		config.New(guildService, serverService, requestsManager),
+		job.New(bookService, guildService, serverService, requestsManager),
 		pos.New(guildService, portalService, serverService, requestsManager),
 	}
 
@@ -94,6 +105,7 @@ func New() (*Application, error) {
 		db:             db,
 		broker:         broker,
 		requestManager: requestsManager,
+		bookService:    bookService,
 		guildService:   guildService,
 		portalService:  portalService,
 		serverService:  serverService,

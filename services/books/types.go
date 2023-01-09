@@ -7,13 +7,13 @@ import (
 	"golang.org/x/text/transform"
 )
 
-type JobService interface {
+type BookService interface {
 	GetJob(id string) (entities.Job, bool)
 	GetJobs() []entities.Job
 	FindJobs(name string, locale discordgo.Locale) []entities.Job
 }
 
-type JobServiceImpl struct {
+type BookServiceImpl struct {
 	transformer   transform.Transformer
 	jobsMap       map[string]entities.Job
 	jobs          []entities.Job

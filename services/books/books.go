@@ -14,7 +14,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-func New(jobRepository jobs.JobRepository) (*JobServiceImpl, error) {
+func New(jobRepository jobs.JobRepository) (*BookServiceImpl, error) {
 	jobs, err := jobRepository.GetJobs()
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func New(jobRepository jobs.JobRepository) (*JobServiceImpl, error) {
 		jobsMap[job.Id] = job
 	}
 
-	return &JobServiceImpl{
+	return &BookServiceImpl{
 		transformer:   transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
 		jobsMap:       jobsMap,
 		jobs:          jobs,
@@ -33,16 +33,16 @@ func New(jobRepository jobs.JobRepository) (*JobServiceImpl, error) {
 	}, nil
 }
 
-func (service *JobServiceImpl) GetJobs() []entities.Job {
+func (service *BookServiceImpl) GetJobs() []entities.Job {
 	return service.jobs
 }
 
-func (service *JobServiceImpl) GetJob(id string) (entities.Job, bool) {
+func (service *BookServiceImpl) GetJob(id string) (entities.Job, bool) {
 	server, found := service.jobsMap[id]
 	return server, found
 }
 
-func (service *JobServiceImpl) FindServers(name string, locale discordgo.Locale) []entities.Job {
+func (service *BookServiceImpl) FindJobs(name string, locale discordgo.Locale) []entities.Job {
 	jobsFound := make([]entities.Job, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {

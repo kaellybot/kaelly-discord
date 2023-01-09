@@ -12,7 +12,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
-	"github.com/rs/zerolog/log"
 )
 
 func New(guildService guilds.GuildService, serverService servers.ServerService,
@@ -169,7 +168,7 @@ func (command *ConfigCommand) request(ctx context.Context, s *discordgo.Session,
 		case serverSubCommandName:
 			command.serverRequest(ctx, s, i, lg)
 		default:
-			log.Error().Msgf("")
+			panic(fmt.Errorf("Cannot handle subCommand %v, request ignored", subCommand.Name))
 		}
 	}
 }

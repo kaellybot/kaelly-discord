@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/kaellybot/kaelly-discord/models/constants"
-	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
@@ -28,22 +27,6 @@ func New() (*MySQLConnectionImpl, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&loc=Local", dbUser, dbPassword, dbUrl, dbName)
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.AutoMigrate(
-		&entities.Dimension{},
-		&entities.DimensionLabel{},
-		&entities.Server{},
-		&entities.ServerLabel{},
-		&entities.TransportType{},
-		&entities.TransportTypeLabel{},
-		&entities.Area{},
-		&entities.AreaLabel{},
-		&entities.SubArea{},
-		&entities.SubAreaLabel{},
-	)
 	if err != nil {
 		return nil, err
 	}

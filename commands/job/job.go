@@ -140,7 +140,7 @@ func (command *JobCommand) getDisplayOptions(ctx context.Context) (entities.Job,
 	return job, server, nil
 }
 
-func (command *JobCommand) getSetOptions(ctx context.Context) (entities.Job, uint, entities.Server, error) {
+func (command *JobCommand) getSetOptions(ctx context.Context) (entities.Job, int64, entities.Server, error) {
 	job, ok := ctx.Value(jobOptionName).(entities.Job)
 	if !ok {
 		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Job", ctx.Value(jobOptionName))
@@ -151,7 +151,7 @@ func (command *JobCommand) getSetOptions(ctx context.Context) (entities.Job, uin
 		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
-	level, ok := ctx.Value(levelOptionName).(uint)
+	level, ok := ctx.Value(levelOptionName).(int64)
 	if !ok {
 		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("Cannot cast %v as uint", ctx.Value(levelOptionName))
 	}

@@ -40,8 +40,8 @@
    "config": {
       "name": "config",
       "description": "Permits to configure me: {{ .game }} server, Almanax, RSS feeds or tweets sendings",
-      "display": {
-         "name": "display",
+      "get": {
+         "name": "get",
          "description": "Displays my current configuration to the Discord serveur"
       },
       "almanax": {
@@ -97,8 +97,8 @@
    "job": {
       "name": "job",
       "description": "Handles the craftsmen book",
-      "display": {
-         "name": "display",
+      "get": {
+         "name": "get",
          "description": "Displays the specified job craftsmen book",
          "job": {
             "name": "job",

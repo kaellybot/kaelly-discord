@@ -6,15 +6,25 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 )
 
+func MapConfigurationGetRequest(guildId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_GET_REQUEST,
+		Language: constants.MapDiscordLocale(lg),
+		ConfigurationGetRequest: &amqp.ConfigurationGetRequest{
+			GuildId: guildId,
+		},
+	}
+}
+
 func MapConfigurationServerRequest(guildId, channelId, serverId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_REQUEST,
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		ConfigurationRequest: &amqp.ConfigurationRequest{
+		ConfigurationSetRequest: &amqp.ConfigurationSetRequest{
 			GuildId:   guildId,
 			ChannelId: channelId,
-			Field:     amqp.ConfigurationRequest_SERVER,
-			ServerField: &amqp.ConfigurationRequest_ServerField{
+			Field:     amqp.ConfigurationSetRequest_SERVER,
+			ServerField: &amqp.ConfigurationSetRequest_ServerField{
 				ServerId: serverId,
 			},
 		},
@@ -22,18 +32,19 @@ func MapConfigurationServerRequest(guildId, channelId, serverId string, lg disco
 }
 
 func MapConfigurationWebhookRequest(guildId, channelId string, enabled bool,
-	provider amqp.ConfigurationRequest_WebhookField_Provider, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	provider amqp.ConfigurationSetRequest_WebhookField_Provider, lg discordgo.Locale) *amqp.RabbitMQMessage {
 
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_REQUEST,
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		ConfigurationRequest: &amqp.ConfigurationRequest{
+		ConfigurationSetRequest: &amqp.ConfigurationSetRequest{
 			GuildId:   guildId,
 			ChannelId: channelId,
-			Field:     amqp.ConfigurationRequest_WEBHOOK,
-			WebhookField: &amqp.ConfigurationRequest_WebhookField{
-				WebhookId:    "TODO",
-				WebhookToken: "TODO",
+			Field:     amqp.ConfigurationSetRequest_WEBHOOK,
+			WebhookField: &amqp.ConfigurationSetRequest_WebhookField{
+				// TODO Webhook id & token
+				WebhookId:    "",
+				WebhookToken: "",
 				Enabled:      enabled,
 				Provider:     provider,
 			},

@@ -40,8 +40,8 @@
     "config": {
         "name": "config",
         "description": "Permet de me configurer : serveur {{ .game }}, l'envoi d'Almanax, de flux RSS ou de tweets",
-        "display": {
-            "name": "display",
+        "get": {
+            "name": "get",
             "description": "Affiche ma configuration actuelle du serveur Discord"
         },
         "almanax": {
@@ -97,8 +97,8 @@
     "job": {
         "name": "job",
         "description": "Gère l'annuaire des artisans",
-        "display": {
-           "name": "display",
+        "get": {
+           "name": "get",
            "description": "Affiche l'annuaire des artisans d'un métier",
            "job": {
               "name": "job",

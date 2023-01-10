@@ -38,26 +38,26 @@ func (command *JobCommand) GetDiscordCommand() *constants.DiscordCommand {
 			DescriptionLocalizations: i18n.GetLocalizations("job.description"),
 			Options: []*discordgo.ApplicationCommandOption{
 				{
-					Name:                     displaySubCommandName,
-					Description:              i18n.Get(constants.DefaultLocale, "job.display.description"),
-					NameLocalizations:        *i18n.GetLocalizations("job.display.name"),
-					DescriptionLocalizations: *i18n.GetLocalizations("job.display.description"),
+					Name:                     getSubCommandName,
+					Description:              i18n.Get(constants.DefaultLocale, "job.get.description"),
+					NameLocalizations:        *i18n.GetLocalizations("job.get.name"),
+					DescriptionLocalizations: *i18n.GetLocalizations("job.get.description"),
 					Type:                     discordgo.ApplicationCommandOptionSubCommand,
 					Options: []*discordgo.ApplicationCommandOption{
 						{
 							Name:                     jobOptionName,
-							Description:              i18n.Get(constants.DefaultLocale, "job.display.job.description"),
-							NameLocalizations:        *i18n.GetLocalizations("job.display.job.name"),
-							DescriptionLocalizations: *i18n.GetLocalizations("job.display.job.description"),
+							Description:              i18n.Get(constants.DefaultLocale, "job.get.job.description"),
+							NameLocalizations:        *i18n.GetLocalizations("job.get.job.name"),
+							DescriptionLocalizations: *i18n.GetLocalizations("job.get.job.description"),
 							Type:                     discordgo.ApplicationCommandOptionString,
 							Required:                 true,
 							Autocomplete:             true,
 						},
 						{
 							Name:                     serverOptionName,
-							Description:              i18n.Get(constants.DefaultLocale, "job.display.server.description", i18n.Vars{"game": constants.Game}),
-							NameLocalizations:        *i18n.GetLocalizations("job.display.server.name"),
-							DescriptionLocalizations: *i18n.GetLocalizations("job.display.server.description", i18n.Vars{"game": constants.Game}),
+							Description:              i18n.Get(constants.DefaultLocale, "job.get.server.description", i18n.Vars{"game": constants.Game}),
+							NameLocalizations:        *i18n.GetLocalizations("job.get.server.name"),
+							DescriptionLocalizations: *i18n.GetLocalizations("job.get.server.description", i18n.Vars{"game": constants.Game}),
 							Type:                     discordgo.ApplicationCommandOptionString,
 							Required:                 false,
 							Autocomplete:             true,
@@ -116,8 +116,8 @@ func (command *JobCommand) request(ctx context.Context, s *discordgo.Session,
 
 	for _, subCommand := range i.ApplicationCommandData().Options {
 		switch subCommand.Name {
-		case displaySubCommandName:
-			command.displayRequest(ctx, s, i, lg)
+		case getSubCommandName:
+			command.getRequest(ctx, s, i, lg)
 		case setSubCommandName:
 			command.setRequest(ctx, s, i, lg)
 		default:
@@ -126,7 +126,7 @@ func (command *JobCommand) request(ctx context.Context, s *discordgo.Session,
 	}
 }
 
-func (command *JobCommand) getDisplayOptions(ctx context.Context) (entities.Job, entities.Server, error) {
+func (command *JobCommand) getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {
 	job, ok := ctx.Value(jobOptionName).(entities.Job)
 	if !ok {
 		return entities.Job{}, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Job", ctx.Value(jobOptionName))

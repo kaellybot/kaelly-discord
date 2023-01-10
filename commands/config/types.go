@@ -8,7 +8,7 @@ import (
 
 const (
 	commandName           = "config"
-	displaySubCommandName = "display"
+	getSubCommandName     = "get"
 	almanaxSubCommandName = "almanax"
 	rssSubCommandName     = "rss"
 	twitterSubCommandName = "twitter"
@@ -18,7 +18,7 @@ const (
 	channelOptionName = "channel"
 	enabledOptionName = "enabled"
 
-	configurationRequestRoutingKey = "requests.configuration"
+	configurationRequestRoutingKey = "requests.configs"
 )
 
 type ConfigCommand struct {

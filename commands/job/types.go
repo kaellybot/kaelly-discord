@@ -9,15 +9,18 @@ import (
 )
 
 const (
-	commandName           = "job"
-	displaySubCommandName = "display"
-	setSubCommandName     = "set"
+	commandName       = "job"
+	getSubCommandName = "get"
+	setSubCommandName = "set"
 
 	jobOptionName    = "job"
 	levelOptionName  = "level"
 	serverOptionName = "server"
 
-	jobRequestRoutingKey = "requests.book"
+	jobRequestRoutingKey = "requests.books"
+
+	memberListLimit = 1000
+	craftsmenListLimit = 30
 )
 
 var (

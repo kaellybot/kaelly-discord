@@ -36,10 +36,10 @@ func (command *ConfigCommand) GetDiscordCommand() *constants.DiscordCommand {
 			DescriptionLocalizations: i18n.GetLocalizations("config.description", i18n.Vars{"game": constants.Game}),
 			Options: []*discordgo.ApplicationCommandOption{
 				{
-					Name:                     displaySubCommandName,
-					Description:              i18n.Get(constants.DefaultLocale, "config.display.description"),
-					NameLocalizations:        *i18n.GetLocalizations("config.display.name"),
-					DescriptionLocalizations: *i18n.GetLocalizations("config.display.description"),
+					Name:                     getSubCommandName,
+					Description:              i18n.Get(constants.DefaultLocale, "config.get.description"),
+					NameLocalizations:        *i18n.GetLocalizations("config.get.name"),
+					DescriptionLocalizations: *i18n.GetLocalizations("config.get.description"),
 					Type:                     discordgo.ApplicationCommandOptionSubCommand,
 				},
 				{
@@ -157,8 +157,8 @@ func (command *ConfigCommand) request(ctx context.Context, s *discordgo.Session,
 
 	for _, subCommand := range i.ApplicationCommandData().Options {
 		switch subCommand.Name {
-		case displaySubCommandName:
-			command.displayRequest(ctx, s, i, lg)
+		case getSubCommandName:
+			command.getRequest(ctx, s, i, lg)
 		case almanaxSubCommandName:
 			command.almanaxRequest(ctx, s, i, lg)
 		case rssSubCommandName:

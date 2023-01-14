@@ -3,7 +3,9 @@ package entities
 import "github.com/bwmarrin/discordgo"
 
 type Job struct {
-	Id     string     `gorm:"primaryKey"`
+	Id     string `gorm:"primaryKey"`
+	Icon   string
+	Color  int
 	Labels []JobLabel `gorm:"foreignKey:JobId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 

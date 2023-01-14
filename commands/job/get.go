@@ -2,7 +2,6 @@ package job
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -45,11 +44,9 @@ func (command *JobCommand) getRespond(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
 
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-
-		// TODO respond
-		content := fmt.Sprintf("%v", message.JobGetAnswer.Craftsmen)
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Content: &content,
+			Embeds: mappers.MapJobBookToEmbed(message.JobGetAnswer, command.bookService,
+				command.serverService, message.Language),
 		})
 		if err != nil {
 			log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")

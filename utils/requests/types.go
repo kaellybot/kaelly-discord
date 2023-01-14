@@ -13,7 +13,8 @@ const (
 )
 
 type RequestManager interface {
-	Request(s *discordgo.Session, i *discordgo.InteractionCreate, routingKey string, message *amqp.RabbitMQMessage, callback RequestCallback) error
+	Request(s *discordgo.Session, i *discordgo.InteractionCreate, routingKey string,
+		message *amqp.RabbitMQMessage, callback RequestCallback) error
 	Listen() error
 }
 
@@ -28,4 +29,5 @@ type discordRequest struct {
 	callback    RequestCallback
 }
 
-type RequestCallback func(ctx context.Context, s *discordgo.Session, i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage)
+type RequestCallback func(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage)

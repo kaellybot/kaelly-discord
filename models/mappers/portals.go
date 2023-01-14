@@ -22,11 +22,14 @@ func MapPortalPositionRequest(dimension entities.Dimension, server entities.Serv
 	}
 }
 
-func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.PortalService, locale amqp.RabbitMQMessage_Language) *discordgo.MessageEmbed {
+func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.PortalService,
+	locale amqp.RabbitMQMessage_Language) *discordgo.MessageEmbed {
+
 	lg := constants.MapAmqpLocale(locale)
 	dimension, found := portalService.GetDimension(portal.DimensionId)
 	if !found {
-		log.Warn().Str(constants.LogEntity, portal.DimensionId).Msgf("Cannot find dimension based on ID sent internally, continuing with empty dimension")
+		log.Warn().Str(constants.LogEntity, portal.DimensionId).
+			Msgf("Cannot find dimension based on ID sent internally, continuing with empty dimension")
 		dimension = entities.Dimension{Id: portal.DimensionId}
 	}
 
@@ -63,10 +66,12 @@ func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService 
 		}
 
 		if portal.Position.ConditionalTransport != nil {
-			embed.Fields = append(embed.Fields, mapTransportToEmbed(portal.Position.ConditionalTransport, portalService, lg, true))
+			embed.Fields = append(embed.Fields, 
+				mapTransportToEmbed(portal.Position.ConditionalTransport, portalService, lg, true))
 		}
 
-		embed.Fields = append(embed.Fields, mapTransportToEmbed(portal.Position.Transport, portalService, lg, false))
+		embed.Fields = append(embed.Fields, 
+			mapTransportToEmbed(portal.Position.Transport, portalService, lg, false))
 
 	} else {
 		embed.Description = i18n.Get(lg, "pos.embed.unknown")

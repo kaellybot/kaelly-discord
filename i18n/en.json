@@ -124,7 +124,8 @@
             "name": "server",
             "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
          }
-      }
+      },
+      "success": "Craftsmen book updated!"
    },
    "pos": {
       "name": "pos",

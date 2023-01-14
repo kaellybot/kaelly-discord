@@ -124,7 +124,8 @@
               "name": "server",
               "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
            }
-        }
+        },
+        "success": "L'annuaire a été mise à jour !"
      },
     "pos": {
         "name": "pos",

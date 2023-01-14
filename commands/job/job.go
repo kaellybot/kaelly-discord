@@ -32,7 +32,7 @@ func (command *JobCommand) GetDiscordCommand() *constants.DiscordCommand {
 			Name:                     commandName,
 			Description:              i18n.Get(constants.DefaultLocale, "job.description"),
 			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: &constants.ManageServerPermission,
+			DefaultMemberPermissions: &constants.DefaultPermission,
 			DMPermission:             &constants.DMPermission,
 			NameLocalizations:        i18n.GetLocalizations("job.name"),
 			DescriptionLocalizations: i18n.GetLocalizations("job.description"),

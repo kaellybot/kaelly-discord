@@ -31,7 +31,7 @@ func (command *ConfigCommand) rssRequest(ctx context.Context, s *discordgo.Sessi
 }
 
 func (command *ConfigCommand) rssRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 
 	// TODO respond
 }

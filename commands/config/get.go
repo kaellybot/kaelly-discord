@@ -25,7 +25,7 @@ func (command *ConfigCommand) getRequest(ctx context.Context, s *discordgo.Sessi
 }
 
 func (command *ConfigCommand) getRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 
 	// TODO respond
 }

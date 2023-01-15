@@ -106,7 +106,7 @@ func (command *PosCommand) getOptions(ctx context.Context) (entities.Dimension, 
 }
 
 func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 
 	if !isAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)

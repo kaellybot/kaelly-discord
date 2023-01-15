@@ -31,7 +31,7 @@ func (command *ConfigCommand) almanaxRequest(ctx context.Context, s *discordgo.S
 }
 
 func (command *ConfigCommand) almanaxRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 
 	// TODO respond
 }

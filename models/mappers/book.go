@@ -1,7 +1,7 @@
 package mappers
 
 import (
-	"fmt"
+	"sort"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -10,6 +10,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
+	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -43,28 +44,35 @@ func MapBookJobSetRequest(userId, jobId, serverId string, level int64,
 	}
 }
 
-func MapJobBookToEmbed(jobBook *amqp.JobGetAnswer, jobService books.BookService,
+func MapJobBookToEmbed(craftsmen []constants.JobUserLevel, jobId, serverId string, jobService books.BookService,
 	serverService servers.ServerService, locale amqp.RabbitMQMessage_Language) *[]*discordgo.MessageEmbed {
 
 	lg := constants.MapAmqpLocale(locale)
 
-	job, found := jobService.GetJob(jobBook.JobId)
+	job, found := jobService.GetJob(jobId)
 	if !found {
-		log.Warn().Str(constants.LogEntity, jobBook.JobId).
+		log.Warn().Str(constants.LogEntity, jobId).
 			Msgf("Cannot find job based on ID sent internally, continuing with empty job")
-		job = entities.Job{Id: jobBook.JobId}
+		job = entities.Job{Id: jobId}
 	}
 
-	server, found := serverService.GetServer(jobBook.ServerId)
+	server, found := serverService.GetServer(serverId)
 	if !found {
-		log.Warn().Str(constants.LogEntity, jobBook.ServerId).
+		log.Warn().Str(constants.LogEntity, serverId).
 			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-		server = entities.Server{Id: jobBook.ServerId}
+		server = entities.Server{Id: serverId}
 	}
+
+	sort.SliceStable(craftsmen, func(i, j int) bool {
+		if craftsmen[i].Level == craftsmen[j].Level {
+			return craftsmen[i].Username < craftsmen[j].Username
+		}
+		return craftsmen[i].Level > craftsmen[j].Level
+	})
 
 	embed := discordgo.MessageEmbed{
-		Title:       translators.GetEntityLabel(job, lg),
-		Description: fmt.Sprintf("%v", jobBook.Craftsmen), // TODO members
+		Title:       i18n.Get(lg, "job.embed.craftsmen.title", i18n.Vars{"job": translators.GetEntityLabel(job, lg)}),
+		Description: i18n.Get(lg, "job.embed.craftsmen.description", i18n.Vars{"craftsmen": craftsmen}),
 		Color:       job.Color,
 		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: job.Icon},
 		Footer: &discordgo.MessageEmbedFooter{

@@ -33,7 +33,7 @@ func (command *JobCommand) setRequest(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *JobCommand) setRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
 		content := i18n.Get(constants.MapAmqpLocale(message.Language), "job.success")

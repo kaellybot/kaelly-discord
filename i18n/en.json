@@ -125,7 +125,13 @@
             "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
          }
       },
-      "success": "Craftsmen book updated!"
+      "success": "Craftsmen book updated!",
+      "embed": {
+          "craftsmen": {
+              "title": "{{ .job }}s list",
+              "description": "{{ if .craftsmen }}{{ range .craftsmen}}Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No craftsman found at this moment!{{ end }}"
+            }
+      }
    },
    "pos": {
       "name": "pos",

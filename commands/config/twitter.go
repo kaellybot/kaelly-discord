@@ -31,7 +31,7 @@ func (command *ConfigCommand) twitterRequest(ctx context.Context, s *discordgo.S
 }
 
 func (command *ConfigCommand) twitterRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 
 	// TODO respond
 }

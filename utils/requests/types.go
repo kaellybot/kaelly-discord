@@ -14,7 +14,7 @@ const (
 
 type RequestManager interface {
 	Request(s *discordgo.Session, i *discordgo.InteractionCreate, routingKey string,
-		message *amqp.RabbitMQMessage, callback RequestCallback) error
+		message *amqp.RabbitMQMessage, callback RequestCallback, properties ...map[string]any) error
 	Listen() error
 }
 
@@ -27,7 +27,8 @@ type discordRequest struct {
 	session     *discordgo.Session
 	interaction *discordgo.InteractionCreate
 	callback    RequestCallback
+	properties  map[string]any
 }
 
 type RequestCallback func(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage)
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any)

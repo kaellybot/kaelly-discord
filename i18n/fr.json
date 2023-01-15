@@ -125,7 +125,13 @@
               "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
            }
         },
-        "success": "L'annuaire a été mise à jour !"
+        "success": "L'annuaire a été mise à jour !",
+        "embed": {
+            "craftsmen": {
+                "title": "Liste des {{ .job }}s",
+                "description": "{{ if .craftsmen }}{{ range .craftsmen}}Niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun artisan pour le moment !{{ end }}"
+            }
+        }
      },
     "pos": {
         "name": "pos",

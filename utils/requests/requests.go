@@ -25,17 +25,24 @@ func GetBinding() amqp.Binding {
 }
 
 func (manager *RequestManagerImpl) Request(s *discordgo.Session, i *discordgo.InteractionCreate,
-	routingKey string, message *amqp.RabbitMQMessage, callback RequestCallback) error {
+	routingKey string, message *amqp.RabbitMQMessage, callback RequestCallback,
+	optionalProperties ...map[string]any) error {
 
 	err := manager.broker.Publish(message, amqp.ExchangeRequest, routingKey, i.ID)
 	if err != nil {
 		return err
 	}
 
+	properties := make(map[string]any)
+	if len(optionalProperties) > 0 {
+		properties = optionalProperties[0]
+	}
+
 	manager.requests[i.ID] = discordRequest{
 		session:     s,
 		interaction: i,
 		callback:    callback,
+		properties:  properties,
 	}
 	return nil
 }
@@ -50,6 +57,6 @@ func (manager *RequestManagerImpl) consume(ctx context.Context, message *amqp.Ra
 	if found {
 		defer panics.HandlePanic(request.session, request.interaction)
 		delete(manager.requests, correlationId)
-		request.callback(ctx, request.session, request.interaction, message)
+		request.callback(ctx, request.session, request.interaction, message, request.properties)
 	}
 }

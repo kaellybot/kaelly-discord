@@ -10,6 +10,7 @@ type Server struct {
 	DofusPortalsId      string `gorm:"unique"`
 	DofusEncyclopediaId string `gorm:"unique"`
 	Icon                string
+	Emoji               string
 	Game                constants.AnkamaGame
 	Labels              []ServerLabel `gorm:"foreignKey:ServerId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

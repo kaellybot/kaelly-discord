@@ -9,7 +9,7 @@ import (
 
 type Language struct {
 	Locale          discordgo.Locale
-	AmqpLocale      amqp.RabbitMQMessage_Language
+	AmqpLocale      amqp.Language
 	TranslationFile string
 }
 
@@ -27,32 +27,32 @@ var (
 		{
 			Locale:          discordgo.French,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, frenchFile),
-			AmqpLocale:      amqp.RabbitMQMessage_FR,
+			AmqpLocale:      amqp.Language_FR,
 		},
 		{
 			Locale:          discordgo.EnglishGB,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, englishFile),
-			AmqpLocale:      amqp.RabbitMQMessage_EN,
+			AmqpLocale:      amqp.Language_EN,
 		},
 		{
 			Locale:          discordgo.EnglishUS,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, englishFile),
-			AmqpLocale:      amqp.RabbitMQMessage_EN,
+			AmqpLocale:      amqp.Language_EN,
 		},
 	}
 )
 
-func MapDiscordLocale(locale discordgo.Locale) amqp.RabbitMQMessage_Language {
+func MapDiscordLocale(locale discordgo.Locale) amqp.Language {
 	for _, language := range Languages {
 		if language.Locale == locale {
 			return language.AmqpLocale
 		}
 	}
 
-	return amqp.RabbitMQMessage_ANY
+	return amqp.Language_ANY
 }
 
-func MapAmqpLocale(locale amqp.RabbitMQMessage_Language) discordgo.Locale {
+func MapAmqpLocale(locale amqp.Language) discordgo.Locale {
 	for _, language := range Languages {
 		if language.AmqpLocale == locale {
 			return language.Locale

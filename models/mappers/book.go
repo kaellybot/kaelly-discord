@@ -45,7 +45,7 @@ func MapBookJobSetRequest(userId, jobId, serverId string, level int64,
 }
 
 func MapJobBookToEmbed(craftsmen []constants.JobUserLevel, jobId, serverId string, jobService books.BookService,
-	serverService servers.ServerService, locale amqp.RabbitMQMessage_Language) *[]*discordgo.MessageEmbed {
+	serverService servers.ServerService, locale amqp.Language) *[]*discordgo.MessageEmbed {
 
 	lg := constants.MapAmqpLocale(locale)
 

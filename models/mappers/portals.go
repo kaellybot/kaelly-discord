@@ -24,7 +24,7 @@ func MapPortalPositionRequest(dimension entities.Dimension, server entities.Serv
 }
 
 func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.PortalService,
-	serverService servers.ServerService, locale amqp.RabbitMQMessage_Language) *discordgo.MessageEmbed {
+	serverService servers.ServerService, locale amqp.Language) *discordgo.MessageEmbed {
 
 	lg := constants.MapAmqpLocale(locale)
 	dimension, found := portalService.GetDimension(portal.DimensionId)
@@ -63,7 +63,6 @@ func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService 
 			"createdBy": portal.CreatedBy, "createdAt": portal.CreatedAt,
 			"updatedBy": portal.UpdatedBy, "updatedAt": portal.UpdatedAt,
 		})
-		
 
 		if portal.Position.ConditionalTransport != nil {
 			embed.Fields = append(embed.Fields,

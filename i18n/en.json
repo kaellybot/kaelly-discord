@@ -146,23 +146,11 @@
       },
       "embed": {
          "unknown": "No recent position found.",
-         "position": {
-            "name": ":cyclone: Position",
-            "value": "**[{{ .position.X }}, {{ .position.Y }}]**"
-         },
-         "uses": {
-            "name": ":eye: Uses",
-            "value": "{{ .uses }} uses"
-         },
-         "hunters": {
-            "name": ":cowboy: Hunters",
-            "value": "**{{ .createdBy}}** (added <t:{{ .createdAt.Seconds }}:R>){{ if .updatedBy }}\n**{{ .updatedBy }}** (updated <t:{{ .updatedAt.Seconds }}:R>){{end}}"
-         },
+         "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} uses\n\n*Added by **{{ .createdBy}}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nUpdated by **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
          "transport": {
-            "name": "{{ if .conditional }}:airplane_small:{{ else }}:airplane:{{ end}} {{ .type }} nearby",
+            "name": "{{ .emoji }} {{ .type }} nearby",
             "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
-         },
-         "footer": "Built with ❤ in partnership with {{ .source }}"
+         }
       }
    },
    "checks": {

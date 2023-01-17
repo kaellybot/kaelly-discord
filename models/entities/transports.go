@@ -3,8 +3,9 @@ package entities
 import "github.com/bwmarrin/discordgo"
 
 type TransportType struct {
-	Id             string               `gorm:"primaryKey"`
-	DofusPortalsId string               `gorm:"unique"`
+	Id             string `gorm:"primaryKey"`
+	DofusPortalsId string `gorm:"unique"`
+	Emoji          string
 	Labels         []TransportTypeLabel `gorm:"foreignKey:TransportTypeId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 

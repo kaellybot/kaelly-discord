@@ -114,7 +114,8 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 
 	embeds := make([]*discordgo.MessageEmbed, 0)
 	for _, position := range message.GetPortalPositionAnswer().GetPositions() {
-		embeds = append(embeds, mappers.MapToEmbed(position, command.portalService, message.Language))
+		embeds = append(embeds, mappers.MapToEmbed(position, command.portalService,
+			command.serverService, message.Language))
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &embeds})

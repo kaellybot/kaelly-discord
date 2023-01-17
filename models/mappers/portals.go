@@ -23,7 +23,7 @@ func MapPortalPositionRequest(dimension entities.Dimension, server entities.Serv
 	}
 }
 
-func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.PortalService,
+func MapPortalToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.PortalService,
 	serverService servers.ServerService, locale amqp.Language) *discordgo.MessageEmbed {
 
 	lg := constants.MapAmqpLocale(locale)
@@ -36,7 +36,7 @@ func MapToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService 
 
 	server, found := serverService.GetServer(portal.ServerId)
 	if !found {
-		log.Warn().Str(constants.LogEntity, portal.DimensionId).
+		log.Warn().Str(constants.LogEntity, portal.ServerId).
 			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
 		server = entities.Server{Id: portal.ServerId}
 	}

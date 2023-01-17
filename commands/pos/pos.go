@@ -114,7 +114,7 @@ func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
 
 	embeds := make([]*discordgo.MessageEmbed, 0)
 	for _, position := range message.GetPortalPositionAnswer().GetPositions() {
-		embeds = append(embeds, mappers.MapToEmbed(position, command.portalService,
+		embeds = append(embeds, mappers.MapPortalToEmbed(position, command.portalService,
 			command.serverService, message.Language))
 	}
 

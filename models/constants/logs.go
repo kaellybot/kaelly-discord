@@ -6,6 +6,8 @@ const (
 	LogCommand         = "command"
 	LogCommandOption   = "option"
 	LogGuildCount      = "guildCount"
+	LogGuildId         = "guildId"
+	LogChannelId       = "channelId"
 	LogEntity          = "entity"
 	LogInteractionType = "interactionType"
 	LogShard           = "shard"

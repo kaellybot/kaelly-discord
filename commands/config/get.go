@@ -57,15 +57,16 @@ func (command *ConfigCommand) getGuildConfigData(s *discordgo.Session,
 	}
 
 	result := constants.GuildConfig{
-		Name: guild.Name,
-		Icon: guild.IconURL(),
+		Name:     guild.Name,
+		Icon:     guild.IconURL(),
+		ServerId: answer.ServerId,
 	}
 
-	channelNames := make(map[string]string)
+	channels := make(map[string]*discordgo.Channel)
 	for _, channelServer := range answer.ChannelServers {
-		channelName, found := channelNames[channelServer.ChannelId]
+		channel, found := channels[channelServer.ChannelId]
 		if !found {
-			channel, err := s.Channel(channelServer.ChannelId)
+			discordChannel, err := s.Channel(channelServer.ChannelId)
 			if err != nil {
 				log.Warn().Err(err).
 					Str(constants.LogGuildId, answer.GuildId).
@@ -74,20 +75,20 @@ func (command *ConfigCommand) getGuildConfigData(s *discordgo.Session,
 				continue
 			}
 
-			channelNames[channel.ID] = channel.Name
-			channelName = channel.Name
+			channels[channelServer.ChannelId] = discordChannel
+			channel = discordChannel
 		}
 
 		result.ChannelServers = append(result.ChannelServers, constants.ChannelServer{
-			ChannelName: channelName,
-			ServerId:    channelServer.ServerId,
+			Channel:  channel,
+			ServerId: channelServer.ServerId,
 		})
 	}
 
 	for _, channelWebhook := range answer.ChannelWebhooks {
-		channelName, found := channelNames[channelWebhook.ChannelId]
+		channel, found := channels[channelWebhook.ChannelId]
 		if !found {
-			channel, err := s.Channel(channelWebhook.ChannelId)
+			discordChannel, err := s.Channel(channelWebhook.ChannelId)
 			if err != nil {
 				log.Warn().Err(err).
 					Str(constants.LogGuildId, answer.GuildId).
@@ -96,12 +97,12 @@ func (command *ConfigCommand) getGuildConfigData(s *discordgo.Session,
 				continue
 			}
 
-			channelNames[channel.ID] = channel.Name
-			channelName = channel.Name
+			channels[channelWebhook.ChannelId] = discordChannel
+			channel = discordChannel
 		}
 
 		result.ChannelWebhooks = append(result.ChannelWebhooks, constants.ChannelWebhook{
-			ChannelName: channelName,
+			Channel: channel,
 			// TODO
 		})
 	}

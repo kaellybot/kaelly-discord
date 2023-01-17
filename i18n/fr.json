@@ -92,7 +92,18 @@
                 "description": "Si non renseigné, le salon courant sera utilisé"
             }
         },
-        "success": "Modification prise en compte !"
+        "success": "Modification prise en compte !",
+        "embed": {
+            "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** est l'actuel serveur de la guilde !{{ else }}Aucun serveur {{ .game }} n'est lié à la guilde !{{ end }}",
+            "server": {
+                "name": "Salons liés à un serveur {{ .game }}",
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
+            },
+            "webhook": {
+                "name": ":hook: Salons notifiés",
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} : TODO\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
+            }
+        }
     },
     "job": {
         "name": "job",

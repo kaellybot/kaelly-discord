@@ -92,7 +92,18 @@
             "description": "If not filled, the current channel is used instead"
          }
       },
-      "success": "Change taken in account!"
+      "success": "Change taken in account!",
+      "embed": {
+         "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game }} server is linked to the guild!{{ end }}",
+         "server": {
+             "name": "Channels linked to {{ .game }} servers",
+             "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
+         },
+         "webhook": {
+             "name": ":hook: Notified channels",
+             "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} : TODO\n{{ end }}{{ else }}No configured channels!{{ end }}"
+         }
+     }
    },
    "job": {
       "name": "job",

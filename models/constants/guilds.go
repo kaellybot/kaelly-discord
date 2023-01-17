@@ -1,18 +1,23 @@
 package constants
 
+import (
+	"github.com/bwmarrin/discordgo"
+)
+
 type GuildConfig struct {
 	Name            string
 	Icon            string
+	ServerId        string
 	ChannelServers  []ChannelServer
 	ChannelWebhooks []ChannelWebhook
 }
 
 type ChannelServer struct {
-	ChannelName string
-	ServerId    string
+	Channel  *discordgo.Channel
+	ServerId string
 }
 
 type ChannelWebhook struct {
-	ChannelName string
+	Channel *discordgo.Channel
 	// TODO
 }

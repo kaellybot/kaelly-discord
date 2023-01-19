@@ -4,13 +4,9 @@
         "description": "Donne des informations sur Kaelly et un moyen d'obtenir de l'aide",
         "title": "{{ .name }} version {{ .version }}",
         "desc": "Bot Discord dédié au jeu {{ .game.Name }} !",
-        "invite": {
-            "title": ":electric_plug: Lien d'invitation",
-            "desc": "Je peux être invitée sur vos serveurs grâce à ce [lien]({{ .invite }}). Vous devrez avoir les droits suffisants pour effectuer l'action !"
-        },
         "support": {
             "title": ":bulb: Serveur de support",
-            "desc": "Vous rencontrez un problème quant à mon utilisation ? Une suggestion ? Une amélioration à proposer ? N'hésitez pas à rejoindre le [serveur Discord]({{ .discord }}) !"
+            "desc": "Tu rencontres un problème quant à mon utilisation ? Une suggestion ? N'hésite pas à rejoindre le [serveur Discord]({{ .discord }}) !"
         },
         "twitter": {
             "title": "<:twitter:383237199925215232> Twitter",
@@ -32,10 +28,7 @@
             "title": ":art: Visuels",
             "desc": "Visuels réalisés par la géniale [{{ .graphist.Name }}]({{ .graphist.Url }})!"
         },
-        "donors": {
-            "title": ":coin: Donateurs",
-            "desc": "{{ if .donors }}{{$first := true}}{{ range .donors}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ else }} Aucun donateur pour le moment !{{ end }}"
-        }
+        "footer": "Certaines illustrations sont la propriété d'Ankama Studio - Tous droits réservés"
     },
     "config": {
         "name": "config",

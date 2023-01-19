@@ -6,22 +6,26 @@ type AnkamaGame struct {
 	Emoji string
 }
 
+const (
+	AnkamaLogo = "https://i.imgur.com/dcqcAr2.png"
+)
+
 var (
 	AnkamaGameDofus = AnkamaGame{
 		Name:  "DOFUS",
-		Icon:  "https://static.ankama.com/dofus/ng/img/logo_dofus.jpg",
+		Icon:  "https://i.imgur.com/n3fJCSu.png",
 		Emoji: "<:dofus:1065724887525773353>",
 	}
 
 	AnkamaGameDofusTouch = AnkamaGame{
 		Name:  "DOFUS Touch",
-		Icon:  "https://static.ankama.com/dofus-touch/www/img/logo.jpg",
+		Icon:  "https://i.imgur.com/lYLm648.png",
 		Emoji: "<:dofustouch:1065724958203981944>",
 	}
 
 	AnkamaGameDofusRetro = AnkamaGame{
 		Name:  "DOFUS Retro",
-		Icon:  "https://static.ankama.com/dofus/ng/modules/mmorpg/retro/new/assets/logo.png",
+		Icon:  "https://i.imgur.com/PagFd6V.png",
 		Emoji: "<:dofusretro:1065724870392041483>",
 	}
 )

@@ -47,13 +47,12 @@ func (command *AboutCommand) getAboutEmbed(locale discordgo.Locale) *discordgo.M
 		Description: i18n.Get(locale, "about.desc", i18n.Vars{"game": constants.Game}),
 		Color:       constants.Color,
 		Image:       &discordgo.MessageEmbedImage{URL: constants.AvatarImage},
-		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.AvatarIcon},
+		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.Game.Icon},
+		Footer: &discordgo.MessageEmbedFooter{
+			Text:    i18n.Get(locale, "about.footer"),
+			IconURL: constants.AnkamaLogo,
+		},
 		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:   i18n.Get(locale, "about.invite.title"),
-				Value:  i18n.Get(locale, "about.invite.desc", i18n.Vars{"invite": constants.Invite}),
-				Inline: false,
-			},
 			{
 				Name:   i18n.Get(locale, "about.support.title"),
 				Value:  i18n.Get(locale, "about.support.desc", i18n.Vars{"discord": constants.Discord}),
@@ -82,11 +81,6 @@ func (command *AboutCommand) getAboutEmbed(locale discordgo.Locale) *discordgo.M
 			{
 				Name:   i18n.Get(locale, "about.graphist.title"),
 				Value:  i18n.Get(locale, "about.graphist.desc", i18n.Vars{"graphist": constants.Elycann}),
-				Inline: false,
-			},
-			{
-				Name:   i18n.Get(locale, "about.donors.title"),
-				Value:  i18n.Get(locale, "about.donors.desc", i18n.Vars{"donors": constants.Donors}),
 				Inline: false,
 			},
 		},

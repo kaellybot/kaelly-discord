@@ -3,7 +3,6 @@ package constants
 const (
 	Name               = "KaellyBot"
 	Version            = "2.0.0"
-	Game               = AnkamaGameDofus
 	Color              = 12543562
 	AvatarIcon         = "https://raw.githubusercontent.com/KaellyBot/Kaelly-dashboard/master/public/img/kaellyProfile.png"
 	AvatarImage        = "https://raw.githubusercontent.com/KaellyBot/Kaelly-dashboard/master/public/img/kaellyFull.png"
@@ -13,4 +12,8 @@ const (
 	Github             = "https://github.com/KaellyBot"
 	Paypal             = "https://paypal.me/kaysoro"
 	DevelopmentGuildId = "299167247279194112"
+)
+
+var (
+	Game = AnkamaGameDofus
 )

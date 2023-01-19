@@ -3,7 +3,7 @@
       "name": "about",
       "description": "Gives information about Kaelly and a way to get help",
       "title": "{{ .name }} version {{ .version }}",
-      "desc": "Discord bot dedicated to the {{ .game }} game!",
+      "desc": "Discord bot dedicated to the {{ .game.Name }} game!",
       "invite": {
          "title": ":electric_plug: Invite link",
          "desc": "I can be invited to your servers with this [link]({{ .invite }}). You will need to have sufficient rights to perform the action!"
@@ -33,13 +33,13 @@
          "desc": "Visuals made by the great [{{ .graphist.Name }}]({{ .graphist.Url }})!"
       },
       "donors": {
-         "title": ":ok_woman: Donors",
+         "title": ":coin: Donors",
          "desc": "{{ if .donors }}{{$first := true}}{{ range .donors}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ else }} No donor for now!{{ end }}"
       }
    },
    "config": {
       "name": "config",
-      "description": "Permits to configure me: {{ .game }} server, Almanax, RSS feeds or tweets sendings",
+      "description": "Permits to configure me: {{ .game.Name }} server, Almanax, RSS feeds or tweets sendings",
       "get": {
          "name": "get",
          "description": "Displays my current configuration to the Discord serveur"
@@ -70,14 +70,14 @@
       },
       "server": {
          "name": "server",
-         "description": "Links the Discord server to a {{ .game }} server",
+         "description": "Links the Discord server to a {{ .game.Name }} server",
          "server": {
             "name": "server",
-            "description": "{{ .game }} server game"
+            "description": "{{ .game.Name }} server game"
          },
          "channel": {
             "name": "channel",
-            "description": "{{ .game }} server linked to the channel will be prior to the one linked to the Discord server"
+            "description": "{{ .game.Name }} server linked to the channel will be prior to the one linked to the Discord server"
          }
       },
       "twitter": {
@@ -94,13 +94,13 @@
       },
       "success": "Change taken in account!",
       "embed": {
-         "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game }} server is linked to the guild!{{ end }}",
+         "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
          "server": {
-             "name": "Channels linked to {{ .game }} servers",
+             "name": "{{ .game.Emoji }} Channels linked to servers",
              "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
          },
          "webhook": {
-             "name": ":hook: Notified channels",
+             "name": ":bell: Notified channels",
              "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} : TODO\n{{ end }}{{ else }}No configured channels!{{ end }}"
          }
      }
@@ -117,7 +117,7 @@
          },
          "server": {
             "name": "server",
-            "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
+            "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
          }
       },
       "set": {
@@ -133,7 +133,7 @@
          },
          "server": {
             "name": "server",
-            "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
+            "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
          }
       },
       "success": "Craftsmen book updated!",
@@ -153,10 +153,10 @@
       },
       "server": {
          "name": "server",
-         "description": "{{ .game }} Server name. If not filled, the guild server is used instead"
+         "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
       },
       "embed": {
-         "unknown": "No recent position found.",
+         "unknown": "No recent position found :frowning:",
          "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} uses\n\n*Added by **{{ .createdBy}}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nUpdated by **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
          "transport": {
             "name": "{{ .emoji }} {{ .type }} nearby",
@@ -177,7 +177,7 @@
          "constraints": "The level must be between {{ .min }} and {{ .max }}! :grin:"
      },
       "server": {
-         "required": "Oops! It seems no {{ .game }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/config server` command :grin:",
+         "required": "Oops! It seems no {{ .game.Name }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/config server` command :grin:",
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
          "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
       }

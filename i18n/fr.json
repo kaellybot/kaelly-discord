@@ -3,7 +3,7 @@
         "name": "about",
         "description": "Donne des informations sur Kaelly et un moyen d'obtenir de l'aide",
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Bot Discord dédié au jeu {{ .game }} !",
+        "desc": "Bot Discord dédié au jeu {{ .game.Name }} !",
         "invite": {
             "title": ":electric_plug: Lien d'invitation",
             "desc": "Je peux être invitée sur vos serveurs grâce à ce [lien]({{ .invite }}). Vous devrez avoir les droits suffisants pour effectuer l'action !"
@@ -33,13 +33,13 @@
             "desc": "Visuels réalisés par la géniale [{{ .graphist.Name }}]({{ .graphist.Url }})!"
         },
         "donors": {
-            "title": ":ok_woman: Donateurs",
+            "title": ":coin: Donateurs",
             "desc": "{{ if .donors }}{{$first := true}}{{ range .donors}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ else }} Aucun donateur pour le moment !{{ end }}"
         }
     },
     "config": {
         "name": "config",
-        "description": "Permet de me configurer : serveur {{ .game }}, l'envoi d'Almanax, de flux RSS ou de tweets",
+        "description": "Permet de me configurer : serveur {{ .game.Name }}, l'envoi d'Almanax, de flux RSS ou de tweets",
         "get": {
             "name": "get",
             "description": "Affiche ma configuration actuelle du serveur Discord"
@@ -70,14 +70,14 @@
         },
         "server": {
             "name": "server",
-            "description": "Lie le serveur Discord à un serveur {{ .game }}",
+            "description": "Lie le serveur Discord à un serveur {{ .game.Name }}",
             "server": {
                 "name": "server",
-                "description": "Nom du serveur {{ .game }}"
+                "description": "Nom du serveur {{ .game.Name }}"
             },
             "channel": {
                 "name": "channel",
-                "description": "Le serveur {{ .game }} lié au salon sera prioritaire à celui lié au serveur Discord"
+                "description": "Le serveur {{ .game.Name }} lié au salon sera prioritaire à celui lié au serveur Discord"
             }
         },
         "twitter": {
@@ -94,13 +94,13 @@
         },
         "success": "Modification prise en compte !",
         "embed": {
-            "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** est l'actuel serveur de la guilde !{{ else }}Aucun serveur {{ .game }} n'est lié à la guilde !{{ end }}",
+            "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** est l'actuel serveur de la guilde !{{ else }}Aucun serveur {{ .game.Name }} n'est lié à la guilde !{{ end }}",
             "server": {
-                "name": "Salons liés à un serveur {{ .game }}",
+                "name": "{{ .game.Emoji }} Salons liés à un serveur",
                 "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
             },
             "webhook": {
-                "name": ":hook: Salons notifiés",
+                "name": ":bell: Salons notifiés",
                 "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} : TODO\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
             }
         }
@@ -117,7 +117,7 @@
            },
            "server": {
               "name": "server",
-              "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
+              "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
            }
         },
         "set": {
@@ -133,7 +133,7 @@
            },
            "server": {
               "name": "server",
-              "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
+              "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
            }
         },
         "success": "L'annuaire a été mise à jour !",
@@ -153,10 +153,10 @@
         },
         "server": {
             "name": "server",
-            "description": "Nom du serveur {{ .game }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
+            "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
         },
         "embed": {
-            "unknown": "Aucune position récente trouvée.",
+            "unknown": "Aucune position récente trouvée :frowning:",
             "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} utilisations\n\n*Ajoutée par **{{ .createdBy}}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nEditée par **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
             "transport": {
                 "name": "{{ .emoji }} {{ .type }} à proximité",
@@ -177,7 +177,7 @@
             "constraints": "Le niveau doit être compris entre {{ .min }} et {{ .max }} ! :grin:"
         },
         "server": {
-            "required": "Oops! Il semble qu'il n'y a pas de serveur {{ .game }} lié à ta guilde (ou au salon), utilise l'option *server* (exemple: `/pos server Djaul`) ou lie ta guilde à un serveur avec la commande `/config server` :grin:",
+            "required": "Oops! Il semble qu'il n'y a pas de serveur {{ .game.Name }} lié à ta guilde (ou au salon), utilise l'option *server* (exemple: `/pos server Djaul`) ou lie ta guilde à un serveur avec la commande `/config server` :grin:",
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun serveur que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs serveurs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Réessaie en sélectionnant un serveur de la liste :slight_smile:"
         }

@@ -86,7 +86,7 @@ func (service *DiscordServiceImpl) Shutdown() error {
 
 func (service *DiscordServiceImpl) ready(session *discordgo.Session, event *discordgo.Ready) {
 	log.Info().Int(constants.LogShard, session.ShardID).Int(constants.LogGuildCount, len(session.State.Guilds)).Msgf("Ready!")
-	session.UpdateGameStatus(0, constants.Game)
+	session.UpdateGameStatus(0, constants.Game.Name)
 }
 
 func (service *DiscordServiceImpl) messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {

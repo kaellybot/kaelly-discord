@@ -24,10 +24,7 @@ func (command *PosCommand) checkDimension(ctx context.Context, s *discordgo.Sess
 			if checkSuccess {
 				next(context.WithValue(ctx, dimensionOptionName, dimensions[0]))
 			} else {
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &response,
-				})
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
 				if err != nil {
 					log.Error().Err(err).Msg("Dimension check response ignored")
 				}
@@ -54,10 +51,7 @@ func (command *PosCommand) checkServer(ctx context.Context, s *discordgo.Session
 			if checkSuccess {
 				next(context.WithValue(ctx, serverOptionName, servers[0]))
 			} else {
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &response,
-				})
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
 				if err != nil {
 					log.Error().Err(err).Msg("Server check response ignored")
 				}
@@ -74,12 +68,9 @@ func (command *PosCommand) checkServer(ctx context.Context, s *discordgo.Session
 	}
 
 	if server == nil {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Flags:   discordgo.MessageFlagsEphemeral,
-				Content: i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game}),
-			},
+		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
+		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+			Content: &content,
 		})
 		if err != nil {
 			log.Error().Err(err).Msg("Server check response ignored")

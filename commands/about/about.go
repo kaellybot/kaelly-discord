@@ -30,11 +30,8 @@ func (command *AboutCommand) GetDiscordCommand() *constants.DiscordCommand {
 
 func (command *AboutCommand) about(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{command.getAboutEmbed(lg)},
-		},
+	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Embeds: &[]*discordgo.MessageEmbed{command.getAboutEmbed(lg)},
 	})
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle about reponse")

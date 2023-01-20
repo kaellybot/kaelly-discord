@@ -15,11 +15,6 @@ import (
 func (command *ConfigCommand) serverRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 
-	err := commands.DeferInteraction(s, i)
-	if err != nil {
-		panic(err)
-	}
-
 	server, channelId, err := command.getServerOptions(ctx)
 	if err != nil {
 		panic(err)
@@ -34,7 +29,7 @@ func (command *ConfigCommand) serverRequest(ctx context.Context, s *discordgo.Se
 
 func (command *ConfigCommand) serverRespond(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-		
+
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
 		content := i18n.Get(constants.MapAmqpLocale(message.Language), "config.success")
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{

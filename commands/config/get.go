@@ -14,13 +14,8 @@ import (
 func (command *ConfigCommand) getRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 
-	err := commands.DeferInteraction(s, i)
-	if err != nil {
-		panic(err)
-	}
-
 	msg := mappers.MapConfigurationGetRequest(i.Interaction.GuildID, lg)
-	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.getRespond)
+	err := command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.getRespond)
 	if err != nil {
 		panic(err)
 	}

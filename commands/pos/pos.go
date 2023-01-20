@@ -71,11 +71,6 @@ func (command *PosCommand) GetDiscordCommand() *constants.DiscordCommand {
 func (command *PosCommand) request(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
-	err := commands.DeferInteraction(s, i)
-	if err != nil {
-		panic(err)
-	}
-
 	dimension, server, err := command.getOptions(ctx)
 	if err != nil {
 		panic(err)

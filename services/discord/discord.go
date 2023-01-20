@@ -110,13 +110,24 @@ func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session,
 		if event.ApplicationCommandData().Name == command.Identity.Name {
 			handler, found := command.Handlers[event.Type]
 			if found {
+				if event.Interaction.Type != discordgo.InteractionApplicationCommandAutocomplete {
+					err := session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+					})
+					if err != nil {
+						panic(err)
+					}
+				}
+
 				handler(session, event, locale)
+
 			} else {
 				log.Error().
 					Str(constants.LogCommand, command.Identity.Name).
 					Uint32(constants.LogInteractionType, uint32(event.Type)).
 					Msgf("Interaction not handled, ignoring it")
 			}
+			return
 		}
 	}
 }

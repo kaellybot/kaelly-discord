@@ -15,11 +15,6 @@ import (
 func (command *JobCommand) setRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 
-	err := commands.DeferInteraction(s, i)
-	if err != nil {
-		panic(err)
-	}
-
 	job, level, server, err := command.getSetOptions(ctx)
 	if err != nil {
 		panic(err)

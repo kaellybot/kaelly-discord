@@ -22,10 +22,7 @@ func (command *ConfigCommand) checkServer(ctx context.Context, s *discordgo.Sess
 					if checkSuccess {
 						next(context.WithValue(ctx, serverOptionName, servers[0]))
 					} else {
-						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-							Type: discordgo.InteractionResponseChannelMessageWithSource,
-							Data: &response,
-						})
+						_, err := s.InteractionResponseEdit(i.Interaction, &response)
 						if err != nil {
 							log.Error().Err(err).Msg("Server check response ignored")
 						}

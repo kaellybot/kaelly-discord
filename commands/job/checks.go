@@ -25,10 +25,7 @@ func (command *JobCommand) checkJob(ctx context.Context, s *discordgo.Session,
 				if checkSuccess {
 					next(context.WithValue(ctx, jobOptionName, jobs[0]))
 				} else {
-					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseChannelMessageWithSource,
-						Data: &response,
-					})
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
 						log.Error().Err(err).Msg("Job check response ignored")
 					}
@@ -56,13 +53,10 @@ func (command *JobCommand) checkLevel(ctx context.Context, s *discordgo.Session,
 					if level >= constants.JobMinLevel && level <= constants.JobMaxLevel {
 						next(context.WithValue(ctx, levelOptionName, level))
 					} else {
-						err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-							Type: discordgo.InteractionResponseChannelMessageWithSource,
-							Data: &discordgo.InteractionResponseData{
-								Flags: discordgo.MessageFlagsEphemeral,
-								Content: i18n.Get(lg, "checks.level.constraints",
-									i18n.Vars{"min": constants.JobMinLevel, "max": constants.JobMaxLevel}),
-							},
+						content := i18n.Get(lg, "checks.level.constraints",
+							i18n.Vars{"min": constants.JobMinLevel, "max": constants.JobMaxLevel})
+						_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+							Content: &content,
 						})
 						if err != nil {
 							log.Error().Err(err).Msg("Level check response ignored")
@@ -92,10 +86,7 @@ func (command *JobCommand) checkServer(ctx context.Context, s *discordgo.Session
 				if checkSuccess {
 					next(context.WithValue(ctx, serverOptionName, servers[0]))
 				} else {
-					err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseChannelMessageWithSource,
-						Data: &response,
-					})
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
 						log.Error().Err(err).Msg("Server check response ignored")
 					}
@@ -113,12 +104,9 @@ func (command *JobCommand) checkServer(ctx context.Context, s *discordgo.Session
 	}
 
 	if server == nil {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Flags:   discordgo.MessageFlagsEphemeral,
-				Content: i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game}),
-			},
+		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
+		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+			Content: &content,
 		})
 		if err != nil {
 			log.Error().Err(err).Msg("Server check response ignored")

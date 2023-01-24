@@ -1,6 +1,5 @@
 {
     "about": {
-        "name": "about",
         "description": "Donne des informations sur Kaelly et un moyen d'obtenir de l'aide",
         "title": "{{ .name }} version {{ .version }}",
         "desc": "Bot Discord dédié au jeu {{ .game.Name }} !",
@@ -31,7 +30,6 @@
         "footer": "Certaines illustrations sont la propriété d'Ankama Studio - Tous droits réservés"
     },
     "config": {
-        "name": "config",
         "description": "Permet de me configurer : serveur {{ .game.Name }}, l'envoi d'Almanax, de flux RSS ou de tweets",
         "get": {
             "name": "get",
@@ -99,7 +97,6 @@
         }
     },
     "job": {
-        "name": "job",
         "description": "Gère l'annuaire des artisans",
         "get": {
            "name": "get",
@@ -134,11 +131,14 @@
             "craftsmen": {
                 "title": "Liste des {{ .job }}s",
                 "description": "{{ if .craftsmen }}{{ range .craftsmen}}Niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun artisan pour le moment !{{ end }}"
+            },
+            "craftsman": {
+                "title": "Métiers de {{ .username }}",
+                "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Niv. {{ .Level }}\n{{ end }}{{ else }}Aucun métier pour le moment !{{ end }}"
             }
         }
      },
     "pos": {
-        "name": "pos",
         "description": "Donne les positions de portail de dimension les plus récentes",
         "dimension": {
             "name": "dimension",

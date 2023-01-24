@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	commandName       = "job"
+	slashCommandName  = "job"
+	userCommandName   = "Jobs"
 	getSubCommandName = "get"
 	setSubCommandName = "set"
 
@@ -19,8 +20,10 @@ const (
 
 	jobRequestRoutingKey = "requests.books"
 
-	memberListLimit = 1000
+	memberListLimit    = 1000
 	craftsmenListLimit = 30
+
+	userProperty = "user"
 )
 
 var (

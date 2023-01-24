@@ -37,7 +37,7 @@ func (command *JobCommand) getRequest(ctx context.Context, s *discordgo.Session,
 		properties[member.User.ID] = username
 	}
 
-	msg := mappers.MapBookJobGetRequest(job.Id, server.Id, userIds, craftsmenListLimit, lg)
+	msg := mappers.MapBookJobGetBookRequest(job.Id, server.Id, userIds, craftsmenListLimit, lg)
 	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.getRespond, properties)
 	if err != nil {
 		panic(err)
@@ -50,7 +50,7 @@ func (command *JobCommand) getRespond(ctx context.Context, s *discordgo.Session,
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
 
 		craftsmen := make([]constants.JobUserLevel, 0)
-		for _, craftsman := range message.JobGetAnswer.Craftsmen {
+		for _, craftsman := range message.JobGetBookAnswer.Craftsmen {
 			username, found := properties[craftsman.UserId]
 			if found {
 				craftsmen = append(craftsmen, constants.JobUserLevel{
@@ -63,7 +63,7 @@ func (command *JobCommand) getRespond(ctx context.Context, s *discordgo.Session,
 		}
 
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Embeds: mappers.MapJobBookToEmbed(craftsmen, message.JobGetAnswer.JobId, message.JobGetAnswer.ServerId,
+			Embeds: mappers.MapJobBookToEmbed(craftsmen, message.JobGetBookAnswer.JobId, message.JobGetBookAnswer.ServerId,
 				command.bookService, command.serverService, message.Language),
 		})
 		if err != nil {

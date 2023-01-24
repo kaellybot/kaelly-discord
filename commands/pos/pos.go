@@ -30,7 +30,7 @@ func New(guildService guilds.GuildService, portalService portals.PortalService,
 	}
 }
 
-func (command *PosCommand) GetDiscordCommand() *constants.DiscordCommand {
+func (command *PosCommand) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     commandName,
@@ -38,7 +38,6 @@ func (command *PosCommand) GetDiscordCommand() *constants.DiscordCommand {
 			Type:                     discordgo.ChatApplicationCommand,
 			DefaultMemberPermissions: &constants.DefaultPermission,
 			DMPermission:             &constants.DMPermission,
-			NameLocalizations:        i18n.GetLocalizations("pos.name"),
 			DescriptionLocalizations: i18n.GetLocalizations("pos.description"),
 			Options: []*discordgo.ApplicationCommandOption{
 				{

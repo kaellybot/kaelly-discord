@@ -115,3 +115,24 @@ func (command *JobCommand) checkServer(ctx context.Context, s *discordgo.Session
 		next(context.WithValue(ctx, serverOptionName, *server))
 	}
 }
+
+func (command *JobCommand) checkUserServer(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+
+	server, err := command.guildService.GetServer(i.GuildID, i.ChannelID)
+	if err != nil {
+		panic(err)
+	}
+
+	if server == nil {
+		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
+		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+			Content: &content,
+		})
+		if err != nil {
+			log.Error().Err(err).Msg("Server check response ignored")
+		}
+	} else {
+		next(context.WithValue(ctx, serverOptionName, *server))
+	}
+}

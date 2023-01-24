@@ -26,15 +26,14 @@ func New(bookService books.BookService, guildService guilds.GuildService,
 	}
 }
 
-func (command *JobCommand) GetDiscordCommand() *constants.DiscordCommand {
+func (command *JobCommand) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
-			Name:                     commandName,
+			Name:                     slashCommandName,
 			Description:              i18n.Get(constants.DefaultLocale, "job.description"),
 			Type:                     discordgo.ChatApplicationCommand,
 			DefaultMemberPermissions: &constants.DefaultPermission,
 			DMPermission:             &constants.DMPermission,
-			NameLocalizations:        i18n.GetLocalizations("job.name"),
 			DescriptionLocalizations: i18n.GetLocalizations("job.description"),
 			Options: []*discordgo.ApplicationCommandOption{
 				{
@@ -105,13 +104,27 @@ func (command *JobCommand) GetDiscordCommand() *constants.DiscordCommand {
 		},
 		Handlers: constants.DiscordHandlers{
 			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkJob, command.checkLevel,
-				command.checkServer, command.request),
+				command.checkServer, command.slashRequest),
 			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
 		},
 	}
 }
 
-func (command *JobCommand) request(ctx context.Context, s *discordgo.Session,
+func (command *JobCommand) GetUserCommand() *constants.DiscordCommand {
+	return &constants.DiscordCommand{
+		Identity: discordgo.ApplicationCommand{
+			Name:                     userCommandName,
+			Type:                     discordgo.UserApplicationCommand,
+			DefaultMemberPermissions: &constants.DefaultPermission,
+			DMPermission:             &constants.DMPermission,
+		},
+		Handlers: constants.DiscordHandlers{
+			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.userRequest),
+		},
+	}
+}
+
+func (command *JobCommand) slashRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
 	for _, subCommand := range i.ApplicationCommandData().Options {
@@ -124,6 +137,12 @@ func (command *JobCommand) request(ctx context.Context, s *discordgo.Session,
 			panic(fmt.Errorf("Cannot handle subCommand %v, request ignored", subCommand.Name))
 		}
 	}
+}
+
+func (command *JobCommand) userRequest(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+
+	command.userJobRequest(ctx, s, i, lg)
 }
 
 func (command *JobCommand) getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {
@@ -157,4 +176,13 @@ func (command *JobCommand) getSetOptions(ctx context.Context) (entities.Job, int
 	}
 
 	return job, level, server, nil
+}
+
+func (command *JobCommand) getUserOptions(ctx context.Context) (entities.Server, error) {
+	server, ok := ctx.Value(serverOptionName).(entities.Server)
+	if !ok {
+		return entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+	}
+
+	return server, nil
 }

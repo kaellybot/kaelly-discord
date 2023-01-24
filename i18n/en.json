@@ -1,6 +1,5 @@
 {
    "about": {
-      "name": "about",
       "description": "Gives information about Kaelly and a way to get help",
       "title": "{{ .name }} version {{ .version }}",
       "desc": "Discord bot dedicated to the {{ .game.Name }} game!",
@@ -31,7 +30,6 @@
       "footer": "Some illustrations are the Ankama Studio property - All rights reserved"
    },
    "config": {
-      "name": "config",
       "description": "Permits to configure me: {{ .game.Name }} server, Almanax, RSS feeds or tweets sendings",
       "get": {
          "name": "get",
@@ -99,7 +97,6 @@
      }
    },
    "job": {
-      "name": "job",
       "description": "Handles the craftsmen book",
       "get": {
          "name": "get",
@@ -134,11 +131,14 @@
           "craftsmen": {
               "title": "{{ .job }}s list",
               "description": "{{ if .craftsmen }}{{ range .craftsmen}}Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No craftsman found at this moment!{{ end }}"
+            },
+            "craftsman": {
+                "title": "{{ .username }} jobs",
+                "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Lvl. {{ .Level }}\n{{ end }}{{ else }}No job for the moment!{{ end }}"
             }
       }
    },
    "pos": {
-      "name": "pos",
       "description": "Gives the most recent dimension portal positions",
       "dimension": {
          "name": "dimension",

@@ -9,18 +9,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-type DiscordService interface {
-	Listen() error
-	RegisterCommands() error
-	Shutdown() error
-}
+func New(token string, shardID, shardCount int, slashCommands []commands.SlashCommand,
+	userCommands []commands.UserCommand) (*DiscordServiceImpl, error) {
 
-type DiscordServiceImpl struct {
-	session  *discordgo.Session
-	commands []*constants.DiscordCommand
-}
-
-func New(token string, shardID, shardCount int, commands []commands.Command) (*DiscordServiceImpl, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Error().Err(err).Msgf("Connecting to Discord gateway failed")
@@ -32,8 +23,12 @@ func New(token string, shardID, shardCount int, commands []commands.Command) (*D
 		commands: make([]*constants.DiscordCommand, 0),
 	}
 
-	for _, command := range commands {
-		service.commands = append(service.commands, command.GetDiscordCommand())
+	for _, command := range slashCommands {
+		service.commands = append(service.commands, command.GetSlashCommand())
+	}
+
+	for _, command := range userCommands {
+		service.commands = append(service.commands, command.GetUserCommand())
 	}
 
 	dg.Identify.Shard = &[2]int{shardID, shardCount}
@@ -96,8 +91,9 @@ func (service *DiscordServiceImpl) messageCreate(session *discordgo.Session, eve
 func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session, event *discordgo.InteractionCreate) {
 	defer panics.HandlePanic(session, event)
 
-	if event == nil {
-		return
+	err := service.deferInteraction(session, event)
+	if err != nil {
+		panic(err)
 	}
 
 	locale := event.Locale
@@ -106,21 +102,10 @@ func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session,
 	}
 
 	for _, command := range service.commands {
-		// TODO not always ApplicationCommandData
 		if event.ApplicationCommandData().Name == command.Identity.Name {
 			handler, found := command.Handlers[event.Type]
 			if found {
-				if event.Interaction.Type != discordgo.InteractionApplicationCommandAutocomplete {
-					err := session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-					})
-					if err != nil {
-						panic(err)
-					}
-				}
-
 				handler(session, event, locale)
-
 			} else {
 				log.Error().
 					Str(constants.LogCommand, command.Identity.Name).
@@ -130,4 +115,14 @@ func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session,
 			return
 		}
 	}
+}
+
+func (service *DiscordServiceImpl) deferInteraction(session *discordgo.Session, event *discordgo.InteractionCreate) error {
+	if event.Interaction.Type != discordgo.InteractionApplicationCommandAutocomplete {
+		return session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		})
+	}
+
+	return nil
 }

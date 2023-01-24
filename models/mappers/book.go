@@ -14,17 +14,33 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MapBookJobGetRequest(jobId, serverId string, userIds []string,
+type i18nJobExperience struct {
+	Job   string
+	Level int64
+}
+
+func MapBookJobGetBookRequest(jobId, serverId string, userIds []string,
 	craftsmenListLimit int64, lg discordgo.Locale) *amqp.RabbitMQMessage {
 
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_JOB_GET_REQUEST,
+		Type:     amqp.RabbitMQMessage_JOB_GET_BOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		JobGetRequest: &amqp.JobGetRequest{
+		JobGetBookRequest: &amqp.JobGetBookRequest{
 			UserIds:  userIds,
 			JobId:    jobId,
 			ServerId: serverId,
 			Limit:    craftsmenListLimit,
+		},
+	}
+}
+
+func MapBookJobGetUserRequest(userId, serverId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_JOB_GET_USER_REQUEST,
+		Language: constants.MapDiscordLocale(lg),
+		JobGetUserRequest: &amqp.JobGetUserRequest{
+			UserId:   userId,
+			ServerId: serverId,
 		},
 	}
 }
@@ -75,6 +91,64 @@ func MapJobBookToEmbed(craftsmen []constants.JobUserLevel, jobId, serverId strin
 		Description: i18n.Get(lg, "job.embed.craftsmen.description", i18n.Vars{"craftsmen": craftsmen}),
 		Color:       job.Color,
 		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: job.Icon},
+		Footer: &discordgo.MessageEmbedFooter{
+			Text:    translators.GetEntityLabel(server, lg),
+			IconURL: server.Icon,
+		},
+	}
+
+	return &[]*discordgo.MessageEmbed{&embed}
+}
+
+func MapJobUserToEmbed(jobExperiences []*amqp.JobGetUserAnswer_JobExperience, member *discordgo.Member,
+	serverId string, jobService books.BookService, serverService servers.ServerService,
+	locale amqp.Language) *[]*discordgo.MessageEmbed {
+
+	lg := constants.MapAmqpLocale(locale)
+	server, found := serverService.GetServer(serverId)
+	if !found {
+		log.Warn().Str(constants.LogEntity, serverId).
+			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
+		server = entities.Server{Id: serverId}
+	}
+
+	i18nJobXp := make([]i18nJobExperience, 0)
+	for _, jobXp := range jobExperiences {
+		job, found := jobService.GetJob(jobXp.JobId)
+		if !found {
+			log.Warn().Str(constants.LogEntity, jobXp.JobId).
+				Msgf("Cannot find job based on ID sent internally, continuing with empty job")
+			job = entities.Job{Id: jobXp.JobId}
+		}
+
+		i18nJobXp = append(i18nJobXp, i18nJobExperience{
+			Job:   translators.GetEntityLabel(job, lg),
+			Level: jobXp.Level,
+		})
+	}
+
+	sort.SliceStable(i18nJobXp, func(i, j int) bool {
+		if i18nJobXp[i].Level == i18nJobXp[j].Level {
+			return i18nJobXp[i].Job < i18nJobXp[j].Job
+		}
+		return i18nJobXp[i].Level > i18nJobXp[j].Level
+	})
+
+	userName := member.Nick
+	if len(userName) == 0 {
+		userName = member.User.Username
+	}
+
+	userIcon := member.AvatarURL("")
+	if len(userIcon) == 0 {
+		userIcon = member.User.AvatarURL("")
+	}
+
+	embed := discordgo.MessageEmbed{
+		Title:       i18n.Get(lg, "job.embed.craftsman.title", i18n.Vars{"username": userName}),
+		Description: i18n.Get(lg, "job.embed.craftsman.description", i18n.Vars{"jobs": i18nJobXp}),
+		Color:       constants.Color,
+		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: userIcon},
 		Footer: &discordgo.MessageEmbedFooter{
 			Text:    translators.GetEntityLabel(server, lg),
 			IconURL: server.Icon,

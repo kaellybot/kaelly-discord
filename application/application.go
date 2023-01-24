@@ -1,8 +1,6 @@
 package application
 
 import (
-	"errors"
-
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/commands/about"
@@ -27,27 +25,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
-
-var (
-	ErrCannotInstantiateApp = errors.New("Cannot instantiate application")
-)
-
-type ApplicationInterface interface {
-	Run() error
-	Shutdown()
-}
-
-type Application struct {
-	db             databases.MySQLConnection
-	broker         amqp.MessageBrokerInterface
-	guildService   guilds.GuildService
-	bookService    books.BookService
-	portalService  portals.PortalService
-	serverService  servers.ServerService
-	discordService discord.DiscordService
-	commands       []commands.Command
-	requestManager requests.RequestManager
-}
 
 func New() (*Application, error) {
 	db, err := databases.New()
@@ -83,20 +60,25 @@ func New() (*Application, error) {
 
 	guildRepo := guildRepo.New(db)
 	guildService := guilds.New(guildRepo)
-
 	requestsManager := requests.New(broker)
-	commands := []commands.Command{
+
+	jobCommand := job.New(bookService, guildService, serverService, requestsManager)
+	slashCommands := []commands.SlashCommand{
 		about.New(),
 		config.New(guildService, serverService, requestsManager),
-		job.New(bookService, guildService, serverService, requestsManager),
+		jobCommand,
 		pos.New(guildService, portalService, serverService, requestsManager),
+	}
+
+	userCommands := []commands.UserCommand{
+		jobCommand,
 	}
 
 	discordService, err := discord.New(
 		viper.GetString(constants.Token),
 		viper.GetInt(constants.ShardId),
 		viper.GetInt(constants.ShardCount),
-		commands)
+		slashCommands, userCommands)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +92,8 @@ func New() (*Application, error) {
 		portalService:  portalService,
 		serverService:  serverService,
 		discordService: discordService,
-		commands:       commands,
+		slashCommands:  slashCommands,
+		userCommands:   userCommands,
 	}, nil
 }
 

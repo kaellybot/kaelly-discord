@@ -10,6 +10,10 @@ var (
 	ErrInvalidAnswerMessage = errors.New("Answer message is not valid")
 )
 
-type Command interface {
-	GetDiscordCommand() *constants.DiscordCommand
+type SlashCommand interface {
+	GetSlashCommand() *constants.DiscordCommand
+}
+
+type UserCommand interface {
+	GetUserCommand() *constants.DiscordCommand
 }

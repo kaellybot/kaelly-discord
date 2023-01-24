@@ -24,7 +24,7 @@ func New(guildService guilds.GuildService, serverService servers.ServerService,
 	}
 }
 
-func (command *ConfigCommand) GetDiscordCommand() *constants.DiscordCommand {
+func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     commandName,
@@ -32,7 +32,6 @@ func (command *ConfigCommand) GetDiscordCommand() *constants.DiscordCommand {
 			Type:                     discordgo.ChatApplicationCommand,
 			DefaultMemberPermissions: &constants.ManageServerPermission,
 			DMPermission:             &constants.DMPermission,
-			NameLocalizations:        i18n.GetLocalizations("config.name"),
 			DescriptionLocalizations: i18n.GetLocalizations("config.description", i18n.Vars{"game": constants.Game}),
 			Options: []*discordgo.ApplicationCommandOption{
 				{

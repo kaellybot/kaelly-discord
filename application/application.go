@@ -9,9 +9,11 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
+	"github.com/kaellybot/kaelly-discord/repositories/cities"
 	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
 	guildRepo "github.com/kaellybot/kaelly-discord/repositories/guilds"
 	"github.com/kaellybot/kaelly-discord/repositories/jobs"
+	"github.com/kaellybot/kaelly-discord/repositories/orders"
 	serverRepo "github.com/kaellybot/kaelly-discord/repositories/servers"
 	"github.com/kaellybot/kaelly-discord/repositories/subareas"
 	"github.com/kaellybot/kaelly-discord/repositories/transports"
@@ -53,7 +55,9 @@ func New() (*Application, error) {
 	}
 
 	jobRepo := jobs.New(db)
-	bookService, err := books.New(jobRepo)
+	cityRepo := cities.New(db)
+	orderRepo := orders.New(db)
+	bookService, err := books.New(jobRepo, cityRepo, orderRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Book Service instantiation failed, shutting down.")
 	}

@@ -4,6 +4,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/commands/about"
+	"github.com/kaellybot/kaelly-discord/commands/align"
 	"github.com/kaellybot/kaelly-discord/commands/config"
 	"github.com/kaellybot/kaelly-discord/commands/job"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
@@ -66,15 +67,18 @@ func New() (*Application, error) {
 	guildService := guilds.New(guildRepo)
 	requestsManager := requests.New(broker)
 
+	alignCommand := align.New(bookService, guildService, serverService, requestsManager)
 	jobCommand := job.New(bookService, guildService, serverService, requestsManager)
 	slashCommands := []commands.SlashCommand{
 		about.New(),
+		alignCommand,
 		config.New(guildService, serverService, requestsManager),
 		jobCommand,
 		pos.New(guildService, portalService, serverService, requestsManager),
 	}
 
 	userCommands := []commands.UserCommand{
+		alignCommand,
 		jobCommand,
 	}
 

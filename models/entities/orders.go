@@ -5,14 +5,15 @@ import "github.com/bwmarrin/discordgo"
 type Order struct {
 	Id     string `gorm:"primaryKey"`
 	Icon   string
+	Emoji  string
 	Color  int
 	Labels []OrderLabel `gorm:"foreignKey:OrderId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type OrderLabel struct {
-	Locale discordgo.Locale `gorm:"primaryKey"`
+	Locale  discordgo.Locale `gorm:"primaryKey"`
 	OrderId string           `gorm:"primaryKey"`
-	Label  string
+	Label   string
 }
 
 func (order Order) GetId() string {

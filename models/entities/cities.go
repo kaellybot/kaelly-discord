@@ -5,6 +5,7 @@ import "github.com/bwmarrin/discordgo"
 type City struct {
 	Id     string `gorm:"primaryKey"`
 	Icon   string
+	Emoji  string
 	Color  int
 	Labels []CityLabel `gorm:"foreignKey:CityId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

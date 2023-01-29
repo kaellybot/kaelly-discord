@@ -18,22 +18,22 @@ func (command *AlignCommand) checkCity(ctx context.Context, s *discordgo.Session
 
 	// Filled case, expecting [1, 1] job
 	for _, subCommand := range data.Options {
-		if subCommand.Name == setSubCommandName {
-			for _, option := range subCommand.Options {
-				if option.Name == cityOptionName {
-					cities := command.bookService.FindCities(option.StringValue(), lg)
-					response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, lg)
-					if checkSuccess {
-						next(context.WithValue(ctx, cityOptionName, cities[0]))
-					} else {
-						_, err := s.InteractionResponseEdit(i.Interaction, &response)
-						if err != nil {
-							log.Error().Err(err).Msg("City check response ignored")
-						}
+		for _, option := range subCommand.Options {
+			if option.Name == cityOptionName {
+				cities := command.bookService.FindCities(option.StringValue(), lg)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, lg)
+				if checkSuccess {
+					next(context.WithValue(ctx, cityOptionName, cities[0]))
+				} else if subCommand.Name == setSubCommandName {
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("City check response ignored")
 					}
-
-					return
+				} else {
+					next(ctx)
 				}
+
+				return
 			}
 		}
 	}
@@ -48,22 +48,22 @@ func (command *AlignCommand) checkOrder(ctx context.Context, s *discordgo.Sessio
 
 	// Filled case, expecting [1, 1] job
 	for _, subCommand := range data.Options {
-		if subCommand.Name == setSubCommandName {
-			for _, option := range subCommand.Options {
-				if option.Name == orderOptionName {
-					orders := command.bookService.FindOrders(option.StringValue(), lg)
-					response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, lg)
-					if checkSuccess {
-						next(context.WithValue(ctx, orderOptionName, orders[0]))
-					} else {
-						_, err := s.InteractionResponseEdit(i.Interaction, &response)
-						if err != nil {
-							log.Error().Err(err).Msg("Order check response ignored")
-						}
+		for _, option := range subCommand.Options {
+			if option.Name == orderOptionName {
+				orders := command.bookService.FindOrders(option.StringValue(), lg)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, lg)
+				if checkSuccess {
+					next(context.WithValue(ctx, orderOptionName, orders[0]))
+				} else if subCommand.Name == setSubCommandName {
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("Order check response ignored")
 					}
-
-					return
+				} else {
+					next(ctx)
 				}
+
+				return
 			}
 		}
 	}

@@ -46,7 +46,7 @@ func (command *AlignCommand) userRespond(ctx context.Context, s *discordgo.Sessi
 		}
 
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Embeds: mappers.MapAlignUserToEmbed(message.AlignGetUserAnswer.Beliefs, member, message.JobGetUserAnswer.ServerId,
+			Embeds: mappers.MapAlignUserToEmbed(message.AlignGetUserAnswer.Beliefs, member, message.AlignGetUserAnswer.ServerId,
 				command.bookService, command.serverService, message.Language),
 		})
 		if err != nil {

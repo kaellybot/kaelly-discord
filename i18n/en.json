@@ -29,6 +29,56 @@
       },
       "footer": "Some illustrations are the Ankama Studio property - All rights reserved"
    },
+   "align": {
+      "description": "Handles the alignment book",
+      "get": {
+         "name": "get",
+         "description": "Displays the specified city and/or order alignment book",
+         "city": {
+            "name": "city",
+            "description": "Game city"
+         },
+         "order": {
+            "name": "order",
+            "description": "Game order"
+         },
+         "server": {
+            "name": "server",
+            "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
+         }
+      },
+      "set": {
+         "name": "set",
+         "description": "Registers your alignment in the specified server alignment book",
+         "city": {
+            "name": "city",
+            "description": "Game city"
+         },
+         "order": {
+            "name": "order",
+            "description": "Game order"
+         },
+         "level": {
+            "name": "level",
+            "description": "Job level between 0 and 200. Indicate 0 to unregister"
+         },
+         "server": {
+            "name": "server",
+            "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
+         }
+      },
+      "success": "Alignment book updated!",
+      "embed": {
+          "believers": {
+              "title": "Aligned list",
+              "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }}, Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}"
+            },
+            "beliefs": {
+                "title": "{{ .username }} alignments",
+                "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }},  Lvl. {{ .Level }}\n{{ end }}{{ else }}No alignment for the moment!{{ end }}"
+            }
+      }
+   },
    "config": {
       "description": "Permits to configure me: {{ .game.Name }} server, Almanax, RSS feeds or tweets sendings",
       "get": {

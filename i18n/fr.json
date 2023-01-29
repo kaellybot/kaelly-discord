@@ -29,6 +29,56 @@
         },
         "footer": "Certaines illustrations sont la propriété d'Ankama Studio - Tous droits réservés"
     },
+    "align": {
+        "description": "Gère l'annuaire des alignés",
+        "get": {
+            "name": "get",
+            "description": "Affiche l'annuaire des alignés d'une cité et/ou d'un ordre",
+            "city": {
+                "name": "city",
+                "description": "Cité du jeu"
+            },
+            "order": {
+                "name": "order",
+                "description": "Ordre du jeu"
+            },
+            "server": {
+                "name": "server",
+                "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
+            }
+        },
+        "set": {
+            "name": "set",
+            "description": "Enregistre ton alignement dans l'annuaire du serveur spécifié",
+            "city": {
+                "name": "city",
+                "description": "Cité du jeu"
+            },
+            "order": {
+                "name": "order",
+                "description": "Ordre du jeu"
+            },
+            "level": {
+                "name": "level",
+                "description": "Niveau d'alignement compris entre 0 et 100. Indiques 0 pour être déréférencé"
+            },
+            "server": {
+                "name": "server",
+                "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
+            }
+        },
+        "success": "L'annuaire a été mise à jour !",
+        "embed": {
+            "believers": {
+                "title": "Liste des alignés",
+                "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }}, Niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun aligné pour le moment !{{ end }}"
+            },
+            "beliefs": {
+                "title": "Alignements de {{ .username }}",
+                "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }}, Niv. {{ .Level }}\n{{ end }}{{ else }}Aucun alignement pour le moment !{{ end }}"
+            }
+        }
+    },
     "config": {
         "description": "Permet de me configurer : serveur {{ .game.Name }}, l'envoi d'Almanax, de flux RSS ou de tweets",
         "get": {
@@ -99,32 +149,32 @@
     "job": {
         "description": "Gère l'annuaire des artisans",
         "get": {
-           "name": "get",
-           "description": "Affiche l'annuaire des artisans d'un métier",
-           "job": {
-              "name": "job",
-              "description": "Métier du jeu"
-           },
-           "server": {
-              "name": "server",
-              "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
-           }
+            "name": "get",
+            "description": "Affiche l'annuaire des artisans d'un métier",
+            "job": {
+                "name": "job",
+                "description": "Métier du jeu"
+            },
+            "server": {
+                "name": "server",
+                "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
+            }
         },
         "set": {
-           "name": "set",
-           "description": "Enregistre ton métier dans l'annuaire du serveur spécifié",
-           "job": {
-              "name": "job",
-              "description": "Métier du jeu"
-           },
-           "level": {
-              "name": "level",
-              "description": "Niveau du métier compris entre 0 et 200. Indiques 0 pour être déréférencé"
-           },
-           "server": {
-              "name": "server",
-              "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
-           }
+            "name": "set",
+            "description": "Enregistre ton métier dans l'annuaire du serveur spécifié",
+            "job": {
+                "name": "job",
+                "description": "Métier du jeu"
+            },
+            "level": {
+                "name": "level",
+                "description": "Niveau du métier compris entre 0 et 200. Indiques 0 pour être déréférencé"
+            },
+            "server": {
+                "name": "server",
+                "description": "Nom du serveur {{ .game.Name }}. Si non renseigné, le serveur de la guilde est utilisé à la place"
+            }
         },
         "success": "L'annuaire a été mise à jour !",
         "embed": {
@@ -137,7 +187,7 @@
                 "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Niv. {{ .Level }}\n{{ end }}{{ else }}Aucun métier pour le moment !{{ end }}"
             }
         }
-     },
+    },
     "pos": {
         "description": "Donne les positions de portail de dimension les plus récentes",
         "dimension": {

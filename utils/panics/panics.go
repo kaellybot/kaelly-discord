@@ -15,7 +15,6 @@ func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate)
 		return
 	}
 
-	// TODO not always ApplicationCommandData
 	log.Error().Str(constants.LogCommand, event.ApplicationCommandData().Name).
 		Str(constants.LogPanic, fmt.Sprintf("%v", r)).
 		Msgf("Panic occurred, sending an error message to user")

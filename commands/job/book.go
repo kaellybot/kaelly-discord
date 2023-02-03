@@ -28,7 +28,6 @@ func (command *JobCommand) getRequest(ctx context.Context, s *discordgo.Session,
 	var userIds []string
 	properties := make(map[string]any)
 	for _, member := range members {
-		member.Mention()
 		userIds = append(userIds, member.User.ID)
 		username := member.Nick
 		if len(username) == 0 {

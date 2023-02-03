@@ -15,9 +15,10 @@ import (
 )
 
 type i18nAlignmentExperience struct {
-	City  string
-	Order string
-	Level int64
+	Username string
+	City     string
+	Order    string
+	Level    int64
 }
 
 func MapBookAlignGetBookRequest(cityId, orderId, serverId string, userIds []string,
@@ -63,7 +64,7 @@ func MapBookAlignSetRequest(userId, cityId, orderId, serverId string, level int6
 	}
 }
 
-func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverId string, jobService books.BookService,
+func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverId string, alignService books.BookService,
 	serverService servers.ServerService, locale amqp.Language) *[]*discordgo.MessageEmbed {
 
 	lg := constants.MapAmqpLocale(locale)
@@ -74,18 +75,54 @@ func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverId stri
 		server = entities.Server{Id: serverId}
 	}
 
-	sort.SliceStable(believers, func(i, j int) bool {
-		if believers[i].Level == believers[j].Level {
-			return believers[i].Username < believers[j].Username
+	cityValues := make(map[string]int64)
+	i18nAlignXp := make([]i18nAlignmentExperience, 0)
+	for _, alignXp := range believers {
+		value, found := cityValues[alignXp.CityId]
+		if found {
+			cityValues[alignXp.CityId] = value + alignXp.Level
+		} else {
+			cityValues[alignXp.CityId] = alignXp.Level
 		}
-		return believers[i].Level > believers[j].Level
+
+		city, found := alignService.GetCity(alignXp.CityId)
+		if !found {
+			log.Warn().Str(constants.LogEntity, alignXp.CityId).
+				Msgf("Cannot find city based on ID sent internally, continuing with empty city")
+			city = entities.City{Id: alignXp.CityId}
+		}
+
+		order, found := alignService.GetOrder(alignXp.OrderId)
+		if !found {
+			log.Warn().Str(constants.LogEntity, alignXp.OrderId).
+				Msgf("Cannot find order based on ID sent internally, continuing with empty order")
+			order = entities.Order{Id: alignXp.OrderId}
+		}
+
+		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
+			Username: alignXp.Username,
+			City:     city.Emoji,
+			Order:    order.Emoji,
+			Level:    alignXp.Level,
+		})
+	}
+
+	sort.SliceStable(i18nAlignXp, func(i, j int) bool {
+		if i18nAlignXp[i].Level == i18nAlignXp[j].Level {
+			if i18nAlignXp[i].City == i18nAlignXp[j].City {
+				return i18nAlignXp[i].Order < i18nAlignXp[j].Order
+			}
+			return i18nAlignXp[i].City < i18nAlignXp[j].City
+		}
+		return i18nAlignXp[i].Level > i18nAlignXp[j].Level
 	})
 
+	winningCity := mapWinningCity(cityValues, alignService)
 	embed := discordgo.MessageEmbed{
 		Title:       i18n.Get(lg, "align.embed.believers.title"),
-		Description: i18n.Get(lg, "align.embed.believers.description", i18n.Vars{"believers": believers}),
-		Color:       0, // TODO EMBED color & thumbnail
-		Thumbnail:   &discordgo.MessageEmbedThumbnail{},
+		Description: i18n.Get(lg, "align.embed.believers.description", i18n.Vars{"believers": i18nAlignXp}),
+		Color:       winningCity.Color,
+		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: winningCity.Icon},
 		Footer: &discordgo.MessageEmbedFooter{
 			Text:    translators.GetEntityLabel(server, lg),
 			IconURL: server.Icon,
@@ -107,8 +144,16 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 		server = entities.Server{Id: serverId}
 	}
 
+	cityValues := make(map[string]int64)
 	i18nAlignXp := make([]i18nAlignmentExperience, 0)
 	for _, alignXp := range alignExperiences {
+		value, found := cityValues[alignXp.CityId]
+		if found {
+			cityValues[alignXp.CityId] = value + alignXp.Level
+		} else {
+			cityValues[alignXp.CityId] = alignXp.Level
+		}
+
 		city, found := alignService.GetCity(alignXp.CityId)
 		if !found {
 			log.Warn().Str(constants.LogEntity, alignXp.CityId).
@@ -124,8 +169,8 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 		}
 
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
-			City:  translators.GetEntityLabel(city, lg),
-			Order: translators.GetEntityLabel(order, lg),
+			City:  city.Emoji,
+			Order: order.Emoji,
 			Level: alignXp.Level,
 		})
 	}
@@ -150,12 +195,11 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 		userIcon = member.User.AvatarURL("")
 	}
 
-	// TODO EMBED
-
+	winningCity := mapWinningCity(cityValues, alignService)
 	embed := discordgo.MessageEmbed{
 		Title:       i18n.Get(lg, "align.embed.beliefs.title", i18n.Vars{"username": userName}),
 		Description: i18n.Get(lg, "align.embed.beliefs.description", i18n.Vars{"beliefs": i18nAlignXp}),
-		Color:       constants.Color,
+		Color:       winningCity.Color,
 		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: userIcon},
 		Footer: &discordgo.MessageEmbedFooter{
 			Text:    translators.GetEntityLabel(server, lg),
@@ -164,4 +208,26 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 	}
 
 	return &[]*discordgo.MessageEmbed{&embed}
+}
+
+func mapWinningCity(cityValues map[string]int64, alignService books.BookService) entities.City {
+	var winningCity = constants.NeutralCity
+	var winningValue int64 = 0
+	for cityId, value := range cityValues {
+		if winningValue == value {
+			winningCity = constants.NeutralCity
+		} else if winningValue < value {
+			winningValue = value
+			city, found := alignService.GetCity(cityId)
+			if !found {
+				log.Warn().Str(constants.LogEntity, cityId).
+					Msgf("Cannot find city based on ID sent internally, continuing with neutral city")
+				city = constants.NeutralCity
+			}
+
+			winningCity = city
+		}
+	}
+
+	return winningCity
 }

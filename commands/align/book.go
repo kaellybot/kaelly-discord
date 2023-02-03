@@ -28,7 +28,6 @@ func (command *AlignCommand) getRequest(ctx context.Context, s *discordgo.Sessio
 	var userIds []string
 	properties := make(map[string]any)
 	for _, member := range members {
-		member.Mention()
 		userIds = append(userIds, member.User.ID)
 		username := member.Nick
 		if len(username) == 0 {
@@ -54,6 +53,8 @@ func (command *AlignCommand) getRespond(ctx context.Context, s *discordgo.Sessio
 			username, found := properties[believer.UserId]
 			if found {
 				believers = append(believers, constants.AlignmentUserLevel{
+					CityId:   believer.CityId,
+					OrderId:  believer.OrderId,
 					Username: fmt.Sprintf("%v", username),
 					Level:    believer.Level,
 				})

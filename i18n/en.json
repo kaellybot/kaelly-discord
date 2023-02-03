@@ -71,11 +71,11 @@
       "embed": {
           "believers": {
               "title": "Aligned list",
-              "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }}, Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}"
+              "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}"
             },
             "beliefs": {
                 "title": "{{ .username }} alignments",
-                "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }},  Lvl. {{ .Level }}\n{{ end }}{{ else }}No alignment for the moment!{{ end }}"
+                "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }} lvl. {{ .Level }}\n{{ end }}{{ else }}No alignment for the moment!{{ end }}"
             }
       }
    },

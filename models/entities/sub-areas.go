@@ -1,6 +1,6 @@
 package entities
 
-import "github.com/bwmarrin/discordgo"
+import amqp "github.com/kaellybot/kaelly-amqp"
 
 type SubArea struct {
 	Id             string         `gorm:"primaryKey"`
@@ -9,8 +9,8 @@ type SubArea struct {
 }
 
 type SubAreaLabel struct {
-	Locale    discordgo.Locale `gorm:"primaryKey"`
-	SubAreaId string           `gorm:"primaryKey"`
+	Locale    amqp.Language `gorm:"primaryKey"`
+	SubAreaId string        `gorm:"primaryKey"`
 	Label     string
 }
 
@@ -18,8 +18,8 @@ func (subArea SubArea) GetId() string {
 	return subArea.Id
 }
 
-func (subArea SubArea) GetLabels() map[discordgo.Locale]string {
-	labels := make(map[discordgo.Locale]string)
+func (subArea SubArea) GetLabels() map[amqp.Language]string {
+	labels := make(map[amqp.Language]string)
 
 	for _, label := range subArea.Labels {
 		labels[label.Locale] = label.Label

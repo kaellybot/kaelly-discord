@@ -10,7 +10,7 @@ import (
 func GetEntityLabel(entity entities.LabelledEntity, locale discordgo.Locale) string {
 	labels := entity.GetLabels()
 
-	label, found := labels[locale]
+	label, found := labels[constants.MapDiscordLocale(locale)]
 	if found {
 		return label
 	}
@@ -20,7 +20,7 @@ func GetEntityLabel(entity entities.LabelledEntity, locale discordgo.Locale) str
 		Str(constants.LogLocale, string(locale)).
 		Msgf("Entity i18n value is empty, returning value based on default locale")
 
-	defaultLabel, found := labels[locale]
+	defaultLabel, found := labels[constants.MapDiscordLocale(constants.DefaultLocale)]
 	if found {
 		return defaultLabel
 	}

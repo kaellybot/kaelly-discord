@@ -1,6 +1,6 @@
 package entities
 
-import "github.com/bwmarrin/discordgo"
+import amqp "github.com/kaellybot/kaelly-amqp"
 
 type Job struct {
 	Id     string `gorm:"primaryKey"`
@@ -10,8 +10,8 @@ type Job struct {
 }
 
 type JobLabel struct {
-	Locale discordgo.Locale `gorm:"primaryKey"`
-	JobId  string           `gorm:"primaryKey"`
+	Locale amqp.Language `gorm:"primaryKey"`
+	JobId  string        `gorm:"primaryKey"`
 	Label  string
 }
 
@@ -19,8 +19,8 @@ func (job Job) GetId() string {
 	return job.Id
 }
 
-func (job Job) GetLabels() map[discordgo.Locale]string {
-	labels := make(map[discordgo.Locale]string)
+func (job Job) GetLabels() map[amqp.Language]string {
+	labels := make(map[amqp.Language]string)
 
 	for _, label := range job.Labels {
 		labels[label.Locale] = label.Label

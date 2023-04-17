@@ -1,8 +1,10 @@
 package entities
 
-import "github.com/bwmarrin/discordgo"
+import (
+	amqp "github.com/kaellybot/kaelly-amqp"
+)
 
 type LabelledEntity interface {
 	GetId() string
-	GetLabels() map[discordgo.Locale]string
+	GetLabels() map[amqp.Language]string
 }

@@ -1,6 +1,6 @@
 package entities
 
-import "github.com/bwmarrin/discordgo"
+import amqp "github.com/kaellybot/kaelly-amqp"
 
 type Order struct {
 	Id     string `gorm:"primaryKey"`
@@ -11,8 +11,8 @@ type Order struct {
 }
 
 type OrderLabel struct {
-	Locale  discordgo.Locale `gorm:"primaryKey"`
-	OrderId string           `gorm:"primaryKey"`
+	Locale  amqp.Language `gorm:"primaryKey"`
+	OrderId string        `gorm:"primaryKey"`
 	Label   string
 }
 
@@ -20,8 +20,8 @@ func (order Order) GetId() string {
 	return order.Id
 }
 
-func (order Order) GetLabels() map[discordgo.Locale]string {
-	labels := make(map[discordgo.Locale]string)
+func (order Order) GetLabels() map[amqp.Language]string {
+	labels := make(map[amqp.Language]string)
 
 	for _, label := range order.Labels {
 		labels[label.Locale] = label.Label

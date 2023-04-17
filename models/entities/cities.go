@@ -1,6 +1,6 @@
 package entities
 
-import "github.com/bwmarrin/discordgo"
+import amqp "github.com/kaellybot/kaelly-amqp"
 
 type City struct {
 	Id     string `gorm:"primaryKey"`
@@ -11,8 +11,8 @@ type City struct {
 }
 
 type CityLabel struct {
-	Locale discordgo.Locale `gorm:"primaryKey"`
-	CityId string           `gorm:"primaryKey"`
+	Locale amqp.Language `gorm:"primaryKey"`
+	CityId string        `gorm:"primaryKey"`
 	Label  string
 }
 
@@ -20,8 +20,8 @@ func (city City) GetId() string {
 	return city.Id
 }
 
-func (city City) GetLabels() map[discordgo.Locale]string {
-	labels := make(map[discordgo.Locale]string)
+func (city City) GetLabels() map[amqp.Language]string {
+	labels := make(map[amqp.Language]string)
 
 	for _, label := range city.Labels {
 		labels[label.Locale] = label.Label

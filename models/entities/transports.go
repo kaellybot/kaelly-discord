@@ -1,6 +1,8 @@
 package entities
 
-import "github.com/bwmarrin/discordgo"
+import (
+	amqp "github.com/kaellybot/kaelly-amqp"
+)
 
 type TransportType struct {
 	Id             string `gorm:"primaryKey"`
@@ -10,8 +12,8 @@ type TransportType struct {
 }
 
 type TransportTypeLabel struct {
-	Locale          discordgo.Locale `gorm:"primaryKey"`
-	TransportTypeId string           `gorm:"primaryKey"`
+	Locale          amqp.Language `gorm:"primaryKey"`
+	TransportTypeId string        `gorm:"primaryKey"`
 	Label           string
 }
 
@@ -19,8 +21,8 @@ func (transportType TransportType) GetId() string {
 	return transportType.Id
 }
 
-func (transportType TransportType) GetLabels() map[discordgo.Locale]string {
-	labels := make(map[discordgo.Locale]string)
+func (transportType TransportType) GetLabels() map[amqp.Language]string {
+	labels := make(map[amqp.Language]string)
 
 	for _, label := range transportType.Labels {
 		labels[label.Locale] = label.Label

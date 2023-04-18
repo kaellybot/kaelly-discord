@@ -29,6 +29,9 @@ const (
 	// RabbitMQ address
 	RabbitMqAddress = "RABBITMQ_ADDRESS"
 
+	// Metric port
+	MetricPort = "METRIC_PORT"
+
 	// Zerolog values from [trace, debug, info, warn, error, fatal, panic]
 	LogLevel = "LOG_LEVEL"
 
@@ -46,6 +49,7 @@ var (
 		MySqlPassword:   "",
 		MySqlDatabase:   "kaellybot",
 		RabbitMqAddress: "amqp://localhost:5672",
+		MetricPort:      2112,
 		LogLevel:        zerolog.InfoLevel.String(),
 		Production:      false,
 	}

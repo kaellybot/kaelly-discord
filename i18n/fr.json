@@ -92,6 +92,10 @@
                 "name": "enabled",
                 "description": "Active l'envoi de l'Almanax dans un salon"
             },
+            "language": {
+                "name": "language",
+                "description": "Si non renseigné, la langue du salon désigné sera utilisée"
+             },
             "channel": {
                 "name": "channel",
                 "description": "Si non renseigné, le salon courant sera utilisé"
@@ -104,6 +108,14 @@
                 "name": "enabled",
                 "description": "Active ou désactive l'envoi de flux RSS dans le salon"
             },
+            "feedtype": {
+                "name": "feed",
+                "description": "Type du flux RSS, fourni par le site web officiel"
+             },
+             "language": {
+                "name": "language",
+                "description": "Si non renseigné, la langue du salon désigné sera utilisée"
+             },
             "channel": {
                 "name": "channel",
                 "description": "Si non renseigné, le salon courant sera utilisé"
@@ -128,6 +140,10 @@
                 "name": "enabled",
                 "description": "Active ou désactive l'envoi de tweets dans le salon"
             },
+            "language": {
+                "name": "language",
+                "description": "Si non renseigné, la langue du salon désigné sera utilisée"
+             },
             "channel": {
                 "name": "channel",
                 "description": "Si non renseigné, le salon courant sera utilisé"
@@ -212,6 +228,10 @@
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucune dimension que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! Si tu veux toute les afficher, ne renseigne pas cette option :slight_smile:"
         },
+        "feed": {
+            "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun flux RSS que je connaisse ! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs flux RSS ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
+        },
         "job": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun métier que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs métiers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
@@ -225,6 +245,11 @@
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs serveurs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Réessaie en sélectionnant un serveur de la liste :slight_smile:"
         }
     },
+    "locales": {
+        "FR": "Français",
+        "EN": "Anglais",
+        "ES": "Espagnol"
+     },
     "panic": [
         "J'ai rencontré une erreur :frowning:... Cela sera étudiée et corrigée le plus tôt possible !",
         "Oops, il semble que j'ai crashé... Je reporte cet évènement à mes créateurs, désolée !"

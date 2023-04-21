@@ -92,6 +92,10 @@
             "name": "enabled",
             "description": "Enables or disables Almanax sending in the channel"
          },
+         "language": {
+            "name": "language",
+            "description": "If not filled, the specified channel language is used instead"
+         },
          "channel": {
             "name": "channel",
             "description": "If not filled, the current channel is used instead"
@@ -103,6 +107,14 @@
          "enabled": {
             "name": "enabled",
             "description": "Enables or disables RSS feeds sending in the channel"
+         },
+         "feedtype": {
+            "name": "feed",
+            "description": "Feed type desired, provided by the official website"
+         },
+         "language": {
+            "name": "language",
+            "description": "If not filled, the specified channel language is used instead"
          },
          "channel": {
             "name": "channel",
@@ -127,6 +139,10 @@
          "enabled": {
             "name": "enabled",
             "description": "Enables or disables tweets sending in the channel"
+         },
+         "language": {
+            "name": "language",
+            "description": "If not filled, the specified channel language is used instead"
          },
          "channel": {
             "name": "channel",
@@ -212,6 +228,10 @@
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
          "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
       },
+      "feed": {
+         "not_found": "Aie! '*{{ .value }}*' does not correspond to any RSS feeds I know! :pensive:",
+         "too_many": "Outch! '*{{ .value }}*' matches too many RSS feeds ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+      },
       "job": {
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any jobs I know! :pensive:",
          "too_many": "Outch! '*{{ .value }}*' matches too many jobs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
@@ -224,6 +244,11 @@
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
          "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
       }
+   },
+   "locales": {
+      "FR": "French",
+      "EN": "English",
+      "ES": "Spanish"
    },
    "panic": [
       "I have encountered an error :frowning:... This will be processed as soon as possible!",

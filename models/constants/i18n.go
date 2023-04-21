@@ -18,8 +18,9 @@ const (
 
 	frenchFile  = "fr.json"
 	englishFile = "en.json"
+	spanishFile = "es.json"
 
-	DefaultLocale = discordgo.EnglishUS
+	DefaultLocale = discordgo.EnglishGB
 )
 
 var (
@@ -38,6 +39,11 @@ var (
 			Locale:          discordgo.EnglishUS,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, englishFile),
 			AmqpLocale:      amqp.Language_EN,
+		},
+		{
+			Locale:          discordgo.SpanishES,
+			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, spanishFile),
+			AmqpLocale:      amqp.Language_ES,
 		},
 	}
 )

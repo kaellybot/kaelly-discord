@@ -12,25 +12,33 @@ func (command *ConfigCommand) autocomplete(s *discordgo.Session, i *discordgo.In
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
 
 	for _, subCommand := range data.Options {
-		if subCommand.Name == serverSubCommandName {
-			for _, option := range subCommand.Options {
-				if option.Focused {
-					switch option.Name {
-					case serverOptionName:
-						servers := command.serverService.FindServers(option.StringValue(), lg)
+		for _, option := range subCommand.Options {
+			if option.Focused {
+				switch option.Name {
+				case serverOptionName:
+					servers := command.serverService.FindServers(option.StringValue(), lg)
 
-						for _, server := range servers {
-							label := translators.GetEntityLabel(server, lg)
-							choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-								Name:  label,
-								Value: label,
-							})
-						}
-					default:
-						log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
+					for _, server := range servers {
+						label := translators.GetEntityLabel(server, lg)
+						choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+							Name:  label,
+							Value: label,
+						})
 					}
-					break
+				case feedTypeOptionName:
+					feedTypes := command.feedService.FindFeedTypes(option.StringValue(), lg)
+
+					for _, feedType := range feedTypes {
+						label := translators.GetEntityLabel(feedType, lg)
+						choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+							Name:  label,
+							Value: label,
+						})
+					}
+				default:
+					log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
 				}
+				break
 			}
 		}
 	}

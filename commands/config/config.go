@@ -7,18 +7,21 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
-func New(guildService guilds.GuildService, serverService servers.ServerService,
-	requestManager requests.RequestManager) *ConfigCommand {
+func New(guildService guilds.GuildService, feedService feeds.FeedService,
+	serverService servers.ServerService, requestManager requests.RequestManager) *ConfigCommand {
 
 	return &ConfigCommand{
 		guildService:   guildService,
+		feedService:    feedService,
 		serverService:  serverService,
 		requestManager: requestManager,
 	}
@@ -57,6 +60,15 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 							Required:                 true,
 						},
 						{
+							Name:                     languageOptionName,
+							Description:              i18n.Get(constants.DefaultLocale, "config.almanax.language.description"),
+							NameLocalizations:        *i18n.GetLocalizations("config.almanax.language.name"),
+							DescriptionLocalizations: *i18n.GetLocalizations("config.almanax.language.description"),
+							Type:                     discordgo.ApplicationCommandOptionString,
+							Required:                 false,
+							Choices:                  translators.GetLocalChoices(),
+						},
+						{
 							Name:                     channelOptionName,
 							Description:              i18n.Get(constants.DefaultLocale, "config.almanax.channel.description"),
 							NameLocalizations:        *i18n.GetLocalizations("config.almanax.channel.name"),
@@ -80,6 +92,24 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 							DescriptionLocalizations: *i18n.GetLocalizations("config.rss.enabled.description"),
 							Type:                     discordgo.ApplicationCommandOptionBoolean,
 							Required:                 true,
+						},
+						{
+							Name:                     feedTypeOptionName,
+							Description:              i18n.Get(constants.DefaultLocale, "config.rss.feedtype.description"),
+							NameLocalizations:        *i18n.GetLocalizations("config.rss.feedtype.name"),
+							DescriptionLocalizations: *i18n.GetLocalizations("config.rss.feedtype.description"),
+							Type:                     discordgo.ApplicationCommandOptionString,
+							Required:                 true,
+							Autocomplete:             true,
+						},
+						{
+							Name:                     languageOptionName,
+							Description:              i18n.Get(constants.DefaultLocale, "config.rss.language.description"),
+							NameLocalizations:        *i18n.GetLocalizations("config.rss.language.name"),
+							DescriptionLocalizations: *i18n.GetLocalizations("config.rss.language.description"),
+							Type:                     discordgo.ApplicationCommandOptionString,
+							Required:                 false,
+							Choices:                  translators.GetLocalChoices(),
 						},
 						{
 							Name:                     channelOptionName,
@@ -133,6 +163,15 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 							Required:                 true,
 						},
 						{
+							Name:                     languageOptionName,
+							Description:              i18n.Get(constants.DefaultLocale, "config.twitter.language.description"),
+							NameLocalizations:        *i18n.GetLocalizations("config.twitter.language.name"),
+							DescriptionLocalizations: *i18n.GetLocalizations("config.twitter.language.description"),
+							Type:                     discordgo.ApplicationCommandOptionString,
+							Required:                 false,
+							Choices:                  translators.GetLocalChoices(),
+						},
+						{
 							Name:                     channelOptionName,
 							Description:              i18n.Get(constants.DefaultLocale, "config.twitter.channel.description"),
 							NameLocalizations:        *i18n.GetLocalizations("config.twitter.channel.name"),
@@ -145,7 +184,8 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 			},
 		},
 		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkServer, command.checkChannelId, command.request),
+			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.checkEnabled,
+				command.checkFeedType, command.checkLanguage, command.checkChannelId, command.request),
 			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
 		},
 	}

@@ -16,7 +16,7 @@ func (command *AlignCommand) checkCity(ctx context.Context, s *discordgo.Session
 
 	data := i.ApplicationCommandData()
 
-	// Filled case, expecting [1, 1] job
+	// Filled case, expecting [1, 1] city
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == cityOptionName {
@@ -46,7 +46,7 @@ func (command *AlignCommand) checkOrder(ctx context.Context, s *discordgo.Sessio
 
 	data := i.ApplicationCommandData()
 
-	// Filled case, expecting [1, 1] job
+	// Filled case, expecting [1, 1] order
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == orderOptionName {

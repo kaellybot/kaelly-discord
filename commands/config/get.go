@@ -96,12 +96,14 @@ func (command *ConfigCommand) getGuildConfigData(s *discordgo.Session,
 			channel = discordChannel
 		}
 
-		result.AlmanaxWebhooks = append(result.AlmanaxWebhooks, constants.AlmanaxWebhook{
-			ChannelWebhook: constants.ChannelWebhook{
-				Channel: channel,
-				Locale:  webhook.Language,
-			},
-		})
+		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
+			result.AlmanaxWebhooks = append(result.AlmanaxWebhooks, constants.AlmanaxWebhook{
+				ChannelWebhook: constants.ChannelWebhook{
+					Channel: channel,
+					Locale:  webhook.Language,
+				},
+			})
+		}
 	}
 
 	for _, webhook := range answer.RssWebhooks {
@@ -120,13 +122,15 @@ func (command *ConfigCommand) getGuildConfigData(s *discordgo.Session,
 			channel = discordChannel
 		}
 
-		result.RssWebhooks = append(result.RssWebhooks, constants.RssWebhook{
-			ChannelWebhook: constants.ChannelWebhook{
-				Channel: channel,
-				Locale:  webhook.Language,
-			},
-			FeedId: webhook.FeedId,
-		})
+		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
+			result.RssWebhooks = append(result.RssWebhooks, constants.RssWebhook{
+				ChannelWebhook: constants.ChannelWebhook{
+					Channel: channel,
+					Locale:  webhook.Language,
+				},
+				FeedId: webhook.FeedId,
+			})
+		}
 	}
 
 	for _, webhook := range answer.TwitterWebhooks {
@@ -145,14 +149,25 @@ func (command *ConfigCommand) getGuildConfigData(s *discordgo.Session,
 			channel = discordChannel
 		}
 
-		result.TwitterWebhooks = append(result.TwitterWebhooks, constants.TwitterWebhook{
-			ChannelWebhook: constants.ChannelWebhook{
-				Channel: channel,
-				Locale:  webhook.Language,
-			},
-			TwitterName: webhook.Name,
-		})
+		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
+			result.TwitterWebhooks = append(result.TwitterWebhooks, constants.TwitterWebhook{
+				ChannelWebhook: constants.ChannelWebhook{
+					Channel: channel,
+					Locale:  webhook.Language,
+				},
+				TwitterName: webhook.Name,
+			})
+		}
 	}
 
 	return result, nil
+}
+
+func webhookExists(s *discordgo.Session, webhookID, channelID, guildID string) bool {
+	webhook, err := s.Webhook(webhookID)
+	if err != nil {
+		return false
+	}
+
+	return webhook.ChannelID == channelID && webhook.GuildID == guildID
 }

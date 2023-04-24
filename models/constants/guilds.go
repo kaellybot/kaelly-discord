@@ -36,4 +36,5 @@ type RssWebhook struct {
 
 type TwitterWebhook struct {
 	ChannelWebhook
+	TwitterName string
 }

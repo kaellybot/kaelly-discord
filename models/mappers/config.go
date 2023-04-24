@@ -218,8 +218,7 @@ func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, lg discordgo.
 		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
 			Channel: webhook.Channel.Mention(),
 			Provider: i18nProvider{
-				// TODO provide official name
-				Name:  i18n.Get(lg, "webhooks.TWITTER.name"),
+				Name:  webhook.TwitterName,
 				Emoji: i18n.Get(lg, "webhooks.TWITTER.emoji"),
 			},
 			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),

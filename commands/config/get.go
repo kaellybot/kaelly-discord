@@ -150,6 +150,7 @@ func (command *ConfigCommand) getGuildConfigData(s *discordgo.Session,
 				Channel: channel,
 				Locale:  webhook.Language,
 			},
+			TwitterName: webhook.Name,
 		})
 	}
 

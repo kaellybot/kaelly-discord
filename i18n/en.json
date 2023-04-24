@@ -69,14 +69,14 @@
       },
       "success": "Alignment book updated!",
       "embed": {
-          "believers": {
-              "title": "Aligned list",
-              "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}"
-            },
-            "beliefs": {
-                "title": "{{ .username }} alignments",
-                "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }} lvl. {{ .Level }}\n{{ end }}{{ else }}No alignment for the moment!{{ end }}"
-            }
+         "believers": {
+            "title": "Aligned list",
+            "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}"
+         },
+         "beliefs": {
+            "title": "{{ .username }} alignments",
+            "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }} lvl. {{ .Level }}\n{{ end }}{{ else }}No alignment for the moment!{{ end }}"
+         }
       }
    },
    "config": {
@@ -153,14 +153,14 @@
       "embed": {
          "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
          "server": {
-             "name": "{{ .game.Emoji }} Channels linked to servers",
-             "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
+            "name": "{{ .game.Emoji }} Channels linked to servers",
+            "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
          },
          "webhook": {
-             "name": ":bell: Notified channels",
-             "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}** ({{.Language}})\n{{ end }}{{ else }}No configured channels!{{ end }}"
+            "name": ":bell: Notified channels",
+            "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}** ({{.Language}})\n{{ end }}{{ else }}No configured channels!{{ end }}"
          }
-     }
+      }
    },
    "job": {
       "description": "Handles the craftsmen book",
@@ -194,14 +194,14 @@
       },
       "success": "Craftsmen book updated!",
       "embed": {
-          "craftsmen": {
-              "title": "{{ .job }}s list",
-              "description": "{{ if .craftsmen }}{{ range .craftsmen}}Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No craftsman found at this moment!{{ end }}"
-            },
-            "craftsman": {
-                "title": "{{ .username }} jobs",
-                "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Lvl. {{ .Level }}\n{{ end }}{{ else }}No job for the moment!{{ end }}"
-            }
+         "craftsmen": {
+            "title": "{{ .job }}s list",
+            "description": "{{ if .craftsmen }}{{ range .craftsmen}}Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No craftsman found at this moment!{{ end }}"
+         },
+         "craftsman": {
+            "title": "{{ .username }} jobs",
+            "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Lvl. {{ .Level }}\n{{ end }}{{ else }}No job for the moment!{{ end }}"
+         }
       }
    },
    "pos": {
@@ -238,15 +238,15 @@
       },
       "level": {
          "constraints": "The level must be between {{ .min }} and {{ .max }}! :grin:"
-     },
+      },
       "server": {
          "required": "Oops! It seems no {{ .game.Name }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/config server` command :grin:",
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
          "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
       },
-      "permission":{
+      "permission": {
          "webhook": "I don't have the right to manage webhooks! Sorry I can't do anything more without this permission :("
-     }
+      }
    },
    "locales": {
       "FR": {
@@ -264,13 +264,13 @@
    },
    "webhooks": {
       "ALMANAX": {
-          "name": "Almanax",
-          "emoji": "<:almanax:1100067553830768682>"
-       },
-       "RSS": {
-          "name": "RSS",
-          "emoji": "<:rss:1100040212136071269>"
-       },
+         "name": "Almanax",
+         "emoji": "<:almanax:1100067553830768682>"
+      },
+      "RSS": {
+         "name": "RSS",
+         "emoji": "<:rss:1100040212136071269>"
+      },
       "TWITTER": {
          "name": "Twitter",
          "emoji": "<:twitter:1100040368445206619>"

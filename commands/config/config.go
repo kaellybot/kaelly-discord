@@ -185,8 +185,8 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 			},
 		},
 		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkWebhookPermission, command.checkServer,
-				command.checkEnabled, command.checkFeedType, command.checkLanguage, command.checkChannelId, command.request),
+			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.checkEnabled,
+				command.checkFeedType, command.checkLanguage, command.checkChannelId, command.request),
 			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
 		},
 	}

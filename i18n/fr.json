@@ -95,7 +95,7 @@
             "language": {
                 "name": "language",
                 "description": "Si non renseigné, la langue du serveur sera utilisée"
-             },
+            },
             "channel": {
                 "name": "channel",
                 "description": "Si non renseigné, le salon courant sera utilisé"
@@ -111,11 +111,11 @@
             "feedtype": {
                 "name": "feed",
                 "description": "Type du flux RSS, fourni par le site web officiel"
-             },
-             "language": {
+            },
+            "language": {
                 "name": "language",
                 "description": "Si non renseigné, la langue du serveur sera utilisée"
-             },
+            },
             "channel": {
                 "name": "channel",
                 "description": "Si non renseigné, le salon courant sera utilisé"
@@ -143,7 +143,7 @@
             "language": {
                 "name": "language",
                 "description": "Si non renseigné, la langue du serveur sera utilisée"
-             },
+            },
             "channel": {
                 "name": "channel",
                 "description": "Si non renseigné, le salon courant sera utilisé"
@@ -244,38 +244,38 @@
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun serveur que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs serveurs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Réessaie en sélectionnant un serveur de la liste :slight_smile:"
         },
-        "permissions":{
-            "webhook": "Je n'ai pas le droit de gérer les webhooks ! Désolée je ne peux pas continuer plus loin sans ça :("
+        "permissions": {
+            "webhook": "Je n'ai pas le droit de gérer les webhooks ! Désolée je ne peux pas aller plus loin sans cette permission :("
         }
     },
     "locales": {
         "FR": {
-           "name": "Français",
-           "emoji": ":flag_fr:"
+            "name": "Français",
+            "emoji": ":flag_fr:"
         },
         "EN": {
-           "name": "Anglais",
-           "emoji": ":flag_gb:"
+            "name": "Anglais",
+            "emoji": ":flag_gb:"
         },
         "ES": {
-           "name": "Espagnol",
-           "emoji": ":flag_es:"
+            "name": "Espagnol",
+            "emoji": ":flag_es:"
         }
-     },
-     "webhooks": {
+    },
+    "webhooks": {
         "ALMANAX": {
             "name": "Almanax",
             "emoji": "<:almanax:1100067553830768682>"
-         },
-         "RSS": {
+        },
+        "RSS": {
             "name": "RSS",
             "emoji": "<:rss:1100040212136071269>"
-         },
+        },
         "TWITTER": {
-           "name": "Twitter",
-           "emoji": "<:twitter:1100040368445206619>"
+            "name": "Twitter",
+            "emoji": "<:twitter:1100040368445206619>"
         }
-     },
+    },
     "panic": [
         "J'ai rencontré une erreur :frowning:... Cela sera étudiée et corrigée le plus tôt possible !",
         "Oops, il semble que j'ai crashé... Je reporte cet évènement à mes créateurs, désolée !"

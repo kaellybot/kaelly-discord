@@ -11,13 +11,18 @@ import (
 func (command *ConfigCommand) almanaxRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 
-	channelId, enabled, err := command.getWebhookOptions(ctx)
+	channelId, enabled, locale, err := command.getWebhookAlmanaxOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapConfigurationWebhookRequest(i.Interaction.GuildID, channelId,
-		enabled, amqp.ConfigurationSetRequest_WebhookField_ALMANAX, lg)
+	webhook, err := command.createWebhook(s, channelId)
+	if err != nil {
+		panic(err)
+		// TODO
+	}
+
+	msg := mappers.MapConfigurationWebhookAlmanaxRequest(webhook, enabled, locale, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.almanaxRespond)
 	if err != nil {
 		panic(err)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
@@ -212,6 +213,10 @@ func (command *ConfigCommand) request(ctx context.Context, s *discordgo.Session,
 	}
 }
 
+func (command *ConfigCommand) createWebhook(s *discordgo.Session, channelId string) (*discordgo.Webhook, error) {
+	return s.WebhookCreate(channelId, constants.Name, constants.AvatarIcon)
+}
+
 func (command *ConfigCommand) getServerOptions(ctx context.Context) (entities.Server, string, error) {
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
@@ -229,16 +234,64 @@ func (command *ConfigCommand) getServerOptions(ctx context.Context) (entities.Se
 	return server, channelId, nil
 }
 
-func (command *ConfigCommand) getWebhookOptions(ctx context.Context) (string, bool, error) {
+func (command *ConfigCommand) getWebhookAlmanaxOptions(ctx context.Context) (string, bool, amqp.Language, error) {
 	channelId, ok := ctx.Value(channelOptionName).(string)
 	if !ok {
-		return "", false, fmt.Errorf("Cannot cast %v as string", ctx.Value(channelOptionName))
+		return "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as string", ctx.Value(channelOptionName))
 	}
 
 	enabled, ok := ctx.Value(enabledOptionName).(bool)
 	if !ok {
-		return "", false, fmt.Errorf("Cannot cast %v as bool", ctx.Value(enabledOptionName))
+		return "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(enabledOptionName))
 	}
 
-	return channelId, enabled, nil
+	locale, ok := ctx.Value(languageOptionName).(amqp.Language)
+	if !ok {
+		return "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(languageOptionName))
+	}
+
+	return channelId, enabled, locale, nil
+}
+
+func (command *ConfigCommand) getWebhookTwitterOptions(ctx context.Context) (string, bool, amqp.Language, error) {
+	channelId, ok := ctx.Value(channelOptionName).(string)
+	if !ok {
+		return "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as string", ctx.Value(channelOptionName))
+	}
+
+	enabled, ok := ctx.Value(enabledOptionName).(bool)
+	if !ok {
+		return "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(enabledOptionName))
+	}
+
+	locale, ok := ctx.Value(languageOptionName).(amqp.Language)
+	if !ok {
+		return "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(languageOptionName))
+	}
+
+	return channelId, enabled, locale, nil
+}
+
+func (command *ConfigCommand) getWebhookRssOptions(ctx context.Context) (string, string, bool, amqp.Language, error) {
+	channelId, ok := ctx.Value(channelOptionName).(string)
+	if !ok {
+		return "", "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as string", ctx.Value(channelOptionName))
+	}
+
+	feedId, ok := ctx.Value(feedTypeOptionName).(string)
+	if !ok {
+		return "", "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as string", ctx.Value(feedTypeOptionName))
+	}
+
+	enabled, ok := ctx.Value(enabledOptionName).(bool)
+	if !ok {
+		return "", "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(enabledOptionName))
+	}
+
+	locale, ok := ctx.Value(languageOptionName).(amqp.Language)
+	if !ok {
+		return "", "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(languageOptionName))
+	}
+
+	return channelId, feedId, enabled, locale, nil
 }

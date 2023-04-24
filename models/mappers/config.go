@@ -1,10 +1,13 @@
 package mappers
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -23,9 +26,13 @@ type i18nServer struct {
 
 type i18nChannelWebhook struct {
 	Channel  string
-	Provider string
 	Language string
-	// TODO
+	Provider i18nProvider
+}
+
+type i18nProvider struct {
+	Name  string
+	Emoji string
 }
 
 func MapConfigurationGetRequest(guildId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
@@ -40,42 +47,70 @@ func MapConfigurationGetRequest(guildId string, lg discordgo.Locale) *amqp.Rabbi
 
 func MapConfigurationServerRequest(guildId, channelId, serverId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_REQUEST,
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_SERVER_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		ConfigurationSetRequest: &amqp.ConfigurationSetRequest{
+		ConfigurationSetServerRequest: &amqp.ConfigurationSetServerRequest{
 			GuildId:   guildId,
 			ChannelId: channelId,
-			Field:     amqp.ConfigurationSetRequest_SERVER,
-			ServerField: &amqp.ConfigurationSetRequest_ServerField{
-				ServerId: serverId,
-			},
+			ServerId:  serverId,
 		},
 	}
 }
 
-func MapConfigurationWebhookRequest(guildId, channelId string, enabled bool,
-	provider amqp.ConfigurationSetRequest_WebhookField_Provider, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, enabled bool,
+	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
 
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_REQUEST,
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		ConfigurationSetRequest: &amqp.ConfigurationSetRequest{
-			GuildId:   guildId,
-			ChannelId: channelId,
-			Field:     amqp.ConfigurationSetRequest_WEBHOOK,
-			WebhookField: &amqp.ConfigurationSetRequest_WebhookField{
-				// TODO Webhook id & token
-				WebhookId:    "",
-				WebhookToken: "",
-				Enabled:      enabled,
-				Provider:     provider,
-			},
+		ConfigurationSetAlmanaxWebhookRequest: &amqp.ConfigurationSetAlmanaxWebhookRequest{
+			GuildId:      webhook.GuildID,
+			ChannelId:    webhook.ChannelID,
+			WebhookId:    webhook.ID,
+			WebhookToken: webhook.Token,
+			Enabled:      enabled,
+			Language:     locale,
+		},
+	}
+}
+
+func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, feedId string, enabled bool,
+	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
+
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST,
+		Language: constants.MapDiscordLocale(lg),
+		ConfigurationSetRssWebhookRequest: &amqp.ConfigurationSetRssWebhookRequest{
+			GuildId:      webhook.GuildID,
+			ChannelId:    webhook.ChannelID,
+			FeedId:       feedId,
+			WebhookId:    webhook.ID,
+			WebhookToken: webhook.Token,
+			Enabled:      enabled,
+			Language:     locale,
+		},
+	}
+}
+
+func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, enabled bool,
+	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
+
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST,
+		Language: constants.MapDiscordLocale(lg),
+		ConfigurationSetTwitterWebhookRequest: &amqp.ConfigurationSetTwitterWebhookRequest{
+			GuildId:      webhook.GuildID,
+			ChannelId:    webhook.ChannelID,
+			WebhookId:    webhook.ID,
+			WebhookToken: webhook.Token,
+			Enabled:      enabled,
+			Language:     locale,
 		},
 	}
 }
 
 func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.ServerService,
-	locale amqp.Language) *discordgo.MessageEmbed {
+	feedService feeds.FeedService, locale amqp.Language) *discordgo.MessageEmbed {
 
 	lg := constants.MapAmqpLocale(locale)
 
@@ -113,12 +148,9 @@ func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.ServerS
 	}
 
 	channelWebhooks := make([]i18nChannelWebhook, 0)
-	for _, channelWebhook := range guild.ChannelWebhooks {
-		channelWebhooks = append(channelWebhooks, i18nChannelWebhook{
-			Channel: channelWebhook.Channel.Mention(),
-			// TODO webhook
-		})
-	}
+	channelWebhooks = append(channelWebhooks, mapAlmanaxWebhooksToI18n(guild.AlmanaxWebhooks, lg)...)
+	channelWebhooks = append(channelWebhooks, mapRssWebhooksToI18n(guild.RssWebhooks, feedService, lg)...)
+	channelWebhooks = append(channelWebhooks, mapTwitterWebhooksToI18n(guild.TwitterWebhooks, lg)...)
 
 	return &discordgo.MessageEmbed{
 		Title:       guild.Name,
@@ -138,4 +170,60 @@ func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.ServerS
 			},
 		},
 	}
+}
+
+func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, lg discordgo.Locale) []i18nChannelWebhook {
+	i18nWebhooks := make([]i18nChannelWebhook, 0)
+	for _, webhook := range webhooks {
+		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
+			Channel: webhook.Channel.Mention(),
+			Provider: i18nProvider{
+				Name:  i18n.Get(lg, "webhooks.ALMANAX.name"),
+				Emoji: i18n.Get(lg, "webhooks.ALMANAX.emoji"),
+			},
+			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
+		})
+	}
+	return i18nWebhooks
+}
+
+func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.FeedService, lg discordgo.Locale) []i18nChannelWebhook {
+	i18nWebhooks := make([]i18nChannelWebhook, 0)
+	for _, webhook := range webhooks {
+		var providerName string
+		feeds := feedService.FindFeedTypes(webhook.FeedId, lg)
+		if len(feeds) == 1 {
+			providerName = translators.GetEntityLabel(feeds[0], lg)
+		} else {
+			log.Warn().Str(constants.LogEntity, webhook.FeedId).
+				Msgf("Cannot find feed type based on ID sent internally, continuing with default feed label")
+			providerName = i18n.Get(lg, "webhooks.RSS.name")
+		}
+
+		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
+			Channel: webhook.Channel.Mention(),
+			Provider: i18nProvider{
+				Name:  providerName,
+				Emoji: i18n.Get(lg, "webhooks.RSS.emoji"),
+			},
+			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
+		})
+	}
+	return i18nWebhooks
+}
+
+func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, lg discordgo.Locale) []i18nChannelWebhook {
+	i18nWebhooks := make([]i18nChannelWebhook, 0)
+	for _, webhook := range webhooks {
+		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
+			Channel: webhook.Channel.Mention(),
+			Provider: i18nProvider{
+				// TODO provide official name
+				Name:  i18n.Get(lg, "webhooks.TWITTER.name"),
+				Emoji: i18n.Get(lg, "webhooks.TWITTER.emoji"),
+			},
+			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
+		})
+	}
+	return i18nWebhooks
 }

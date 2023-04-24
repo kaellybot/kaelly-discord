@@ -158,7 +158,7 @@
             },
             "webhook": {
                 "name": ":bell: Salons notifiés",
-                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} : TODO\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}** ({{.Language}})\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
             }
         }
     },
@@ -246,9 +246,32 @@
         }
     },
     "locales": {
-        "FR": "Français",
-        "EN": "Anglais",
-        "ES": "Espagnol"
+        "FR": {
+           "name": "Français",
+           "emoji": ":flag_fr:"
+        },
+        "EN": {
+           "name": "Anglais",
+           "emoji": ":flag_gb:"
+        },
+        "ES": {
+           "name": "Espagnol",
+           "emoji": ":flag_es:"
+        }
+     },
+     "webhooks": {
+        "ALMANAX": {
+            "name": "Almanax",
+            "emoji": "<:almanax:1100067553830768682>"
+         },
+         "RSS": {
+            "name": "RSS",
+            "emoji": "<:rss:1100040212136071269>"
+         },
+        "TWITTER": {
+           "name": "Twitter",
+           "emoji": "<:twitter:1100040368445206619>"
+        }
      },
     "panic": [
         "J'ai rencontré une erreur :frowning:... Cela sera étudiée et corrigée le plus tôt possible !",

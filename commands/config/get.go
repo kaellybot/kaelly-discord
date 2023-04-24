@@ -32,7 +32,7 @@ func (command *ConfigCommand) getRespond(ctx context.Context, s *discordgo.Sessi
 
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Embeds: &[]*discordgo.MessageEmbed{
-				mappers.MapConfigToEmbed(guild, command.serverService, message.Language),
+				mappers.MapConfigToEmbed(guild, command.serverService, command.feedService, message.Language),
 			},
 		})
 		if err != nil {
@@ -80,25 +80,76 @@ func (command *ConfigCommand) getGuildConfigData(s *discordgo.Session,
 		})
 	}
 
-	for _, channelWebhook := range answer.ChannelWebhooks {
-		channel, found := channels[channelWebhook.ChannelId]
+	for _, webhook := range answer.AlmanaxWebhooks {
+		channel, found := channels[webhook.ChannelId]
 		if !found {
-			discordChannel, err := s.Channel(channelWebhook.ChannelId)
+			discordChannel, err := s.Channel(webhook.ChannelId)
 			if err != nil {
 				log.Warn().Err(err).
 					Str(constants.LogGuildId, answer.GuildId).
-					Str(constants.LogChannelId, channelWebhook.ChannelId).
+					Str(constants.LogChannelId, webhook.ChannelId).
 					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
 				continue
 			}
 
-			channels[channelWebhook.ChannelId] = discordChannel
+			channels[webhook.ChannelId] = discordChannel
 			channel = discordChannel
 		}
 
-		result.ChannelWebhooks = append(result.ChannelWebhooks, constants.ChannelWebhook{
-			Channel: channel,
-			// TODO
+		result.AlmanaxWebhooks = append(result.AlmanaxWebhooks, constants.AlmanaxWebhook{
+			ChannelWebhook: constants.ChannelWebhook{
+				Channel: channel,
+				Locale:  webhook.Language,
+			},
+		})
+	}
+
+	for _, webhook := range answer.RssWebhooks {
+		channel, found := channels[webhook.ChannelId]
+		if !found {
+			discordChannel, err := s.Channel(webhook.ChannelId)
+			if err != nil {
+				log.Warn().Err(err).
+					Str(constants.LogGuildId, answer.GuildId).
+					Str(constants.LogChannelId, webhook.ChannelId).
+					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
+				continue
+			}
+
+			channels[webhook.ChannelId] = discordChannel
+			channel = discordChannel
+		}
+
+		result.RssWebhooks = append(result.RssWebhooks, constants.RssWebhook{
+			ChannelWebhook: constants.ChannelWebhook{
+				Channel: channel,
+				Locale:  webhook.Language,
+			},
+			FeedId: webhook.FeedId,
+		})
+	}
+
+	for _, webhook := range answer.TwitterWebhooks {
+		channel, found := channels[webhook.ChannelId]
+		if !found {
+			discordChannel, err := s.Channel(webhook.ChannelId)
+			if err != nil {
+				log.Warn().Err(err).
+					Str(constants.LogGuildId, answer.GuildId).
+					Str(constants.LogChannelId, webhook.ChannelId).
+					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
+				continue
+			}
+
+			channels[webhook.ChannelId] = discordChannel
+			channel = discordChannel
+		}
+
+		result.TwitterWebhooks = append(result.TwitterWebhooks, constants.TwitterWebhook{
+			ChannelWebhook: constants.ChannelWebhook{
+				Channel: channel,
+				Locale:  webhook.Language,
+			},
 		})
 	}
 

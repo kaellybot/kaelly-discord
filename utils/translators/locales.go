@@ -14,7 +14,7 @@ func GetLocalChoices() []*discordgo.ApplicationCommandOptionChoice {
 		if id != int32(amqp.Language_ANY) {
 			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 				Name:              name,
-				NameLocalizations: *i18n.GetLocalizations(fmt.Sprintf("locales.%s", name)),
+				NameLocalizations: *i18n.GetLocalizations(fmt.Sprintf("locales.%s.name", name)),
 				Value:             name,
 			})
 		}

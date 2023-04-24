@@ -11,13 +11,18 @@ import (
 func (command *ConfigCommand) rssRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 
-	channelId, enabled, err := command.getWebhookOptions(ctx)
+	channelId, feedId, enabled, locale, err := command.getWebhookRssOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapConfigurationWebhookRequest(i.Interaction.GuildID, channelId,
-		enabled, amqp.ConfigurationSetRequest_WebhookField_RSS, lg)
+	webhook, err := command.createWebhook(s, channelId)
+	if err != nil {
+		panic(err)
+		// TODO
+	}
+
+	msg := mappers.MapConfigurationWebhookRssRequest(webhook, feedId, enabled, locale, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.rssRespond)
 	if err != nil {
 		panic(err)

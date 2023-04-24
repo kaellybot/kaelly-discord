@@ -158,7 +158,7 @@
          },
          "webhook": {
              "name": ":bell: Notified channels",
-             "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} : TODO\n{{ end }}{{ else }}No configured channels!{{ end }}"
+             "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}** ({{.Language}})\n{{ end }}{{ else }}No configured channels!{{ end }}"
          }
      }
    },
@@ -246,9 +246,32 @@
       }
    },
    "locales": {
-      "FR": "French",
-      "EN": "English",
-      "ES": "Spanish"
+      "FR": {
+         "name": "French",
+         "emoji": ":flag_fr:"
+      },
+      "EN": {
+         "name": "English",
+         "emoji": ":flag_gb:"
+      },
+      "ES": {
+         "name": "Spanish",
+         "emoji": ":flag_es:"
+      }
+   },
+   "webhooks": {
+      "ALMANAX": {
+          "name": "Almanax",
+          "emoji": "<:almanax:1100067553830768682>"
+       },
+       "RSS": {
+          "name": "RSS",
+          "emoji": "<:rss:1100040212136071269>"
+       },
+      "TWITTER": {
+         "name": "Twitter",
+         "emoji": "<:twitter:1100040368445206619>"
+      }
    },
    "panic": [
       "I have encountered an error :frowning:... This will be processed as soon as possible!",

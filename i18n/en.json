@@ -94,7 +94,7 @@
          },
          "language": {
             "name": "language",
-            "description": "If not filled, the specified channel language is used instead"
+            "description": "If not filled, the server language is used instead"
          },
          "channel": {
             "name": "channel",
@@ -114,7 +114,7 @@
          },
          "language": {
             "name": "language",
-            "description": "If not filled, the specified channel language is used instead"
+            "description": "If not filled, the server language is used instead"
          },
          "channel": {
             "name": "channel",
@@ -142,7 +142,7 @@
          },
          "language": {
             "name": "language",
-            "description": "If not filled, the specified channel language is used instead"
+            "description": "If not filled, the server language is used instead"
          },
          "channel": {
             "name": "channel",
@@ -243,7 +243,10 @@
          "required": "Oops! It seems no {{ .game.Name }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/config server` command :grin:",
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
          "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
-      }
+      },
+      "permission":{
+         "webhook": "I don't have the right to manage webhooks! Sorry I can't do anything more without this permission :("
+     }
    },
    "locales": {
       "FR": {

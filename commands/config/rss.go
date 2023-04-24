@@ -11,7 +11,7 @@ import (
 func (command *ConfigCommand) rssRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 
-	channelId, feedId, enabled, locale, err := command.getWebhookRssOptions(ctx)
+	channelId, feed, enabled, locale, err := command.getWebhookRssOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -19,10 +19,9 @@ func (command *ConfigCommand) rssRequest(ctx context.Context, s *discordgo.Sessi
 	webhook, err := command.createWebhook(s, channelId)
 	if err != nil {
 		panic(err)
-		// TODO
 	}
 
-	msg := mappers.MapConfigurationWebhookRssRequest(webhook, feedId, enabled, locale, lg)
+	msg := mappers.MapConfigurationWebhookRssRequest(webhook, feed, enabled, locale, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.rssRespond)
 	if err != nil {
 		panic(err)

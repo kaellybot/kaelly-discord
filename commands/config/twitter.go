@@ -19,7 +19,6 @@ func (command *ConfigCommand) twitterRequest(ctx context.Context, s *discordgo.S
 	webhook, err := command.createWebhook(s, channelId)
 	if err != nil {
 		panic(err)
-		// TODO
 	}
 
 	msg := mappers.MapConfigurationWebhookTwitterRequest(webhook, enabled, locale, lg)

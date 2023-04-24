@@ -60,6 +60,10 @@ func MapConfigurationServerRequest(guildId, channelId, serverId string, lg disco
 func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, enabled bool,
 	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
 
+	if locale == amqp.Language_ANY {
+		locale = constants.MapDiscordLocale(lg)
+	}
+
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
@@ -74,8 +78,12 @@ func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, enabled b
 	}
 }
 
-func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, feedId string, enabled bool,
+func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, feed entities.FeedType, enabled bool,
 	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
+
+	if locale == amqp.Language_ANY {
+		locale = constants.MapDiscordLocale(lg)
+	}
 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST,
@@ -83,7 +91,7 @@ func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, feedId string
 		ConfigurationSetRssWebhookRequest: &amqp.ConfigurationSetRssWebhookRequest{
 			GuildId:      webhook.GuildID,
 			ChannelId:    webhook.ChannelID,
-			FeedId:       feedId,
+			FeedId:       feed.Id,
 			WebhookId:    webhook.ID,
 			WebhookToken: webhook.Token,
 			Enabled:      enabled,
@@ -94,6 +102,10 @@ func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, feedId string
 
 func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, enabled bool,
 	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
+
+	if locale == amqp.Language_ANY {
+		locale = constants.MapDiscordLocale(lg)
+	}
 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST,

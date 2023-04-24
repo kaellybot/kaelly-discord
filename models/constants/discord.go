@@ -22,5 +22,6 @@ var (
 		discordgo.IntentGuildMembers |
 		discordgo.IntentGuilds |
 		discordgo.IntentGuildMessages |
-		discordgo.IntentGuildMessageReactions
+		discordgo.IntentGuildMessageReactions |
+		discordgo.IntentGuildWebhooks
 )

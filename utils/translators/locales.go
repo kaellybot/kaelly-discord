@@ -15,7 +15,7 @@ func GetLocalChoices() []*discordgo.ApplicationCommandOptionChoice {
 			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 				Name:              name,
 				NameLocalizations: *i18n.GetLocalizations(fmt.Sprintf("locales.%s.name", name)),
-				Value:             name,
+				Value:             id,
 			})
 		}
 	}

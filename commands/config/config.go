@@ -65,7 +65,7 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 							Description:              i18n.Get(constants.DefaultLocale, "config.almanax.language.description"),
 							NameLocalizations:        *i18n.GetLocalizations("config.almanax.language.name"),
 							DescriptionLocalizations: *i18n.GetLocalizations("config.almanax.language.description"),
-							Type:                     discordgo.ApplicationCommandOptionString,
+							Type:                     discordgo.ApplicationCommandOptionInteger,
 							Required:                 false,
 							Choices:                  translators.GetLocalChoices(),
 						},
@@ -108,7 +108,7 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 							Description:              i18n.Get(constants.DefaultLocale, "config.rss.language.description"),
 							NameLocalizations:        *i18n.GetLocalizations("config.rss.language.name"),
 							DescriptionLocalizations: *i18n.GetLocalizations("config.rss.language.description"),
-							Type:                     discordgo.ApplicationCommandOptionString,
+							Type:                     discordgo.ApplicationCommandOptionInteger,
 							Required:                 false,
 							Choices:                  translators.GetLocalChoices(),
 						},
@@ -168,7 +168,7 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 							Description:              i18n.Get(constants.DefaultLocale, "config.twitter.language.description"),
 							NameLocalizations:        *i18n.GetLocalizations("config.twitter.language.name"),
 							DescriptionLocalizations: *i18n.GetLocalizations("config.twitter.language.description"),
-							Type:                     discordgo.ApplicationCommandOptionString,
+							Type:                     discordgo.ApplicationCommandOptionInteger,
 							Required:                 false,
 							Choices:                  translators.GetLocalChoices(),
 						},
@@ -185,8 +185,8 @@ func (command *ConfigCommand) GetSlashCommand() *constants.DiscordCommand {
 			},
 		},
 		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.checkEnabled,
-				command.checkFeedType, command.checkLanguage, command.checkChannelId, command.request),
+			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkWebhookPermission, command.checkServer,
+				command.checkEnabled, command.checkFeedType, command.checkLanguage, command.checkChannelId, command.request),
 			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
 		},
 	}
@@ -272,26 +272,26 @@ func (command *ConfigCommand) getWebhookTwitterOptions(ctx context.Context) (str
 	return channelId, enabled, locale, nil
 }
 
-func (command *ConfigCommand) getWebhookRssOptions(ctx context.Context) (string, string, bool, amqp.Language, error) {
+func (command *ConfigCommand) getWebhookRssOptions(ctx context.Context) (string, entities.FeedType, bool, amqp.Language, error) {
 	channelId, ok := ctx.Value(channelOptionName).(string)
 	if !ok {
-		return "", "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as string", ctx.Value(channelOptionName))
+		return "", entities.FeedType{}, false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as string", ctx.Value(channelOptionName))
 	}
 
-	feedId, ok := ctx.Value(feedTypeOptionName).(string)
+	feed, ok := ctx.Value(feedTypeOptionName).(entities.FeedType)
 	if !ok {
-		return "", "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as string", ctx.Value(feedTypeOptionName))
+		return "", entities.FeedType{}, false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as entities.FeedType", ctx.Value(feedTypeOptionName))
 	}
 
 	enabled, ok := ctx.Value(enabledOptionName).(bool)
 	if !ok {
-		return "", "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(enabledOptionName))
+		return "", entities.FeedType{}, false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(enabledOptionName))
 	}
 
 	locale, ok := ctx.Value(languageOptionName).(amqp.Language)
 	if !ok {
-		return "", "", false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(languageOptionName))
+		return "", entities.FeedType{}, false, amqp.Language_ANY, fmt.Errorf("Cannot cast %v as bool", ctx.Value(languageOptionName))
 	}
 
-	return channelId, feedId, enabled, locale, nil
+	return channelId, feed, enabled, locale, nil
 }

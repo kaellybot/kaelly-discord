@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
-	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -30,20 +29,17 @@ func (command *ConfigCommand) almanaxRequest(ctx context.Context, s *discordgo.S
 		return
 	}
 
-	webhook, err := command.createWebhook(s, channelId)
+	var webhook *discordgo.Webhook = nil
+	if enabled {
+		webhook, err = command.createWebhook(s, channelId)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	msg := mappers.MapConfigurationWebhookAlmanaxRequest(webhook, i.GuildID, channelId, enabled, locale, lg)
+	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)
 	}
-
-	msg := mappers.MapConfigurationWebhookAlmanaxRequest(webhook, enabled, locale, lg)
-	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.almanaxRespond)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (command *ConfigCommand) almanaxRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-
-	// TODO respond
 }

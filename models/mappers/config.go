@@ -57,64 +57,82 @@ func MapConfigurationServerRequest(guildId, channelId, serverId string, lg disco
 	}
 }
 
-func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, enabled bool,
-	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildId, channelId string,
+	enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
 
 	if locale == amqp.Language_ANY {
 		locale = constants.MapDiscordLocale(lg)
+	}
+
+	var webhookId, webhookToken string
+	if webhook != nil {
+		webhookId = webhook.ID
+		webhookToken = webhook.Token
 	}
 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		ConfigurationSetAlmanaxWebhookRequest: &amqp.ConfigurationSetAlmanaxWebhookRequest{
-			GuildId:      webhook.GuildID,
-			ChannelId:    webhook.ChannelID,
-			WebhookId:    webhook.ID,
-			WebhookToken: webhook.Token,
+			GuildId:      guildId,
+			ChannelId:    channelId,
+			WebhookId:    webhookId,
+			WebhookToken: webhookToken,
 			Enabled:      enabled,
 			Language:     locale,
 		},
 	}
 }
 
-func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, feed entities.FeedType, enabled bool,
-	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildId, channelId string,
+	feed entities.FeedType, enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
 
 	if locale == amqp.Language_ANY {
 		locale = constants.MapDiscordLocale(lg)
+	}
+
+	var webhookId, webhookToken string
+	if webhook != nil {
+		webhookId = webhook.ID
+		webhookToken = webhook.Token
 	}
 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		ConfigurationSetRssWebhookRequest: &amqp.ConfigurationSetRssWebhookRequest{
-			GuildId:      webhook.GuildID,
-			ChannelId:    webhook.ChannelID,
+			GuildId:      guildId,
+			ChannelId:    channelId,
 			FeedId:       feed.Id,
-			WebhookId:    webhook.ID,
-			WebhookToken: webhook.Token,
+			WebhookId:    webhookId,
+			WebhookToken: webhookToken,
 			Enabled:      enabled,
 			Language:     locale,
 		},
 	}
 }
 
-func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, enabled bool,
-	locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildId, channelId string,
+	enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
 
 	if locale == amqp.Language_ANY {
 		locale = constants.MapDiscordLocale(lg)
+	}
+
+	var webhookId, webhookToken string
+	if webhook != nil {
+		webhookId = webhook.ID
+		webhookToken = webhook.Token
 	}
 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		ConfigurationSetTwitterWebhookRequest: &amqp.ConfigurationSetTwitterWebhookRequest{
-			GuildId:      webhook.GuildID,
-			ChannelId:    webhook.ChannelID,
-			WebhookId:    webhook.ID,
-			WebhookToken: webhook.Token,
+			GuildId:      guildId,
+			ChannelId:    channelId,
+			WebhookId:    webhookId,
+			WebhookToken: webhookToken,
 			Enabled:      enabled,
 			Language:     locale,
 		},

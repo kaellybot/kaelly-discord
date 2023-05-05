@@ -27,10 +27,3 @@ func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate)
 		log.Warn().Err(err).Msgf("Could not respond to caller after panicking")
 	}
 }
-
-func interactionHasAlreadyBeenAcknowledged(err error) bool {
-	restErr, ok := err.(*discordgo.RESTError)
-	return ok && restErr != nil &&
-		restErr.Message != nil &&
-		restErr.Message.Code == discordgo.ErrCodeInteractionHasAlreadyBeenAcknowledged
-}

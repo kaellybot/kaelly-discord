@@ -12,9 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *AlignCommand) getRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
-
 	city, order, server, err := command.getGetOptions(ctx)
 	if err != nil {
 		panic(err)
@@ -25,10 +24,10 @@ func (command *AlignCommand) getRequest(ctx context.Context, s *discordgo.Sessio
 		panic(err)
 	}
 
-	var userIds []string
+	var userIDs []string
 	properties := make(map[string]any)
 	for _, member := range members {
-		userIds = append(userIds, member.User.ID)
+		userIDs = append(userIDs, member.User.ID)
 		username := member.Nick
 		if len(username) == 0 {
 			username = member.User.Username
@@ -36,30 +35,28 @@ func (command *AlignCommand) getRequest(ctx context.Context, s *discordgo.Sessio
 		properties[member.User.ID] = username
 	}
 
-	msg := mappers.MapBookAlignGetBookRequest(city.Id, order.Id, server.Id, userIds, believerListLimit, lg)
+	msg := mappers.MapBookAlignGetBookRequest(city.ID, order.ID, server.ID, userIDs, believerListLimit, lg)
 	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.getRespond, properties)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *AlignCommand) getRespond(ctx context.Context, s *discordgo.Session,
+func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-
 		believers := make([]constants.AlignmentUserLevel, 0)
 		for _, believer := range message.AlignGetBookAnswer.Believers {
 			username, found := properties[believer.UserId]
 			if found {
 				believers = append(believers, constants.AlignmentUserLevel{
-					CityId:   believer.CityId,
-					OrderId:  believer.OrderId,
+					CityID:   believer.CityId,
+					OrderID:  believer.OrderId,
 					Username: fmt.Sprintf("%v", username),
 					Level:    believer.Level,
 				})
 			} else {
-				log.Warn().Msgf("MemberId not found in property, item ignored...")
+				log.Warn().Msgf("MemberID not found in property, item ignored...")
 			}
 		}
 

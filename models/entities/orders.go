@@ -3,21 +3,21 @@ package entities
 import amqp "github.com/kaellybot/kaelly-amqp"
 
 type Order struct {
-	Id     string `gorm:"primaryKey"`
+	ID     string `gorm:"primaryKey"`
 	Icon   string
 	Emoji  string
 	Color  int
-	Labels []OrderLabel `gorm:"foreignKey:OrderId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Labels []OrderLabel `gorm:"foreignKey:OrderID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type OrderLabel struct {
 	Locale  amqp.Language `gorm:"primaryKey"`
-	OrderId string        `gorm:"primaryKey"`
+	OrderID string        `gorm:"primaryKey"`
 	Label   string
 }
 
-func (order Order) GetId() string {
-	return order.Id
+func (order Order) GetID() string {
+	return order.ID
 }
 
 func (order Order) GetLabels() map[amqp.Language]string {

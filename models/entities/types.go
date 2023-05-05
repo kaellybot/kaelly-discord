@@ -5,6 +5,6 @@ import (
 )
 
 type LabelledEntity interface {
-	GetId() string
+	GetID() string
 	GetLabels() map[amqp.Language]string
 }

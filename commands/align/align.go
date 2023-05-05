@@ -15,10 +15,9 @@ import (
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
-func New(bookService books.BookService, guildService guilds.GuildService,
-	serverService servers.ServerService, requestManager requests.RequestManager) *AlignCommand {
-
-	return &AlignCommand{
+func New(bookService books.Service, guildService guilds.Service,
+	serverService servers.Service, requestManager requests.RequestManager) *Command {
+	return &Command{
 		bookService:    bookService,
 		guildService:   guildService,
 		serverService:  serverService,
@@ -26,7 +25,7 @@ func New(bookService books.BookService, guildService guilds.GuildService,
 	}
 }
 
-func (command *AlignCommand) GetSlashCommand() *constants.DiscordCommand {
+func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     slashCommandName,
@@ -128,7 +127,7 @@ func (command *AlignCommand) GetSlashCommand() *constants.DiscordCommand {
 	}
 }
 
-func (command *AlignCommand) GetUserCommand() *constants.DiscordCommand {
+func (command *Command) GetUserCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     userCommandName,
@@ -142,9 +141,8 @@ func (command *AlignCommand) GetUserCommand() *constants.DiscordCommand {
 	}
 }
 
-func (command *AlignCommand) slashRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
+func (command *Command) slashRequest(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	for _, subCommand := range i.ApplicationCommandData().Options {
 		switch subCommand.Name {
 		case getSubCommandName:
@@ -152,18 +150,17 @@ func (command *AlignCommand) slashRequest(ctx context.Context, s *discordgo.Sess
 		case setSubCommandName:
 			command.setRequest(ctx, s, i, lg)
 		default:
-			panic(fmt.Errorf("Cannot handle subCommand %v, request ignored", subCommand.Name))
+			panic(fmt.Errorf("cannot handle subCommand %v, request ignored", subCommand.Name))
 		}
 	}
 }
 
-func (command *AlignCommand) userRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
+func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	command.userAlignRequest(ctx, s, i, lg)
 }
 
-func (command *AlignCommand) getGetOptions(ctx context.Context) (entities.City, entities.Order, entities.Server, error) {
+func (command *Command) getGetOptions(ctx context.Context) (entities.City, entities.Order, entities.Server, error) {
 	city, ok := ctx.Value(cityOptionName).(entities.City)
 	if !ok {
 		city = entities.City{}
@@ -177,46 +174,45 @@ func (command *AlignCommand) getGetOptions(ctx context.Context) (entities.City, 
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
 		return entities.City{}, entities.Order{}, entities.Server{},
-			fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
 	return city, order, server, nil
 }
 
-func (command *AlignCommand) getSetOptions(ctx context.Context) (entities.City, entities.Order,
+func (command *Command) getSetOptions(ctx context.Context) (entities.City, entities.Order,
 	int64, entities.Server, error) {
-
 	city, ok := ctx.Value(cityOptionName).(entities.City)
 	if !ok {
 		return entities.City{}, entities.Order{}, 0, entities.Server{},
-			fmt.Errorf("Cannot cast %v as entities.City", ctx.Value(cityOptionName))
+			fmt.Errorf("cannot cast %v as entities.City", ctx.Value(cityOptionName))
 	}
 
 	order, ok := ctx.Value(orderOptionName).(entities.Order)
 	if !ok {
 		return entities.City{}, entities.Order{}, 0, entities.Server{},
-			fmt.Errorf("Cannot cast %v as entities.Order", ctx.Value(orderOptionName))
+			fmt.Errorf("cannot cast %v as entities.Order", ctx.Value(orderOptionName))
 	}
 
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
 		return entities.City{}, entities.Order{}, 0, entities.Server{},
-			fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
 	level, ok := ctx.Value(levelOptionName).(int64)
 	if !ok {
 		return entities.City{}, entities.Order{}, 0, entities.Server{},
-			fmt.Errorf("Cannot cast %v as uint", ctx.Value(levelOptionName))
+			fmt.Errorf("cannot cast %v as uint", ctx.Value(levelOptionName))
 	}
 
 	return city, order, level, server, nil
 }
 
-func (command *AlignCommand) getUserOptions(ctx context.Context) (entities.Server, error) {
+func (command *Command) getUserOptions(ctx context.Context) (entities.Server, error) {
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
-		return entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
 	return server, nil

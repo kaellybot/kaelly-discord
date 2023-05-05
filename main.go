@@ -26,7 +26,7 @@ func init() {
 func initConfig() {
 	viper.SetConfigFile(constants.ConfigFileName)
 
-	for configName, defaultValue := range constants.DefaultConfigValues {
+	for configName, defaultValue := range constants.GetDefaultConfigValues() {
 		viper.SetDefault(configName, defaultValue)
 	}
 
@@ -62,10 +62,16 @@ func initLog() {
 }
 
 func initMetrics() {
-	http.Handle("/metrics", promhttp.Handler())
 	go func() {
 		log.Info().Msgf("Exposing Prometheus metrics...")
-		err := http.ListenAndServe(fmt.Sprintf(":%v", viper.GetInt(constants.MetricPort)), nil)
+		http.Handle("/metrics", promhttp.Handler())
+
+		server := &http.Server{
+			Addr:              fmt.Sprintf(":%v", viper.GetInt(constants.MetricPort)),
+			ReadHeaderTimeout: 0,
+		}
+
+		err := server.ListenAndServe()
 		if err != nil {
 			log.Error().Err(err).Msgf("Cannot listen and serve Prometheus metrics")
 		}
@@ -73,7 +79,6 @@ func initMetrics() {
 }
 
 func initI18n() {
-
 	i18n.SetDefault(constants.DefaultLocale)
 	for _, language := range constants.Languages {
 		if err := i18n.LoadBundle(language.Locale, language.TranslationFile); err != nil {
@@ -97,7 +102,7 @@ func main() {
 	}
 
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	log.Info().Msgf("%s v%s is now running. Press CTRL-C to exit.", constants.Name, constants.Version)
 	<-sc
 

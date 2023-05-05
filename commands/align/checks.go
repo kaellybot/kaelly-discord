@@ -11,9 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *AlignCommand) checkCity(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkCity(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] city
@@ -41,9 +40,8 @@ func (command *AlignCommand) checkCity(ctx context.Context, s *discordgo.Session
 	next(ctx)
 }
 
-func (command *AlignCommand) checkOrder(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkOrder(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] order
@@ -71,9 +69,8 @@ func (command *AlignCommand) checkOrder(ctx context.Context, s *discordgo.Sessio
 	next(ctx)
 }
 
-func (command *AlignCommand) checkLevel(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -104,9 +101,8 @@ func (command *AlignCommand) checkLevel(ctx context.Context, s *discordgo.Sessio
 	next(ctx)
 }
 
-func (command *AlignCommand) checkServer(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] server
@@ -137,28 +133,7 @@ func (command *AlignCommand) checkServer(ctx context.Context, s *discordgo.Sessi
 
 	if server == nil {
 		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Content: &content,
-		})
-		if err != nil {
-			log.Error().Err(err).Msg("Server check response ignored")
-		}
-	} else {
-		next(context.WithValue(ctx, serverOptionName, *server))
-	}
-}
-
-func (command *AlignCommand) checkUserServer(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
-	server, err := command.guildService.GetServer(i.GuildID, i.ChannelID)
-	if err != nil {
-		panic(err)
-	}
-
-	if server == nil {
-		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
 		if err != nil {

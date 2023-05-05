@@ -10,9 +10,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *JobCommand) userJobRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) userJobRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
-
 	server, err := command.getUserOptions(ctx)
 	if err != nil {
 		panic(err)
@@ -25,7 +24,7 @@ func (command *JobCommand) userJobRequest(ctx context.Context, s *discordgo.Sess
 	}
 	member.User = user
 
-	msg := mappers.MapBookJobGetUserRequest(member.User.ID, server.Id, lg)
+	msg := mappers.MapBookJobGetUserRequest(member.User.ID, server.ID, lg)
 	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.userRespond,
 		map[string]any{userProperty: member})
 	if err != nil {
@@ -33,9 +32,8 @@ func (command *JobCommand) userJobRequest(ctx context.Context, s *discordgo.Sess
 	}
 }
 
-func (command *JobCommand) userRespond(ctx context.Context, s *discordgo.Session,
+func (command *Command) userRespond(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
 		var member *discordgo.Member
 		userProperty, found := properties[userProperty]

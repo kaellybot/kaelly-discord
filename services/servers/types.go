@@ -7,15 +7,15 @@ import (
 	"golang.org/x/text/transform"
 )
 
-type ServerService interface {
+type Service interface {
 	GetServer(id string) (entities.Server, bool)
 	GetServers() []entities.Server
 	FindServers(name string, locale discordgo.Locale) []entities.Server
 }
 
-type ServerServiceImpl struct {
+type Impl struct {
 	transformer transform.Transformer
 	serversMap  map[string]entities.Server
 	servers     []entities.Server
-	repository  repository.ServerRepository
+	repository  repository.Repository
 }

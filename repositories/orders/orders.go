@@ -5,19 +5,11 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 )
 
-type OrderRepository interface {
-	GetOrders() ([]entities.Order, error)
+func New(db databases.MySQLConnection) *Impl {
+	return &Impl{db: db}
 }
 
-type OrderRepositoryImpl struct {
-	db databases.MySQLConnection
-}
-
-func New(db databases.MySQLConnection) *OrderRepositoryImpl {
-	return &OrderRepositoryImpl{db: db}
-}
-
-func (repo *OrderRepositoryImpl) GetOrders() ([]entities.Order, error) {
+func (repo *Impl) GetOrders() ([]entities.Order, error) {
 	var orders []entities.Order
 	response := repo.db.GetDB().Model(&entities.Order{}).Preload("Labels").Find(&orders)
 	return orders, response.Error

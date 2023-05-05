@@ -5,13 +5,13 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 )
 
-type DiscordService interface {
+type Service interface {
 	Listen() error
 	RegisterCommands() error
 	Shutdown() error
 }
 
-type DiscordServiceImpl struct {
+type Impl struct {
 	session  *discordgo.Session
 	commands []*constants.DiscordCommand
 }

@@ -15,7 +15,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-func New(repository repository.ServerRepository) (*ServerServiceImpl, error) {
+func New(repository repository.Repository) (*Impl, error) {
 	servers, err := repository.GetServers()
 	if err != nil {
 		return nil, err
@@ -23,10 +23,10 @@ func New(repository repository.ServerRepository) (*ServerServiceImpl, error) {
 
 	serversMap := make(map[string]entities.Server)
 	for _, server := range servers {
-		serversMap[server.Id] = server
+		serversMap[server.ID] = server
 	}
 
-	return &ServerServiceImpl{
+	return &Impl{
 		transformer: transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
 		serversMap:  serversMap,
 		servers:     servers,
@@ -34,16 +34,16 @@ func New(repository repository.ServerRepository) (*ServerServiceImpl, error) {
 	}, nil
 }
 
-func (service *ServerServiceImpl) GetServers() []entities.Server {
+func (service *Impl) GetServers() []entities.Server {
 	return service.servers
 }
 
-func (service *ServerServiceImpl) GetServer(id string) (entities.Server, bool) {
+func (service *Impl) GetServer(id string) (entities.Server, bool) {
 	server, found := service.serversMap[id]
 	return server, found
 }
 
-func (service *ServerServiceImpl) FindServers(name string, locale discordgo.Locale) []entities.Server {
+func (service *Impl) FindServers(name string, locale discordgo.Locale) []entities.Server {
 	serversFound := make([]entities.Server, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {

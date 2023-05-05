@@ -10,17 +10,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *ConfigCommand) rssRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
-
-	channelId, feed, enabled, locale, err := command.getWebhookRssOptions(ctx)
+	channelID, feed, enabled, locale, err := command.getWebhookRssOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	if !validators.HasWebhookPermission(s, channelId) {
+	if !validators.HasWebhookPermission(s, channelID) {
 		content := i18n.Get(lg, "checks.permissions.webhook")
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
 		if err != nil {
@@ -29,15 +28,15 @@ func (command *ConfigCommand) rssRequest(ctx context.Context, s *discordgo.Sessi
 		return
 	}
 
-	var webhook *discordgo.Webhook = nil
+	var webhook *discordgo.Webhook
 	if enabled {
-		webhook, err = command.createWebhook(s, channelId)
+		webhook, err = command.createWebhook(s, channelID)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	msg := mappers.MapConfigurationWebhookRssRequest(webhook, i.GuildID, channelId, feed, enabled, locale, lg)
+	msg := mappers.MapConfigurationWebhookRssRequest(webhook, i.GuildID, channelID, feed, enabled, locale, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

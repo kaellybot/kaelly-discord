@@ -19,7 +19,7 @@ type RequestManager interface {
 }
 
 type RequestManagerImpl struct {
-	broker   amqp.MessageBrokerInterface
+	broker   amqp.MessageBroker
 	requests map[string]discordRequest
 }
 

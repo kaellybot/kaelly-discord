@@ -3,19 +3,19 @@ package entities
 import amqp "github.com/kaellybot/kaelly-amqp"
 
 type SubArea struct {
-	Id             string         `gorm:"primaryKey"`
-	DofusPortalsId string         `gorm:"unique"`
-	Labels         []SubAreaLabel `gorm:"foreignKey:SubAreaId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ID             string         `gorm:"primaryKey"`
+	DofusPortalsID string         `gorm:"unique"`
+	Labels         []SubAreaLabel `gorm:"foreignKey:SubAreaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type SubAreaLabel struct {
 	Locale    amqp.Language `gorm:"primaryKey"`
-	SubAreaId string        `gorm:"primaryKey"`
+	SubAreaID string        `gorm:"primaryKey"`
 	Label     string
 }
 
-func (subArea SubArea) GetId() string {
-	return subArea.Id
+func (subArea SubArea) GetID() string {
+	return subArea.ID
 }
 
 func (subArea SubArea) GetLabels() map[amqp.Language]string {

@@ -12,26 +12,24 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *AlignCommand) setRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) setRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
-
 	city, order, level, server, err := command.getSetOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapBookAlignSetRequest(i.Interaction.Member.User.ID, city.Id, order.Id, server.Id, level, lg)
+	msg := mappers.MapBookAlignSetRequest(i.Interaction.Member.User.ID, city.ID, order.ID, server.ID, level, lg)
 	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *AlignCommand) setRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-
+func (command *Command) setRespond(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-		content := i18n.Get(constants.MapAmqpLocale(message.Language), "align.success")
+		content := i18n.Get(constants.MapAMQPLocale(message.Language), "align.success")
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})

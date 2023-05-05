@@ -1,35 +1,27 @@
-package servers
+package guilds
 
 import (
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 )
 
-type GuildRepository interface {
-	GetServer(guildID, channelId string) (*entities.Server, error)
+func New(db databases.MySQLConnection) *Impl {
+	return &Impl{db: db}
 }
 
-type GuildRepositoryImpl struct {
-	db databases.MySQLConnection
-}
-
-func New(db databases.MySQLConnection) *GuildRepositoryImpl {
-	return &GuildRepositoryImpl{db: db}
-}
-
-func (repo *GuildRepositoryImpl) GetServer(guildId, channelId string) (*entities.Server, error) {
-	var serverIds []string
+func (repo *Impl) GetServer(guildID, channelID string) (*entities.Server, error) {
+	var serverIDs []string
 	err := repo.db.GetDB().Table("guilds").
 		Select("COALESCE(channel_servers.server_id, guilds.server_id) as server").
-		Joins("LEFT JOIN channel_servers ON guilds.id = channel_servers.guild_id AND channel_servers.channel_id = ?", channelId).
-		Where("guilds.id = ?", guildId).
-		Pluck("server", &serverIds).Error
+		Joins("LEFT JOIN channel_servers ON guilds.id = channel_servers.guild_id AND channel_servers.channel_id = ?", channelID).
+		Where("guilds.id = ?", guildID).
+		Pluck("server", &serverIDs).Error
 	if err != nil {
 		return nil, err
 	}
-	if len(serverIds) == 0 {
+	if len(serverIDs) == 0 {
 		return nil, nil
 	}
 
-	return &entities.Server{Id: serverIds[0]}, nil
+	return &entities.Server{ID: serverIDs[0]}, nil
 }

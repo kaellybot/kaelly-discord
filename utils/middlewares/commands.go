@@ -8,7 +8,8 @@ import (
 )
 
 type NextFunc func(ctx context.Context)
-type MiddlewareCommand func(ctx context.Context, s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale, next NextFunc)
+type MiddlewareCommand func(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next NextFunc)
 
 func Use(chainedFunctions ...MiddlewareCommand) constants.DiscordHandler {
 	return func(session *discordgo.Session, interaction *discordgo.InteractionCreate, lg discordgo.Locale) {

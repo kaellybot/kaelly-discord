@@ -7,7 +7,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func ExpectOnlyOneElement[T any](i18nPrefix, optionValue string, collection []T, lg discordgo.Locale) (discordgo.WebhookEdit, bool) {
+func ExpectOnlyOneElement[T any](i18nPrefix, optionValue string, collection []T,
+	lg discordgo.Locale) (discordgo.WebhookEdit, bool) {
 	if len(collection) == 1 {
 		return discordgo.WebhookEdit{}, true
 	}
@@ -25,11 +26,11 @@ func ExpectOnlyOneElement[T any](i18nPrefix, optionValue string, collection []T,
 	}, false
 }
 
-func HasWebhookPermission(s *discordgo.Session, channelId string) bool {
-	permissions, err := s.State.UserChannelPermissions(s.State.User.ID, channelId)
+func HasWebhookPermission(s *discordgo.Session, channelID string) bool {
+	permissions, err := s.State.UserChannelPermissions(s.State.User.ID, channelID)
 	if err != nil {
 		log.Error().Err(err).
-			Str(constants.LogChannelId, channelId).
+			Str(constants.LogChannelID, channelID).
 			Msg("Cannot retrieve channel permission, returning false")
 		return false
 	}

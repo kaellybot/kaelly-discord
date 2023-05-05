@@ -7,11 +7,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func New() *AboutCommand {
-	return &AboutCommand{}
+func New() *Command {
+	return &Command{}
 }
 
-func (command *AboutCommand) GetSlashCommand() *constants.DiscordCommand {
+func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     commandName,
@@ -27,7 +27,7 @@ func (command *AboutCommand) GetSlashCommand() *constants.DiscordCommand {
 	}
 }
 
-func (command *AboutCommand) about(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) about(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{command.getAboutEmbed(lg)},
 	})
@@ -36,7 +36,7 @@ func (command *AboutCommand) about(s *discordgo.Session, i *discordgo.Interactio
 	}
 }
 
-func (command *AboutCommand) getAboutEmbed(locale discordgo.Locale) *discordgo.MessageEmbed {
+func (command *Command) getAboutEmbed(locale discordgo.Locale) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       i18n.Get(locale, "about.title", i18n.Vars{"name": constants.Name, "version": constants.Version}),
 		Description: i18n.Get(locale, "about.desc", i18n.Vars{"game": constants.Game}),

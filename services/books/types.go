@@ -9,7 +9,7 @@ import (
 	"golang.org/x/text/transform"
 )
 
-type BookService interface {
+type Service interface {
 	GetJob(id string) (entities.Job, bool)
 	GetJobs() []entities.Job
 	FindJobs(name string, locale discordgo.Locale) []entities.Job
@@ -21,7 +21,7 @@ type BookService interface {
 	FindOrders(name string, locale discordgo.Locale) []entities.Order
 }
 
-type BookServiceImpl struct {
+type Impl struct {
 	transformer     transform.Transformer
 	jobsMap         map[string]entities.Job
 	jobs            []entities.Job
@@ -29,7 +29,7 @@ type BookServiceImpl struct {
 	cities          []entities.City
 	ordersMap       map[string]entities.Order
 	orders          []entities.Order
-	jobRepository   jobs.JobRepository
-	cityRepository  cities.CityRepository
-	orderRepository orders.OrderRepository
+	jobRepository   jobs.Repository
+	cityRepository  cities.Repository
+	orderRepository orders.Repository
 }

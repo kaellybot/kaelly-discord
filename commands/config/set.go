@@ -11,8 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *ConfigCommand) setRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+func (command *Command) setRespond(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 
 	if !isConfigSetAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
@@ -26,7 +26,7 @@ func (command *ConfigCommand) setRespond(ctx context.Context, s *discordgo.Sessi
 	}
 
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-		content := i18n.Get(constants.MapAmqpLocale(message.Language), "config.success")
+		content := i18n.Get(constants.MapAMQPLocale(message.Language), "config.success")
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})

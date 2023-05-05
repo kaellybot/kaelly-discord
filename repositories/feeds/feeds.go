@@ -5,19 +5,11 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 )
 
-type FeedRepository interface {
-	GetFeedTypes() ([]entities.FeedType, error)
+func New(db databases.MySQLConnection) *Impl {
+	return &Impl{db: db}
 }
 
-type FeedRepositoryImpl struct {
-	db databases.MySQLConnection
-}
-
-func New(db databases.MySQLConnection) *FeedRepositoryImpl {
-	return &FeedRepositoryImpl{db: db}
-}
-
-func (repo *FeedRepositoryImpl) GetFeedTypes() ([]entities.FeedType, error) {
+func (repo *Impl) GetFeedTypes() ([]entities.FeedType, error) {
 	var feedTypes []entities.FeedType
 	response := repo.db.GetDB().Model(&entities.FeedType{}).Preload("Labels").Find(&feedTypes)
 	return feedTypes, response.Error

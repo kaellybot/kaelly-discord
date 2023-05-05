@@ -3,18 +3,18 @@ package entities
 import amqp "github.com/kaellybot/kaelly-amqp"
 
 type FeedType struct {
-	Id     string          `gorm:"primaryKey"`
-	Labels []FeedTypeLabel `gorm:"foreignKey:FeedTypeId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ID     string          `gorm:"primaryKey"`
+	Labels []FeedTypeLabel `gorm:"foreignKey:FeedTypeID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type FeedTypeLabel struct {
 	Locale     amqp.Language `gorm:"primaryKey"`
-	FeedTypeId string        `gorm:"primaryKey"`
+	FeedTypeID string        `gorm:"primaryKey"`
 	Label      string
 }
 
-func (feedType FeedType) GetId() string {
-	return feedType.Id
+func (feedType FeedType) GetID() string {
+	return feedType.ID
 }
 
 func (feedType FeedType) GetLabels() map[amqp.Language]string {

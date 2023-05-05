@@ -9,7 +9,7 @@ import (
 
 type Language struct {
 	Locale          discordgo.Locale
-	AmqpLocale      amqp.Language
+	AMQPLocale      amqp.Language
 	TranslationFile string
 }
 
@@ -28,22 +28,22 @@ var (
 		{
 			Locale:          discordgo.French,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, frenchFile),
-			AmqpLocale:      amqp.Language_FR,
+			AMQPLocale:      amqp.Language_FR,
 		},
 		{
 			Locale:          discordgo.EnglishGB,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, englishFile),
-			AmqpLocale:      amqp.Language_EN,
+			AMQPLocale:      amqp.Language_EN,
 		},
 		{
 			Locale:          discordgo.EnglishUS,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, englishFile),
-			AmqpLocale:      amqp.Language_EN,
+			AMQPLocale:      amqp.Language_EN,
 		},
 		{
 			Locale:          discordgo.SpanishES,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, spanishFile),
-			AmqpLocale:      amqp.Language_ES,
+			AMQPLocale:      amqp.Language_ES,
 		},
 	}
 )
@@ -51,16 +51,16 @@ var (
 func MapDiscordLocale(locale discordgo.Locale) amqp.Language {
 	for _, language := range Languages {
 		if language.Locale == locale {
-			return language.AmqpLocale
+			return language.AMQPLocale
 		}
 	}
 
 	return amqp.Language_ANY
 }
 
-func MapAmqpLocale(locale amqp.Language) discordgo.Locale {
+func MapAMQPLocale(locale amqp.Language) discordgo.Locale {
 	for _, language := range Languages {
-		if language.AmqpLocale == locale {
+		if language.AMQPLocale == locale {
 			return language.Locale
 		}
 	}

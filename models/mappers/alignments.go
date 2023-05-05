@@ -21,82 +21,79 @@ type i18nAlignmentExperience struct {
 	Level    int64
 }
 
-func MapBookAlignGetBookRequest(cityId, orderId, serverId string, userIds []string,
+func MapBookAlignGetBookRequest(cityID, orderID, serverID string, userIDs []string,
 	craftsmenListLimit int64, lg discordgo.Locale) *amqp.RabbitMQMessage {
-
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ALIGN_GET_BOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		AlignGetBookRequest: &amqp.AlignGetBookRequest{
-			UserIds:  userIds,
-			CityId:   cityId,
-			OrderId:  orderId,
-			ServerId: serverId,
+			UserIds:  userIDs,
+			CityId:   cityID,
+			OrderId:  orderID,
+			ServerId: serverID,
 			Limit:    craftsmenListLimit,
 		},
 	}
 }
 
-func MapBookAlignGetUserRequest(userId, serverId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapBookAlignGetUserRequest(userID, serverID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ALIGN_GET_USER_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		AlignGetUserRequest: &amqp.AlignGetUserRequest{
-			UserId:   userId,
-			ServerId: serverId,
+			UserId:   userID,
+			ServerId: serverID,
 		},
 	}
 }
 
-func MapBookAlignSetRequest(userId, cityId, orderId, serverId string, level int64,
+func MapBookAlignSetRequest(userID, cityID, orderID, serverID string, level int64,
 	lg discordgo.Locale) *amqp.RabbitMQMessage {
-
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ALIGN_SET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		AlignSetRequest: &amqp.AlignSetRequest{
-			UserId:   userId,
-			CityId:   cityId,
-			OrderId:  orderId,
-			ServerId: serverId,
+			UserId:   userID,
+			CityId:   cityID,
+			OrderId:  orderID,
+			ServerId: serverID,
 			Level:    level,
 		},
 	}
 }
 
-func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverId string, alignService books.BookService,
-	serverService servers.ServerService, locale amqp.Language) *[]*discordgo.MessageEmbed {
-
-	lg := constants.MapAmqpLocale(locale)
-	server, found := serverService.GetServer(serverId)
+func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverID string, alignService books.Service,
+	serverService servers.Service, locale amqp.Language) *[]*discordgo.MessageEmbed {
+	lg := constants.MapAMQPLocale(locale)
+	server, found := serverService.GetServer(serverID)
 	if !found {
-		log.Warn().Str(constants.LogEntity, serverId).
+		log.Warn().Str(constants.LogEntity, serverID).
 			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-		server = entities.Server{Id: serverId}
+		server = entities.Server{ID: serverID}
 	}
 
 	cityValues := make(map[string]int64)
 	i18nAlignXp := make([]i18nAlignmentExperience, 0)
 	for _, alignXp := range believers {
-		value, found := cityValues[alignXp.CityId]
-		if found {
-			cityValues[alignXp.CityId] = value + alignXp.Level
+		value, foundAlign := cityValues[alignXp.CityID]
+		if foundAlign {
+			cityValues[alignXp.CityID] = value + alignXp.Level
 		} else {
-			cityValues[alignXp.CityId] = alignXp.Level
+			cityValues[alignXp.CityID] = alignXp.Level
 		}
 
-		city, found := alignService.GetCity(alignXp.CityId)
-		if !found {
-			log.Warn().Str(constants.LogEntity, alignXp.CityId).
+		city, foundCity := alignService.GetCity(alignXp.CityID)
+		if !foundCity {
+			log.Warn().Str(constants.LogEntity, alignXp.CityID).
 				Msgf("Cannot find city based on ID sent internally, continuing with empty city")
-			city = entities.City{Id: alignXp.CityId}
+			city = entities.City{ID: alignXp.CityID}
 		}
 
-		order, found := alignService.GetOrder(alignXp.OrderId)
-		if !found {
-			log.Warn().Str(constants.LogEntity, alignXp.OrderId).
+		order, foundOrder := alignService.GetOrder(alignXp.OrderID)
+		if !foundOrder {
+			log.Warn().Str(constants.LogEntity, alignXp.OrderID).
 				Msgf("Cannot find order based on ID sent internally, continuing with empty order")
-			order = entities.Order{Id: alignXp.OrderId}
+			order = entities.Order{ID: alignXp.OrderID}
 		}
 
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
@@ -133,39 +130,38 @@ func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverId stri
 }
 
 func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperience, member *discordgo.Member,
-	serverId string, alignService books.BookService, serverService servers.ServerService,
+	serverID string, alignService books.Service, serverService servers.Service,
 	locale amqp.Language) *[]*discordgo.MessageEmbed {
-
-	lg := constants.MapAmqpLocale(locale)
-	server, found := serverService.GetServer(serverId)
+	lg := constants.MapAMQPLocale(locale)
+	server, found := serverService.GetServer(serverID)
 	if !found {
-		log.Warn().Str(constants.LogEntity, serverId).
+		log.Warn().Str(constants.LogEntity, serverID).
 			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-		server = entities.Server{Id: serverId}
+		server = entities.Server{ID: serverID}
 	}
 
 	cityValues := make(map[string]int64)
 	i18nAlignXp := make([]i18nAlignmentExperience, 0)
 	for _, alignXp := range alignExperiences {
-		value, found := cityValues[alignXp.CityId]
-		if found {
+		value, foundCity := cityValues[alignXp.CityId]
+		if foundCity {
 			cityValues[alignXp.CityId] = value + alignXp.Level
 		} else {
 			cityValues[alignXp.CityId] = alignXp.Level
 		}
 
-		city, found := alignService.GetCity(alignXp.CityId)
-		if !found {
+		city, foundCity := alignService.GetCity(alignXp.CityId)
+		if !foundCity {
 			log.Warn().Str(constants.LogEntity, alignXp.CityId).
 				Msgf("Cannot find city based on ID sent internally, continuing with empty city")
-			city = entities.City{Id: alignXp.CityId}
+			city = entities.City{ID: alignXp.CityId}
 		}
 
-		order, found := alignService.GetOrder(alignXp.OrderId)
-		if !found {
+		order, foundOrder := alignService.GetOrder(alignXp.OrderId)
+		if !foundOrder {
 			log.Warn().Str(constants.LogEntity, alignXp.OrderId).
 				Msgf("Cannot find order based on ID sent internally, continuing with empty order")
-			order = entities.Order{Id: alignXp.OrderId}
+			order = entities.Order{ID: alignXp.OrderId}
 		}
 
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
@@ -210,19 +206,19 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 	return &[]*discordgo.MessageEmbed{&embed}
 }
 
-func mapWinningCity(cityValues map[string]int64, alignService books.BookService) entities.City {
-	var winningCity = constants.NeutralCity
+func mapWinningCity(cityValues map[string]int64, alignService books.Service) entities.City {
+	var winningCity = constants.GetNeutralCity()
 	var winningValue int64 = 0
-	for cityId, value := range cityValues {
+	for cityID, value := range cityValues {
 		if winningValue == value {
-			winningCity = constants.NeutralCity
+			winningCity = constants.GetNeutralCity()
 		} else if winningValue < value {
 			winningValue = value
-			city, found := alignService.GetCity(cityId)
+			city, found := alignService.GetCity(cityID)
 			if !found {
-				log.Warn().Str(constants.LogEntity, cityId).
+				log.Warn().Str(constants.LogEntity, cityID).
 					Msgf("Cannot find city based on ID sent internally, continuing with neutral city")
-				city = constants.NeutralCity
+				city = constants.GetNeutralCity()
 			}
 
 			winningCity = city

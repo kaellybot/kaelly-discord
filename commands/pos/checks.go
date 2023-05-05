@@ -11,9 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *PosCommand) checkDimension(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkDimension(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] dimension
@@ -38,9 +37,8 @@ func (command *PosCommand) checkDimension(ctx context.Context, s *discordgo.Sess
 	next(ctx)
 }
 
-func (command *PosCommand) checkServer(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] server
@@ -69,7 +67,7 @@ func (command *PosCommand) checkServer(ctx context.Context, s *discordgo.Session
 
 	if server == nil {
 		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
 		if err != nil {

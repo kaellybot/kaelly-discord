@@ -11,7 +11,7 @@ const (
 	Twitter            = "https://twitter.com/KaellyBot"
 	Github             = "https://github.com/KaellyBot"
 	Paypal             = "https://paypal.me/kaysoro"
-	DevelopmentGuildId = "299167247279194112"
+	DevelopmentGuildID = "299167247279194112"
 )
 
 var (

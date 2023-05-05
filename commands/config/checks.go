@@ -10,9 +10,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *ConfigCommand) checkServer(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		if subCommand.Name == serverSubCommandName {
@@ -38,9 +37,8 @@ func (command *ConfigCommand) checkServer(ctx context.Context, s *discordgo.Sess
 	next(ctx)
 }
 
-func (command *ConfigCommand) checkFeedType(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		if subCommand.Name == rssSubCommandName {
@@ -66,9 +64,8 @@ func (command *ConfigCommand) checkFeedType(ctx context.Context, s *discordgo.Se
 	next(ctx)
 }
 
-func (command *ConfigCommand) checkLanguage(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
+func (command *Command) checkLanguage(ctx context.Context, _ *discordgo.Session,
+	i *discordgo.InteractionCreate, _ discordgo.Locale, next middlewares.NextFunc) {
 	locale := amqp.Language_ANY
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
@@ -83,9 +80,8 @@ func (command *ConfigCommand) checkLanguage(ctx context.Context, s *discordgo.Se
 	next(context.WithValue(ctx, languageOptionName, locale))
 }
 
-func (command *ConfigCommand) checkChannelId(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
+func (command *Command) checkChannelID(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, _ discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
@@ -105,9 +101,8 @@ func (command *ConfigCommand) checkChannelId(ctx context.Context, s *discordgo.S
 	next(ctx)
 }
 
-func (command *ConfigCommand) checkEnabled(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
+func (command *Command) checkEnabled(ctx context.Context, _ *discordgo.Session,
+	i *discordgo.InteractionCreate, _ discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {

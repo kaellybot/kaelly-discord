@@ -16,9 +16,8 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-func New(jobRepository jobs.JobRepository, cityRepository cities.CityRepository,
-	orderRepository orders.OrderRepository) (*BookServiceImpl, error) {
-
+func New(jobRepository jobs.Repository, cityRepository cities.Repository,
+	orderRepository orders.Repository) (*Impl, error) {
 	jobs, err := jobRepository.GetJobs()
 	if err != nil {
 		return nil, err
@@ -26,7 +25,7 @@ func New(jobRepository jobs.JobRepository, cityRepository cities.CityRepository,
 
 	jobsMap := make(map[string]entities.Job)
 	for _, job := range jobs {
-		jobsMap[job.Id] = job
+		jobsMap[job.ID] = job
 	}
 
 	cities, err := cityRepository.GetCities()
@@ -36,7 +35,7 @@ func New(jobRepository jobs.JobRepository, cityRepository cities.CityRepository,
 
 	citiesMap := make(map[string]entities.City)
 	for _, city := range cities {
-		citiesMap[city.Id] = city
+		citiesMap[city.ID] = city
 	}
 
 	orders, err := orderRepository.GetOrders()
@@ -46,10 +45,10 @@ func New(jobRepository jobs.JobRepository, cityRepository cities.CityRepository,
 
 	ordersMap := make(map[string]entities.Order)
 	for _, order := range orders {
-		ordersMap[order.Id] = order
+		ordersMap[order.ID] = order
 	}
 
-	return &BookServiceImpl{
+	return &Impl{
 		transformer:     transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
 		jobsMap:         jobsMap,
 		jobs:            jobs,
@@ -63,16 +62,16 @@ func New(jobRepository jobs.JobRepository, cityRepository cities.CityRepository,
 	}, nil
 }
 
-func (service *BookServiceImpl) GetJobs() []entities.Job {
+func (service *Impl) GetJobs() []entities.Job {
 	return service.jobs
 }
 
-func (service *BookServiceImpl) GetJob(id string) (entities.Job, bool) {
+func (service *Impl) GetJob(id string) (entities.Job, bool) {
 	job, found := service.jobsMap[id]
 	return job, found
 }
 
-func (service *BookServiceImpl) FindJobs(name string, locale discordgo.Locale) []entities.Job {
+func (service *Impl) FindJobs(name string, locale discordgo.Locale) []entities.Job {
 	jobsFound := make([]entities.Job, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -81,8 +80,9 @@ func (service *BookServiceImpl) FindJobs(name string, locale discordgo.Locale) [
 	}
 
 	for _, job := range service.jobs {
-		currentCleanedName, _, err := transform.String(service.transformer, strings.ToLower(translators.GetEntityLabel(job, locale)))
-		if err == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		currentCleanedName, _, errStr := transform.String(service.transformer,
+			strings.ToLower(translators.GetEntityLabel(job, locale)))
+		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
 			jobsFound = append(jobsFound, job)
 		}
 	}
@@ -90,16 +90,16 @@ func (service *BookServiceImpl) FindJobs(name string, locale discordgo.Locale) [
 	return jobsFound
 }
 
-func (service *BookServiceImpl) GetCity(id string) (entities.City, bool) {
+func (service *Impl) GetCity(id string) (entities.City, bool) {
 	city, found := service.citiesMap[id]
 	return city, found
 }
 
-func (service *BookServiceImpl) GetCities() []entities.City {
+func (service *Impl) GetCities() []entities.City {
 	return service.cities
 }
 
-func (service *BookServiceImpl) FindCities(name string, locale discordgo.Locale) []entities.City {
+func (service *Impl) FindCities(name string, locale discordgo.Locale) []entities.City {
 	citiesFound := make([]entities.City, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -108,8 +108,9 @@ func (service *BookServiceImpl) FindCities(name string, locale discordgo.Locale)
 	}
 
 	for _, city := range service.cities {
-		currentCleanedName, _, err := transform.String(service.transformer, strings.ToLower(translators.GetEntityLabel(city, locale)))
-		if err == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		currentCleanedName, _, errStr := transform.String(service.transformer,
+			strings.ToLower(translators.GetEntityLabel(city, locale)))
+		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
 			citiesFound = append(citiesFound, city)
 		}
 	}
@@ -117,16 +118,16 @@ func (service *BookServiceImpl) FindCities(name string, locale discordgo.Locale)
 	return citiesFound
 }
 
-func (service *BookServiceImpl) GetOrder(id string) (entities.Order, bool) {
+func (service *Impl) GetOrder(id string) (entities.Order, bool) {
 	order, found := service.ordersMap[id]
 	return order, found
 }
 
-func (service *BookServiceImpl) GetOrders() []entities.Order {
+func (service *Impl) GetOrders() []entities.Order {
 	return service.orders
 }
 
-func (service *BookServiceImpl) FindOrders(name string, locale discordgo.Locale) []entities.Order {
+func (service *Impl) FindOrders(name string, locale discordgo.Locale) []entities.Order {
 	ordersFound := make([]entities.Order, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -135,8 +136,9 @@ func (service *BookServiceImpl) FindOrders(name string, locale discordgo.Locale)
 	}
 
 	for _, order := range service.orders {
-		currentCleanedName, _, err := transform.String(service.transformer, strings.ToLower(translators.GetEntityLabel(order, locale)))
-		if err == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		currentCleanedName, _, errStr := transform.String(service.transformer,
+			strings.ToLower(translators.GetEntityLabel(order, locale)))
+		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
 			ordersFound = append(ordersFound, order)
 		}
 	}

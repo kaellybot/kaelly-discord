@@ -5,22 +5,14 @@ import (
 	guildRepo "github.com/kaellybot/kaelly-discord/repositories/guilds"
 )
 
-type GuildService interface {
-	GetServer(guildId, channelId string) (*entities.Server, error)
-}
-
-type GuildServiceImpl struct {
-	guildRepo guildRepo.GuildRepository
-}
-
-func New(guildRepo guildRepo.GuildRepository) *GuildServiceImpl {
-	return &GuildServiceImpl{
+func New(guildRepo guildRepo.Repository) *Impl {
+	return &Impl{
 		guildRepo: guildRepo,
 	}
 }
 
-func (service *GuildServiceImpl) GetServer(guildId, channelId string) (*entities.Server, error) {
-	server, err := service.guildRepo.GetServer(guildId, channelId)
+func (service *Impl) GetServer(guildID, channelID string) (*entities.Server, error) {
+	server, err := service.guildRepo.GetServer(guildID, channelID)
 	if err != nil {
 		return nil, err
 	}

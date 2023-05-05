@@ -7,13 +7,13 @@ import (
 	"golang.org/x/text/transform"
 )
 
-type FeedService interface {
+type Service interface {
 	GetFeedTypes() []entities.FeedType
 	FindFeedTypes(name string, locale discordgo.Locale) []entities.FeedType
 }
 
-type FeedServiceImpl struct {
+type Impl struct {
 	transformer transform.Transformer
 	feedTypes   []entities.FeedType
-	repository  repository.FeedRepository
+	repository  repository.Repository
 }

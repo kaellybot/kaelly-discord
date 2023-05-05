@@ -3,21 +3,21 @@ package entities
 import amqp "github.com/kaellybot/kaelly-amqp"
 
 type Dimension struct {
-	Id             string `gorm:"primaryKey"`
-	DofusPortalsId string `gorm:"unique"`
+	ID             string `gorm:"primaryKey"`
+	DofusPortalsID string `gorm:"unique"`
 	Icon           string
 	Color          int
-	Labels         []DimensionLabel `gorm:"foreignKey:DimensionId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Labels         []DimensionLabel `gorm:"foreignKey:DimensionID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type DimensionLabel struct {
 	Locale      amqp.Language `gorm:"primaryKey"`
-	DimensionId string        `gorm:"primaryKey"`
+	DimensionID string        `gorm:"primaryKey"`
 	Label       string
 }
 
-func (dimension Dimension) GetId() string {
-	return dimension.Id
+func (dimension Dimension) GetID() string {
+	return dimension.ID
 }
 
 func (dimension Dimension) GetLabels() map[amqp.Language]string {

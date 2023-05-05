@@ -5,20 +5,20 @@ import (
 )
 
 type TransportType struct {
-	Id             string `gorm:"primaryKey"`
-	DofusPortalsId string `gorm:"unique"`
+	ID             string `gorm:"primaryKey"`
+	DofusPortalsID string `gorm:"unique"`
 	Emoji          string
-	Labels         []TransportTypeLabel `gorm:"foreignKey:TransportTypeId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Labels         []TransportTypeLabel `gorm:"foreignKey:TransportTypeID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type TransportTypeLabel struct {
 	Locale          amqp.Language `gorm:"primaryKey"`
-	TransportTypeId string        `gorm:"primaryKey"`
+	TransportTypeID string        `gorm:"primaryKey"`
 	Label           string
 }
 
-func (transportType TransportType) GetId() string {
-	return transportType.Id
+func (transportType TransportType) GetID() string {
+	return transportType.ID
 }
 
 func (transportType TransportType) GetLabels() map[amqp.Language]string {

@@ -31,13 +31,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-func New() (*Application, error) {
+func New() (*Impl, error) {
 	db, err := databases.New()
 	if err != nil {
 		log.Fatal().Err(err).Msgf("DB instantiation failed, shutting down.")
 	}
 
-	broker, err := amqp.New(constants.GetRabbitMQClientId(), viper.GetString(constants.RabbitMqAddress), getBindings())
+	broker, err := amqp.New(constants.GetRabbitMQClientID(), viper.GetString(constants.RabbitMQAddress), getBindings())
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Broker instantiation failed, shutting down.")
 	}
@@ -92,14 +92,14 @@ func New() (*Application, error) {
 
 	discordService, err := discord.New(
 		viper.GetString(constants.Token),
-		viper.GetInt(constants.ShardId),
+		viper.GetInt(constants.ShardID),
 		viper.GetInt(constants.ShardCount),
 		slashCommands, userCommands)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Application{
+	return &Impl{
 		db:             db,
 		broker:         broker,
 		requestManager: requestsManager,
@@ -113,7 +113,7 @@ func New() (*Application, error) {
 	}, nil
 }
 
-func (app *Application) Run() error {
+func (app *Impl) Run() error {
 	err := app.requestManager.Listen()
 	if err != nil {
 		return err
@@ -132,7 +132,7 @@ func (app *Application) Run() error {
 	return nil
 }
 
-func (app *Application) Shutdown() {
+func (app *Impl) Shutdown() {
 	app.db.Shutdown()
 	app.broker.Shutdown()
 	app.discordService.Shutdown()

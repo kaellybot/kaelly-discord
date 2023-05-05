@@ -4,4 +4,4 @@ const (
 	commandName = "about"
 )
 
-type AboutCommand struct{}
+type Command struct{}

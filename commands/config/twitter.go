@@ -10,17 +10,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *ConfigCommand) twitterRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
-
-	channelId, enabled, locale, err := command.getWebhookTwitterOptions(ctx)
+	channelID, enabled, locale, err := command.getWebhookTwitterOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	if !validators.HasWebhookPermission(s, channelId) {
+	if !validators.HasWebhookPermission(s, channelID) {
 		content := i18n.Get(lg, "checks.permissions.webhook")
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
 		if err != nil {
@@ -29,15 +28,15 @@ func (command *ConfigCommand) twitterRequest(ctx context.Context, s *discordgo.S
 		return
 	}
 
-	var webhook *discordgo.Webhook = nil
+	var webhook *discordgo.Webhook
 	if enabled {
-		webhook, err = command.createWebhook(s, channelId)
+		webhook, err = command.createWebhook(s, channelID)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	msg := mappers.MapConfigurationWebhookTwitterRequest(webhook, i.GuildID, channelId, enabled, locale, lg)
+	msg := mappers.MapConfigurationWebhookTwitterRequest(webhook, i.GuildID, channelID, enabled, locale, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

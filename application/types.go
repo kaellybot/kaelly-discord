@@ -15,22 +15,22 @@ import (
 )
 
 var (
-	ErrCannotInstantiateApp = errors.New("Cannot instantiate application")
+	ErrCannotInstantiateApp = errors.New("cannot instantiate application")
 )
 
-type ApplicationInterface interface {
+type Application interface {
 	Run() error
 	Shutdown()
 }
 
-type Application struct {
+type Impl struct {
 	db             databases.MySQLConnection
-	broker         amqp.MessageBrokerInterface
-	guildService   guilds.GuildService
-	bookService    books.BookService
-	portalService  portals.PortalService
-	serverService  servers.ServerService
-	discordService discord.DiscordService
+	broker         amqp.MessageBroker
+	guildService   guilds.Service
+	bookService    books.Service
+	portalService  portals.Service
+	serverService  servers.Service
+	discordService discord.Service
 	slashCommands  []commands.SlashCommand
 	userCommands   []commands.UserCommand
 	requestManager requests.RequestManager

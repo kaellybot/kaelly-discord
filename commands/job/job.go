@@ -15,10 +15,9 @@ import (
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
-func New(bookService books.BookService, guildService guilds.GuildService,
-	serverService servers.ServerService, requestManager requests.RequestManager) *JobCommand {
-
-	return &JobCommand{
+func New(bookService books.Service, guildService guilds.Service,
+	serverService servers.Service, requestManager requests.RequestManager) *Command {
+	return &Command{
 		bookService:    bookService,
 		guildService:   guildService,
 		serverService:  serverService,
@@ -26,7 +25,7 @@ func New(bookService books.BookService, guildService guilds.GuildService,
 	}
 }
 
-func (command *JobCommand) GetSlashCommand() *constants.DiscordCommand {
+func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     slashCommandName,
@@ -110,7 +109,7 @@ func (command *JobCommand) GetSlashCommand() *constants.DiscordCommand {
 	}
 }
 
-func (command *JobCommand) GetUserCommand() *constants.DiscordCommand {
+func (command *Command) GetUserCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     userCommandName,
@@ -124,7 +123,7 @@ func (command *JobCommand) GetUserCommand() *constants.DiscordCommand {
 	}
 }
 
-func (command *JobCommand) slashRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) slashRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
 	for _, subCommand := range i.ApplicationCommandData().Options {
@@ -134,54 +133,54 @@ func (command *JobCommand) slashRequest(ctx context.Context, s *discordgo.Sessio
 		case setSubCommandName:
 			command.setRequest(ctx, s, i, lg)
 		default:
-			panic(fmt.Errorf("Cannot handle subCommand %v, request ignored", subCommand.Name))
+			panic(fmt.Errorf("cannot handle subCommand %v, request ignored", subCommand.Name))
 		}
 	}
 }
 
-func (command *JobCommand) userRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
 	command.userJobRequest(ctx, s, i, lg)
 }
 
-func (command *JobCommand) getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {
+func (command *Command) getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {
 	job, ok := ctx.Value(jobOptionName).(entities.Job)
 	if !ok {
-		return entities.Job{}, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Job", ctx.Value(jobOptionName))
+		return entities.Job{}, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Job", ctx.Value(jobOptionName))
 	}
 
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
-		return entities.Job{}, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Job{}, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
 	return job, server, nil
 }
 
-func (command *JobCommand) getSetOptions(ctx context.Context) (entities.Job, int64, entities.Server, error) {
+func (command *Command) getSetOptions(ctx context.Context) (entities.Job, int64, entities.Server, error) {
 	job, ok := ctx.Value(jobOptionName).(entities.Job)
 	if !ok {
-		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Job", ctx.Value(jobOptionName))
+		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Job", ctx.Value(jobOptionName))
 	}
 
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
-		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
 	level, ok := ctx.Value(levelOptionName).(int64)
 	if !ok {
-		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("Cannot cast %v as uint", ctx.Value(levelOptionName))
+		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("cannot cast %v as uint", ctx.Value(levelOptionName))
 	}
 
 	return job, level, server, nil
 }
 
-func (command *JobCommand) getUserOptions(ctx context.Context) (entities.Server, error) {
+func (command *Command) getUserOptions(ctx context.Context) (entities.Server, error) {
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
-		return entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
 	return server, nil

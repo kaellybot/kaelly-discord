@@ -32,9 +32,9 @@ var (
 	maxLevel float64 = constants.AlignmentMaxLevel
 )
 
-type AlignCommand struct {
-	bookService    books.BookService
-	guildService   guilds.GuildService
-	serverService  servers.ServerService
+type Command struct {
+	bookService    books.Service
+	guildService   guilds.Service
+	serverService  servers.Service
 	requestManager requests.RequestManager
 }

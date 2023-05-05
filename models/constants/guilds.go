@@ -8,7 +8,7 @@ import (
 type GuildConfig struct {
 	Name            string
 	Icon            string
-	ServerId        string
+	ServerID        string
 	ChannelServers  []ChannelServer
 	AlmanaxWebhooks []AlmanaxWebhook
 	RssWebhooks     []RssWebhook
@@ -17,7 +17,7 @@ type GuildConfig struct {
 
 type ChannelServer struct {
 	Channel  *discordgo.Channel
-	ServerId string
+	ServerID string
 }
 
 type ChannelWebhook struct {
@@ -31,7 +31,7 @@ type AlmanaxWebhook struct {
 
 type RssWebhook struct {
 	ChannelWebhook
-	FeedId string
+	FeedID string
 }
 
 type TwitterWebhook struct {

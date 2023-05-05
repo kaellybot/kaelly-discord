@@ -19,10 +19,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func New(guildService guilds.GuildService, portalService portals.PortalService,
-	serverService servers.ServerService, requestManager requests.RequestManager) *PosCommand {
-
-	return &PosCommand{
+func New(guildService guilds.Service, portalService portals.Service,
+	serverService servers.Service, requestManager requests.RequestManager) *Command {
+	return &Command{
 		guildService:   guildService,
 		portalService:  portalService,
 		serverService:  serverService,
@@ -30,7 +29,7 @@ func New(guildService guilds.GuildService, portalService portals.PortalService,
 	}
 }
 
-func (command *PosCommand) GetSlashCommand() *constants.DiscordCommand {
+func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     commandName,
@@ -67,7 +66,7 @@ func (command *PosCommand) GetSlashCommand() *constants.DiscordCommand {
 	}
 }
 
-func (command *PosCommand) request(ctx context.Context, s *discordgo.Session,
+func (command *Command) request(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 
 	dimension, server, err := command.getOptions(ctx)
@@ -82,24 +81,24 @@ func (command *PosCommand) request(ctx context.Context, s *discordgo.Session,
 	}
 }
 
-func (command *PosCommand) getOptions(ctx context.Context) (entities.Dimension, entities.Server, error) {
+func (command *Command) getOptions(ctx context.Context) (entities.Dimension, entities.Server, error) {
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
-		return entities.Dimension{}, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Dimension{}, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
 	dimension := entities.Dimension{}
 	if ctx.Value(dimensionOptionName) != nil {
 		dimension, ok = ctx.Value(dimensionOptionName).(entities.Dimension)
 		if !ok {
-			return entities.Dimension{}, entities.Server{}, fmt.Errorf("Cannot cast %v as entities.Dimension", ctx.Value(dimensionOptionName))
+			return entities.Dimension{}, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Dimension", ctx.Value(dimensionOptionName))
 		}
 	}
 
 	return dimension, server, nil
 }
 
-func (command *PosCommand) respond(ctx context.Context, s *discordgo.Session,
+func (command *Command) respond(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 
 	if !isAnswerValid(message) {

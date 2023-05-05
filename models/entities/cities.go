@@ -3,21 +3,21 @@ package entities
 import amqp "github.com/kaellybot/kaelly-amqp"
 
 type City struct {
-	Id     string `gorm:"primaryKey"`
+	ID     string `gorm:"primaryKey"`
 	Icon   string
 	Emoji  string
 	Color  int
-	Labels []CityLabel `gorm:"foreignKey:CityId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Labels []CityLabel `gorm:"foreignKey:CityID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type CityLabel struct {
 	Locale amqp.Language `gorm:"primaryKey"`
-	CityId string        `gorm:"primaryKey"`
+	CityID string        `gorm:"primaryKey"`
 	Label  string
 }
 
-func (city City) GetId() string {
-	return city.Id
+func (city City) GetID() string {
+	return city.ID
 }
 
 func (city City) GetLabels() map[amqp.Language]string {

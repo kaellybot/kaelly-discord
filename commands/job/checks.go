@@ -11,9 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *JobCommand) checkJob(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkJob(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] job
@@ -39,9 +38,8 @@ func (command *JobCommand) checkJob(ctx context.Context, s *discordgo.Session,
 	next(ctx)
 }
 
-func (command *JobCommand) checkLevel(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -72,9 +70,8 @@ func (command *JobCommand) checkLevel(ctx context.Context, s *discordgo.Session,
 	next(ctx)
 }
 
-func (command *JobCommand) checkServer(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] server
@@ -105,28 +102,7 @@ func (command *JobCommand) checkServer(ctx context.Context, s *discordgo.Session
 
 	if server == nil {
 		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Content: &content,
-		})
-		if err != nil {
-			log.Error().Err(err).Msg("Server check response ignored")
-		}
-	} else {
-		next(context.WithValue(ctx, serverOptionName, *server))
-	}
-}
-
-func (command *JobCommand) checkUserServer(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
-	server, err := command.guildService.GetServer(i.GuildID, i.ChannelID)
-	if err != nil {
-		panic(err)
-	}
-
-	if server == nil {
-		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
 		if err != nil {

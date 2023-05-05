@@ -12,9 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *JobCommand) getRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
-
 	job, server, err := command.getGetOptions(ctx)
 	if err != nil {
 		panic(err)
@@ -36,18 +35,16 @@ func (command *JobCommand) getRequest(ctx context.Context, s *discordgo.Session,
 		properties[member.User.ID] = username
 	}
 
-	msg := mappers.MapBookJobGetBookRequest(job.Id, server.Id, userIds, craftsmenListLimit, lg)
+	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID, userIds, craftsmenListLimit, lg)
 	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.getRespond, properties)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *JobCommand) getRespond(ctx context.Context, s *discordgo.Session,
+func (command *Command) getRespond(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-
 		craftsmen := make([]constants.JobUserLevel, 0)
 		for _, craftsman := range message.JobGetBookAnswer.Craftsmen {
 			username, found := properties[craftsman.UserId]

@@ -15,24 +15,24 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-func New(repository repository.FeedRepository) (*FeedServiceImpl, error) {
+func New(repository repository.Repository) (*Impl, error) {
 	feedTypes, err := repository.GetFeedTypes()
 	if err != nil {
 		return nil, err
 	}
 
-	return &FeedServiceImpl{
+	return &Impl{
 		transformer: transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
 		feedTypes:   feedTypes,
 		repository:  repository,
 	}, nil
 }
 
-func (service *FeedServiceImpl) GetFeedTypes() []entities.FeedType {
+func (service *Impl) GetFeedTypes() []entities.FeedType {
 	return service.feedTypes
 }
 
-func (service *FeedServiceImpl) FindFeedTypes(name string, locale discordgo.Locale) []entities.FeedType {
+func (service *Impl) FindFeedTypes(name string, locale discordgo.Locale) []entities.FeedType {
 	feedTypesFound := make([]entities.FeedType, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {

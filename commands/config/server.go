@@ -12,26 +12,25 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *ConfigCommand) serverRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) serverRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
-
-	server, channelId, err := command.getServerOptions(ctx)
+	server, channelID, err := command.getServerOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapConfigurationServerRequest(i.Interaction.GuildID, channelId, server.Id, lg)
+	msg := mappers.MapConfigurationServerRequest(i.Interaction.GuildID, channelID, server.ID, lg)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.serverRespond)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *ConfigCommand) serverRespond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+func (command *Command) serverRespond(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-		content := i18n.Get(constants.MapAmqpLocale(message.Language), "config.success")
+		content := i18n.Get(constants.MapAMQPLocale(message.Language), "config.success")
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})

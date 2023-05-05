@@ -10,15 +10,14 @@ import (
 )
 
 func New(token string, shardID, shardCount int, slashCommands []commands.SlashCommand,
-	userCommands []commands.UserCommand) (*DiscordServiceImpl, error) {
-
+	userCommands []commands.UserCommand) (*Impl, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Error().Err(err).Msgf("Connecting to Discord gateway failed")
 		return nil, err
 	}
 
-	service := DiscordServiceImpl{
+	service := Impl{
 		session:  dg,
 		commands: make([]*constants.DiscordCommand, 0),
 	}
@@ -40,7 +39,7 @@ func New(token string, shardID, shardCount int, slashCommands []commands.SlashCo
 	return &service, nil
 }
 
-func (service *DiscordServiceImpl) Listen() error {
+func (service *Impl) Listen() error {
 	err := service.session.Open()
 	if err != nil {
 		log.Error().Int(constants.LogShard, service.session.ShardID).Err(err).Msgf("Impossible to listen events")
@@ -51,12 +50,11 @@ func (service *DiscordServiceImpl) Listen() error {
 	return nil
 }
 
-func (service *DiscordServiceImpl) RegisterCommands() error {
-
-	guildId := ""
+func (service *Impl) RegisterCommands() error {
+	guildID := ""
 	if !viper.GetBool(constants.Production) {
 		log.Info().Msgf("Development mode enabled, registering commands in dedicated development guild")
-		guildId = constants.DevelopmentGuildId
+		guildID = constants.DevelopmentGuildID
 	}
 
 	identities := make([]*discordgo.ApplicationCommand, 0)
@@ -64,7 +62,7 @@ func (service *DiscordServiceImpl) RegisterCommands() error {
 		identities = append(identities, &command.Identity)
 	}
 
-	_, err := service.session.ApplicationCommandBulkOverwrite(service.session.State.User.ID, guildId, identities)
+	_, err := service.session.ApplicationCommandBulkOverwrite(service.session.State.User.ID, guildID, identities)
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to create commands, registration stopped")
 		return err
@@ -74,21 +72,24 @@ func (service *DiscordServiceImpl) RegisterCommands() error {
 	return nil
 }
 
-func (service *DiscordServiceImpl) Shutdown() error {
+func (service *Impl) Shutdown() error {
 	log.Info().Int(constants.LogShard, service.session.ShardID).Msgf("Closing Discord connections...")
 	return service.session.Close()
 }
 
-func (service *DiscordServiceImpl) ready(session *discordgo.Session, event *discordgo.Ready) {
-	log.Info().Int(constants.LogShard, session.ShardID).Int(constants.LogGuildCount, len(session.State.Guilds)).Msgf("Ready!")
+func (service *Impl) ready(session *discordgo.Session, _ *discordgo.Ready) {
+	log.Info().
+		Int(constants.LogShard, session.ShardID).
+		Int(constants.LogGuildCount, len(session.State.Guilds)).
+		Msgf("Ready!")
 	session.UpdateGameStatus(0, constants.Game.Name)
 }
 
-func (service *DiscordServiceImpl) messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
+func (service *Impl) messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
 	// TODO defer service.handlePanic()
 }
 
-func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session, event *discordgo.InteractionCreate) {
+func (service *Impl) interactionCreate(session *discordgo.Session, event *discordgo.InteractionCreate) {
 	defer panics.HandlePanic(session, event)
 
 	err := service.deferInteraction(session, event)
@@ -117,7 +118,7 @@ func (service *DiscordServiceImpl) interactionCreate(session *discordgo.Session,
 	}
 }
 
-func (service *DiscordServiceImpl) deferInteraction(session *discordgo.Session, event *discordgo.InteractionCreate) error {
+func (service *Impl) deferInteraction(session *discordgo.Session, event *discordgo.InteractionCreate) error {
 	if event.Interaction.Type != discordgo.InteractionApplicationCommandAutocomplete {
 		return session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,

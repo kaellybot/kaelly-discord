@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	ErrInvalidAnswerMessage = errors.New("Answer message is not valid")
+	ErrInvalidAnswerMessage = errors.New("answer message is not valid")
 )
 
 type SlashCommand interface {

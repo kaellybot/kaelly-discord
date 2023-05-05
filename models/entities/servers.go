@@ -3,22 +3,22 @@ package entities
 import amqp "github.com/kaellybot/kaelly-amqp"
 
 type Server struct {
-	Id                  string `gorm:"primaryKey"`
-	DofusPortalsId      string `gorm:"unique"`
-	DofusEncyclopediaId string `gorm:"unique"`
+	ID                  string `gorm:"primaryKey"`
+	DofusPortalsID      string `gorm:"unique"`
+	DofusEncyclopediaID string `gorm:"unique"`
 	Icon                string
 	Emoji               string
-	Labels              []ServerLabel `gorm:"foreignKey:ServerId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Labels              []ServerLabel `gorm:"foreignKey:ServerID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type ServerLabel struct {
 	Locale   amqp.Language `gorm:"primaryKey"`
-	ServerId string        `gorm:"primaryKey"`
+	ServerID string        `gorm:"primaryKey"`
 	Label    string
 }
 
-func (server Server) GetId() string {
-	return server.Id
+func (server Server) GetID() string {
+	return server.ID
 }
 
 func (server Server) GetLabels() map[amqp.Language]string {

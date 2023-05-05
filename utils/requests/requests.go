@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func New(broker amqp.MessageBrokerInterface) *RequestManagerImpl {
+func New(broker amqp.MessageBroker) *RequestManagerImpl {
 	return &RequestManagerImpl{
 		broker:   broker,
 		requests: make(map[string]discordRequest),
@@ -27,7 +27,6 @@ func GetBinding() amqp.Binding {
 func (manager *RequestManagerImpl) Request(s *discordgo.Session, i *discordgo.InteractionCreate,
 	routingKey string, message *amqp.RabbitMQMessage, callback RequestCallback,
 	optionalProperties ...map[string]any) error {
-
 	err := manager.broker.Publish(message, amqp.ExchangeRequest, routingKey, i.ID)
 	if err != nil {
 		return err
@@ -49,14 +48,15 @@ func (manager *RequestManagerImpl) Request(s *discordgo.Session, i *discordgo.In
 
 func (manager *RequestManagerImpl) Listen() error {
 	log.Info().Msgf("Listening request answers...")
-	return manager.broker.Consume(AnswersQueueName, AnswersRoutingKey, manager.consume)
+	return manager.broker.Consume(AnswersQueueName, manager.consume)
 }
 
-func (manager *RequestManagerImpl) consume(ctx context.Context, message *amqp.RabbitMQMessage, correlationId string) {
-	request, found := manager.requests[correlationId]
+func (manager *RequestManagerImpl) consume(ctx context.Context,
+	message *amqp.RabbitMQMessage, correlationID string) {
+	request, found := manager.requests[correlationID]
 	if found {
 		defer panics.HandlePanic(request.session, request.interaction)
-		delete(manager.requests, correlationId)
+		delete(manager.requests, correlationID)
 		request.callback(ctx, request.session, request.interaction, message, request.properties)
 	}
 }

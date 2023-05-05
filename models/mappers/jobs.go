@@ -19,64 +19,61 @@ type i18nJobExperience struct {
 	Level int64
 }
 
-func MapBookJobGetBookRequest(jobId, serverId string, userIds []string,
+func MapBookJobGetBookRequest(jobID, serverID string, userIDs []string,
 	craftsmenListLimit int64, lg discordgo.Locale) *amqp.RabbitMQMessage {
-
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_GET_BOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		JobGetBookRequest: &amqp.JobGetBookRequest{
-			UserIds:  userIds,
-			JobId:    jobId,
-			ServerId: serverId,
+			UserIds:  userIDs,
+			JobId:    jobID,
+			ServerId: serverID,
 			Limit:    craftsmenListLimit,
 		},
 	}
 }
 
-func MapBookJobGetUserRequest(userId, serverId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapBookJobGetUserRequest(userID, serverID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_GET_USER_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		JobGetUserRequest: &amqp.JobGetUserRequest{
-			UserId:   userId,
-			ServerId: serverId,
+			UserId:   userID,
+			ServerId: serverID,
 		},
 	}
 }
 
-func MapBookJobSetRequest(userId, jobId, serverId string, level int64,
+func MapBookJobSetRequest(userID, jobID, serverID string, level int64,
 	lg discordgo.Locale) *amqp.RabbitMQMessage {
-
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_SET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		JobSetRequest: &amqp.JobSetRequest{
-			UserId:   userId,
-			JobId:    jobId,
-			ServerId: serverId,
+			UserId:   userID,
+			JobId:    jobID,
+			ServerId: serverID,
 			Level:    level,
 		},
 	}
 }
 
-func MapJobBookToEmbed(craftsmen []constants.JobUserLevel, jobId, serverId string, jobService books.BookService,
-	serverService servers.ServerService, locale amqp.Language) *[]*discordgo.MessageEmbed {
+func MapJobBookToEmbed(craftsmen []constants.JobUserLevel, jobID, serverID string, jobService books.Service,
+	serverService servers.Service, locale amqp.Language) *[]*discordgo.MessageEmbed {
+	lg := constants.MapAMQPLocale(locale)
 
-	lg := constants.MapAmqpLocale(locale)
-
-	job, found := jobService.GetJob(jobId)
+	job, found := jobService.GetJob(jobID)
 	if !found {
-		log.Warn().Str(constants.LogEntity, jobId).
+		log.Warn().Str(constants.LogEntity, jobID).
 			Msgf("Cannot find job based on ID sent internally, continuing with empty job")
-		job = entities.Job{Id: jobId}
+		job = entities.Job{ID: jobID}
 	}
 
-	server, found := serverService.GetServer(serverId)
+	server, found := serverService.GetServer(serverID)
 	if !found {
-		log.Warn().Str(constants.LogEntity, serverId).
+		log.Warn().Str(constants.LogEntity, serverID).
 			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-		server = entities.Server{Id: serverId}
+		server = entities.Server{ID: serverID}
 	}
 
 	sort.SliceStable(craftsmen, func(i, j int) bool {
@@ -101,24 +98,23 @@ func MapJobBookToEmbed(craftsmen []constants.JobUserLevel, jobId, serverId strin
 }
 
 func MapJobUserToEmbed(jobExperiences []*amqp.JobGetUserAnswer_JobExperience, member *discordgo.Member,
-	serverId string, jobService books.BookService, serverService servers.ServerService,
+	serverID string, jobService books.Service, serverService servers.Service,
 	locale amqp.Language) *[]*discordgo.MessageEmbed {
-
-	lg := constants.MapAmqpLocale(locale)
-	server, found := serverService.GetServer(serverId)
+	lg := constants.MapAMQPLocale(locale)
+	server, found := serverService.GetServer(serverID)
 	if !found {
-		log.Warn().Str(constants.LogEntity, serverId).
+		log.Warn().Str(constants.LogEntity, serverID).
 			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-		server = entities.Server{Id: serverId}
+		server = entities.Server{ID: serverID}
 	}
 
 	i18nJobXp := make([]i18nJobExperience, 0)
 	for _, jobXp := range jobExperiences {
-		job, found := jobService.GetJob(jobXp.JobId)
-		if !found {
+		job, foundJob := jobService.GetJob(jobXp.JobId)
+		if !foundJob {
 			log.Warn().Str(constants.LogEntity, jobXp.JobId).
 				Msgf("Cannot find job based on ID sent internally, continuing with empty job")
-			job = entities.Job{Id: jobXp.JobId}
+			job = entities.Job{ID: jobXp.JobId}
 		}
 
 		i18nJobXp = append(i18nJobXp, i18nJobExperience{

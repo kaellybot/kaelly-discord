@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *AlignCommand) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	data := i.ApplicationCommandData()
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
 

@@ -35,38 +35,37 @@ type i18nProvider struct {
 	Emoji string
 }
 
-func MapConfigurationGetRequest(guildId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapConfigurationGetRequest(guildID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_GET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		ConfigurationGetRequest: &amqp.ConfigurationGetRequest{
-			GuildId: guildId,
+			GuildId: guildID,
 		},
 	}
 }
 
-func MapConfigurationServerRequest(guildId, channelId, serverId string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapConfigurationServerRequest(guildID, channelID, serverID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_SERVER_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		ConfigurationSetServerRequest: &amqp.ConfigurationSetServerRequest{
-			GuildId:   guildId,
-			ChannelId: channelId,
-			ServerId:  serverId,
+			GuildId:   guildID,
+			ChannelId: channelID,
+			ServerId:  serverID,
 		},
 	}
 }
 
-func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildId, channelId string,
+func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildID, channelID string,
 	enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
-
 	if locale == amqp.Language_ANY {
 		locale = constants.MapDiscordLocale(lg)
 	}
 
-	var webhookId, webhookToken string
+	var webhookID, webhookToken string
 	if webhook != nil {
-		webhookId = webhook.ID
+		webhookID = webhook.ID
 		webhookToken = webhook.Token
 	}
 
@@ -74,9 +73,9 @@ func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildId, 
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		ConfigurationSetAlmanaxWebhookRequest: &amqp.ConfigurationSetAlmanaxWebhookRequest{
-			GuildId:      guildId,
-			ChannelId:    channelId,
-			WebhookId:    webhookId,
+			GuildId:      guildID,
+			ChannelId:    channelID,
+			WebhookId:    webhookID,
 			WebhookToken: webhookToken,
 			Enabled:      enabled,
 			Language:     locale,
@@ -84,16 +83,15 @@ func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildId, 
 	}
 }
 
-func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildId, channelId string,
+func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildID, channelID string,
 	feed entities.FeedType, enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
-
 	if locale == amqp.Language_ANY {
 		locale = constants.MapDiscordLocale(lg)
 	}
 
-	var webhookId, webhookToken string
+	var webhookID, webhookToken string
 	if webhook != nil {
-		webhookId = webhook.ID
+		webhookID = webhook.ID
 		webhookToken = webhook.Token
 	}
 
@@ -101,10 +99,10 @@ func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildId, chan
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		ConfigurationSetRssWebhookRequest: &amqp.ConfigurationSetRssWebhookRequest{
-			GuildId:      guildId,
-			ChannelId:    channelId,
-			FeedId:       feed.Id,
-			WebhookId:    webhookId,
+			GuildId:      guildID,
+			ChannelId:    channelID,
+			FeedId:       feed.ID,
+			WebhookId:    webhookID,
 			WebhookToken: webhookToken,
 			Enabled:      enabled,
 			Language:     locale,
@@ -112,16 +110,15 @@ func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildId, chan
 	}
 }
 
-func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildId, channelId string,
+func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildID, channelID string,
 	enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
-
 	if locale == amqp.Language_ANY {
 		locale = constants.MapDiscordLocale(lg)
 	}
 
-	var webhookId, webhookToken string
+	var webhookID, webhookToken string
 	if webhook != nil {
-		webhookId = webhook.ID
+		webhookID = webhook.ID
 		webhookToken = webhook.Token
 	}
 
@@ -129,9 +126,9 @@ func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildId, 
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		ConfigurationSetTwitterWebhookRequest: &amqp.ConfigurationSetTwitterWebhookRequest{
-			GuildId:      guildId,
-			ChannelId:    channelId,
-			WebhookId:    webhookId,
+			GuildId:      guildID,
+			ChannelId:    channelID,
+			WebhookId:    webhookID,
 			WebhookToken: webhookToken,
 			Enabled:      enabled,
 			Language:     locale,
@@ -139,18 +136,17 @@ func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildId, 
 	}
 }
 
-func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.ServerService,
-	feedService feeds.FeedService, locale amqp.Language) *discordgo.MessageEmbed {
-
-	lg := constants.MapAmqpLocale(locale)
+func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service,
+	feedService feeds.Service, locale amqp.Language) *discordgo.MessageEmbed {
+	lg := constants.MapAMQPLocale(locale)
 
 	var guildServer *i18nServer
-	if len(guild.ServerId) > 0 {
-		server, found := serverService.GetServer(guild.ServerId)
+	if len(guild.ServerID) > 0 {
+		server, found := serverService.GetServer(guild.ServerID)
 		if !found {
-			log.Warn().Str(constants.LogEntity, guild.ServerId).
+			log.Warn().Str(constants.LogEntity, guild.ServerID).
 				Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-			server = entities.Server{Id: guild.ServerId}
+			server = entities.Server{ID: guild.ServerID}
 		}
 
 		guildServer = &i18nServer{
@@ -161,11 +157,11 @@ func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.ServerS
 
 	channelServers := make([]i18nChannelServer, 0)
 	for _, channelServer := range guild.ChannelServers {
-		server, found := serverService.GetServer(channelServer.ServerId)
+		server, found := serverService.GetServer(channelServer.ServerID)
 		if !found {
-			log.Warn().Str(constants.LogEntity, channelServer.ServerId).
+			log.Warn().Str(constants.LogEntity, channelServer.ServerID).
 				Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-			server = entities.Server{Id: channelServer.ServerId}
+			server = entities.Server{ID: channelServer.ServerID}
 		}
 
 		channelServers = append(channelServers, i18nChannelServer{
@@ -217,15 +213,15 @@ func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, lg discordgo.
 	return i18nWebhooks
 }
 
-func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.FeedService, lg discordgo.Locale) []i18nChannelWebhook {
+func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.Service, lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
 		var providerName string
-		feeds := feedService.FindFeedTypes(webhook.FeedId, lg)
+		feeds := feedService.FindFeedTypes(webhook.FeedID, lg)
 		if len(feeds) == 1 {
 			providerName = translators.GetEntityLabel(feeds[0], lg)
 		} else {
-			log.Warn().Str(constants.LogEntity, webhook.FeedId).
+			log.Warn().Str(constants.LogEntity, webhook.FeedID).
 				Msgf("Cannot find feed type based on ID sent internally, continuing with default feed label")
 			providerName = i18n.Get(lg, "webhooks.RSS.name")
 		}

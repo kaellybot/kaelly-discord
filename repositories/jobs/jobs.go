@@ -5,19 +5,11 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 )
 
-type JobRepository interface {
-	GetJobs() ([]entities.Job, error)
+func New(db databases.MySQLConnection) *Impl {
+	return &Impl{db: db}
 }
 
-type JobRepositoryImpl struct {
-	db databases.MySQLConnection
-}
-
-func New(db databases.MySQLConnection) *JobRepositoryImpl {
-	return &JobRepositoryImpl{db: db}
-}
-
-func (repo *JobRepositoryImpl) GetJobs() ([]entities.Job, error) {
+func (repo *Impl) GetJobs() ([]entities.Job, error) {
 	var jobs []entities.Job
 	response := repo.db.GetDB().Model(&entities.Job{}).Preload("Labels").Find(&jobs)
 	return jobs, response.Error

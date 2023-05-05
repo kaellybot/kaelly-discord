@@ -15,9 +15,9 @@ const (
 	portalRequestRoutingKey = "requests.portals"
 )
 
-type PosCommand struct {
-	guildService   guilds.GuildService
-	portalService  portals.PortalService
-	serverService  servers.ServerService
+type Command struct {
+	guildService   guilds.Service
+	portalService  portals.Service
+	serverService  servers.Service
 	requestManager requests.RequestManager
 }

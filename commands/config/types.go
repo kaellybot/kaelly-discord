@@ -24,9 +24,9 @@ const (
 	configurationRequestRoutingKey = "requests.configs"
 )
 
-type ConfigCommand struct {
-	guildService   guilds.GuildService
-	feedService    feeds.FeedService
-	serverService  servers.ServerService
+type Command struct {
+	guildService   guilds.Service
+	feedService    feeds.Service
+	serverService  servers.Service
 	requestManager requests.RequestManager
 }

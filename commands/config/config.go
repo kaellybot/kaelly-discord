@@ -13,6 +13,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
@@ -27,6 +28,8 @@ func New(guildService guilds.Service, feedService feeds.Service,
 		requestManager: requestManager,
 	}
 
+	checkServer := checks.CheckServer(contract.ConfigServerOptionName, cmd.serverService)
+
 	subCommandHandlers := cmd.HandleSubCommand(commands.SubCommandHandlers{
 		contract.ConfigAlmanaxSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.almanaxRequest),
@@ -35,7 +38,7 @@ func New(guildService guilds.Service, feedService feeds.Service,
 		contract.ConfigRSSSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkFeedType, cmd.checkLanguage, cmd.checkChannelID, cmd.rssRequest),
 		contract.ConfigServerSubCommandName: middlewares.
-			Use(cmd.checkServer, cmd.checkChannelID, cmd.serverRequest),
+			Use(checkServer, cmd.checkChannelID, cmd.serverRequest),
 		contract.ConfigTwitterSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.twitterRequest),
 	})

@@ -12,31 +12,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-	data := i.ApplicationCommandData()
-	for _, subCommand := range data.Options {
-		for _, option := range subCommand.Options {
-			if option.Name == contract.ConfigServerOptionName {
-				servers := command.serverService.FindServers(option.StringValue(), lg)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
-				if checkSuccess {
-					next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
-				} else {
-					_, err := s.InteractionResponseEdit(i.Interaction, &response)
-					if err != nil {
-						log.Error().Err(err).Msg("Server check response ignored")
-					}
-				}
-
-				return
-			}
-		}
-	}
-
-	next(ctx)
-}
-
 func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()

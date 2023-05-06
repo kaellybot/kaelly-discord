@@ -12,6 +12,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
@@ -26,11 +27,14 @@ func New(bookService books.Service, guildService guilds.Service,
 		requestManager: requestManager,
 	}
 
+	checkServer := checks.CheckServerWithFallback(contract.AlignServerOptionName,
+		cmd.serverService, cmd.guildService)
+
 	subCommandHandlers := cmd.HandleSubCommand(commands.SubCommandHandlers{
 		contract.AlignGetSubCommandName: middlewares.
-			Use(cmd.checkOptionalCity, cmd.checkOptionalOrder, cmd.checkServer, cmd.getRequest),
+			Use(cmd.checkOptionalCity, cmd.checkOptionalOrder, checkServer, cmd.getRequest),
 		contract.AlignSetSubCommandName: middlewares.
-			Use(cmd.checkMandatoryCity, cmd.checkMandatoryOrder, cmd.checkLevel, cmd.checkServer, cmd.setRequest),
+			Use(cmd.checkMandatoryCity, cmd.checkMandatoryOrder, cmd.checkLevel, checkServer, cmd.setRequest),
 	})
 
 	cmd.slashHandlers = commands.DiscordHandlers{
@@ -38,7 +42,7 @@ func New(bookService books.Service, guildService guilds.Service,
 		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
 	}
 	cmd.userHandlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(cmd.checkServer, cmd.userRequest),
+		discordgo.InteractionApplicationCommand: middlewares.Use(checkServer, cmd.userRequest),
 	}
 	return &cmd
 }

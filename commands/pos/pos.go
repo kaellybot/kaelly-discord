@@ -14,6 +14,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/rs/zerolog/log"
@@ -22,20 +23,23 @@ import (
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(guildService guilds.Service, portalService portals.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
-	command := Command{
+	cmd := Command{
 		guildService:   guildService,
 		portalService:  portalService,
 		serverService:  serverService,
 		requestManager: requestManager,
 	}
 
-	command.handlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(command.checkDimension,
-			command.checkServer, command.request),
-		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+	checkServer := checks.CheckServerWithFallback(contract.PosServerOptionName,
+		cmd.serverService, cmd.guildService)
+
+	cmd.handlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand: middlewares.Use(cmd.checkDimension,
+			checkServer, cmd.request),
+		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
 	}
 
-	return &command
+	return &cmd
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {

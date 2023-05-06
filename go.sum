@@ -148,6 +148,8 @@ github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kaellybot/kaelly-amqp v0.0.2 h1:Lal/CHuBmtLC05p5wudnCgfJPQFPlkKyfKX9m1Sn81Y=
 github.com/kaellybot/kaelly-amqp v0.0.2/go.mod h1:ymW2PEel1b+Ro3Du667MBJmDr0tFYG7LtaqfbTA/5VU=
+github.com/kaellybot/kaelly-commands v0.0.3 h1:Xz9zuJhcdPGaZQyZQ3Ksd3PD4JR4chVeDyMtyC75ko0=
+github.com/kaellybot/kaelly-commands v0.0.3/go.mod h1:EXz2b8Kw1JcdOBuRY5mj/UpBx/fIelm72CaJXVKyylE=
 github.com/kaysoro/discordgo-i18n v1.0.2 h1:Qo56wDpyAOF4pnPiqTG5JSsSRn1PajjMmVpCZP6ryqg=
 github.com/kaysoro/discordgo-i18n v1.0.2/go.mod h1:bLGt9tjMm5Y0hUjxyWsNJ02l/ngNqiMIQ+X9zjZC9vw=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=

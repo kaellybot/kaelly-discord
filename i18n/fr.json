@@ -7,7 +7,7 @@
             "desc": "Tu rencontres un problème quant à mon utilisation ? Une suggestion ? N'hésite pas à rejoindre le [serveur Discord]({{ .discord }}) !"
         },
         "twitter": {
-            "title": "<:twitter:383237199925215232> Twitter",
+            "title": "<:twitter:1100040368445206619> Twitter",
             "desc": "Je suis aussi sur [Twitter]({{ .twitter }}) : tu y trouveras les dernières nouveautés !"
         },
         "opensource": {
@@ -24,7 +24,7 @@
         },
         "graphist": {
             "title": ":art: Visuels",
-            "desc": "Visuels réalisés par la géniale [{{ .graphist.Name }}]({{ .graphist.Url }})!"
+            "desc": "Visuels réalisés par la géniale [{{ .graphist.Name }}]({{ .graphist.URL }})!"
         },
         "footer": "Certaines illustrations sont la propriété d'Ankama Studio - Tous droits réservés"
     },

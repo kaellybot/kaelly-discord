@@ -1,7 +1,7 @@
 package about
 
-const (
-	commandName = "about"
-)
+import "github.com/kaellybot/kaelly-discord/commands"
 
-type Command struct{}
+type Command struct {
+	commands.AbstractCommand
+}

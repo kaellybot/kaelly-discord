@@ -1,8 +1,14 @@
 package discord
 
 import (
+	"errors"
+
 	"github.com/bwmarrin/discordgo"
-	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/commands"
+)
+
+var (
+	ErrInvalidInteractionType = errors.New("Interaction type is not handled")
 )
 
 type Service interface {
@@ -12,5 +18,5 @@ type Service interface {
 
 type Impl struct {
 	session  *discordgo.Session
-	commands []*constants.DiscordCommand
+	commands []commands.DiscordCommand
 }

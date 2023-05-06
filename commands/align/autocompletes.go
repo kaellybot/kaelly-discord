@@ -2,6 +2,7 @@ package align
 
 import (
 	"github.com/bwmarrin/discordgo"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/rs/zerolog/log"
@@ -15,7 +16,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 		for _, option := range subCommand.Options {
 			if option.Focused {
 				switch option.Name {
-				case cityOptionName:
+				case contract.AlignCityOptionName:
 					cities := command.bookService.FindCities(option.StringValue(), lg)
 
 					for _, city := range cities {
@@ -25,7 +26,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 							Value: label,
 						})
 					}
-				case orderOptionName:
+				case contract.AlignOrderOptionName:
 					orders := command.bookService.FindOrders(option.StringValue(), lg)
 
 					for _, order := range orders {
@@ -35,7 +36,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 							Value: label,
 						})
 					}
-				case serverOptionName:
+				case contract.AlignServerOptionName:
 					servers := command.serverService.FindServers(option.StringValue(), lg)
 
 					for _, server := range servers {

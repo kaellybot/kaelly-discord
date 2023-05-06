@@ -1,6 +1,7 @@
 package align
 
 import (
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -8,16 +9,6 @@ import (
 )
 
 const (
-	slashCommandName  = "align"
-	userCommandName   = "Alignments"
-	getSubCommandName = "get"
-	setSubCommandName = "set"
-
-	cityOptionName   = "city"
-	orderOptionName  = "order"
-	levelOptionName  = "level"
-	serverOptionName = "server"
-
 	alignRequestRoutingKey = "requests.books"
 
 	memberListLimit   = 1000
@@ -27,8 +18,11 @@ const (
 )
 
 type Command struct {
+	commands.AbstractCommand
 	bookService    books.Service
 	guildService   guilds.Service
 	serverService  servers.Service
 	requestManager requests.RequestManager
+	slashHandlers  commands.DiscordHandlers
+	userHandlers   commands.DiscordHandlers
 }

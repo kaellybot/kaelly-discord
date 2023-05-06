@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
@@ -18,12 +19,12 @@ func (command *Command) checkCity(ctx context.Context, s *discordgo.Session,
 	// Filled case, expecting [1, 1] city
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == cityOptionName {
+			if option.Name == contract.AlignCityOptionName {
 				cities := command.bookService.FindCities(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, lg)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
-				} else if subCommand.Name == setSubCommandName {
+				} else if subCommand.Name == contract.AlignSetSubCommandName {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
 						log.Error().Err(err).Msg("City check response ignored")
@@ -47,12 +48,12 @@ func (command *Command) checkOrder(ctx context.Context, s *discordgo.Session,
 	// Filled case, expecting [1, 1] order
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == orderOptionName {
+			if option.Name == contract.AlignOrderOptionName {
 				orders := command.bookService.FindOrders(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, lg)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
-				} else if subCommand.Name == setSubCommandName {
+				} else if subCommand.Name == contract.AlignSetSubCommandName {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
 						log.Error().Err(err).Msg("Order check response ignored")
@@ -74,9 +75,9 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
-		if subCommand.Name == setSubCommandName {
+		if subCommand.Name == contract.AlignSetSubCommandName {
 			for _, option := range subCommand.Options {
-				if option.Name == levelOptionName {
+				if option.Name == contract.AlignLevelOptionName {
 					level := option.IntValue()
 
 					if level >= constants.AlignmentMinLevel && level <= constants.AlignmentMaxLevel {
@@ -108,7 +109,7 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	// Filled case, expecting [1, 1] server
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == serverOptionName {
+			if option.Name == contract.AlignServerOptionName {
 				servers := command.serverService.FindServers(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
 				if checkSuccess {

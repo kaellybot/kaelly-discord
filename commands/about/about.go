@@ -2,6 +2,7 @@ package about
 
 import (
 	"github.com/bwmarrin/discordgo"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -11,16 +12,11 @@ func New() *Command {
 	return &Command{}
 }
 
-//nolint:nolintlint,exhaustive,lll,dupl
-func (command *Command) GetSlashCommand() *constants.DiscordCommand {
-	return &constants.DiscordCommand{
-		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand: command.about,
-		},
-	}
+func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
+	return i.ApplicationCommandData().Name == contract.AboutCommandName
 }
 
-func (command *Command) about(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{command.getAboutEmbed(lg)},
 	})

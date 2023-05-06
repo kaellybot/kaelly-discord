@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	contract "github.com/kaellybot/kaelly-commands"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/books"
@@ -16,31 +18,34 @@ import (
 
 func New(bookService books.Service, guildService guilds.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
-	return &Command{
+	command := Command{
 		bookService:    bookService,
 		guildService:   guildService,
 		serverService:  serverService,
 		requestManager: requestManager,
 	}
-}
-
-//nolint:nolintlint,exhaustive,lll,dupl
-func (command *Command) GetSlashCommand() *constants.DiscordCommand {
-	return &constants.DiscordCommand{
-		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkCity, command.checkOrder,
-				command.checkLevel, command.checkServer, command.slashRequest),
-			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
-		},
+	command.slashHandlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand: middlewares.Use(command.checkCity, command.checkOrder,
+			command.checkLevel, command.checkServer, command.slashRequest),
+		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
 	}
+	command.userHandlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+	}
+	return &command
 }
 
-//nolint:nolintlint,exhaustive,lll,dupl
-func (command *Command) GetUserCommand() *constants.DiscordCommand {
-	return &constants.DiscordCommand{
-		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.userRequest),
-		},
+func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
+	return len(i.ApplicationCommandData().TargetID) == 0 &&
+		contract.AlignSlashCommandName == i.ApplicationCommandData().Name ||
+		contract.AlignUserCommandName == i.ApplicationCommandData().Name
+}
+
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	if len(i.ApplicationCommandData().TargetID) == 0 {
+		command.CallHandler(s, i, lg, command.slashHandlers)
+	} else {
+		command.CallHandler(s, i, lg, command.userHandlers)
 	}
 }
 
@@ -48,9 +53,9 @@ func (command *Command) slashRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	for _, subCommand := range i.ApplicationCommandData().Options {
 		switch subCommand.Name {
-		case getSubCommandName:
+		case contract.AlignGetSubCommandName:
 			command.getRequest(ctx, s, i, lg)
-		case setSubCommandName:
+		case contract.AlignSetSubCommandName:
 			command.setRequest(ctx, s, i, lg)
 		default:
 			panic(fmt.Errorf("cannot handle subCommand %v, request ignored", subCommand.Name))

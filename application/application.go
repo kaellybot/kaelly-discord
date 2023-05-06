@@ -75,26 +75,18 @@ func New() (*Impl, error) {
 	guildService := guilds.New(guildRepo)
 	requestsManager := requests.New(broker)
 
-	alignCommand := align.New(bookService, guildService, serverService, requestsManager)
-	jobCommand := job.New(bookService, guildService, serverService, requestsManager)
-	slashCommands := []commands.SlashCommand{
+	commands := []commands.DiscordCommand{
 		about.New(),
-		alignCommand,
+		align.New(bookService, guildService, serverService, requestsManager),
 		config.New(guildService, feedService, serverService, requestsManager),
-		jobCommand,
+		job.New(bookService, guildService, serverService, requestsManager),
 		pos.New(guildService, portalService, serverService, requestsManager),
-	}
-
-	userCommands := []commands.UserCommand{
-		alignCommand,
-		jobCommand,
 	}
 
 	discordService, err := discord.New(
 		viper.GetString(constants.Token),
 		viper.GetInt(constants.ShardID),
-		viper.GetInt(constants.ShardCount),
-		slashCommands, userCommands)
+		viper.GetInt(constants.ShardCount), commands)
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +100,6 @@ func New() (*Impl, error) {
 		portalService:  portalService,
 		serverService:  serverService,
 		discordService: discordService,
-		slashCommands:  slashCommands,
-		userCommands:   userCommands,
 	}, nil
 }
 

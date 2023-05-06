@@ -2,6 +2,7 @@ package job
 
 import (
 	"github.com/bwmarrin/discordgo"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/rs/zerolog/log"
@@ -15,7 +16,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 		for _, option := range subCommand.Options {
 			if option.Focused {
 				switch option.Name {
-				case jobOptionName:
+				case contract.JobJobOptionName:
 					jobs := command.bookService.FindJobs(option.StringValue(), lg)
 
 					for _, job := range jobs {
@@ -25,7 +26,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 							Value: label,
 						})
 					}
-				case serverOptionName:
+				case contract.JobServerOptionName:
 					servers := command.serverService.FindServers(option.StringValue(), lg)
 
 					for _, server := range servers {

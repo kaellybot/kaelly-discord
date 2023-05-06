@@ -8,8 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func New(token string, shardID, shardCount int, slashCommands []commands.SlashCommand,
-	userCommands []commands.UserCommand) (*Impl, error) {
+func New(token string, shardID, shardCount int, commands []commands.DiscordCommand) (*Impl, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Error().Err(err).Msgf("Connecting to Discord gateway failed")
@@ -18,15 +17,7 @@ func New(token string, shardID, shardCount int, slashCommands []commands.SlashCo
 
 	service := Impl{
 		session:  dg,
-		commands: make([]*constants.DiscordCommand, 0),
-	}
-
-	for _, command := range slashCommands {
-		service.commands = append(service.commands, command.GetSlashCommand())
-	}
-
-	for _, command := range userCommands {
-		service.commands = append(service.commands, command.GetUserCommand())
+		commands: commands,
 	}
 
 	dg.Identify.Shard = &[2]int{shardID, shardCount}
@@ -64,7 +55,7 @@ func (service *Impl) ready(session *discordgo.Session, _ *discordgo.Ready) {
 	err := session.UpdateGameStatus(0, constants.GetGame().Name)
 	if err != nil {
 		log.Warn().Err(err).
-			Msgf("Cannot update the game status, still continuing...")
+			Msgf("Cannot update the game status, continuing...")
 	}
 }
 
@@ -81,18 +72,9 @@ func (service *Impl) interactionCreate(session *discordgo.Session, event *discor
 		locale = *event.GuildLocale
 	}
 
-	// TODO rewrite this function to have handlers per subCommand
 	for _, command := range service.commands {
-		if event.ApplicationCommandData().Name == command.Name {
-			handler, found := command.Handlers[event.Type]
-			if found {
-				handler(session, event, locale)
-			} else {
-				log.Error().
-					Str(constants.LogCommand, command.Name).
-					Uint32(constants.LogInteractionType, uint32(event.Type)).
-					Msgf("Interaction not handled, ignoring it")
-			}
+		if command.Matches(event) {
+			command.Handle(session, event, locale)
 			return
 		}
 	}

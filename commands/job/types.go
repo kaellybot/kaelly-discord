@@ -1,6 +1,7 @@
 package job
 
 import (
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -8,15 +9,6 @@ import (
 )
 
 const (
-	slashCommandName  = "job"
-	userCommandName   = "Jobs"
-	getSubCommandName = "get"
-	setSubCommandName = "set"
-
-	jobOptionName    = "job"
-	levelOptionName  = "level"
-	serverOptionName = "server"
-
 	jobRequestRoutingKey = "requests.books"
 
 	memberListLimit    = 1000
@@ -26,8 +18,11 @@ const (
 )
 
 type Command struct {
+	commands.AbstractCommand
 	bookService    books.Service
 	guildService   guilds.Service
 	serverService  servers.Service
 	requestManager requests.RequestManager
+	slashHandlers  commands.DiscordHandlers
+	userHandlers   commands.DiscordHandlers
 }

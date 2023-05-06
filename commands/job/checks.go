@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
@@ -18,7 +19,7 @@ func (command *Command) checkJob(ctx context.Context, s *discordgo.Session,
 	// Filled case, expecting [1, 1] job
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == jobOptionName {
+			if option.Name == contract.JobJobOptionName {
 				jobs := command.bookService.FindJobs(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.job", option.StringValue(), jobs, lg)
 				if checkSuccess {
@@ -43,9 +44,9 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
-		if subCommand.Name == setSubCommandName {
+		if subCommand.Name == contract.JobSetSubCommandName {
 			for _, option := range subCommand.Options {
-				if option.Name == levelOptionName {
+				if option.Name == contract.JobLevelOptionName {
 					level := option.IntValue()
 
 					if level >= constants.JobMinLevel && level <= constants.JobMaxLevel {
@@ -77,7 +78,7 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	// Filled case, expecting [1, 1] server
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == serverOptionName {
+			if option.Name == contract.JobServerOptionName {
 				servers := command.serverService.FindServers(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
 				if checkSuccess {

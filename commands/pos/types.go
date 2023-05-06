@@ -1,6 +1,7 @@
 package pos
 
 import (
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -8,16 +9,14 @@ import (
 )
 
 const (
-	commandName         = "pos"
-	dimensionOptionName = "dimension"
-	serverOptionName    = "server"
-
 	portalRequestRoutingKey = "requests.portals"
 )
 
 type Command struct {
+	commands.AbstractCommand
 	guildService   guilds.Service
 	portalService  portals.Service
 	serverService  servers.Service
 	requestManager requests.RequestManager
+	handlers       commands.DiscordHandlers
 }

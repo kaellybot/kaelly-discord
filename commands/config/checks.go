@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
@@ -15,9 +16,9 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
-		if subCommand.Name == serverSubCommandName {
+		if subCommand.Name == contract.ConfigServerSubCommandName {
 			for _, option := range subCommand.Options {
-				if option.Name == serverOptionName {
+				if option.Name == contract.ConfigServerOptionName {
 					servers := command.serverService.FindServers(option.StringValue(), lg)
 					response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
 					if checkSuccess {
@@ -42,9 +43,9 @@ func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
-		if subCommand.Name == rssSubCommandName {
+		if subCommand.Name == contract.ConfigRSSSubCommandName {
 			for _, option := range subCommand.Options {
-				if option.Name == feedTypeOptionName {
+				if option.Name == contract.ConfigFeedTypeOptionName {
 					feedTypes := command.feedService.FindFeedTypes(option.StringValue(), lg)
 					response, checkSuccess := validators.ExpectOnlyOneElement("checks.feed", option.StringValue(), feedTypes, lg)
 					if checkSuccess {
@@ -71,7 +72,7 @@ func (command *Command) checkLanguage(ctx context.Context, _ *discordgo.Session,
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == languageOptionName {
+			if option.Name == contract.ConfigLanguageOptionName {
 				locale = amqp.Language(option.IntValue())
 				break
 			}
@@ -86,14 +87,14 @@ func (command *Command) checkChannelID(ctx context.Context, s *discordgo.Session
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == channelOptionName {
+			if option.Name == contract.ConfigChannelOptionName {
 				next(context.WithValue(ctx, constants.ContextKeyChannel, option.ChannelValue(s).ID))
 				return
 			}
 		}
 
 		// If option not found, guess we're using the current channel for webhook queries
-		if subCommand.Name != serverSubCommandName {
+		if subCommand.Name != contract.ConfigServerSubCommandName {
 			next(context.WithValue(ctx, constants.ContextKeyChannel, i.ChannelID))
 			return
 		}
@@ -107,7 +108,7 @@ func (command *Command) checkEnabled(ctx context.Context, _ *discordgo.Session,
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == enabledOptionName {
+			if option.Name == contract.ConfigEnabledOptionName {
 				next(context.WithValue(ctx, constants.ContextKeyEnabled, option.BoolValue()))
 				return
 			}

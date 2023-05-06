@@ -6,6 +6,8 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
@@ -17,38 +19,41 @@ import (
 
 func New(guildService guilds.Service, feedService feeds.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
-	return &Command{
+	command := Command{
 		guildService:   guildService,
 		feedService:    feedService,
 		serverService:  serverService,
 		requestManager: requestManager,
 	}
+	command.handlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.checkEnabled,
+			command.checkFeedType, command.checkLanguage, command.checkChannelID, command.request),
+		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+	}
+	return &command
 }
 
-//nolint:nolintlint,exhaustive,lll,dupl
-func (command *Command) GetSlashCommand() *constants.DiscordCommand {
-	return &constants.DiscordCommand{
-		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.checkEnabled,
-				command.checkFeedType, command.checkLanguage, command.checkChannelID, command.request),
-			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
-		},
-	}
+func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
+	return i.ApplicationCommandData().Name == contract.ConfigCommandName
+}
+
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	command.CallHandler(s, i, lg, command.handlers)
 }
 
 func (command *Command) request(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	for _, subCommand := range i.ApplicationCommandData().Options {
 		switch subCommand.Name {
-		case getSubCommandName:
+		case contract.ConfigGetSubCommandName:
 			command.getRequest(ctx, s, i, lg)
-		case almanaxSubCommandName:
+		case contract.ConfigAlmanaxSubCommandName:
 			command.almanaxRequest(ctx, s, i, lg)
-		case rssSubCommandName:
+		case contract.ConfigRSSSubCommandName:
 			command.rssRequest(ctx, s, i, lg)
-		case twitterSubCommandName:
+		case contract.ConfigTwitterSubCommandName:
 			command.twitterRequest(ctx, s, i, lg)
-		case serverSubCommandName:
+		case contract.ConfigServerSubCommandName:
 			command.serverRequest(ctx, s, i, lg)
 		default:
 			panic(fmt.Errorf("cannot handle subCommand %v, request ignored", subCommand.Name))

@@ -7,7 +7,7 @@
          "desc": "You have a problem with its use? A suggestion ? Feel free to join the [Discord server]({{ .discord }}) !"
       },
       "twitter": {
-         "title": "<:twitter:383237199925215232> Twitter",
+         "title": "<:twitter:1100040368445206619> Twitter",
          "desc": "I'm also on [Twitter]({{ .twitter }}): you will find the last news!"
       },
       "opensource": {
@@ -24,7 +24,7 @@
       },
       "graphist": {
          "title": ":art: Visuals",
-         "desc": "Visuals made by the great [{{ .graphist.Name }}]({{ .graphist.Url }})!"
+         "desc": "Visuals made by the great [{{ .graphist.Name }}]({{ .graphist.URL }})!"
       },
       "footer": "Some illustrations are the Ankama Studio property - All rights reserved"
    },

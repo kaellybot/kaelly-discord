@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
@@ -20,22 +21,28 @@ import (
 
 func New(guildService guilds.Service, portalService portals.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
-	return &Command{
+	command := Command{
 		guildService:   guildService,
 		portalService:  portalService,
 		serverService:  serverService,
 		requestManager: requestManager,
 	}
+
+	command.handlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand: middlewares.Use(command.checkDimension,
+			command.checkServer, command.request),
+		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+	}
+
+	return &command
 }
 
-//nolint:nolintlint,exhaustive,lll,dupl
-func (command *Command) GetSlashCommand() *constants.DiscordCommand {
-	return &constants.DiscordCommand{
-		Handlers: constants.DiscordHandlers{
-			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkDimension, command.checkServer, command.request),
-			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
-		},
-	}
+func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
+	return i.ApplicationCommandData().Name == contract.PosCommandName
+}
+
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	command.CallHandler(s, i, lg, command.handlers)
 }
 
 func (command *Command) request(ctx context.Context, s *discordgo.Session,

@@ -10,32 +10,16 @@ import (
 
 func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	data := i.ApplicationCommandData()
-	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
+	var choices []*discordgo.ApplicationCommandOptionChoice
 
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Focused {
 				switch option.Name {
 				case contract.ConfigServerOptionName:
-					servers := command.serverService.FindServers(option.StringValue(), lg)
-
-					for _, server := range servers {
-						label := translators.GetEntityLabel(server, lg)
-						choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-							Name:  label,
-							Value: label,
-						})
-					}
+					choices = command.findServers(option.StringValue(), lg)
 				case contract.ConfigFeedTypeOptionName:
-					feedTypes := command.feedService.FindFeedTypes(option.StringValue(), lg)
-
-					for _, feedType := range feedTypes {
-						label := translators.GetEntityLabel(feedType, lg)
-						choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-							Name:  label,
-							Value: label,
-						})
-					}
+					choices = command.findFeedTypes(option.StringValue(), lg)
 				default:
 					log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
 				}
@@ -53,4 +37,36 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 	if err != nil {
 		log.Error().Err(err).Msg("Autocomplete request ignored")
 	}
+}
+
+func (command *Command) findServers(serverName string, lg discordgo.Locale) []*discordgo.
+	ApplicationCommandOptionChoice {
+	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
+	servers := command.serverService.FindServers(serverName, lg)
+
+	for _, server := range servers {
+		label := translators.GetEntityLabel(server, lg)
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  label,
+			Value: label,
+		})
+	}
+
+	return choices
+}
+
+func (command *Command) findFeedTypes(feedTypeName string, lg discordgo.Locale) []*discordgo.
+	ApplicationCommandOptionChoice {
+	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
+	feedTypes := command.feedService.FindFeedTypes(feedTypeName, lg)
+
+	for _, feedType := range feedTypes {
+		label := translators.GetEntityLabel(feedType, lg)
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  label,
+			Value: label,
+		})
+	}
+
+	return choices
 }

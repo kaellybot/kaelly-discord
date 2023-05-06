@@ -25,14 +25,16 @@ func New(bookService books.Service, guildService guilds.Service,
 	}
 }
 
+//nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetSlashCommand() *constants.DiscordCommand {
+	var minLevel float64 = constants.JobMinLevel
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     slashCommandName,
 			Description:              i18n.Get(constants.DefaultLocale, "job.description"),
 			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: &constants.DefaultPermission,
-			DMPermission:             &constants.DMPermission,
+			DefaultMemberPermissions: constants.GetDefaultPermission(),
+			DMPermission:             constants.GetDMPermission(),
 			DescriptionLocalizations: i18n.GetLocalizations("job.description"),
 			Options: []*discordgo.ApplicationCommandOption{
 				{
@@ -53,9 +55,9 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 						},
 						{
 							Name:                     serverOptionName,
-							Description:              i18n.Get(constants.DefaultLocale, "job.get.server.description", i18n.Vars{"game": constants.Game}),
+							Description:              i18n.Get(constants.DefaultLocale, "job.get.server.description", i18n.Vars{"game": constants.GetGame()}),
 							NameLocalizations:        *i18n.GetLocalizations("job.get.server.name"),
-							DescriptionLocalizations: *i18n.GetLocalizations("job.get.server.description", i18n.Vars{"game": constants.Game}),
+							DescriptionLocalizations: *i18n.GetLocalizations("job.get.server.description", i18n.Vars{"game": constants.GetGame()}),
 							Type:                     discordgo.ApplicationCommandOptionString,
 							Required:                 false,
 							Autocomplete:             true,
@@ -86,13 +88,13 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 							Type:                     discordgo.ApplicationCommandOptionInteger,
 							Required:                 true,
 							MinValue:                 &minLevel,
-							MaxValue:                 maxLevel,
+							MaxValue:                 constants.JobMaxLevel,
 						},
 						{
 							Name:                     serverOptionName,
-							Description:              i18n.Get(constants.DefaultLocale, "job.set.server.description", i18n.Vars{"game": constants.Game}),
+							Description:              i18n.Get(constants.DefaultLocale, "job.set.server.description", i18n.Vars{"game": constants.GetGame()}),
 							NameLocalizations:        *i18n.GetLocalizations("job.set.server.name"),
-							DescriptionLocalizations: *i18n.GetLocalizations("job.set.server.description", i18n.Vars{"game": constants.Game}),
+							DescriptionLocalizations: *i18n.GetLocalizations("job.set.server.description", i18n.Vars{"game": constants.GetGame()}),
 							Type:                     discordgo.ApplicationCommandOptionString,
 							Required:                 false,
 							Autocomplete:             true,
@@ -109,13 +111,14 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	}
 }
 
+//nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetUserCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     userCommandName,
 			Type:                     discordgo.UserApplicationCommand,
-			DefaultMemberPermissions: &constants.DefaultPermission,
-			DMPermission:             &constants.DMPermission,
+			DefaultMemberPermissions: constants.GetDefaultPermission(),
+			DMPermission:             constants.GetDMPermission(),
 		},
 		Handlers: constants.DiscordHandlers{
 			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.userRequest),
@@ -124,8 +127,7 @@ func (command *Command) GetUserCommand() *constants.DiscordCommand {
 }
 
 func (command *Command) slashRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
+	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	for _, subCommand := range i.ApplicationCommandData().Options {
 		switch subCommand.Name {
 		case getSubCommandName:
@@ -139,48 +141,53 @@ func (command *Command) slashRequest(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
+	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	command.userJobRequest(ctx, s, i, lg)
 }
 
 func (command *Command) getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {
 	job, ok := ctx.Value(jobOptionName).(entities.Job)
 	if !ok {
-		return entities.Job{}, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Job", ctx.Value(jobOptionName))
+		return entities.Job{}, entities.Server{},
+			fmt.Errorf("cannot cast %v as entities.Job", ctx.Value(jobOptionName))
 	}
 
 	server, ok := ctx.Value(serverOptionName).(entities.Server)
 	if !ok {
-		return entities.Job{}, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Job{}, entities.Server{},
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
 	}
 
 	return job, server, nil
 }
 
 func (command *Command) getSetOptions(ctx context.Context) (entities.Job, int64, entities.Server, error) {
-	job, ok := ctx.Value(jobOptionName).(entities.Job)
+	job, ok := ctx.Value(constants.ContextKeyJob).(entities.Job)
 	if !ok {
-		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Job", ctx.Value(jobOptionName))
+		return entities.Job{}, 0, entities.Server{},
+			fmt.Errorf("cannot cast %v as entities.Job", ctx.Value(constants.ContextKeyJob))
 	}
 
-	server, ok := ctx.Value(serverOptionName).(entities.Server)
+	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
-		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Job{}, 0, entities.Server{},
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
 	}
 
-	level, ok := ctx.Value(levelOptionName).(int64)
+	level, ok := ctx.Value(constants.ContextKeyLevel).(int64)
 	if !ok {
-		return entities.Job{}, 0, entities.Server{}, fmt.Errorf("cannot cast %v as uint", ctx.Value(levelOptionName))
+		return entities.Job{}, 0, entities.Server{},
+			fmt.Errorf("cannot cast %v as uint", ctx.Value(constants.ContextKeyLevel))
 	}
 
 	return job, level, server, nil
 }
 
 func (command *Command) getUserOptions(ctx context.Context) (entities.Server, error) {
-	server, ok := ctx.Value(serverOptionName).(entities.Server)
+	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
-		return entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Server{},
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
 	}
 
 	return server, nil

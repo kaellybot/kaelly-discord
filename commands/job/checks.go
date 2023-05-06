@@ -22,7 +22,7 @@ func (command *Command) checkJob(ctx context.Context, s *discordgo.Session,
 				jobs := command.bookService.FindJobs(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.job", option.StringValue(), jobs, lg)
 				if checkSuccess {
-					next(context.WithValue(ctx, jobOptionName, jobs[0]))
+					next(context.WithValue(ctx, constants.ContextKeyJob, jobs[0]))
 				} else {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
@@ -49,7 +49,7 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 					level := option.IntValue()
 
 					if level >= constants.JobMinLevel && level <= constants.JobMaxLevel {
-						next(context.WithValue(ctx, levelOptionName, level))
+						next(context.WithValue(ctx, constants.ContextKeyLevel, level))
 					} else {
 						content := i18n.Get(lg, "checks.level.constraints",
 							i18n.Vars{"min": constants.JobMinLevel, "max": constants.JobMaxLevel})
@@ -81,7 +81,7 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 				servers := command.serverService.FindServers(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
 				if checkSuccess {
-					next(context.WithValue(ctx, serverOptionName, servers[0]))
+					next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
 				} else {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
@@ -95,13 +95,13 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	}
 
 	// Option not filled (refers to guild and/or channel)
-	server, err := command.guildService.GetServer(i.GuildID, i.ChannelID)
+	server, found, err := command.guildService.GetServer(i.GuildID, i.ChannelID)
 	if err != nil {
 		panic(err)
 	}
 
-	if server == nil {
-		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
+	if !found {
+		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.GetGame()})
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
@@ -109,6 +109,6 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 			log.Error().Err(err).Msg("Server check response ignored")
 		}
 	} else {
-		next(context.WithValue(ctx, serverOptionName, *server))
+		next(context.WithValue(ctx, constants.ContextKeyServer, server))
 	}
 }

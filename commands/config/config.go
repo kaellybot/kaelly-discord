@@ -27,15 +27,16 @@ func New(guildService guilds.Service, feedService feeds.Service,
 	}
 }
 
+//nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     commandName,
-			Description:              i18n.Get(constants.DefaultLocale, "config.description", i18n.Vars{"game": constants.Game}),
+			Description:              i18n.Get(constants.DefaultLocale, "config.description", i18n.Vars{"game": constants.GetGame()}),
 			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: &constants.ManageServerPermission,
-			DMPermission:             &constants.DMPermission,
-			DescriptionLocalizations: i18n.GetLocalizations("config.description", i18n.Vars{"game": constants.Game}),
+			DefaultMemberPermissions: constants.GetManageServerPermission(),
+			DMPermission:             constants.GetDMPermission(),
+			DescriptionLocalizations: i18n.GetLocalizations("config.description", i18n.Vars{"game": constants.GetGame()}),
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:                     getSubCommandName,
@@ -123,25 +124,25 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 				},
 				{
 					Name:                     serverSubCommandName,
-					Description:              i18n.Get(constants.DefaultLocale, "config.server.description", i18n.Vars{"game": constants.Game}),
+					Description:              i18n.Get(constants.DefaultLocale, "config.server.description", i18n.Vars{"game": constants.GetGame()}),
 					NameLocalizations:        *i18n.GetLocalizations("config.server.name"),
-					DescriptionLocalizations: *i18n.GetLocalizations("config.server.description", i18n.Vars{"game": constants.Game}),
+					DescriptionLocalizations: *i18n.GetLocalizations("config.server.description", i18n.Vars{"game": constants.GetGame()}),
 					Type:                     discordgo.ApplicationCommandOptionSubCommand,
 					Options: []*discordgo.ApplicationCommandOption{
 						{
 							Name:                     serverOptionName,
-							Description:              i18n.Get(constants.DefaultLocale, "config.server.server.description", i18n.Vars{"game": constants.Game}),
+							Description:              i18n.Get(constants.DefaultLocale, "config.server.server.description", i18n.Vars{"game": constants.GetGame()}),
 							NameLocalizations:        *i18n.GetLocalizations("config.server.server.name"),
-							DescriptionLocalizations: *i18n.GetLocalizations("config.server.server.description", i18n.Vars{"game": constants.Game}),
+							DescriptionLocalizations: *i18n.GetLocalizations("config.server.server.description", i18n.Vars{"game": constants.GetGame()}),
 							Type:                     discordgo.ApplicationCommandOptionString,
 							Required:                 true,
 							Autocomplete:             true,
 						},
 						{
 							Name:                     channelOptionName,
-							Description:              i18n.Get(constants.DefaultLocale, "config.server.channel.description", i18n.Vars{"game": constants.Game}),
+							Description:              i18n.Get(constants.DefaultLocale, "config.server.channel.description", i18n.Vars{"game": constants.GetGame()}),
 							NameLocalizations:        *i18n.GetLocalizations("config.server.channel.name"),
-							DescriptionLocalizations: *i18n.GetLocalizations("config.server.channel.description", i18n.Vars{"game": constants.Game}),
+							DescriptionLocalizations: *i18n.GetLocalizations("config.server.channel.description", i18n.Vars{"game": constants.GetGame()}),
 							Type:                     discordgo.ApplicationCommandOptionChannel,
 							Required:                 false,
 						},
@@ -193,7 +194,6 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 
 func (command *Command) request(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-
 	for _, subCommand := range i.ApplicationCommandData().Options {
 		switch subCommand.Name {
 		case getSubCommandName:
@@ -217,16 +217,18 @@ func (command *Command) createWebhook(s *discordgo.Session, channelID string) (*
 }
 
 func (command *Command) getServerOptions(ctx context.Context) (entities.Server, string, error) {
-	server, ok := ctx.Value(serverOptionName).(entities.Server)
+	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
-		return entities.Server{}, "", fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Server{}, "",
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
 	}
 
 	channelID := ""
-	if ctx.Value(channelOptionName) != nil {
-		channelID, ok = ctx.Value(channelOptionName).(string)
+	if ctx.Value(constants.ContextKeyChannel) != nil {
+		channelID, ok = ctx.Value(constants.ContextKeyChannel).(string)
 		if !ok {
-			return entities.Server{}, "", fmt.Errorf("cannot cast %v as string", ctx.Value(channelOptionName))
+			return entities.Server{}, "",
+				fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
 		}
 	}
 
@@ -234,62 +236,73 @@ func (command *Command) getServerOptions(ctx context.Context) (entities.Server, 
 }
 
 func (command *Command) getWebhookAlmanaxOptions(ctx context.Context) (string, bool, amqp.Language, error) {
-	channelID, ok := ctx.Value(channelOptionName).(string)
+	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
-		return "", false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as string", ctx.Value(channelOptionName))
+		return "", false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
 	}
 
-	enabled, ok := ctx.Value(enabledOptionName).(bool)
+	enabled, ok := ctx.Value(constants.ContextKeyEnabled).(bool)
 	if !ok {
-		return "", false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as bool", ctx.Value(enabledOptionName))
+		return "", false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyEnabled))
 	}
 
-	locale, ok := ctx.Value(languageOptionName).(amqp.Language)
+	locale, ok := ctx.Value(constants.ContextKeyLanguage).(amqp.Language)
 	if !ok {
-		return "", false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as bool", ctx.Value(languageOptionName))
+		return "", false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyLanguage))
 	}
 
 	return channelID, enabled, locale, nil
 }
 
 func (command *Command) getWebhookTwitterOptions(ctx context.Context) (string, bool, amqp.Language, error) {
-	channelID, ok := ctx.Value(channelOptionName).(string)
+	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
-		return "", false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as string", ctx.Value(channelOptionName))
+		return "", false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
 	}
 
-	enabled, ok := ctx.Value(enabledOptionName).(bool)
+	enabled, ok := ctx.Value(constants.ContextKeyEnabled).(bool)
 	if !ok {
-		return "", false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as bool", ctx.Value(enabledOptionName))
+		return "", false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyEnabled))
 	}
 
-	locale, ok := ctx.Value(languageOptionName).(amqp.Language)
+	locale, ok := ctx.Value(constants.ContextKeyLanguage).(amqp.Language)
 	if !ok {
-		return "", false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as bool", ctx.Value(languageOptionName))
+		return "", false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyLanguage))
 	}
 
 	return channelID, enabled, locale, nil
 }
 
-func (command *Command) getWebhookRssOptions(ctx context.Context) (string, entities.FeedType, bool, amqp.Language, error) {
-	channelID, ok := ctx.Value(channelOptionName).(string)
+func (command *Command) getWebhookRssOptions(ctx context.Context) (
+	string, entities.FeedType, bool, amqp.Language, error) {
+	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
-		return "", entities.FeedType{}, false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as string", ctx.Value(channelOptionName))
+		return "", entities.FeedType{}, false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
 	}
 
-	feed, ok := ctx.Value(feedTypeOptionName).(entities.FeedType)
+	feed, ok := ctx.Value(constants.ContextKeyFeed).(entities.FeedType)
 	if !ok {
-		return "", entities.FeedType{}, false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as entities.FeedType", ctx.Value(feedTypeOptionName))
+		return "", entities.FeedType{}, false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as entities.FeedType", ctx.Value(constants.ContextKeyFeed))
 	}
 
-	enabled, ok := ctx.Value(enabledOptionName).(bool)
+	enabled, ok := ctx.Value(constants.ContextKeyEnabled).(bool)
 	if !ok {
-		return "", entities.FeedType{}, false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as bool", ctx.Value(enabledOptionName))
+		return "", entities.FeedType{}, false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyEnabled))
 	}
 
-	locale, ok := ctx.Value(languageOptionName).(amqp.Language)
+	locale, ok := ctx.Value(constants.ContextKeyLanguage).(amqp.Language)
 	if !ok {
-		return "", entities.FeedType{}, false, amqp.Language_ANY, fmt.Errorf("cannot cast %v as bool", ctx.Value(languageOptionName))
+		return "", entities.FeedType{}, false, amqp.Language_ANY,
+			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyLanguage))
 	}
 
 	return channelID, feed, enabled, locale, nil

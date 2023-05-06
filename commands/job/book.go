@@ -42,7 +42,7 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 	}
 }
 
-func (command *Command) getRespond(ctx context.Context, s *discordgo.Session,
+func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
 		craftsmen := make([]constants.JobUserLevel, 0)

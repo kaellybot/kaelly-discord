@@ -13,7 +13,6 @@ import (
 
 func (command *Command) setRespond(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-
 	if !isConfigSetAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}

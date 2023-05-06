@@ -25,14 +25,16 @@ func New(bookService books.Service, guildService guilds.Service,
 	}
 }
 
+//nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetSlashCommand() *constants.DiscordCommand {
+	var minLevel float64 = constants.AlignmentMinLevel
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     slashCommandName,
 			Description:              i18n.Get(constants.DefaultLocale, "align.description"),
 			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: &constants.DefaultPermission,
-			DMPermission:             &constants.DMPermission,
+			DefaultMemberPermissions: constants.GetDefaultPermission(),
+			DMPermission:             constants.GetDMPermission(),
 			DescriptionLocalizations: i18n.GetLocalizations("align.description"),
 			Options: []*discordgo.ApplicationCommandOption{
 				{
@@ -62,9 +64,9 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 						},
 						{
 							Name:                     serverOptionName,
-							Description:              i18n.Get(constants.DefaultLocale, "align.get.server.description", i18n.Vars{"game": constants.Game}),
+							Description:              i18n.Get(constants.DefaultLocale, "align.get.server.description", i18n.Vars{"game": constants.GetGame()}),
 							NameLocalizations:        *i18n.GetLocalizations("align.get.server.name"),
-							DescriptionLocalizations: *i18n.GetLocalizations("align.get.server.description", i18n.Vars{"game": constants.Game}),
+							DescriptionLocalizations: *i18n.GetLocalizations("align.get.server.description", i18n.Vars{"game": constants.GetGame()}),
 							Type:                     discordgo.ApplicationCommandOptionString,
 							Required:                 false,
 							Autocomplete:             true,
@@ -104,13 +106,13 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 							Type:                     discordgo.ApplicationCommandOptionInteger,
 							Required:                 true,
 							MinValue:                 &minLevel,
-							MaxValue:                 maxLevel,
+							MaxValue:                 constants.AlignmentMaxLevel,
 						},
 						{
 							Name:                     serverOptionName,
-							Description:              i18n.Get(constants.DefaultLocale, "align.set.server.description", i18n.Vars{"game": constants.Game}),
+							Description:              i18n.Get(constants.DefaultLocale, "align.set.server.description", i18n.Vars{"game": constants.GetGame()}),
 							NameLocalizations:        *i18n.GetLocalizations("align.set.server.name"),
-							DescriptionLocalizations: *i18n.GetLocalizations("align.set.server.description", i18n.Vars{"game": constants.Game}),
+							DescriptionLocalizations: *i18n.GetLocalizations("align.set.server.description", i18n.Vars{"game": constants.GetGame()}),
 							Type:                     discordgo.ApplicationCommandOptionString,
 							Required:                 false,
 							Autocomplete:             true,
@@ -127,13 +129,14 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	}
 }
 
+//nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetUserCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     userCommandName,
 			Type:                     discordgo.UserApplicationCommand,
-			DefaultMemberPermissions: &constants.DefaultPermission,
-			DMPermission:             &constants.DMPermission,
+			DefaultMemberPermissions: constants.GetDefaultPermission(),
+			DMPermission:             constants.GetDMPermission(),
 		},
 		Handlers: constants.DiscordHandlers{
 			discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.userRequest),
@@ -161,20 +164,20 @@ func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) getGetOptions(ctx context.Context) (entities.City, entities.Order, entities.Server, error) {
-	city, ok := ctx.Value(cityOptionName).(entities.City)
+	city, ok := ctx.Value(constants.ContextKeyCity).(entities.City)
 	if !ok {
 		city = entities.City{}
 	}
 
-	order, ok := ctx.Value(orderOptionName).(entities.Order)
+	order, ok := ctx.Value(constants.ContextKeyOrder).(entities.Order)
 	if !ok {
 		order = entities.Order{}
 	}
 
-	server, ok := ctx.Value(serverOptionName).(entities.Server)
+	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
 		return entities.City{}, entities.Order{}, entities.Server{},
-			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
 	}
 
 	return city, order, server, nil
@@ -182,37 +185,37 @@ func (command *Command) getGetOptions(ctx context.Context) (entities.City, entit
 
 func (command *Command) getSetOptions(ctx context.Context) (entities.City, entities.Order,
 	int64, entities.Server, error) {
-	city, ok := ctx.Value(cityOptionName).(entities.City)
+	city, ok := ctx.Value(constants.ContextKeyCity).(entities.City)
 	if !ok {
 		return entities.City{}, entities.Order{}, 0, entities.Server{},
-			fmt.Errorf("cannot cast %v as entities.City", ctx.Value(cityOptionName))
+			fmt.Errorf("cannot cast %v as entities.City", ctx.Value(constants.ContextKeyCity))
 	}
 
-	order, ok := ctx.Value(orderOptionName).(entities.Order)
+	order, ok := ctx.Value(constants.ContextKeyOrder).(entities.Order)
 	if !ok {
 		return entities.City{}, entities.Order{}, 0, entities.Server{},
-			fmt.Errorf("cannot cast %v as entities.Order", ctx.Value(orderOptionName))
+			fmt.Errorf("cannot cast %v as entities.Order", ctx.Value(constants.ContextKeyOrder))
 	}
 
-	server, ok := ctx.Value(serverOptionName).(entities.Server)
+	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
 		return entities.City{}, entities.Order{}, 0, entities.Server{},
-			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
 	}
 
-	level, ok := ctx.Value(levelOptionName).(int64)
+	level, ok := ctx.Value(constants.ContextKeyLevel).(int64)
 	if !ok {
 		return entities.City{}, entities.Order{}, 0, entities.Server{},
-			fmt.Errorf("cannot cast %v as uint", ctx.Value(levelOptionName))
+			fmt.Errorf("cannot cast %v as uint", ctx.Value(constants.ContextKeyLevel))
 	}
 
 	return city, order, level, server, nil
 }
 
 func (command *Command) getUserOptions(ctx context.Context) (entities.Server, error) {
-	server, ok := ctx.Value(serverOptionName).(entities.Server)
+	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
-		return entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
 	}
 
 	return server, nil

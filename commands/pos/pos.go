@@ -29,14 +29,15 @@ func New(guildService guilds.Service, portalService portals.Service,
 	}
 }
 
+//nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     commandName,
 			Description:              i18n.Get(constants.DefaultLocale, "pos.description"),
 			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: &constants.DefaultPermission,
-			DMPermission:             &constants.DMPermission,
+			DefaultMemberPermissions: constants.GetDefaultPermission(),
+			DMPermission:             constants.GetDMPermission(),
 			DescriptionLocalizations: i18n.GetLocalizations("pos.description"),
 			Options: []*discordgo.ApplicationCommandOption{
 				{
@@ -50,9 +51,9 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 				},
 				{
 					Name:                     serverOptionName,
-					Description:              i18n.Get(constants.DefaultLocale, "pos.server.description", i18n.Vars{"game": constants.Game}),
+					Description:              i18n.Get(constants.DefaultLocale, "pos.server.description", i18n.Vars{"game": constants.GetGame()}),
 					NameLocalizations:        *i18n.GetLocalizations("pos.server.name"),
-					DescriptionLocalizations: *i18n.GetLocalizations("pos.server.description", i18n.Vars{"game": constants.Game}),
+					DescriptionLocalizations: *i18n.GetLocalizations("pos.server.description", i18n.Vars{"game": constants.GetGame()}),
 					Type:                     discordgo.ApplicationCommandOptionString,
 					Required:                 false,
 					Autocomplete:             true,
@@ -67,8 +68,7 @@ func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 }
 
 func (command *Command) request(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
-
+	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	dimension, server, err := command.getOptions(ctx)
 	if err != nil {
 		panic(err)
@@ -81,26 +81,28 @@ func (command *Command) request(ctx context.Context, s *discordgo.Session,
 	}
 }
 
-func (command *Command) getOptions(ctx context.Context) (entities.Dimension, entities.Server, error) {
-	server, ok := ctx.Value(serverOptionName).(entities.Server)
+func (command *Command) getOptions(ctx context.Context) (
+	entities.Dimension, entities.Server, error) {
+	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
-		return entities.Dimension{}, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(serverOptionName))
+		return entities.Dimension{}, entities.Server{},
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
 	}
 
 	dimension := entities.Dimension{}
-	if ctx.Value(dimensionOptionName) != nil {
-		dimension, ok = ctx.Value(dimensionOptionName).(entities.Dimension)
+	if ctx.Value(constants.ContextKeyDimension) != nil {
+		dimension, ok = ctx.Value(constants.ContextKeyDimension).(entities.Dimension)
 		if !ok {
-			return entities.Dimension{}, entities.Server{}, fmt.Errorf("cannot cast %v as entities.Dimension", ctx.Value(dimensionOptionName))
+			return entities.Dimension{}, entities.Server{},
+				fmt.Errorf("cannot cast %v as entities.Dimension", ctx.Value(constants.ContextKeyDimension))
 		}
 	}
 
 	return dimension, server, nil
 }
 
-func (command *Command) respond(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-
+func (command *Command) respond(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 	if !isAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}
@@ -113,7 +115,8 @@ func (command *Command) respond(ctx context.Context, s *discordgo.Session,
 
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &embeds})
 	if err != nil {
-		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+		log.Warn().Err(err).
+			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
 }
 

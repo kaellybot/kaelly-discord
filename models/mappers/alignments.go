@@ -86,14 +86,14 @@ func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverID stri
 		if !foundCity {
 			log.Warn().Str(constants.LogEntity, alignXp.CityID).
 				Msgf("Cannot find city based on ID sent internally, continuing with empty city")
-			city = entities.City{ID: alignXp.CityID}
+			city = entities.City{}
 		}
 
 		order, foundOrder := alignService.GetOrder(alignXp.OrderID)
 		if !foundOrder {
 			log.Warn().Str(constants.LogEntity, alignXp.OrderID).
 				Msgf("Cannot find order based on ID sent internally, continuing with empty order")
-			order = entities.Order{ID: alignXp.OrderID}
+			order = entities.Order{}
 		}
 
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
@@ -154,14 +154,14 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 		if !foundCity {
 			log.Warn().Str(constants.LogEntity, alignXp.CityId).
 				Msgf("Cannot find city based on ID sent internally, continuing with empty city")
-			city = entities.City{ID: alignXp.CityId}
+			city = entities.City{}
 		}
 
 		order, foundOrder := alignService.GetOrder(alignXp.OrderId)
 		if !foundOrder {
 			log.Warn().Str(constants.LogEntity, alignXp.OrderId).
 				Msgf("Cannot find order based on ID sent internally, continuing with empty order")
-			order = entities.Order{ID: alignXp.OrderId}
+			order = entities.Order{}
 		}
 
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
@@ -208,7 +208,7 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 
 func mapWinningCity(cityValues map[string]int64, alignService books.Service) entities.City {
 	var winningCity = constants.GetNeutralCity()
-	var winningValue int64 = 0
+	var winningValue int64
 	for cityID, value := range cityValues {
 		if winningValue == value {
 			winningCity = constants.GetNeutralCity()

@@ -6,7 +6,7 @@ import (
 )
 
 type Service interface {
-	GetServer(guildID, channelID string) (*entities.Server, error)
+	GetServer(guildID, channelID string) (entities.Server, bool, error)
 }
 
 type Impl struct {

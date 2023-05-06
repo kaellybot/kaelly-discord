@@ -5,9 +5,9 @@ type Graphist struct {
 	URL  string
 }
 
-var (
-	Elycann = Graphist{
+func GetGraphist() Graphist {
+	return Graphist{
 		Name: "Elycann",
 		URL:  "https://www.facebook.com/Elysdrawings",
 	}
-)
+}

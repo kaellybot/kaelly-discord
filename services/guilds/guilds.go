@@ -11,11 +11,6 @@ func New(guildRepo guildRepo.Repository) *Impl {
 	}
 }
 
-func (service *Impl) GetServer(guildID, channelID string) (*entities.Server, error) {
-	server, err := service.guildRepo.GetServer(guildID, channelID)
-	if err != nil {
-		return nil, err
-	}
-
-	return server, nil
+func (service *Impl) GetServer(guildID, channelID string) (entities.Server, bool, error) {
+	return service.guildRepo.GetServer(guildID, channelID)
 }

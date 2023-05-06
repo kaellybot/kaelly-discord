@@ -12,7 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MapPortalPositionRequest(dimension entities.Dimension, server entities.Server, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapPortalPositionRequest(dimension entities.Dimension, server entities.Server,
+	lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_PORTAL_POSITION_REQUEST,
 		Language: constants.MapDiscordLocale(lg),

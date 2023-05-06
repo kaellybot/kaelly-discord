@@ -1,7 +1,6 @@
 package job
 
 import (
-	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -24,11 +23,6 @@ const (
 	craftsmenListLimit = 30
 
 	userProperty = "user"
-)
-
-var (
-	minLevel float64 = constants.JobMinLevel
-	maxLevel float64 = constants.JobMaxLevel
 )
 
 type Command struct {

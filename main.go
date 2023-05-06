@@ -80,7 +80,7 @@ func initMetrics() {
 
 func initI18n() {
 	i18n.SetDefault(constants.DefaultLocale)
-	for _, language := range constants.Languages {
+	for _, language := range constants.GetLanguages() {
 		if err := i18n.LoadBundle(language.Locale, language.TranslationFile); err != nil {
 			log.Warn().Err(err).
 				Str(constants.LogLocale, language.Locale.String()).

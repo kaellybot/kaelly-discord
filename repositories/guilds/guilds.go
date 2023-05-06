@@ -9,19 +9,20 @@ func New(db databases.MySQLConnection) *Impl {
 	return &Impl{db: db}
 }
 
-func (repo *Impl) GetServer(guildID, channelID string) (*entities.Server, error) {
+func (repo *Impl) GetServer(guildID, channelID string) (entities.Server, bool, error) {
 	var serverIDs []string
 	err := repo.db.GetDB().Table("guilds").
 		Select("COALESCE(channel_servers.server_id, guilds.server_id) as server").
-		Joins("LEFT JOIN channel_servers ON guilds.id = channel_servers.guild_id AND channel_servers.channel_id = ?", channelID).
+		Joins("LEFT JOIN channel_servers ON guilds.id = channel_servers.guild_id "+
+			"AND channel_servers.channel_id = ?", channelID).
 		Where("guilds.id = ?", guildID).
 		Pluck("server", &serverIDs).Error
 	if err != nil {
-		return nil, err
+		return entities.Server{}, false, err
 	}
 	if len(serverIDs) == 0 {
-		return nil, nil
+		return entities.Server{}, false, nil
 	}
 
-	return &entities.Server{ID: serverIDs[0]}, nil
+	return entities.Server{ID: serverIDs[0]}, true, nil
 }

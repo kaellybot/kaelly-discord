@@ -4,6 +4,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 )
 
+//nolint:lll
 type TransportType struct {
 	ID             string `gorm:"primaryKey"`
 	DofusPortalsID string `gorm:"unique"`

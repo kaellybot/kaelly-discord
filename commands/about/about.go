@@ -11,14 +11,15 @@ func New() *Command {
 	return &Command{}
 }
 
+//nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
 		Identity: discordgo.ApplicationCommand{
 			Name:                     commandName,
 			Description:              i18n.Get(constants.DefaultLocale, "about.description"),
 			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: &constants.DefaultPermission,
-			DMPermission:             &constants.DMPermission,
+			DefaultMemberPermissions: constants.GetDefaultPermission(),
+			DMPermission:             constants.GetDMPermission(),
 			DescriptionLocalizations: i18n.GetLocalizations("about.description"),
 		},
 		Handlers: constants.DiscordHandlers{
@@ -39,10 +40,10 @@ func (command *Command) about(s *discordgo.Session, i *discordgo.InteractionCrea
 func (command *Command) getAboutEmbed(locale discordgo.Locale) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       i18n.Get(locale, "about.title", i18n.Vars{"name": constants.Name, "version": constants.Version}),
-		Description: i18n.Get(locale, "about.desc", i18n.Vars{"game": constants.Game}),
+		Description: i18n.Get(locale, "about.desc", i18n.Vars{"game": constants.GetGame()}),
 		Color:       constants.Color,
 		Image:       &discordgo.MessageEmbedImage{URL: constants.AvatarImage},
-		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.Game.Icon},
+		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.GetGame().Icon},
 		Footer: &discordgo.MessageEmbedFooter{
 			Text:    i18n.Get(locale, "about.footer"),
 			IconURL: constants.AnkamaLogo,
@@ -75,7 +76,7 @@ func (command *Command) getAboutEmbed(locale discordgo.Locale) *discordgo.Messag
 			},
 			{
 				Name:   i18n.Get(locale, "about.graphist.title"),
-				Value:  i18n.Get(locale, "about.graphist.desc", i18n.Vars{"graphist": constants.Elycann}),
+				Value:  i18n.Get(locale, "about.graphist.desc", i18n.Vars{"graphist": constants.GetGraphist()}),
 				Inline: false,
 			},
 		},

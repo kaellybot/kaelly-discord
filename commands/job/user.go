@@ -32,7 +32,7 @@ func (command *Command) userJobRequest(ctx context.Context, s *discordgo.Session
 	}
 }
 
-func (command *Command) userRespond(ctx context.Context, s *discordgo.Session,
+func (command *Command) userRespond(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
 		var member *discordgo.Member

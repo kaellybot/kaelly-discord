@@ -28,7 +28,6 @@ func (command *Command) serverRequest(ctx context.Context, s *discordgo.Session,
 
 func (command *Command) serverRespond(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
 		content := i18n.Get(constants.MapAMQPLocale(message.Language), "config.success")
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{

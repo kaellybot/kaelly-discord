@@ -1,7 +1,6 @@
 package align
 
 import (
-	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -25,11 +24,6 @@ const (
 	believerListLimit = 30
 
 	userProperty = "user"
-)
-
-var (
-	minLevel float64 = constants.AlignmentMinLevel
-	maxLevel float64 = constants.AlignmentMaxLevel
 )
 
 type Command struct {

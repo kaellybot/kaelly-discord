@@ -22,7 +22,7 @@ func (command *Command) checkCity(ctx context.Context, s *discordgo.Session,
 				cities := command.bookService.FindCities(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, lg)
 				if checkSuccess {
-					next(context.WithValue(ctx, cityOptionName, cities[0]))
+					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				} else if subCommand.Name == setSubCommandName {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
@@ -51,7 +51,7 @@ func (command *Command) checkOrder(ctx context.Context, s *discordgo.Session,
 				orders := command.bookService.FindOrders(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, lg)
 				if checkSuccess {
-					next(context.WithValue(ctx, orderOptionName, orders[0]))
+					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				} else if subCommand.Name == setSubCommandName {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
@@ -80,7 +80,7 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 					level := option.IntValue()
 
 					if level >= constants.AlignmentMinLevel && level <= constants.AlignmentMaxLevel {
-						next(context.WithValue(ctx, levelOptionName, level))
+						next(context.WithValue(ctx, constants.ContextKeyLevel, level))
 					} else {
 						content := i18n.Get(lg, "checks.level.constraints",
 							i18n.Vars{"min": constants.AlignmentMinLevel, "max": constants.AlignmentMaxLevel})
@@ -112,7 +112,7 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 				servers := command.serverService.FindServers(option.StringValue(), lg)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
 				if checkSuccess {
-					next(context.WithValue(ctx, serverOptionName, servers[0]))
+					next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
 				} else {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
@@ -126,13 +126,13 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	}
 
 	// Option not filled (refers to guild and/or channel)
-	server, err := command.guildService.GetServer(i.GuildID, i.ChannelID)
+	server, found, err := command.guildService.GetServer(i.GuildID, i.ChannelID)
 	if err != nil {
 		panic(err)
 	}
 
-	if server == nil {
-		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.Game})
+	if !found {
+		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.GetGame()})
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
@@ -140,6 +140,6 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 			log.Error().Err(err).Msg("Server check response ignored")
 		}
 	} else {
-		next(context.WithValue(ctx, serverOptionName, *server))
+		next(context.WithValue(ctx, constants.ContextKeyServer, server))
 	}
 }

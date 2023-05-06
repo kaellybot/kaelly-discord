@@ -31,9 +31,8 @@ func New(token string, shardID, shardCount int, slashCommands []commands.SlashCo
 	}
 
 	dg.Identify.Shard = &[2]int{shardID, shardCount}
-	dg.Identify.Intents = constants.Intents
+	dg.Identify.Intents = constants.GetIntents()
 	dg.AddHandler(service.ready)
-	dg.AddHandler(service.messageCreate)
 	dg.AddHandler(service.interactionCreate)
 
 	return &service, nil
@@ -72,9 +71,12 @@ func (service *Impl) RegisterCommands() error {
 	return nil
 }
 
-func (service *Impl) Shutdown() error {
+func (service *Impl) Shutdown() {
 	log.Info().Int(constants.LogShard, service.session.ShardID).Msgf("Closing Discord connections...")
-	return service.session.Close()
+	err := service.session.Close()
+	if err != nil {
+		log.Warn().Err(err).Msgf("Cannot close session and shutdown correctly")
+	}
 }
 
 func (service *Impl) ready(session *discordgo.Session, _ *discordgo.Ready) {
@@ -82,11 +84,11 @@ func (service *Impl) ready(session *discordgo.Session, _ *discordgo.Ready) {
 		Int(constants.LogShard, session.ShardID).
 		Int(constants.LogGuildCount, len(session.State.Guilds)).
 		Msgf("Ready!")
-	session.UpdateGameStatus(0, constants.Game.Name)
-}
-
-func (service *Impl) messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
-	// TODO defer service.handlePanic()
+	err := session.UpdateGameStatus(0, constants.GetGame().Name)
+	if err != nil {
+		log.Warn().Err(err).
+			Msgf("Cannot update the game status, still continuing...")
+	}
 }
 
 func (service *Impl) interactionCreate(session *discordgo.Session, event *discordgo.InteractionCreate) {

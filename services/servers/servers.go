@@ -52,8 +52,9 @@ func (service *Impl) FindServers(name string, locale discordgo.Locale) []entitie
 	}
 
 	for _, server := range service.servers {
-		currentCleanedName, _, err := transform.String(service.transformer, strings.ToLower(translators.GetEntityLabel(server, locale)))
-		if err == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		currentCleanedName, _, errStr := transform.String(service.transformer,
+			strings.ToLower(translators.GetEntityLabel(server, locale)))
+		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
 			serversFound = append(serversFound, server)
 		}
 	}

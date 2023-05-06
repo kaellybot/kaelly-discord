@@ -23,8 +23,8 @@ const (
 	DefaultLocale = discordgo.EnglishGB
 )
 
-var (
-	Languages = []Language{
+func GetLanguages() []Language {
+	return []Language{
 		{
 			Locale:          discordgo.French,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, frenchFile),
@@ -46,10 +46,10 @@ var (
 			AMQPLocale:      amqp.Language_ES,
 		},
 	}
-)
+}
 
 func MapDiscordLocale(locale discordgo.Locale) amqp.Language {
-	for _, language := range Languages {
+	for _, language := range GetLanguages() {
 		if language.Locale == locale {
 			return language.AMQPLocale
 		}
@@ -59,7 +59,7 @@ func MapDiscordLocale(locale discordgo.Locale) amqp.Language {
 }
 
 func MapAMQPLocale(locale amqp.Language) discordgo.Locale {
-	for _, language := range Languages {
+	for _, language := range GetLanguages() {
 		if language.AMQPLocale == locale {
 			return language.Locale
 		}

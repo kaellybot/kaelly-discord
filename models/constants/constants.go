@@ -13,7 +13,3 @@ const (
 	Paypal             = "https://paypal.me/kaysoro"
 	DevelopmentGuildID = "299167247279194112"
 )
-
-var (
-	Game = AnkamaGameDofus
-)

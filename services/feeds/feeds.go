@@ -41,8 +41,9 @@ func (service *Impl) FindFeedTypes(name string, locale discordgo.Locale) []entit
 	}
 
 	for _, feedType := range service.feedTypes {
-		currentCleanedName, _, err := transform.String(service.transformer, strings.ToLower(translators.GetEntityLabel(feedType, locale)))
-		if err == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		currentCleanedName, _, errStr := transform.String(service.transformer,
+			strings.ToLower(translators.GetEntityLabel(feedType, locale)))
+		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
 			feedTypesFound = append(feedTypesFound, feedType)
 		}
 	}

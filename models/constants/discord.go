@@ -12,16 +12,25 @@ type DiscordCommand struct {
 	Handlers DiscordHandlers
 }
 
-var (
-	DMPermission = false
+func GetDMPermission() *bool {
+	var dmPermission = false
+	return &dmPermission
+}
 
-	DefaultPermission      int64 = discordgo.PermissionViewChannel
-	ManageServerPermission int64 = discordgo.PermissionManageServer
+func GetDefaultPermission() *int64 {
+	var defaultPermission int64 = discordgo.PermissionViewChannel
+	return &defaultPermission
+}
 
-	Intents discordgo.Intent = discordgo.IntentMessageContent |
+func GetManageServerPermission() *int64 {
+	var manageServerPermission int64 = discordgo.PermissionManageServer
+	return &manageServerPermission
+}
+func GetIntents() discordgo.Intent {
+	return discordgo.IntentMessageContent |
 		discordgo.IntentGuildMembers |
 		discordgo.IntentGuilds |
 		discordgo.IntentGuildMessages |
 		discordgo.IntentGuildMessageReactions |
 		discordgo.IntentGuildWebhooks
-)
+}

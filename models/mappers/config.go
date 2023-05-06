@@ -180,12 +180,12 @@ func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service
 
 	return &discordgo.MessageEmbed{
 		Title:       guild.Name,
-		Description: i18n.Get(lg, "config.embed.description", i18n.Vars{"server": guildServer, "game": constants.Game}),
+		Description: i18n.Get(lg, "config.embed.description", i18n.Vars{"server": guildServer, "game": constants.GetGame()}),
 		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: guild.Icon},
 		Color:       constants.Color,
 		Fields: []*discordgo.MessageEmbedField{
 			{
-				Name:   i18n.Get(lg, "config.embed.server.name", i18n.Vars{"game": constants.Game}),
+				Name:   i18n.Get(lg, "config.embed.server.name", i18n.Vars{"game": constants.GetGame()}),
 				Value:  i18n.Get(lg, "config.embed.server.value", i18n.Vars{"channels": channelServers}),
 				Inline: true,
 			},
@@ -213,7 +213,8 @@ func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, lg discordgo.
 	return i18nWebhooks
 }
 
-func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.Service, lg discordgo.Locale) []i18nChannelWebhook {
+func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.Service,
+	lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
 		var providerName string

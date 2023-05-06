@@ -16,22 +16,20 @@ func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
-		if subCommand.Name == contract.ConfigServerSubCommandName {
-			for _, option := range subCommand.Options {
-				if option.Name == contract.ConfigServerOptionName {
-					servers := command.serverService.FindServers(option.StringValue(), lg)
-					response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
-					if checkSuccess {
-						next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
-					} else {
-						_, err := s.InteractionResponseEdit(i.Interaction, &response)
-						if err != nil {
-							log.Error().Err(err).Msg("Server check response ignored")
-						}
+		for _, option := range subCommand.Options {
+			if option.Name == contract.ConfigServerOptionName {
+				servers := command.serverService.FindServers(option.StringValue(), lg)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
+				if checkSuccess {
+					next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
+				} else {
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("Server check response ignored")
 					}
-
-					return
 				}
+
+				return
 			}
 		}
 	}
@@ -43,22 +41,20 @@ func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
-		if subCommand.Name == contract.ConfigRSSSubCommandName {
-			for _, option := range subCommand.Options {
-				if option.Name == contract.ConfigFeedTypeOptionName {
-					feedTypes := command.feedService.FindFeedTypes(option.StringValue(), lg)
-					response, checkSuccess := validators.ExpectOnlyOneElement("checks.feed", option.StringValue(), feedTypes, lg)
-					if checkSuccess {
-						next(context.WithValue(ctx, constants.ContextKeyFeed, feedTypes[0]))
-					} else {
-						_, err := s.InteractionResponseEdit(i.Interaction, &response)
-						if err != nil {
-							log.Error().Err(err).Msg("Feed check response ignored")
-						}
+		for _, option := range subCommand.Options {
+			if option.Name == contract.ConfigFeedTypeOptionName {
+				feedTypes := command.feedService.FindFeedTypes(option.StringValue(), lg)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.feed", option.StringValue(), feedTypes, lg)
+				if checkSuccess {
+					next(context.WithValue(ctx, constants.ContextKeyFeed, feedTypes[0]))
+				} else {
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("Feed check response ignored")
 					}
-
-					return
 				}
+
+				return
 			}
 		}
 	}

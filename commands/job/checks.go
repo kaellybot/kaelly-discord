@@ -44,31 +44,27 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
-		if subCommand.Name == contract.JobSetSubCommandName {
-			for _, option := range subCommand.Options {
-				if option.Name == contract.JobLevelOptionName {
-					level := option.IntValue()
+		for _, option := range subCommand.Options {
+			if option.Name == contract.JobLevelOptionName {
+				level := option.IntValue()
 
-					if level >= constants.JobMinLevel && level <= constants.JobMaxLevel {
-						next(context.WithValue(ctx, constants.ContextKeyLevel, level))
-					} else {
-						content := i18n.Get(lg, "checks.level.constraints",
-							i18n.Vars{"min": constants.JobMinLevel, "max": constants.JobMaxLevel})
-						_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-							Content: &content,
-						})
-						if err != nil {
-							log.Error().Err(err).Msg("Level check response ignored")
-						}
+				if level >= constants.JobMinLevel && level <= constants.JobMaxLevel {
+					next(context.WithValue(ctx, constants.ContextKeyLevel, level))
+				} else {
+					content := i18n.Get(lg, "checks.level.constraints",
+						i18n.Vars{"min": constants.JobMinLevel, "max": constants.JobMaxLevel})
+					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+						Content: &content,
+					})
+					if err != nil {
+						log.Error().Err(err).Msg("Level check response ignored")
 					}
-
-					return
 				}
+
+				return
 			}
 		}
 	}
-
-	next(ctx)
 }
 
 func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,

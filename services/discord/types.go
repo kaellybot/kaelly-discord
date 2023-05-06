@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrInvalidInteractionType = errors.New("Interaction type is not handled")
+	ErrInvalidInteractionType = errors.New("interaction type is not handled")
 )
 
 type Service interface {

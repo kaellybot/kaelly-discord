@@ -7,11 +7,12 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) userAlignRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	server, err := command.getUserOptions(ctx)
 	if err != nil {
 		panic(err)

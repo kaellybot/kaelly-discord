@@ -16,23 +16,31 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
 
+//nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(bookService books.Service, guildService guilds.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
-	command := Command{
+	cmd := Command{
 		bookService:    bookService,
 		guildService:   guildService,
 		serverService:  serverService,
 		requestManager: requestManager,
 	}
-	command.slashHandlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(command.checkJob, command.checkLevel,
-			command.checkServer, command.slashRequest),
-		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+
+	subCommandHandlers := cmd.HandleSubCommand(commands.SubCommandHandlers{
+		contract.JobGetSubCommandName: middlewares.
+			Use(cmd.checkJob, cmd.checkServer, cmd.getRequest),
+		contract.JobSetSubCommandName: middlewares.
+			Use(cmd.checkJob, cmd.checkLevel, cmd.checkServer, cmd.setRequest),
+	})
+
+	cmd.slashHandlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand:             subCommandHandlers,
+		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
 	}
-	command.userHandlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.userRequest),
+	cmd.userHandlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand: middlewares.Use(cmd.checkServer, cmd.userRequest),
 	}
-	return &command
+	return &cmd
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
@@ -46,20 +54,6 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 		command.CallHandler(s, i, lg, command.slashHandlers)
 	} else {
 		command.CallHandler(s, i, lg, command.userHandlers)
-	}
-}
-
-func (command *Command) slashRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	for _, subCommand := range i.ApplicationCommandData().Options {
-		switch subCommand.Name {
-		case contract.JobGetSubCommandName:
-			command.getRequest(ctx, s, i, lg)
-		case contract.JobSetSubCommandName:
-			command.setRequest(ctx, s, i, lg)
-		default:
-			panic(fmt.Errorf("cannot handle subCommand %v, request ignored", subCommand.Name))
-		}
 	}
 }
 

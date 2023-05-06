@@ -16,23 +16,31 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
 
+//nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(bookService books.Service, guildService guilds.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
-	command := Command{
+	cmd := Command{
 		bookService:    bookService,
 		guildService:   guildService,
 		serverService:  serverService,
 		requestManager: requestManager,
 	}
-	command.slashHandlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(command.checkCity, command.checkOrder,
-			command.checkLevel, command.checkServer, command.slashRequest),
-		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+
+	subCommandHandlers := cmd.HandleSubCommand(commands.SubCommandHandlers{
+		contract.AlignGetSubCommandName: middlewares.
+			Use(cmd.checkOptionalCity, cmd.checkOptionalOrder, cmd.checkServer, cmd.getRequest),
+		contract.AlignSetSubCommandName: middlewares.
+			Use(cmd.checkMandatoryCity, cmd.checkMandatoryOrder, cmd.checkLevel, cmd.checkServer, cmd.setRequest),
+	})
+
+	cmd.slashHandlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand:             subCommandHandlers,
+		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
 	}
-	command.userHandlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+	cmd.userHandlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand: middlewares.Use(cmd.checkServer, cmd.userRequest),
 	}
-	return &command
+	return &cmd
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
@@ -47,25 +55,6 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 	} else {
 		command.CallHandler(s, i, lg, command.userHandlers)
 	}
-}
-
-func (command *Command) slashRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	for _, subCommand := range i.ApplicationCommandData().Options {
-		switch subCommand.Name {
-		case contract.AlignGetSubCommandName:
-			command.getRequest(ctx, s, i, lg)
-		case contract.AlignSetSubCommandName:
-			command.setRequest(ctx, s, i, lg)
-		default:
-			panic(fmt.Errorf("cannot handle subCommand %v, request ignored", subCommand.Name))
-		}
-	}
-}
-
-func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	command.userAlignRequest(ctx, s, i, lg)
 }
 
 func (command *Command) getGetOptions(ctx context.Context) (entities.City, entities.Order, entities.Server, error) {

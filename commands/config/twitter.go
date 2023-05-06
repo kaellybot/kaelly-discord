@@ -5,13 +5,14 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
 func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	channelID, enabled, locale, err := command.getWebhookTwitterOptions(ctx)
 	if err != nil {
 		panic(err)

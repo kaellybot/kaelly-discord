@@ -19,6 +19,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(guildService guilds.Service, portalService portals.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
 	command := Command{

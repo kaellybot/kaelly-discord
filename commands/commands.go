@@ -17,3 +17,17 @@ func (command *AbstractCommand) CallHandler(s *discordgo.Session, i *discordgo.I
 			Msgf("Interaction not handled, ignoring it")
 	}
 }
+
+func (command *AbstractCommand) HandleSubCommand(handlers map[string]DiscordHandler) DiscordHandler {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+		data := i.ApplicationCommandData()
+		for _, subCommand := range data.Options {
+			handler, found := handlers[subCommand.Name]
+			if found {
+				handler(s, i, lg)
+			} else {
+				panic(ErrNoSubCommandHandler)
+			}
+		}
+	}
+}

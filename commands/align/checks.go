@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) checkCity(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
@@ -24,11 +24,31 @@ func (command *Command) checkCity(ctx context.Context, s *discordgo.Session,
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, lg)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
-				} else if subCommand.Name == contract.AlignSetSubCommandName {
+				} else {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
 						log.Error().Err(err).Msg("City check response ignored")
 					}
+				}
+
+				return
+			}
+		}
+	}
+}
+
+func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	data := i.ApplicationCommandData()
+
+	// Filled case, expecting [1, 1] city
+	for _, subCommand := range data.Options {
+		for _, option := range subCommand.Options {
+			if option.Name == contract.AlignCityOptionName {
+				cities := command.bookService.FindCities(option.StringValue(), lg)
+				_, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, lg)
+				if checkSuccess {
+					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				} else {
 					next(ctx)
 				}
@@ -41,7 +61,7 @@ func (command *Command) checkCity(ctx context.Context, s *discordgo.Session,
 	next(ctx)
 }
 
-func (command *Command) checkOrder(ctx context.Context, s *discordgo.Session,
+func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
@@ -53,11 +73,31 @@ func (command *Command) checkOrder(ctx context.Context, s *discordgo.Session,
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, lg)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
-				} else if subCommand.Name == contract.AlignSetSubCommandName {
+				} else {
 					_, err := s.InteractionResponseEdit(i.Interaction, &response)
 					if err != nil {
 						log.Error().Err(err).Msg("Order check response ignored")
 					}
+				}
+
+				return
+			}
+		}
+	}
+}
+
+func (command *Command) checkOptionalOrder(ctx context.Context, _ *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	data := i.ApplicationCommandData()
+
+	// Filled case, expecting [1, 1] order
+	for _, subCommand := range data.Options {
+		for _, option := range subCommand.Options {
+			if option.Name == contract.AlignOrderOptionName {
+				orders := command.bookService.FindOrders(option.StringValue(), lg)
+				_, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, lg)
+				if checkSuccess {
+					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				} else {
 					next(ctx)
 				}
@@ -75,31 +115,27 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
-		if subCommand.Name == contract.AlignSetSubCommandName {
-			for _, option := range subCommand.Options {
-				if option.Name == contract.AlignLevelOptionName {
-					level := option.IntValue()
+		for _, option := range subCommand.Options {
+			if option.Name == contract.AlignLevelOptionName {
+				level := option.IntValue()
 
-					if level >= constants.AlignmentMinLevel && level <= constants.AlignmentMaxLevel {
-						next(context.WithValue(ctx, constants.ContextKeyLevel, level))
-					} else {
-						content := i18n.Get(lg, "checks.level.constraints",
-							i18n.Vars{"min": constants.AlignmentMinLevel, "max": constants.AlignmentMaxLevel})
-						_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-							Content: &content,
-						})
-						if err != nil {
-							log.Error().Err(err).Msg("Level check response ignored")
-						}
+				if level >= constants.AlignmentMinLevel && level <= constants.AlignmentMaxLevel {
+					next(context.WithValue(ctx, constants.ContextKeyLevel, level))
+				} else {
+					content := i18n.Get(lg, "checks.level.constraints",
+						i18n.Vars{"min": constants.AlignmentMinLevel, "max": constants.AlignmentMaxLevel})
+					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+						Content: &content,
+					})
+					if err != nil {
+						log.Error().Err(err).Msg("Level check response ignored")
 					}
-
-					return
 				}
+
+				return
 			}
 		}
 	}
-
-	next(ctx)
 }
 
 func (command *Command) checkServer(ctx context.Context, s *discordgo.Session,

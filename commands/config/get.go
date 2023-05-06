@@ -8,11 +8,12 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/rs/zerolog/log"
 )
 
 func (command *Command) getRequest(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	msg := mappers.MapConfigurationGetRequest(i.Interaction.GuildID, lg)
 	err := command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.getRespond)
 	if err != nil {

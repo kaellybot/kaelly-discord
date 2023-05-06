@@ -17,20 +17,35 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
 
+//nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(guildService guilds.Service, feedService feeds.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
-	command := Command{
+	cmd := Command{
 		guildService:   guildService,
 		feedService:    feedService,
 		serverService:  serverService,
 		requestManager: requestManager,
 	}
-	command.handlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(command.checkServer, command.checkEnabled,
-			command.checkFeedType, command.checkLanguage, command.checkChannelID, command.request),
-		discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,
+
+	subCommandHandlers := cmd.HandleSubCommand(commands.SubCommandHandlers{
+		contract.ConfigAlmanaxSubCommandName: middlewares.
+			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.almanaxRequest),
+		contract.ConfigGetSubCommandName: middlewares.
+			Use(cmd.getRequest),
+		contract.ConfigRSSSubCommandName: middlewares.
+			Use(cmd.checkEnabled, cmd.checkFeedType, cmd.checkLanguage, cmd.checkChannelID, cmd.rssRequest),
+		contract.ConfigServerSubCommandName: middlewares.
+			Use(cmd.checkServer, cmd.checkChannelID, cmd.serverRequest),
+		contract.ConfigTwitterSubCommandName: middlewares.
+			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.twitterRequest),
+	})
+
+	cmd.handlers = commands.DiscordHandlers{
+		discordgo.InteractionApplicationCommand:             subCommandHandlers,
+		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
 	}
-	return &command
+
+	return &cmd
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
@@ -39,26 +54,6 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	command.CallHandler(s, i, lg, command.handlers)
-}
-
-func (command *Command) request(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	for _, subCommand := range i.ApplicationCommandData().Options {
-		switch subCommand.Name {
-		case contract.ConfigGetSubCommandName:
-			command.getRequest(ctx, s, i, lg)
-		case contract.ConfigAlmanaxSubCommandName:
-			command.almanaxRequest(ctx, s, i, lg)
-		case contract.ConfigRSSSubCommandName:
-			command.rssRequest(ctx, s, i, lg)
-		case contract.ConfigTwitterSubCommandName:
-			command.twitterRequest(ctx, s, i, lg)
-		case contract.ConfigServerSubCommandName:
-			command.serverRequest(ctx, s, i, lg)
-		default:
-			panic(fmt.Errorf("cannot handle subCommand %v, request ignored", subCommand.Name))
-		}
-	}
 }
 
 func (command *Command) createWebhook(s *discordgo.Session, channelID string) (*discordgo.Webhook, error) {

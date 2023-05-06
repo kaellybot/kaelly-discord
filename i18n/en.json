@@ -1,6 +1,5 @@
 {
    "about": {
-      "description": "Gives information about Kaelly and a way to get help",
       "title": "{{ .name }} version {{ .version }}",
       "desc": "Discord bot dedicated to the {{ .game.Name }} game!",
       "support": {
@@ -30,43 +29,6 @@
       "footer": "Some illustrations are the Ankama Studio property - All rights reserved"
    },
    "align": {
-      "description": "Handles the alignment book",
-      "get": {
-         "name": "get",
-         "description": "Displays the specified city and/or order alignment book",
-         "city": {
-            "name": "city",
-            "description": "Game city"
-         },
-         "order": {
-            "name": "order",
-            "description": "Game order"
-         },
-         "server": {
-            "name": "server",
-            "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
-         }
-      },
-      "set": {
-         "name": "set",
-         "description": "Registers your alignment in the specified server alignment book",
-         "city": {
-            "name": "city",
-            "description": "Game city"
-         },
-         "order": {
-            "name": "order",
-            "description": "Game order"
-         },
-         "level": {
-            "name": "level",
-            "description": "Job level between 0 and 200. Indicate 0 to unregister"
-         },
-         "server": {
-            "name": "server",
-            "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
-         }
-      },
       "success": "Alignment book updated!",
       "embed": {
          "believers": {
@@ -80,75 +42,6 @@
       }
    },
    "config": {
-      "description": "Permits to configure me: {{ .game.Name }} server, Almanax, RSS feeds or tweets sendings",
-      "get": {
-         "name": "get",
-         "description": "Displays my current configuration to the Discord serveur"
-      },
-      "almanax": {
-         "name": "almanax",
-         "description": "Enable Alamanax sending in a channel",
-         "enabled": {
-            "name": "enabled",
-            "description": "Enables or disables Almanax sending in the channel"
-         },
-         "language": {
-            "name": "language",
-            "description": "If not filled, the server language is used instead"
-         },
-         "channel": {
-            "name": "channel",
-            "description": "If not filled, the current channel is used instead"
-         }
-      },
-      "rss": {
-         "name": "rss",
-         "description": "Enables RSS feeds in a channel",
-         "enabled": {
-            "name": "enabled",
-            "description": "Enables or disables RSS feeds sending in the channel"
-         },
-         "feedtype": {
-            "name": "feed",
-            "description": "Feed type desired, provided by the official website"
-         },
-         "language": {
-            "name": "language",
-            "description": "If not filled, the server language is used instead"
-         },
-         "channel": {
-            "name": "channel",
-            "description": "If not filled, the current channel is used instead"
-         }
-      },
-      "server": {
-         "name": "server",
-         "description": "Links the Discord server to a {{ .game.Name }} server",
-         "server": {
-            "name": "server",
-            "description": "{{ .game.Name }} server game"
-         },
-         "channel": {
-            "name": "channel",
-            "description": "{{ .game.Name }} server linked to the channel will be prior to the one linked to the Discord server"
-         }
-      },
-      "twitter": {
-         "name": "twitter",
-         "description": "Enables tweets sending in a channel",
-         "enabled": {
-            "name": "enabled",
-            "description": "Enables or disables tweets sending in the channel"
-         },
-         "language": {
-            "name": "language",
-            "description": "If not filled, the server language is used instead"
-         },
-         "channel": {
-            "name": "channel",
-            "description": "If not filled, the current channel is used instead"
-         }
-      },
       "success": "Change taken in account!",
       "embed": {
          "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
@@ -163,35 +56,6 @@
       }
    },
    "job": {
-      "description": "Handles the craftsmen book",
-      "get": {
-         "name": "get",
-         "description": "Displays the specified job craftsmen book",
-         "job": {
-            "name": "job",
-            "description": "Game job"
-         },
-         "server": {
-            "name": "server",
-            "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
-         }
-      },
-      "set": {
-         "name": "set",
-         "description": "Registers your job in the specified server craftsmen book",
-         "job": {
-            "name": "job",
-            "description": "Game job"
-         },
-         "level": {
-            "name": "level",
-            "description": "Job level between 0 and 200. Indicate 0 to unregister"
-         },
-         "server": {
-            "name": "server",
-            "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
-         }
-      },
       "success": "Craftsmen book updated!",
       "embed": {
          "craftsmen": {
@@ -205,15 +69,6 @@
       }
    },
    "pos": {
-      "description": "Gives the most recent dimension portal positions",
-      "dimension": {
-         "name": "dimension",
-         "description": "Dimension name. If not filled, all dimensions are retrieved"
-      },
-      "server": {
-         "name": "server",
-         "description": "{{ .game.Name }} Server name. If not filled, the guild server is used instead"
-      },
       "embed": {
          "unknown": "No recent position found :frowning:",
          "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} uses\n\n*Added by **{{ .createdBy}}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nUpdated by **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
@@ -246,20 +101,6 @@
       },
       "permission": {
          "webhook": "I don't have the right to manage webhooks! Sorry I can't do anything more without this permission :("
-      }
-   },
-   "locales": {
-      "FR": {
-         "name": "French",
-         "emoji": ":flag_fr:"
-      },
-      "EN": {
-         "name": "English",
-         "emoji": ":flag_gb:"
-      },
-      "ES": {
-         "name": "Spanish",
-         "emoji": ":flag_es:"
       }
    },
    "webhooks": {

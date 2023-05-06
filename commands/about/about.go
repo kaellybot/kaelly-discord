@@ -14,14 +14,6 @@ func New() *Command {
 //nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
-		Identity: discordgo.ApplicationCommand{
-			Name:                     commandName,
-			Description:              i18n.Get(constants.DefaultLocale, "about.description"),
-			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: constants.GetDefaultPermission(),
-			DMPermission:             constants.GetDMPermission(),
-			DescriptionLocalizations: i18n.GetLocalizations("about.description"),
-		},
 		Handlers: constants.DiscordHandlers{
 			discordgo.InteractionApplicationCommand: command.about,
 		},

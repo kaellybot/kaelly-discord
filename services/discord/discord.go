@@ -6,7 +6,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/panics"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 )
 
 func New(token string, shardID, shardCount int, slashCommands []commands.SlashCommand,
@@ -49,28 +48,6 @@ func (service *Impl) Listen() error {
 	return nil
 }
 
-func (service *Impl) RegisterCommands() error {
-	guildID := ""
-	if !viper.GetBool(constants.Production) {
-		log.Info().Msgf("Development mode enabled, registering commands in dedicated development guild")
-		guildID = constants.DevelopmentGuildID
-	}
-
-	identities := make([]*discordgo.ApplicationCommand, 0)
-	for _, command := range service.commands {
-		identities = append(identities, &command.Identity)
-	}
-
-	_, err := service.session.ApplicationCommandBulkOverwrite(service.session.State.User.ID, guildID, identities)
-	if err != nil {
-		log.Error().Err(err).Msgf("Failed to create commands, registration stopped")
-		return err
-	}
-	log.Info().Msgf("Commands successfully registered!")
-
-	return nil
-}
-
 func (service *Impl) Shutdown() {
 	log.Info().Int(constants.LogShard, service.session.ShardID).Msgf("Closing Discord connections...")
 	err := service.session.Close()
@@ -104,14 +81,15 @@ func (service *Impl) interactionCreate(session *discordgo.Session, event *discor
 		locale = *event.GuildLocale
 	}
 
+	// TODO rewrite this function to have handlers per subCommand
 	for _, command := range service.commands {
-		if event.ApplicationCommandData().Name == command.Identity.Name {
+		if event.ApplicationCommandData().Name == command.Name {
 			handler, found := command.Handlers[event.Type]
 			if found {
 				handler(session, event, locale)
 			} else {
 				log.Error().
-					Str(constants.LogCommand, command.Identity.Name).
+					Str(constants.LogCommand, command.Name).
 					Uint32(constants.LogInteractionType, uint32(event.Type)).
 					Msgf("Interaction not handled, ignoring it")
 			}

@@ -124,11 +124,6 @@ func (app *Impl) Run() error {
 		return err
 	}
 
-	err = app.discordService.RegisterCommands()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 

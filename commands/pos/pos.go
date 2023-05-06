@@ -15,7 +15,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
-	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -32,34 +31,6 @@ func New(guildService guilds.Service, portalService portals.Service,
 //nolint:nolintlint,exhaustive,lll,dupl
 func (command *Command) GetSlashCommand() *constants.DiscordCommand {
 	return &constants.DiscordCommand{
-		Identity: discordgo.ApplicationCommand{
-			Name:                     commandName,
-			Description:              i18n.Get(constants.DefaultLocale, "pos.description"),
-			Type:                     discordgo.ChatApplicationCommand,
-			DefaultMemberPermissions: constants.GetDefaultPermission(),
-			DMPermission:             constants.GetDMPermission(),
-			DescriptionLocalizations: i18n.GetLocalizations("pos.description"),
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Name:                     dimensionOptionName,
-					Description:              i18n.Get(constants.DefaultLocale, "pos.dimension.description"),
-					NameLocalizations:        *i18n.GetLocalizations("pos.dimension.name"),
-					DescriptionLocalizations: *i18n.GetLocalizations("pos.dimension.description"),
-					Type:                     discordgo.ApplicationCommandOptionString,
-					Required:                 false,
-					Autocomplete:             true,
-				},
-				{
-					Name:                     serverOptionName,
-					Description:              i18n.Get(constants.DefaultLocale, "pos.server.description", i18n.Vars{"game": constants.GetGame()}),
-					NameLocalizations:        *i18n.GetLocalizations("pos.server.name"),
-					DescriptionLocalizations: *i18n.GetLocalizations("pos.server.description", i18n.Vars{"game": constants.GetGame()}),
-					Type:                     discordgo.ApplicationCommandOptionString,
-					Required:                 false,
-					Autocomplete:             true,
-				},
-			},
-		},
 		Handlers: constants.DiscordHandlers{
 			discordgo.InteractionApplicationCommand:             middlewares.Use(command.checkDimension, command.checkServer, command.request),
 			discordgo.InteractionApplicationCommandAutocomplete: command.autocomplete,

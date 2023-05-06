@@ -7,7 +7,6 @@ import (
 
 type Service interface {
 	Listen() error
-	RegisterCommands() error
 	Shutdown()
 }
 

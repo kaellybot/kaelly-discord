@@ -3,6 +3,7 @@ module github.com/kaellybot/kaelly-discord
 go 1.20
 
 // replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
+// replace github.com/kaellybot/kaelly-commands => ../kaelly-commands
 
 require (
 	github.com/bwmarrin/discordgo v0.26.1

@@ -49,53 +49,70 @@ func (command *Command) getGuildConfigData(s *discordgo.Session,
 		return constants.GuildConfig{}, err
 	}
 
+	cache := make(map[string]*discordgo.Channel)
 	result := constants.GuildConfig{
-		Name:     guild.Name,
-		Icon:     guild.IconURL(),
-		ServerID: answer.ServerId,
+		Name:            guild.Name,
+		Icon:            guild.IconURL(),
+		ServerID:        answer.ServerId,
+		ChannelServers:  getValidChannelServers(s, answer, cache),
+		AlmanaxWebhooks: getValidAlmanaxWebhooks(s, answer, cache),
+		RssWebhooks:     getValidRSSWebhooks(s, answer, cache),
+		TwitterWebhooks: getValidTwitterWebhooks(s, answer, cache),
 	}
 
-	channels := make(map[string]*discordgo.Channel)
+	return result, nil
+}
+
+func getValidChannelServers(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
+	cache map[string]*discordgo.Channel) []constants.ChannelServer {
+	result := make([]constants.ChannelServer, 0)
 	for _, channelServer := range answer.ChannelServers {
-		channel, found := channels[channelServer.ChannelId]
+		channel, found := cache[channelServer.ChannelId]
 		if !found {
 			discordChannel, errChan := s.Channel(channelServer.ChannelId)
 			if errChan != nil {
-				log.Warn().Err(err).
+				log.Warn().Err(errChan).
 					Str(constants.LogGuildID, answer.GuildId).
 					Str(constants.LogChannelID, channelServer.ChannelId).
 					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
 				continue
 			}
 
-			channels[channelServer.ChannelId] = discordChannel
+			cache[channelServer.ChannelId] = discordChannel
 			channel = discordChannel
 		}
 
-		result.ChannelServers = append(result.ChannelServers, constants.ChannelServer{
+		result = append(result, constants.ChannelServer{
 			Channel:  channel,
 			ServerID: channelServer.ServerId,
 		})
 	}
 
+	return result
+}
+
+//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
+func getValidAlmanaxWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
+	cache map[string]*discordgo.Channel) []constants.AlmanaxWebhook {
+	result := make([]constants.AlmanaxWebhook, 0)
 	for _, webhook := range answer.AlmanaxWebhooks {
-		channel, found := channels[webhook.ChannelId]
+		channel, found := cache[webhook.ChannelId]
 		if !found {
 			discordChannel, errChan := s.Channel(webhook.ChannelId)
 			if errChan != nil {
-				log.Warn().Err(err).
+				log.Warn().Err(errChan).
 					Str(constants.LogGuildID, answer.GuildId).
 					Str(constants.LogChannelID, webhook.ChannelId).
 					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
 				continue
 			}
 
-			channels[webhook.ChannelId] = discordChannel
+			cache[webhook.ChannelId] = discordChannel
 			channel = discordChannel
 		}
 
 		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
-			result.AlmanaxWebhooks = append(result.AlmanaxWebhooks, constants.AlmanaxWebhook{
+			result = append(result, constants.AlmanaxWebhook{
 				ChannelWebhook: constants.ChannelWebhook{
 					Channel: channel,
 					Locale:  webhook.Language,
@@ -104,24 +121,30 @@ func (command *Command) getGuildConfigData(s *discordgo.Session,
 		}
 	}
 
+	return result
+}
+
+func getValidRSSWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
+	cache map[string]*discordgo.Channel) []constants.RssWebhook {
+	result := make([]constants.RssWebhook, 0)
 	for _, webhook := range answer.RssWebhooks {
-		channel, found := channels[webhook.ChannelId]
+		channel, found := cache[webhook.ChannelId]
 		if !found {
 			discordChannel, errChan := s.Channel(webhook.ChannelId)
 			if errChan != nil {
-				log.Warn().Err(err).
+				log.Warn().Err(errChan).
 					Str(constants.LogGuildID, answer.GuildId).
 					Str(constants.LogChannelID, webhook.ChannelId).
 					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
 				continue
 			}
 
-			channels[webhook.ChannelId] = discordChannel
+			cache[webhook.ChannelId] = discordChannel
 			channel = discordChannel
 		}
 
 		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
-			result.RssWebhooks = append(result.RssWebhooks, constants.RssWebhook{
+			result = append(result, constants.RssWebhook{
 				ChannelWebhook: constants.ChannelWebhook{
 					Channel: channel,
 					Locale:  webhook.Language,
@@ -131,34 +154,40 @@ func (command *Command) getGuildConfigData(s *discordgo.Session,
 		}
 	}
 
+	return result
+}
+
+//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
+func getValidTwitterWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
+	cache map[string]*discordgo.Channel) []constants.TwitterWebhook {
+	result := make([]constants.TwitterWebhook, 0)
 	for _, webhook := range answer.TwitterWebhooks {
-		channel, found := channels[webhook.ChannelId]
+		channel, found := cache[webhook.ChannelId]
 		if !found {
 			discordChannel, errChan := s.Channel(webhook.ChannelId)
 			if errChan != nil {
-				log.Warn().Err(err).
+				log.Warn().Err(errChan).
 					Str(constants.LogGuildID, answer.GuildId).
 					Str(constants.LogChannelID, webhook.ChannelId).
 					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
 				continue
 			}
 
-			channels[webhook.ChannelId] = discordChannel
+			cache[webhook.ChannelId] = discordChannel
 			channel = discordChannel
 		}
 
 		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
-			result.TwitterWebhooks = append(result.TwitterWebhooks, constants.TwitterWebhook{
+			result = append(result, constants.TwitterWebhook{
 				ChannelWebhook: constants.ChannelWebhook{
 					Channel: channel,
 					Locale:  webhook.Language,
 				},
-				TwitterName: webhook.Name,
 			})
 		}
 	}
 
-	return result, nil
+	return result
 }
 
 func webhookExists(s *discordgo.Session, webhookID, channelID, guildID string) bool {

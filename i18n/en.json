@@ -117,6 +117,20 @@
          "emoji": "<:twitter:1100040368445206619>"
       }
    },
+   "locales": {
+      "FR": {
+         "name": "French",
+         "emoji": ":flag_fr:"
+      },
+      "EN": {
+         "name": "English",
+         "emoji": ":flag_gb:"
+      },
+      "ES": {
+         "name": "Spanish",
+         "emoji": ":flag_es:"
+      }
+   },
    "panic": [
       "I have encountered an error :frowning:... This will be processed as soon as possible!",
       "Oops, it seems I've crashed... I'm reporting this event to my creators, sorry!"

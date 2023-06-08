@@ -10,6 +10,8 @@ import (
 
 const (
 	configurationRequestRoutingKey = "requests.configs"
+
+	defaultIconSize = "128"
 )
 
 type Command struct {

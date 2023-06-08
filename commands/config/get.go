@@ -52,7 +52,7 @@ func (command *Command) getGuildConfigData(s *discordgo.Session,
 	cache := make(map[string]*discordgo.Channel)
 	result := constants.GuildConfig{
 		Name:            guild.Name,
-		Icon:            guild.IconURL(),
+		Icon:            guild.IconURL(defaultIconSize),
 		ServerID:        answer.ServerId,
 		ChannelServers:  getValidChannelServers(s, answer, cache),
 		AlmanaxWebhooks: getValidAlmanaxWebhooks(s, answer, cache),

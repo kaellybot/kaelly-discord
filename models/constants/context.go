@@ -12,5 +12,6 @@ const (
 	ContextKeyLanguage
 	ContextKeyLevel
 	ContextKeyOrder
+	ContextKeyQuery
 	ContextKeyServer
 )

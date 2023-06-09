@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	configurationRequestRoutingKey = "requests.items"
+	itemRequestRoutingKey = "requests.encyclopedias"
 
 	defaultIconSize = "128"
 )

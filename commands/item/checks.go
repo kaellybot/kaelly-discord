@@ -2,6 +2,7 @@ package item
 
 import (
 	"context"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	contract "github.com/kaellybot/kaelly-commands"
@@ -14,9 +15,8 @@ func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == contract.ItemQueryOptionName {
-				next(context.WithValue(ctx, constants.ContextKeyQuery, "TODO"))
-				// TODO expect one item at this level
+			if option.Name == contract.ItemQueryOptionName && len(strings.TrimSpace(option.StringValue())) == 0 {
+				next(context.WithValue(ctx, constants.ContextKeyQuery, option.StringValue()))
 				return
 			}
 		}

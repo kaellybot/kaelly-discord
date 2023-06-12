@@ -129,6 +129,10 @@
       "ES": {
          "name": "Spanish",
          "emoji": ":flag_es:"
+      },
+      "DE": {
+          "name": "German",
+          "emoji": ":flag_de:"
       }
    },
    "panic": [

@@ -43,17 +43,19 @@ func (command *Command) requestItemList(s *discordgo.Session, i *discordgo.Inter
 
 func (command *Command) autocompleteItemList(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	if !isItemListAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+	var choices []*discordgo.ApplicationCommandOptionChoice
+	if isItemListAnswerValid(message) {
+		for _, item := range message.EncyclopediaItemListAnswer.Items {
+			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+				Name:  item.Name,
+				Value: item.Name,
+			})
+		}
+	} else {
+		log.Error().Err(commands.ErrInvalidAnswerMessage).
+			Msgf("Cannot retrieve autocomplete, retrieving empty choices...")
 	}
 
-	var choices []*discordgo.ApplicationCommandOptionChoice
-	for _, item := range message.EncyclopediaItemListAnswer.Items {
-		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-			Name:  item.Name,
-			Value: item.Name,
-		})
-	}
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
 		Data: &discordgo.InteractionResponseData{

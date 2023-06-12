@@ -19,6 +19,7 @@ const (
 	frenchFile  = "fr.json"
 	englishFile = "en.json"
 	spanishFile = "es.json"
+	germanFile  = "de.json"
 
 	DefaultLocale = discordgo.EnglishGB
 )
@@ -44,6 +45,11 @@ func GetLanguages() []Language {
 			Locale:          discordgo.SpanishES,
 			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, spanishFile),
 			AMQPLocale:      amqp.Language_ES,
+		},
+		{
+			Locale:          discordgo.German,
+			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, germanFile),
+			AMQPLocale:      amqp.Language_DE,
 		},
 	}
 }

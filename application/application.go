@@ -9,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/item"
 	"github.com/kaellybot/kaelly-discord/commands/job"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
+	"github.com/kaellybot/kaelly-discord/commands/set"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
 	"github.com/kaellybot/kaelly-discord/repositories/cities"
@@ -83,6 +84,7 @@ func New() (*Impl, error) {
 		item.New(requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),
 		pos.New(guildService, portalService, serverService, requestsManager),
+		set.New(requestsManager),
 	}
 
 	discordService, err := discord.New(

@@ -12,6 +12,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/set"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
+	characteristicRepo "github.com/kaellybot/kaelly-discord/repositories/characteristics"
 	"github.com/kaellybot/kaelly-discord/repositories/cities"
 	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
 	feedRepo "github.com/kaellybot/kaelly-discord/repositories/feeds"
@@ -22,6 +23,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/repositories/subareas"
 	"github.com/kaellybot/kaelly-discord/repositories/transports"
 	"github.com/kaellybot/kaelly-discord/services/books"
+	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
@@ -73,6 +75,12 @@ func New() (*Impl, error) {
 		log.Fatal().Err(err).Msgf("Feed Service instantiation failed, shutting down.")
 	}
 
+	characteristicRepo := characteristicRepo.New(db)
+	characteristicService, err := characteristics.New(characteristicRepo)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Characteristic Service instantiation failed, shutting down.")
+	}
+
 	guildRepo := guildRepo.New(db)
 	guildService := guilds.New(guildRepo)
 	requestsManager := requests.New(broker)
@@ -81,10 +89,10 @@ func New() (*Impl, error) {
 		about.New(),
 		align.New(bookService, guildService, serverService, requestsManager),
 		config.New(guildService, feedService, serverService, requestsManager),
-		item.New(requestsManager),
+		item.New(characteristicService, requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),
 		pos.New(guildService, portalService, serverService, requestsManager),
-		set.New(requestsManager),
+		set.New(characteristicService, requestsManager),
 	}
 
 	discordService, err := discord.New(

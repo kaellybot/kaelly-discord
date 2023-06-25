@@ -2,6 +2,7 @@ package set
 
 import (
 	"github.com/kaellybot/kaelly-discord/commands"
+	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
 
@@ -13,6 +14,7 @@ const (
 
 type Command struct {
 	commands.AbstractCommand
-	requestManager requests.RequestManager
-	handlers       commands.DiscordHandlers
+	characteristicService characteristics.Service
+	requestManager        requests.RequestManager
+	handlers              commands.DiscordHandlers
 }

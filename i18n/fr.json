@@ -55,6 +55,9 @@
             }
         }
     },
+    "item": {
+        "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/{{ .id }}"
+    },
     "job": {
         "success": "L'annuaire a été mise à jour !",
         "embed": {
@@ -82,8 +85,8 @@
         "description": "Niveau **{{ .level }}**",
         "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/panoplies/{{ .id }}",
         "items": {
-            "title": "Equipements",
-            "description": "{{ if .items }}{{ range .items}}* {{ .Name }}\n{{ end }}{{ else }}Aucun équipement !{{ end }}",
+            "title": "Objets",
+            "description": "{{ if .items }}{{ range .items}}* [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}Aucun équipement !{{ end }}",
             "placeholder": "Objets de la panoplie"
         },
         "effects": {

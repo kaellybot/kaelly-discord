@@ -55,6 +55,9 @@
          }
       }
    },
+   "item": {
+      "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}"
+  },
    "job": {
       "success": "Craftsmen book updated!",
       "embed": {

@@ -78,6 +78,21 @@
          }
       }
    },
+   "set": {
+      "description": "Level **{{ .level }}**",
+      "url": "https://www.dofus.com/en/mmorpg/encyclopedia/sets/{{ .id }}",
+      "items": {
+         "title": "Items",
+         "description": "{{ if .items }}{{ range .items}}* {{ .Name }}\n{{ end }}{{ else }}No item!{{ end }}",
+         "placeholder": "Set items"
+      },
+      "effects": {
+         "title": "Effects ({{ .itemNumber }} items)",
+         "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}No effect!{{ end }}",
+         "placeholder": "Set bonuses",
+         "option": "Effects ({{ .itemNumber }} / {{ .itemCount }} items)"
+      }
+   },
    "checks": {
       "dimension": {
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
@@ -93,6 +108,9 @@
       },
       "level": {
          "constraints": "The level must be between {{ .min }} and {{ .max }}! :grin:"
+      },
+      "query": {
+         "constraints": "The field must be filled! :grin:"
       },
       "server": {
          "required": "Oops! It seems no {{ .game.Name }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/config server` command :grin:",
@@ -131,8 +149,8 @@
          "emoji": ":flag_es:"
       },
       "DE": {
-          "name": "German",
-          "emoji": ":flag_de:"
+         "name": "German",
+         "emoji": ":flag_de:"
       }
    },
    "panic": [

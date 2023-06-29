@@ -9,6 +9,8 @@ const (
 	LogGuildID         = "guildID"
 	LogChannelID       = "channelID"
 	LogEntity          = "entity"
+	LogAnkamaID        = "ankamaID"
+	LogItemNumber      = "itemNumber"
 	LogInteractionType = "interactionType"
 	LogShard           = "shard"
 	LogFileName        = "fileName"

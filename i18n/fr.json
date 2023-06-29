@@ -78,6 +78,21 @@
             }
         }
     },
+    "set": {
+        "description": "Niveau **{{ .level }}**",
+        "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/panoplies/{{ .id }}",
+        "items": {
+            "title": "Equipements",
+            "description": "{{ if .items }}{{ range .items}}* {{ .Name }}\n{{ end }}{{ else }}Aucun équipement !{{ end }}",
+            "placeholder": "Objets de la panoplie"
+        },
+        "effects": {
+            "title": "Effets ({{ .itemNumber }} objets)",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}Aucun effet !{{ end }}",
+            "placeholder": "Bonus de panoplie",
+            "option": "Effets ({{ .itemNumber }} / {{ .itemCount }} objets)"
+        }
+    },
     "checks": {
         "dimension": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucune dimension que je connaisse ! :pensive:",
@@ -93,6 +108,9 @@
         },
         "level": {
             "constraints": "Le niveau doit être compris entre {{ .min }} et {{ .max }} ! :grin:"
+        },
+        "query": {
+            "constraints": "Le champs ne doit pas être vide ! :grin:"
         },
         "server": {
             "required": "Oops! Il semble qu'il n'y a pas de serveur {{ .game.Name }} lié à ta guilde (ou au salon), utilise l'option *server* (exemple: `/pos server Djaul`) ou lie ta guilde à un serveur avec la commande `/config server` :grin:",

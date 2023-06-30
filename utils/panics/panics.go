@@ -15,7 +15,20 @@ func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate)
 		return
 	}
 
-	log.Error().Str(constants.LogCommand, event.ApplicationCommandData().Name).
+	var commandName string
+	if event.Type == discordgo.InteractionApplicationCommand ||
+		event.Type == discordgo.InteractionApplicationCommandAutocomplete {
+		commandName = event.ApplicationCommandData().Name
+	} else if event.Type == discordgo.InteractionMessageComponent {
+		commandName = event.MessageComponentData().CustomID
+	} else {
+		log.Warn().
+			Uint32(constants.LogInteractionType, uint32(event.Interaction.Type)).
+			Msgf("Cannot handle interaction type, continue recovering with this value as command Name")
+		commandName = fmt.Sprintf("%v", event.Interaction.Type)
+	}
+
+	log.Error().Str(constants.LogCommand, commandName).
 		Str(constants.LogPanic, fmt.Sprintf("%v", r)).
 		Msgf("Panic occurred, sending an error message to user")
 

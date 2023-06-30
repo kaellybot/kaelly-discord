@@ -42,7 +42,7 @@ func (service *Impl) GetEquipmentEmoji(equipmentType amqp.EquipmentType) entitie
 		return entities.Emoji{Type: constants.EmojiTypeEquipment}
 	}
 
-	emojiID := fmt.Sprintf("%v", equipmentType)
+	emojiID := equipmentType.String()
 	emoji, found := innerStore[emojiID]
 	if !found {
 		log.Warn().
@@ -63,7 +63,7 @@ func (service *Impl) GetSetBonusEmoji(equipedItemNumber, itemNumber int) entitie
 		return entities.Emoji{Type: constants.EmojiTypeBonusSet}
 	}
 
-	emojiID := fmt.Sprintf("%v", len(innerStore)-(itemNumber-equipedItemNumber))
+	emojiID := fmt.Sprintf("%v", len(innerStore)-(itemNumber-equipedItemNumber)+1)
 	emoji, found := innerStore[emojiID]
 	if !found {
 		log.Warn().

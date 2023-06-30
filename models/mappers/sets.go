@@ -139,7 +139,7 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 			Value:   fmt.Sprintf("%v", currentBonus.ItemNumber),
 			Default: currentBonus.ItemNumber == bonus.ItemNumber,
 			Emoji: discordgo.ComponentEmoji{
-				Name: emoji.Name,
+				ID: emoji.Snowflake,
 			},
 		})
 	}

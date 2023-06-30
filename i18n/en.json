@@ -86,7 +86,7 @@
       "url": "https://www.dofus.com/en/mmorpg/encyclopedia/sets/{{ .id }}",
       "items": {
          "title": "Items",
-         "description": "{{ if .items }}{{ range .items}}* {{ .Name }}\n{{ end }}{{ else }}No item!{{ end }}",
+         "description": "{{ if .items }}{{ range .items}}{{ .Name }}, lvl {{ .Level }}\n{{ end }}{{ else }}No item!{{ end }}",
          "placeholder": "Set items"
       },
       "effects": {

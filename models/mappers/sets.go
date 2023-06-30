@@ -79,7 +79,7 @@ func mapSetToEmbeds(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSet
 				Value: i18n.Get(lg, "set.items.description", i18n.Vars{
 					"items": mapSetItems(items, lg),
 				}),
-				Inline: true,
+				Inline: false,
 			}
 		})
 
@@ -181,16 +181,18 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 }
 
 type i18nItem struct {
-	Name string
-	URL  string
+	Name  string
+	URL   string
+	Level int64
 }
 
 func mapSetItems(items []*amqp.EncyclopediaSetAnswer_Equipment, lg discordgo.Locale) []i18nItem {
 	result := make([]i18nItem, 0)
 	for _, item := range items {
 		result = append(result, i18nItem{
-			Name: item.GetName(),
-			URL:  i18n.Get(lg, "item.url", i18n.Vars{"id": item.GetId()}),
+			Name:  item.GetName(),
+			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": item.GetId()}),
+			Level: item.GetLevel(),
 		})
 	}
 

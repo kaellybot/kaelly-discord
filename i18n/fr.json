@@ -86,7 +86,7 @@
         "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/panoplies/{{ .id }}",
         "items": {
             "title": "Objets",
-            "description": "{{ if .items }}{{ range .items}}* [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}Aucun équipement !{{ end }}",
+            "description": "{{ if .items }}{{ range .items}}[{{ .Name }}]({{ .URL }}), niv. {{ .Level }}\n{{ end }}{{ else }}Aucun équipement !{{ end }}",
             "placeholder": "Objets de la panoplie"
         },
         "effects": {

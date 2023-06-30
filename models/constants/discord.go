@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	InvisibleCharacter = "\u200b"
+	InvisibleCharacter    = "\u200b"
 	MaxButtonPerActionRow = 5
+	MaxCharacterPerField  = 10
+	MaxEquipmentPerField  = 8
 )
 
 func GetIntents() discordgo.Intent {

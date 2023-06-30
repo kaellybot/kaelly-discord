@@ -27,22 +27,23 @@ func New(characService characteristics.Service, emojiService emojis.Service,
 	}
 
 	cmd.handlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand:             middlewares.Use(cmd.checkQuery, cmd.request),
+		discordgo.InteractionApplicationCommand:             middlewares.Use(cmd.checkQuery, cmd.getSet),
 		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
+		discordgo.InteractionMessageComponent:               cmd.updateSet,
 	}
 
 	return &cmd
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	return i.ApplicationCommandData().Name == contract.SetCommandName
+	return matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	command.CallHandler(s, i, lg, command.handlers)
 }
 
-func (command *Command) request(ctx context.Context, s *discordgo.Session,
+func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
 	query, err := command.getOption(ctx)
 	if err != nil {
@@ -50,10 +51,17 @@ func (command *Command) request(ctx context.Context, s *discordgo.Session,
 	}
 
 	msg := mappers.MapSetRequest(query, lg)
-	err = command.requestManager.Request(s, i, setRequestRoutingKey, msg, command.respond)
+	err = command.requestManager.Request(s, i, setRequestRoutingKey, msg, command.getSetReply)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (command *Command) updateSet(s *discordgo.Session, i *discordgo.InteractionCreate,
+	lg discordgo.Locale) {
+	// TODO
+	data := i.MessageComponentData()
+	fmt.Printf("coucou %v", data)
 }
 
 func (command *Command) getOption(ctx context.Context) (string, error) {
@@ -65,7 +73,7 @@ func (command *Command) getOption(ctx context.Context) (string, error) {
 	return query, nil
 }
 
-func (command *Command) respond(_ context.Context, s *discordgo.Session,
+func (command *Command) getSetReply(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 	if !isAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
@@ -84,4 +92,14 @@ func isAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
 		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_ANSWER &&
 		message.EncyclopediaSetAnswer != nil
+}
+
+func matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsApplicationCommand(i) &&
+		i.ApplicationCommandData().Name == contract.SetCommandName
+}
+
+func matchesMessageCommand(i *discordgo.InteractionCreate) bool {
+	// TODO
+	return true
 }

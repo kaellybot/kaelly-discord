@@ -48,9 +48,13 @@ func New(bookService books.Service, guildService guilds.Service,
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	return len(i.ApplicationCommandData().TargetID) == 0 &&
-		contract.AlignSlashCommandName == i.ApplicationCommandData().Name ||
-		contract.AlignUserCommandName == i.ApplicationCommandData().Name
+	if commands.IsApplicationCommand(i) {
+		return len(i.ApplicationCommandData().TargetID) == 0 &&
+			contract.AlignSlashCommandName == i.ApplicationCommandData().Name ||
+			contract.AlignUserCommandName == i.ApplicationCommandData().Name
+	}
+
+	return false
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {

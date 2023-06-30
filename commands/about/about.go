@@ -3,6 +3,7 @@ package about
 import (
 	"github.com/bwmarrin/discordgo"
 	contract "github.com/kaellybot/kaelly-commands"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -13,7 +14,8 @@ func New() *Command {
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	return i.ApplicationCommandData().Name == contract.AboutCommandName
+	return commands.IsApplicationCommand(i) &&
+		i.ApplicationCommandData().Name == contract.AboutCommandName
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {

@@ -20,14 +20,22 @@ func (command *AbstractCommand) CallHandler(s *discordgo.Session, i *discordgo.I
 
 func (command *AbstractCommand) HandleSubCommand(handlers map[string]DiscordHandler) DiscordHandler {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
-		data := i.ApplicationCommandData()
-		for _, subCommand := range data.Options {
-			handler, found := handlers[subCommand.Name]
-			if found {
-				handler(s, i, lg)
-			} else {
-				panic(ErrNoSubCommandHandler)
+		if IsApplicationCommand(i) {
+			data := i.ApplicationCommandData()
+			for _, subCommand := range data.Options {
+				handler, found := handlers[subCommand.Name]
+				if found {
+					handler(s, i, lg)
+				} else {
+					panic(ErrNoSubCommandHandler)
+				}
 			}
 		}
+		// TODO message component
 	}
+}
+
+func IsApplicationCommand(i *discordgo.InteractionCreate) bool {
+	return i.Type == discordgo.InteractionApplicationCommand ||
+		i.Type == discordgo.InteractionApplicationCommandAutocomplete
 }

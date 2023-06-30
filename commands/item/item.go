@@ -32,7 +32,9 @@ func New(characService characteristics.Service, emojiService emojis.Service,
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	return i.ApplicationCommandData().Name == contract.ItemCommandName
+	// TODO handle messagecomponent too
+	return commands.IsApplicationCommand(i) &&
+		i.ApplicationCommandData().Name == contract.ItemCommandName
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {

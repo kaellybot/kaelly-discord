@@ -7,6 +7,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -32,13 +33,14 @@ func MapSetRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	}
 }
 
-func MapSetToDefaultWebhookEdit(set *amqp.EncyclopediaSetAnswer, service characteristics.Service,
-	locale amqp.Language) *discordgo.WebhookEdit {
-	return MapSetToWebhookEdit(set, len(set.Equipments), service, locale)
+func MapSetToDefaultWebhookEdit(set *amqp.EncyclopediaSetAnswer, characService characteristics.Service,
+	emojiService emojis.Service, locale amqp.Language) *discordgo.WebhookEdit {
+	return MapSetToWebhookEdit(set, len(set.Equipments), characService, emojiService, locale)
 }
 
 func MapSetToWebhookEdit(set *amqp.EncyclopediaSetAnswer, itemNumber int,
-	service characteristics.Service, locale amqp.Language) *discordgo.WebhookEdit {
+	characService characteristics.Service, emojiService emojis.Service,
+	locale amqp.Language) *discordgo.WebhookEdit {
 	lg := constants.MapAMQPLocale(locale)
 	bonus := &amqp.EncyclopediaSetAnswer_Bonus{ItemNumber: 0}
 	for _, currentBonus := range set.Bonuses {
@@ -58,8 +60,8 @@ func MapSetToWebhookEdit(set *amqp.EncyclopediaSetAnswer, itemNumber int,
 	}
 
 	return &discordgo.WebhookEdit{
-		Embeds:     mapSetToEmbeds(set, bonus, service, lg),
-		Components: mapSetToComponents(set, bonus, lg),
+		Embeds:     mapSetToEmbeds(set, bonus, characService, lg),
+		Components: mapSetToComponents(set, bonus, emojiService, lg),
 	}
 }
 
@@ -123,11 +125,12 @@ func mapSetToEmbeds(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSet
 }
 
 func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSetAnswer_Bonus,
-	lg discordgo.Locale) *[]discordgo.MessageComponent {
+	service emojis.Service, lg discordgo.Locale) *[]discordgo.MessageComponent {
 	components := make([]discordgo.MessageComponent, 0)
 
 	bonuses := make([]discordgo.SelectMenuOption, 0)
 	for _, currentBonus := range set.Bonuses {
+		emoji := service.GetSetBonusEmoji(int(currentBonus.ItemNumber), len(set.Equipments))
 		bonuses = append(bonuses, discordgo.SelectMenuOption{
 			Label: i18n.Get(lg, "set.effects.option", i18n.Vars{
 				"itemNumber": currentBonus.ItemNumber,
@@ -136,7 +139,7 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 			Value:   fmt.Sprintf("%v", currentBonus.ItemNumber),
 			Default: currentBonus.ItemNumber == bonus.ItemNumber,
 			Emoji: discordgo.ComponentEmoji{
-				Name: constants.EmojiEffectID,
+				Name: emoji.Name,
 			},
 		})
 	}
@@ -158,7 +161,7 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 			Label: item.Name,
 			Value: item.Id,
 			Emoji: discordgo.ComponentEmoji{
-				ID: constants.EmojiHatID,
+				ID: service.GetEquipmentEmoji(item.Type).Snowflake,
 			},
 		})
 	}

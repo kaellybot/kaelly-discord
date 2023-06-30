@@ -207,18 +207,18 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 }
 
 func mapWinningCity(cityValues map[string]int64, alignService books.Service) entities.City {
-	var winningCity = constants.GetNeutralCity()
+	var winningCity = entities.GetNeutralCity()
 	var winningValue int64
 	for cityID, value := range cityValues {
 		if winningValue == value {
-			winningCity = constants.GetNeutralCity()
+			winningCity = entities.GetNeutralCity()
 		} else if winningValue < value {
 			winningValue = value
 			city, found := alignService.GetCity(cityID)
 			if !found {
 				log.Warn().Str(constants.LogEntity, cityID).
 					Msgf("Cannot find city based on ID sent internally, continuing with neutral city")
-				city = constants.GetNeutralCity()
+				city = entities.GetNeutralCity()
 			}
 
 			winningCity = city

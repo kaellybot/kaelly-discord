@@ -11,6 +11,7 @@ const (
 	LogEntity          = "entity"
 	LogAnkamaID        = "ankamaID"
 	LogItemNumber      = "itemNumber"
+	LogEmojiType       = "emojiType"
 	LogInteractionType = "interactionType"
 	LogShard           = "shard"
 	LogFileName        = "fileName"

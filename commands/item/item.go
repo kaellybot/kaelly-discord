@@ -9,16 +9,18 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
-func New(characteristicService characteristics.Service, 
+func New(characService characteristics.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		characteristicService: characteristicService,
-		requestManager:        requestManager,
+		characService:  characService,
+		emojiService:   emojiService,
+		requestManager: requestManager,
 	}
 
 	cmd.handlers = commands.DiscordHandlers{

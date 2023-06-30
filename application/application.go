@@ -12,9 +12,10 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/set"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
-	characteristicRepo "github.com/kaellybot/kaelly-discord/repositories/characteristics"
+	characRepo "github.com/kaellybot/kaelly-discord/repositories/characteristics"
 	"github.com/kaellybot/kaelly-discord/repositories/cities"
 	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
+	emojiRepo "github.com/kaellybot/kaelly-discord/repositories/emojis"
 	feedRepo "github.com/kaellybot/kaelly-discord/repositories/feeds"
 	guildRepo "github.com/kaellybot/kaelly-discord/repositories/guilds"
 	"github.com/kaellybot/kaelly-discord/repositories/jobs"
@@ -25,6 +26,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/discord"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
@@ -75,10 +77,16 @@ func New() (*Impl, error) {
 		log.Fatal().Err(err).Msgf("Feed Service instantiation failed, shutting down.")
 	}
 
-	characteristicRepo := characteristicRepo.New(db)
-	characteristicService, err := characteristics.New(characteristicRepo)
+	characRepo := characRepo.New(db)
+	characService, err := characteristics.New(characRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Characteristic Service instantiation failed, shutting down.")
+	}
+
+	emojiRepo := emojiRepo.New(db)
+	emojiService, err := emojis.New(emojiRepo)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Emoji Service instantiation failed, shutting down.")
 	}
 
 	guildRepo := guildRepo.New(db)
@@ -89,10 +97,10 @@ func New() (*Impl, error) {
 		about.New(),
 		align.New(bookService, guildService, serverService, requestsManager),
 		config.New(guildService, feedService, serverService, requestsManager),
-		item.New(characteristicService, requestsManager),
+		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),
 		pos.New(guildService, portalService, serverService, requestsManager),
-		set.New(characteristicService, requestsManager),
+		set.New(characService, emojiService, requestsManager),
 	}
 
 	discordService, err := discord.New(

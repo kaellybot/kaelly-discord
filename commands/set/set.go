@@ -11,17 +11,19 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/rs/zerolog/log"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
-func New(characteristicService characteristics.Service,
+func New(characService characteristics.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		characteristicService: characteristicService,
-		requestManager:        requestManager,
+		characService:  characService,
+		emojiService:   emojiService,
+		requestManager: requestManager,
 	}
 
 	cmd.handlers = commands.DiscordHandlers{
@@ -70,7 +72,7 @@ func (command *Command) respond(_ context.Context, s *discordgo.Session,
 	}
 
 	reply := mappers.MapSetToDefaultWebhookEdit(message.EncyclopediaSetAnswer,
-		command.characteristicService, message.Language)
+		command.characService, command.emojiService, message.Language)
 	_, err := s.InteractionResponseEdit(i.Interaction, reply)
 	if err != nil {
 		log.Warn().Err(err).

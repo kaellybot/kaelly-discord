@@ -1,6 +1,9 @@
 package entities
 
-import amqp "github.com/kaellybot/kaelly-amqp"
+import (
+	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-discord/models/constants"
+)
 
 type City struct {
 	ID     string `gorm:"primaryKey"`
@@ -28,4 +31,11 @@ func (city City) GetLabels() map[amqp.Language]string {
 	}
 
 	return labels
+}
+
+func GetNeutralCity() City {
+	return City{
+		Color: constants.NeutralCityColor,
+		Icon:  "https://i.imgur.com/i74Rh8o.png",
+	}
 }

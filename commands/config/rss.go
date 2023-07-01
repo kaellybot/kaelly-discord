@@ -13,7 +13,7 @@ import (
 
 func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	channelID, feed, enabled, locale, err := command.getWebhookRssOptions(ctx)
+	channelID, feed, enabled, locale, err := getWebhookRssOptions(ctx)
 	if err != nil {
 		panic(err)
 	}

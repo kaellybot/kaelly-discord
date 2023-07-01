@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//nolint:nolintlint,exhaustive
 func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate) {
 	r := recover()
 	if r == nil {
@@ -16,12 +17,12 @@ func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate)
 	}
 
 	var commandName string
-	if event.Type == discordgo.InteractionApplicationCommand ||
-		event.Type == discordgo.InteractionApplicationCommandAutocomplete {
+	switch event.Type {
+	case discordgo.InteractionApplicationCommand, discordgo.InteractionApplicationCommandAutocomplete:
 		commandName = event.ApplicationCommandData().Name
-	} else if event.Type == discordgo.InteractionMessageComponent {
+	case discordgo.InteractionMessageComponent:
 		commandName = event.MessageComponentData().CustomID
-	} else {
+	default:
 		log.Warn().
 			Uint32(constants.LogInteractionType, uint32(event.Interaction.Type)).
 			Msgf("Cannot handle interaction type, continue recovering with this value as command Name")

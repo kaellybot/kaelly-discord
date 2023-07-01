@@ -64,7 +64,7 @@ func (command *Command) createWebhook(s *discordgo.Session, channelID string) (*
 	return s.WebhookCreate(channelID, constants.Name, constants.AvatarIcon)
 }
 
-func (command *Command) getServerOptions(ctx context.Context) (entities.Server, string, error) {
+func getServerOptions(ctx context.Context) (entities.Server, string, error) {
 	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
 		return entities.Server{}, "",
@@ -83,7 +83,7 @@ func (command *Command) getServerOptions(ctx context.Context) (entities.Server, 
 	return server, channelID, nil
 }
 
-func (command *Command) getWebhookAlmanaxOptions(ctx context.Context) (string, bool, amqp.Language, error) {
+func getWebhookAlmanaxOptions(ctx context.Context) (string, bool, amqp.Language, error) {
 	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
 		return "", false, amqp.Language_ANY,
@@ -105,7 +105,7 @@ func (command *Command) getWebhookAlmanaxOptions(ctx context.Context) (string, b
 	return channelID, enabled, locale, nil
 }
 
-func (command *Command) getWebhookTwitterOptions(ctx context.Context) (string, bool, amqp.Language, error) {
+func getWebhookTwitterOptions(ctx context.Context) (string, bool, amqp.Language, error) {
 	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
 		return "", false, amqp.Language_ANY,
@@ -127,7 +127,7 @@ func (command *Command) getWebhookTwitterOptions(ctx context.Context) (string, b
 	return channelID, enabled, locale, nil
 }
 
-func (command *Command) getWebhookRssOptions(ctx context.Context) (
+func getWebhookRssOptions(ctx context.Context) (
 	string, entities.FeedType, bool, amqp.Language, error) {
 	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {

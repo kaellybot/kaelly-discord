@@ -9,8 +9,8 @@ import (
 
 const (
 	setRequestRoutingKey = "requests.encyclopedias"
-
-	defaultIconSize = "128"
+	defaultIconSize      = "128"
+	itemNumberProperty   = "itemNumber"
 )
 
 type Command struct {

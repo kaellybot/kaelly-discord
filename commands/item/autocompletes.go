@@ -13,7 +13,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) autocomplete(s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	data := i.ApplicationCommandData()
 
 	for _, option := range data.Options {
@@ -22,20 +23,24 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 			case contract.ItemQueryOptionName:
 				command.requestItemList(s, i, option.StringValue(), lg)
 			default:
-				log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
+				log.Error().
+					Str(constants.LogCommandOption, option.Name).
+					Msgf("Option name not handled, ignoring it")
 			}
 			break
 		}
 	}
 }
 
-func (command *Command) requestItemList(s *discordgo.Session, i *discordgo.InteractionCreate, query string, lg discordgo.Locale) {
+func (command *Command) requestItemList(s *discordgo.Session,
+	i *discordgo.InteractionCreate, query string, lg discordgo.Locale) {
 	if len(strings.TrimSpace(query)) == 0 {
 		return
 	}
 
 	msg := mappers.MapItemListRequest(query, lg)
-	err := command.requestManager.Request(s, i, itemRequestRoutingKey, msg, command.autocompleteItemList)
+	err := command.requestManager.Request(s, i, itemRequestRoutingKey,
+		msg, command.autocompleteItemList)
 	if err != nil {
 		log.Error().Err(err).Msg("Autocomplete request ignored")
 	}

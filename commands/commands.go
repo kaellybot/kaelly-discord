@@ -31,11 +31,14 @@ func (command *AbstractCommand) HandleSubCommand(handlers map[string]DiscordHand
 				}
 			}
 		}
-		// TODO message component
 	}
 }
 
 func IsApplicationCommand(i *discordgo.InteractionCreate) bool {
 	return i.Type == discordgo.InteractionApplicationCommand ||
 		i.Type == discordgo.InteractionApplicationCommandAutocomplete
+}
+
+func IsMessageCommand(i *discordgo.InteractionCreate) bool {
+	return i.Type == discordgo.InteractionMessageComponent
 }

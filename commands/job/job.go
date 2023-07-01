@@ -69,7 +69,7 @@ func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
 	command.userJobRequest(ctx, s, i, lg)
 }
 
-func (command *Command) getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {
+func getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {
 	job, ok := ctx.Value(constants.ContextKeyJob).(entities.Job)
 	if !ok {
 		return entities.Job{}, entities.Server{},
@@ -85,7 +85,7 @@ func (command *Command) getGetOptions(ctx context.Context) (entities.Job, entiti
 	return job, server, nil
 }
 
-func (command *Command) getSetOptions(ctx context.Context) (entities.Job, int64, entities.Server, error) {
+func getSetOptions(ctx context.Context) (entities.Job, int64, entities.Server, error) {
 	job, ok := ctx.Value(constants.ContextKeyJob).(entities.Job)
 	if !ok {
 		return entities.Job{}, 0, entities.Server{},
@@ -107,7 +107,7 @@ func (command *Command) getSetOptions(ctx context.Context) (entities.Job, int64,
 	return job, level, server, nil
 }
 
-func (command *Command) getUserOptions(ctx context.Context) (entities.Server, error) {
+func getUserOptions(ctx context.Context) (entities.Server, error) {
 	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
 		return entities.Server{},

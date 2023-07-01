@@ -14,7 +14,7 @@ import (
 
 func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	channelID, enabled, locale, err := command.getWebhookTwitterOptions(ctx)
+	channelID, enabled, locale, err := getWebhookTwitterOptions(ctx)
 	if err != nil {
 		panic(err)
 	}

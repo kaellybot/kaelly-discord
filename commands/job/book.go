@@ -15,7 +15,7 @@ import (
 
 func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	job, server, err := command.getGetOptions(ctx)
+	job, server, err := getGetOptions(ctx)
 	if err != nil {
 		panic(err)
 	}

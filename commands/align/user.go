@@ -13,7 +13,7 @@ import (
 
 func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	server, err := command.getUserOptions(ctx)
+	server, err := getUserOptions(ctx)
 	if err != nil {
 		panic(err)
 	}

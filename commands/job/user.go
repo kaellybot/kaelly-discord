@@ -12,7 +12,7 @@ import (
 
 func (command *Command) userJobRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
-	server, err := command.getUserOptions(ctx)
+	server, err := getUserOptions(ctx)
 	if err != nil {
 		panic(err)
 	}

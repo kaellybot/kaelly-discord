@@ -46,11 +46,21 @@ func (command *Command) item(ctx context.Context, s *discordgo.Session,
 
 }
 
-func (command *Command) getQueryOption(ctx context.Context) (string, error) {
+func getQueryOption(ctx context.Context) (string, error) {
 	query, ok := ctx.Value(constants.ContextKeyQuery).(string)
 	if !ok {
 		return "", fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyQuery))
 	}
 
 	return query, nil
+}
+
+func matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsApplicationCommand(i) &&
+		i.ApplicationCommandData().Name == contract.ItemCommandName
+}
+
+func matchesMessageCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsMessageCommand(i) &&
+		contract.IsBelongsToItem(i.MessageComponentData().CustomID)
 }

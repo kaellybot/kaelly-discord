@@ -53,7 +53,7 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 
 func (command *Command) request(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	dimension, server, err := command.getOptions(ctx)
+	dimension, server, err := getOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -63,26 +63,6 @@ func (command *Command) request(ctx context.Context, s *discordgo.Session,
 	if err != nil {
 		panic(err)
 	}
-}
-
-func (command *Command) getOptions(ctx context.Context) (
-	entities.Dimension, entities.Server, error) {
-	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
-	if !ok {
-		return entities.Dimension{}, entities.Server{},
-			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
-	}
-
-	dimension := entities.Dimension{}
-	if ctx.Value(constants.ContextKeyDimension) != nil {
-		dimension, ok = ctx.Value(constants.ContextKeyDimension).(entities.Dimension)
-		if !ok {
-			return entities.Dimension{}, entities.Server{},
-				fmt.Errorf("cannot cast %v as entities.Dimension", ctx.Value(constants.ContextKeyDimension))
-		}
-	}
-
-	return dimension, server, nil
 }
 
 func (command *Command) respond(_ context.Context, s *discordgo.Session,
@@ -102,6 +82,26 @@ func (command *Command) respond(_ context.Context, s *discordgo.Session,
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+}
+
+func getOptions(ctx context.Context) (
+	entities.Dimension, entities.Server, error) {
+	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
+	if !ok {
+		return entities.Dimension{}, entities.Server{},
+			fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))
+	}
+
+	dimension := entities.Dimension{}
+	if ctx.Value(constants.ContextKeyDimension) != nil {
+		dimension, ok = ctx.Value(constants.ContextKeyDimension).(entities.Dimension)
+		if !ok {
+			return entities.Dimension{}, entities.Server{},
+				fmt.Errorf("cannot cast %v as entities.Dimension", ctx.Value(constants.ContextKeyDimension))
+		}
+	}
+
+	return dimension, server, nil
 }
 
 func isAnswerValid(message *amqp.RabbitMQMessage) bool {

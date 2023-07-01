@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
@@ -147,7 +148,7 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 	components = append(components, discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
 			discordgo.SelectMenu{
-				CustomID:    fmt.Sprintf("/sets/%v/effects", set.Id),
+				CustomID:    contract.CraftSetBonusCustomID(set.Id),
 				MenuType:    discordgo.StringSelectMenu,
 				Placeholder: i18n.Get(lg, "set.effects.placeholder"),
 				Options:     bonuses,
@@ -169,7 +170,7 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 	components = append(components, discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
 			discordgo.SelectMenu{
-				CustomID:    fmt.Sprintf("/sets/%v/items", set.Id),
+				CustomID:    contract.CraftItemCustomID(),
 				MenuType:    discordgo.StringSelectMenu,
 				Placeholder: i18n.Get(lg, "set.items.placeholder"),
 				Options:     items,

@@ -14,7 +14,7 @@ import (
 
 func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	channelID, enabled, locale, err := command.getWebhookAlmanaxOptions(ctx)
+	channelID, enabled, locale, err := getWebhookAlmanaxOptions(ctx)
 	if err != nil {
 		panic(err)
 	}

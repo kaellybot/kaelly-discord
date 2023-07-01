@@ -22,7 +22,6 @@ func mapSetEffects(effects []*amqp.EncyclopediaSetAnswer_Effect,
 		charac, found := characteristicService.GetCharacteristic(effect.Id)
 		if !found {
 			charac = entities.Characteristic{
-				ID:        effect.Id,
 				SortOrder: math.MaxInt,
 			}
 		}

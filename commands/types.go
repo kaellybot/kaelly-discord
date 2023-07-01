@@ -7,8 +7,10 @@ import (
 )
 
 var (
-	ErrInvalidAnswerMessage = errors.New("answer message is not valid")
-	ErrNoSubCommandHandler  = errors.New("no sub command handler provided")
+	ErrInvalidAnswerMessage    = errors.New("answer message is not valid")
+	ErrNoSubCommandHandler     = errors.New("no sub command handler provided")
+	ErrInvalidInteraction      = errors.New("message interaction is not valid")
+	ErrRequestPropertyNotFound = errors.New("request property is not found")
 )
 
 type DiscordCommand interface {

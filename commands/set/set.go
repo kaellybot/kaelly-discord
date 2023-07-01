@@ -3,6 +3,7 @@ package set
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -45,7 +46,7 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 
 func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	query, err := command.getOption(ctx)
+	query, err := getOption(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -59,18 +60,43 @@ func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 
 func (command *Command) updateSet(s *discordgo.Session, i *discordgo.InteractionCreate,
 	lg discordgo.Locale) {
-	// TODO
-	data := i.MessageComponentData()
-	fmt.Printf("coucou %v", data)
-}
+	customID := i.MessageComponentData().CustomID
+	properties := make(map[string]any)
+	var query string
+	var callback requests.RequestCallback
 
-func (command *Command) getOption(ctx context.Context) (string, error) {
-	query, ok := ctx.Value(constants.ContextKeyQuery).(string)
-	if !ok {
-		return "", fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyQuery))
+	if setID, ok := contract.ExtractSetCustomID(customID); ok {
+		query = setID
+		callback = command.getSetReply
+	} else if setID, ok = contract.ExtractSetBonusCustomID(customID); ok {
+		query = setID
+		callback = command.updateSetReply
+		itemNumber, err := getBonusValue(i.MessageComponentData())
+		if err != nil {
+			log.Error().
+				Str(constants.LogCommand, contract.SetCommandName).
+				Str(constants.LogCustomID, customID).
+				Str(constants.LogRequestProperty, itemNumberProperty).
+				Strs(constants.LogRequestValue, i.MessageComponentData().Values).
+				Msgf("Cannot retrieve itemNumber from values selected by user, panicking...")
+			panic(err)
+		}
+
+		properties[itemNumberProperty] = itemNumber
+	} else {
+		log.Error().
+			Str(constants.LogCommand, contract.SetCommandName).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
 	}
 
-	return query, nil
+	msg := mappers.MapSetRequest(query, lg)
+	err := command.requestManager.Request(s, i, setRequestRoutingKey,
+		msg, callback, properties)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (command *Command) getSetReply(_ context.Context, s *discordgo.Session,
@@ -88,10 +114,59 @@ func (command *Command) getSetReply(_ context.Context, s *discordgo.Session,
 	}
 }
 
+func (command *Command) updateSetReply(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+	if !isAnswerValid(message) {
+		panic(commands.ErrInvalidAnswerMessage)
+	}
+
+	itemNumberValue, found := properties[itemNumberProperty]
+	if !found {
+		log.Error().
+			Str(constants.LogCommand, contract.SetCommandName).
+			Str(constants.LogRequestProperty, itemNumberProperty).
+			Msgf("Cannot find request property, panicking...")
+		panic(commands.ErrRequestPropertyNotFound)
+	}
+	itemNumber, ok := itemNumberValue.(int)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, contract.SetCommandName).
+			Str(constants.LogRequestProperty, itemNumberProperty).
+			Msgf("Cannot convert request property, panicking...")
+		panic(commands.ErrRequestPropertyNotFound)
+	}
+
+	reply := mappers.MapSetToWebhookEdit(message.EncyclopediaSetAnswer, itemNumber,
+		command.characService, command.emojiService, message.Language)
+	_, err := s.InteractionResponseEdit(i.Interaction, reply)
+	if err != nil {
+		log.Warn().Err(err).
+			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+	}
+}
+
 func isAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
 		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_ANSWER &&
 		message.EncyclopediaSetAnswer != nil
+}
+
+func getOption(ctx context.Context) (string, error) {
+	query, ok := ctx.Value(constants.ContextKeyQuery).(string)
+	if !ok {
+		return "", fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyQuery))
+	}
+
+	return query, nil
+}
+
+func getBonusValue(data discordgo.MessageComponentInteractionData) (int, error) {
+	values := data.Values
+	if len(values) != 1 {
+		return 0, commands.ErrInvalidInteraction
+	}
+	return strconv.Atoi(values[0])
 }
 
 func matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
@@ -100,6 +175,6 @@ func matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
 }
 
 func matchesMessageCommand(i *discordgo.InteractionCreate) bool {
-	// TODO
-	return true
+	return commands.IsMessageCommand(i) &&
+		contract.IsBelongsToSet(i.MessageComponentData().CustomID)
 }

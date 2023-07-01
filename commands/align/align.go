@@ -65,7 +65,7 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 	}
 }
 
-func (command *Command) getGetOptions(ctx context.Context) (entities.City, entities.Order, entities.Server, error) {
+func getGetOptions(ctx context.Context) (entities.City, entities.Order, entities.Server, error) {
 	city, ok := ctx.Value(constants.ContextKeyCity).(entities.City)
 	if !ok {
 		city = entities.City{}
@@ -85,7 +85,7 @@ func (command *Command) getGetOptions(ctx context.Context) (entities.City, entit
 	return city, order, server, nil
 }
 
-func (command *Command) getSetOptions(ctx context.Context) (entities.City, entities.Order,
+func getSetOptions(ctx context.Context) (entities.City, entities.Order,
 	int64, entities.Server, error) {
 	city, ok := ctx.Value(constants.ContextKeyCity).(entities.City)
 	if !ok {
@@ -114,7 +114,7 @@ func (command *Command) getSetOptions(ctx context.Context) (entities.City, entit
 	return city, order, level, server, nil
 }
 
-func (command *Command) getUserOptions(ctx context.Context) (entities.Server, error) {
+func getUserOptions(ctx context.Context) (entities.Server, error) {
 	server, ok := ctx.Value(constants.ContextKeyServer).(entities.Server)
 	if !ok {
 		return entities.Server{}, fmt.Errorf("cannot cast %v as entities.Server", ctx.Value(constants.ContextKeyServer))

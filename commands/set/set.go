@@ -51,7 +51,7 @@ func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapSetRequest(query, lg)
+	msg := mappers.MapSetRequest(query, false, lg)
 	err = command.requestManager.Request(s, i, setRequestRoutingKey, msg, command.getSetReply)
 	if err != nil {
 		panic(err)
@@ -63,13 +63,14 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 	customID := i.MessageComponentData().CustomID
 	properties := make(map[string]any)
 	var query string
+	var isID bool
 	var callback requests.RequestCallback
-
 	if setID, ok := contract.ExtractSetCustomID(customID); ok {
 		query = setID
 		callback = command.getSetReply
 	} else if setID, ok = contract.ExtractSetBonusCustomID(customID); ok {
 		query = setID
+		isID = true
 		callback = command.updateSetReply
 		itemNumber, err := getBonusValue(i.MessageComponentData())
 		if err != nil {
@@ -91,7 +92,7 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapSetRequest(query, lg)
+	msg := mappers.MapSetRequest(query, isID, lg)
 	err := command.requestManager.Request(s, i, setRequestRoutingKey,
 		msg, callback, properties)
 	if err != nil {

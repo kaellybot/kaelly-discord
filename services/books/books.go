@@ -5,6 +5,7 @@ import (
 	"unicode"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/repositories/cities"
 	"github.com/kaellybot/kaelly-discord/repositories/jobs"
@@ -23,6 +24,10 @@ func New(jobRepository jobs.Repository, cityRepository cities.Repository,
 		return nil, err
 	}
 
+	log.Info().
+		Int(constants.LogEntityCount, len(jobs)).
+		Msgf("Jobs loaded")
+
 	jobsMap := make(map[string]entities.Job)
 	for _, job := range jobs {
 		jobsMap[job.ID] = job
@@ -33,6 +38,10 @@ func New(jobRepository jobs.Repository, cityRepository cities.Repository,
 		return nil, err
 	}
 
+	log.Info().
+		Int(constants.LogEntityCount, len(cities)).
+		Msgf("Cities loaded")
+
 	citiesMap := make(map[string]entities.City)
 	for _, city := range cities {
 		citiesMap[city.ID] = city
@@ -42,6 +51,10 @@ func New(jobRepository jobs.Repository, cityRepository cities.Repository,
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info().
+		Int(constants.LogEntityCount, len(orders)).
+		Msgf("Orders loaded")
 
 	ordersMap := make(map[string]entities.Order)
 	for _, order := range orders {

@@ -24,12 +24,13 @@ func MapSetListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage 
 	}
 }
 
-func MapSetRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapSetRequest(query string, isID bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		EncyclopediaSetRequest: &amqp.EncyclopediaSetRequest{
 			Query: query,
+			IsID:  isID,
 		},
 	}
 }

@@ -32,9 +32,7 @@ func New(characService characteristics.Service, emojiService emojis.Service,
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	// TODO handle messagecomponent too
-	return commands.IsApplicationCommand(i) &&
-		i.ApplicationCommandData().Name == contract.ItemCommandName
+	return matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
@@ -43,7 +41,7 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 
 func (command *Command) item(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-
+	// TODO
 }
 
 func getQueryOption(ctx context.Context) (string, error) {

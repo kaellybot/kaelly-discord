@@ -10,6 +10,7 @@ const (
 	LogChannelID       = "channelID"
 	LogCustomID        = "customID"
 	LogEntity          = "entity"
+	LogEntityCount     = "entityCount"
 	LogAnkamaID        = "ankamaID"
 	LogItemNumber      = "itemNumber"
 	LogEmojiType       = "emojiType"

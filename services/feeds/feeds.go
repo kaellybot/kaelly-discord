@@ -5,6 +5,7 @@ import (
 	"unicode"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	repository "github.com/kaellybot/kaelly-discord/repositories/feeds"
 
@@ -20,6 +21,10 @@ func New(repository repository.Repository) (*Impl, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info().
+		Int(constants.LogEntityCount, len(feedTypes)).
+		Msgf("Feed types loaded")
 
 	return &Impl{
 		transformer: transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),

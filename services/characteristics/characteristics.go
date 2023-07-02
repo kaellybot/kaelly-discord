@@ -1,8 +1,10 @@
 package characteristics
 
 import (
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	repository "github.com/kaellybot/kaelly-discord/repositories/characteristics"
+	"github.com/rs/zerolog/log"
 )
 
 func New(repository repository.Repository) (*Impl, error) {
@@ -10,6 +12,10 @@ func New(repository repository.Repository) (*Impl, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info().
+		Int(constants.LogEntityCount, len(characteristics)).
+		Msgf("Characteristics loaded")
 
 	characteristicsMap := make(map[string]entities.Characteristic)
 	for _, characteristic := range characteristics {

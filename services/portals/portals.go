@@ -5,6 +5,7 @@ import (
 	"unicode"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
 	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
@@ -25,6 +26,10 @@ func New(dimensionRepo dimensions.Repository, areaRepo areas.Repository,
 		return nil, err
 	}
 
+	log.Info().
+		Int(constants.LogEntityCount, len(dimEntities)).
+		Msgf("Dimensions loaded")
+
 	dimensions := make(map[string]entities.Dimension)
 	for _, dimension := range dimEntities {
 		dimensions[dimension.ID] = dimension
@@ -35,6 +40,10 @@ func New(dimensionRepo dimensions.Repository, areaRepo areas.Repository,
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info().
+		Int(constants.LogEntityCount, len(areaEntities)).
+		Msgf("Areas loaded")
 
 	areas := make(map[string]entities.Area)
 	for _, area := range areaEntities {
@@ -47,6 +56,10 @@ func New(dimensionRepo dimensions.Repository, areaRepo areas.Repository,
 		return nil, err
 	}
 
+	log.Info().
+		Int(constants.LogEntityCount, len(subAreaEntities)).
+		Msgf("Sub Areas loaded")
+
 	subAreas := make(map[string]entities.SubArea)
 	for _, subArea := range subAreaEntities {
 		subAreas[subArea.ID] = subArea
@@ -57,6 +70,10 @@ func New(dimensionRepo dimensions.Repository, areaRepo areas.Repository,
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info().
+		Int(constants.LogEntityCount, len(transportTypeEntities)).
+		Msgf("Transport types loaded")
 
 	transportTypes := make(map[string]entities.TransportType)
 	for _, transportType := range transportTypeEntities {

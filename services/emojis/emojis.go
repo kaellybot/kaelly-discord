@@ -16,6 +16,10 @@ func New(repository repository.Repository) (*Impl, error) {
 		return nil, err
 	}
 
+	log.Info().
+		Int(constants.LogEntityCount, len(emojis)).
+		Msgf("Emojis loaded")
+
 	emojiStore := make(map[constants.EmojiType]emojiStore)
 	for _, emoji := range emojis {
 		innerStore, found := emojiStore[emoji.Type]

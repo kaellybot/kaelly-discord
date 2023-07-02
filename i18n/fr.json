@@ -56,7 +56,7 @@
         }
     },
     "item": {
-        "description": "**{{ .type }}**{{ if .level }} niveau **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
+        "description": "**{{ .type }}**{{ if .level }} de niveau **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
         "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/{{ .id }}",
         "effects": {
             "title": "Effets",

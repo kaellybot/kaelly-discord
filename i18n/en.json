@@ -56,8 +56,19 @@
       }
    },
    "item": {
-      "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}"
-  },
+      "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
+      "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
+      "effects": {
+         "title": "Effects",
+         "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}No effect!{{ end }}",
+         "button": "Effects"
+      },
+      "recipe": {
+         "title": "Recipe",
+         "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}** [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}No ingredient!{{ end }}",
+         "button": "Recipe"
+      }
+   },
    "job": {
       "success": "Craftsmen book updated!",
       "embed": {

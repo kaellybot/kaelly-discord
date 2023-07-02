@@ -56,7 +56,18 @@
         }
     },
     "item": {
-        "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/{{ .id }}"
+        "description": "**{{ .type }}**{{ if .level }} niveau **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
+        "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/{{ .id }}",
+        "effects": {
+            "title": "Effets",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}Aucun effet !{{ end }}",
+            "button": "Effets"
+        },
+        "recipe": {
+            "title": "Recette",
+            "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}** [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}Aucun ingrédient !{{ end }}",
+            "button": "Recette"
+        }
     },
     "job": {
         "success": "L'annuaire a été mise à jour !",

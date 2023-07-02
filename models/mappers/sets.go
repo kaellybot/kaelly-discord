@@ -98,7 +98,7 @@ func mapSetToEmbeds(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSet
 				return &discordgo.MessageEmbedField{
 					Name: name,
 					Value: i18n.Get(lg, "set.effects.description", i18n.Vars{
-						"effects": mapSetEffects(items, service),
+						"effects": mapEffects(items, service),
 					}),
 					Inline: true,
 				}

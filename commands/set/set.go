@@ -46,7 +46,7 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 
 func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	query, err := getOption(ctx)
+	query, err := getQueryOption(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -63,14 +63,12 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 	customID := i.MessageComponentData().CustomID
 	properties := make(map[string]any)
 	var query string
-	var isID bool
 	var callback requests.RequestCallback
 	if setID, ok := contract.ExtractSetCustomID(customID); ok {
 		query = setID
 		callback = command.getSetReply
 	} else if setID, ok = contract.ExtractSetBonusCustomID(customID); ok {
 		query = setID
-		isID = true
 		callback = command.updateSetReply
 		itemNumber, err := getBonusValue(i.MessageComponentData())
 		if err != nil {
@@ -92,7 +90,7 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapSetRequest(query, isID, lg)
+	msg := mappers.MapSetRequest(query, true, lg)
 	err := command.requestManager.Request(s, i, setRequestRoutingKey,
 		msg, callback, properties)
 	if err != nil {
@@ -153,7 +151,7 @@ func isAnswerValid(message *amqp.RabbitMQMessage) bool {
 		message.EncyclopediaSetAnswer != nil
 }
 
-func getOption(ctx context.Context) (string, error) {
+func getQueryOption(ctx context.Context) (string, error) {
 	query, ok := ctx.Value(constants.ContextKeyQuery).(string)
 	if !ok {
 		return "", fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyQuery))

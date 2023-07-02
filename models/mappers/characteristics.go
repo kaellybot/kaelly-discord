@@ -4,10 +4,14 @@ import (
 	"math"
 	"sort"
 
-	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 )
+
+type AMQPCharacteristic interface {
+	GetId() string
+	GetLabel() string
+}
 
 type i18nCharacteristic struct {
 	Label     string
@@ -15,11 +19,11 @@ type i18nCharacteristic struct {
 	SortOrder int
 }
 
-func mapSetEffects(effects []*amqp.EncyclopediaSetAnswer_Effect,
+func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 	characteristicService characteristics.Service) []i18nCharacteristic {
 	characs := make([]i18nCharacteristic, 0)
 	for _, effect := range effects {
-		charac, found := characteristicService.GetCharacteristic(effect.Id)
+		charac, found := characteristicService.GetCharacteristic(effect.GetId())
 		if !found {
 			charac = entities.Characteristic{
 				SortOrder: math.MaxInt,
@@ -27,7 +31,7 @@ func mapSetEffects(effects []*amqp.EncyclopediaSetAnswer_Effect,
 		}
 
 		characs = append(characs, i18nCharacteristic{
-			Label:     effect.Label,
+			Label:     effect.GetLabel(),
 			Emoji:     charac.Emoji,
 			SortOrder: charac.SortOrder,
 		})

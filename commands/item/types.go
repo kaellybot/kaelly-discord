@@ -9,8 +9,7 @@ import (
 
 const (
 	itemRequestRoutingKey = "requests.encyclopedias"
-
-	defaultIconSize = "128"
+	isRecipeProperty      = "isRecipe"
 )
 
 type Command struct {

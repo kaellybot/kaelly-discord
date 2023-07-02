@@ -9,7 +9,6 @@ import (
 
 const (
 	setRequestRoutingKey = "requests.encyclopedias"
-	defaultIconSize      = "128"
 	itemNumberProperty   = "itemNumber"
 )
 

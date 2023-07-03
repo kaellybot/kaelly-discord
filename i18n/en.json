@@ -65,7 +65,7 @@
       },
       "recipe": {
          "title": "Recipe",
-         "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}** [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}No ingredient!{{ end }}",
+         "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}**x [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}No ingredient!{{ end }}",
          "button": "Recipe"
       }
    },

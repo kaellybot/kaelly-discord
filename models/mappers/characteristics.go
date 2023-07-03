@@ -11,12 +11,14 @@ import (
 type AMQPCharacteristic interface {
 	GetId() string
 	GetLabel() string
+	GetIsActive() bool
 }
 
 type i18nCharacteristic struct {
 	Label     string
 	Emoji     string
 	SortOrder int
+	IsActive  bool
 }
 
 func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
@@ -34,6 +36,7 @@ func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 			Label:     effect.GetLabel(),
 			Emoji:     charac.Emoji,
 			SortOrder: charac.SortOrder,
+			IsActive:  effect.GetIsActive(),
 		})
 	}
 
@@ -43,6 +46,10 @@ func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 
 func sortCharacteristics(characteristics []i18nCharacteristic) {
 	sort.SliceStable(characteristics, func(i, j int) bool {
-		return characteristics[i].SortOrder < characteristics[j].SortOrder
+		if characteristics[i].IsActive == characteristics[j].IsActive {
+			return characteristics[i].SortOrder < characteristics[j].SortOrder
+		}
+		// TODO checks if it works
+		return characteristics[i].IsActive
 	})
 }

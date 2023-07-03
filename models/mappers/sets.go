@@ -86,8 +86,9 @@ func mapSetToEmbeds(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSet
 		})
 
 	if bonus != nil {
-		bonusFields := discord.SliceFields(bonus.GetEffects(), constants.MaxCharacterPerField,
-			func(i int, items []*amqp.EncyclopediaSetAnswer_Effect) *discordgo.MessageEmbedField {
+		i18nEffects := mapEffects(bonus.GetEffects(), service)
+		bonusFields := discord.SliceFields(i18nEffects, constants.MaxCharacterPerField,
+			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
 				if i == 0 {
 					name = i18n.Get(lg, "set.effects.title", i18n.Vars{
@@ -98,7 +99,7 @@ func mapSetToEmbeds(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSet
 				return &discordgo.MessageEmbedField{
 					Name: name,
 					Value: i18n.Get(lg, "set.effects.description", i18n.Vars{
-						"effects": mapEffects(items, service),
+						"effects": items,
 					}),
 					Inline: true,
 				}

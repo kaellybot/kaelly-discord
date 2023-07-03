@@ -48,8 +48,9 @@ func mapItemToEmbeds(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	fields := make([]*discordgo.MessageEmbedField, 0)
 
 	if !isRecipe && len(item.GetEffects()) > 0 {
-		effectFields := discord.SliceFields(item.GetEffects(), constants.MaxCharacterPerField,
-			func(i int, items []*amqp.EncyclopediaItemAnswer_Effect) *discordgo.MessageEmbedField {
+		i18nEffects := mapEffects(item.GetEffects(), service)
+		effectFields := discord.SliceFields(i18nEffects, constants.MaxCharacterPerField,
+			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
 				if i == 0 {
 					name = i18n.Get(lg, "item.effects.title")
@@ -58,7 +59,7 @@ func mapItemToEmbeds(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
 				return &discordgo.MessageEmbedField{
 					Name: name,
 					Value: i18n.Get(lg, "item.effects.description", i18n.Vars{
-						"effects": mapEffects(items, service),
+						"effects": items,
 					}),
 					Inline: true,
 				}
@@ -116,7 +117,7 @@ func mapItemToComponents(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
 		components = append(components, discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.Button{
-					CustomID: contract.CraftSetBonusCustomID(item.GetSet().GetId()),
+					CustomID: contract.CraftSetCustomID(item.GetSet().GetId()),
 					Label:    item.GetSet().GetName(),
 					Style:    discordgo.PrimaryButton,
 					Emoji:    discordgo.ComponentEmoji{

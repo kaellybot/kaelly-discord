@@ -6,9 +6,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/slicers"
 )
 
-func SliceFields[T any](items []T, limit int,
-	toField func(i int, items []T) *discordgo.MessageEmbedField,
-) []*discordgo.MessageEmbedField {
+func SliceFields[T any](items []T, limit int, toField ItemsToField[T]) []*discordgo.MessageEmbedField {
 	fields := make([]*discordgo.MessageEmbedField, 0)
 	slicedItems := slicers.Slice(items, limit)
 	for i, items := range slicedItems {
@@ -18,8 +16,7 @@ func SliceFields[T any](items []T, limit int,
 	return fields
 }
 
-func SliceButtons[T any](items []T, toButton func(item T) discordgo.Button,
-) []discordgo.ActionsRow {
+func SliceButtons[T any](items []T, toButton ItemToButton[T]) []discordgo.ActionsRow {
 	actionsRow := make([]discordgo.ActionsRow, 0)
 	slicedItems := slicers.Slice(items, constants.MaxButtonPerActionRow)
 	for _, items := range slicedItems {

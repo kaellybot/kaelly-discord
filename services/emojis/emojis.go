@@ -3,6 +3,7 @@ package emojis
 import (
 	"fmt"
 
+	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
@@ -37,13 +38,34 @@ func New(repository repository.Repository) (*Impl, error) {
 	}, nil
 }
 
-func (service *Impl) GetEquipmentEmoji(equipmentType amqp.EquipmentType) entities.Emoji {
+func (service *Impl) GetMiscEmoji(emojiMiscID constants.EmojiMiscID) discordgo.ComponentEmoji {
+	innerStore, found := service.emojiStore[constants.EmojiTypeMisc]
+	if !found {
+		log.Warn().
+			Str(constants.LogEmojiType, string(constants.EmojiTypeEquipment)).
+			Msgf("No miscellaneous type store found, returning empty emoji")
+		return mapEmoji(entities.Emoji{})
+	}
+
+	emojiID := string(emojiMiscID)
+	emoji, found := innerStore[emojiID]
+	if !found {
+		log.Warn().
+			Str(constants.LogEntity, emojiID).
+			Msgf("No miscellaneous emoji found, returning empty emoji")
+		return mapEmoji(entities.Emoji{})
+	}
+
+	return mapEmoji(emoji)
+}
+
+func (service *Impl) GetEquipmentEmoji(equipmentType amqp.EquipmentType) discordgo.ComponentEmoji {
 	innerStore, found := service.emojiStore[constants.EmojiTypeEquipment]
 	if !found {
 		log.Warn().
 			Str(constants.LogEmojiType, string(constants.EmojiTypeEquipment)).
 			Msgf("No equipment type store found, returning empty emoji")
-		return entities.Emoji{Type: constants.EmojiTypeEquipment}
+		return mapEmoji(entities.Emoji{})
 	}
 
 	emojiID := equipmentType.String()
@@ -51,20 +73,20 @@ func (service *Impl) GetEquipmentEmoji(equipmentType amqp.EquipmentType) entitie
 	if !found {
 		log.Warn().
 			Str(constants.LogEntity, emojiID).
-			Msgf("No equipment type found, returning empty emoji")
-		return entities.Emoji{Type: constants.EmojiTypeEquipment}
+			Msgf("No equipment type emoji found, returning empty emoji")
+		return mapEmoji(entities.Emoji{})
 	}
 
-	return emoji
+	return mapEmoji(emoji)
 }
 
-func (service *Impl) GetSetBonusEmoji(equipedItemNumber, itemNumber int) entities.Emoji {
+func (service *Impl) GetSetBonusEmoji(equipedItemNumber, itemNumber int) discordgo.ComponentEmoji {
 	innerStore, found := service.emojiStore[constants.EmojiTypeBonusSet]
 	if !found {
 		log.Warn().
 			Str(constants.LogEmojiType, string(constants.EmojiTypeBonusSet)).
 			Msgf("No bonus set store found, returning empty emoji")
-		return entities.Emoji{Type: constants.EmojiTypeBonusSet}
+		return mapEmoji(entities.Emoji{})
 	}
 
 	emojiID := fmt.Sprintf("%v", len(innerStore)-(itemNumber-equipedItemNumber)+1)
@@ -74,7 +96,14 @@ func (service *Impl) GetSetBonusEmoji(equipedItemNumber, itemNumber int) entitie
 			Str(constants.LogEntity, emojiID).
 			Str(constants.LogEmojiType, string(constants.EmojiTypeBonusSet)).
 			Msgf("No bonus set emoji found, returning empty emoji")
-		return entities.Emoji{Type: constants.EmojiTypeBonusSet}
+		return mapEmoji(entities.Emoji{})
 	}
-	return emoji
+	return mapEmoji(emoji)
+}
+
+func mapEmoji(emoji entities.Emoji) discordgo.ComponentEmoji {
+	return discordgo.ComponentEmoji{
+		ID:   emoji.Snowflake,
+		Name: emoji.Name,
+	}
 }

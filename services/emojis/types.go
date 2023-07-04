@@ -1,6 +1,7 @@
 package emojis
 
 import (
+	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
@@ -8,8 +9,9 @@ import (
 )
 
 type Service interface {
-	GetEquipmentEmoji(equipmentType amqp.EquipmentType) entities.Emoji
-	GetSetBonusEmoji(equipedItemNumber, itemNumber int) entities.Emoji
+	GetMiscEmoji(emojiID constants.EmojiMiscID) discordgo.ComponentEmoji
+	GetEquipmentEmoji(equipmentType amqp.EquipmentType) discordgo.ComponentEmoji
+	GetSetBonusEmoji(equipedItemNumber, itemNumber int) discordgo.ComponentEmoji
 }
 
 type Impl struct {

@@ -114,49 +114,35 @@ func mapItemToComponents(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	components := make([]discordgo.MessageComponent, 0)
 
 	if item.GetSet() != nil {
-		components = append(components, discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.Button{
-					CustomID: contract.CraftSetCustomID(item.GetSet().GetId()),
-					Label:    item.GetSet().GetName(),
-					Style:    discordgo.PrimaryButton,
-					Emoji:    discordgo.ComponentEmoji{
-						// TODO
-					},
-				},
-			},
+		components = append(components, discordgo.Button{
+			CustomID: contract.CraftSetCustomID(item.GetSet().GetId()),
+			Label:    item.GetSet().GetName(),
+			Style:    discordgo.PrimaryButton,
+			Emoji:    service.GetMiscEmoji(constants.EmojiIDSet),
 		})
 	}
 
 	if isRecipe && len(item.GetEffects()) > 0 {
-		components = append(components, discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.Button{
-					CustomID: contract.CraftItemEffectsCustomID(item.GetId()),
-					Label:    i18n.Get(lg, "item.effects.button"),
-					Style:    discordgo.PrimaryButton,
-					Emoji:    discordgo.ComponentEmoji{
-						// TODO
-					},
-				},
-			},
+		components = append(components, discordgo.Button{
+			CustomID: contract.CraftItemEffectsCustomID(item.GetId()),
+			Label:    i18n.Get(lg, "item.effects.button"),
+			Style:    discordgo.PrimaryButton,
+			Emoji:    service.GetMiscEmoji(constants.EmojiIDEffect),
 		})
 	} else if item.GetRecipe() != nil {
-		components = append(components, discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.Button{
-					CustomID: contract.CraftItemRecipeCustomID(item.GetId()),
-					Label:    i18n.Get(lg, "item.recipe.button"),
-					Style:    discordgo.PrimaryButton,
-					Emoji:    discordgo.ComponentEmoji{
-						// TODO
-					},
-				},
-			},
+		components = append(components, discordgo.Button{
+			CustomID: contract.CraftItemRecipeCustomID(item.GetId()),
+			Label:    i18n.Get(lg, "item.recipe.button"),
+			Style:    discordgo.PrimaryButton,
+			Emoji:    service.GetMiscEmoji(constants.EmojiIDRecipe),
 		})
 	}
 
-	return &components
+	return &[]discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: components,
+		},
+	}
 }
 
 type i18nIngredient struct {

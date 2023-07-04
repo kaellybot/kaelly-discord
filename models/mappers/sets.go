@@ -141,9 +141,7 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 			}),
 			Value:   fmt.Sprintf("%v", currentBonus.ItemNumber),
 			Default: currentBonus.ItemNumber == bonus.ItemNumber,
-			Emoji: discordgo.ComponentEmoji{
-				ID: emoji.Snowflake,
-			},
+			Emoji:   emoji,
 		})
 	}
 
@@ -163,9 +161,7 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 		items = append(items, discordgo.SelectMenuOption{
 			Label: item.Name,
 			Value: item.Id,
-			Emoji: discordgo.ComponentEmoji{
-				ID: service.GetEquipmentEmoji(item.Type).Snowflake,
-			},
+			Emoji: service.GetEquipmentEmoji(item.Type),
 		})
 	}
 

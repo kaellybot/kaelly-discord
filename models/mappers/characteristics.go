@@ -49,7 +49,7 @@ func sortCharacteristics(characteristics []i18nCharacteristic) {
 		if characteristics[i].IsActive == characteristics[j].IsActive {
 			return characteristics[i].SortOrder < characteristics[j].SortOrder
 		}
-		// TODO checks if it works
+
 		return characteristics[i].IsActive
 	})
 }

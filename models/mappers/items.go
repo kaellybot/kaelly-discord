@@ -1,6 +1,8 @@
 package mappers
 
 import (
+	"errors"
+
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
@@ -11,44 +13,75 @@ import (
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
+var (
+	ErrItemTypeNotHandled = errors.New("item type not handled")
+)
+
 func MapItemListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_LIST_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		EncyclopediaItemListRequest: &amqp.EncyclopediaItemListRequest{
 			Query: query,
+			Type:  amqp.EncyclopediaItemListRequest_ANY,
 		},
 	}
 }
 
-func MapItemRequest(query string, isID bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapItemRequest(query string, isID bool, itemType amqp.ItemType,
+	lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		EncyclopediaItemRequest: &amqp.EncyclopediaItemRequest{
 			Query: query,
 			IsID:  isID,
+			Type:  itemType,
 		},
 	}
 }
 
-func MapItemToWebhookEdit(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
+//nolint:nolintlint,exhaustive
+func MapItemToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	characService characteristics.Service, emojiService emojis.Service,
-	locale amqp.Language) *discordgo.WebhookEdit {
-	lg := constants.MapAMQPLocale(locale)
-
-	return &discordgo.WebhookEdit{
-		Embeds:     mapItemToEmbeds(item, isRecipe, characService, lg),
-		Components: mapItemToComponents(item, isRecipe, emojiService, lg),
+	locale amqp.Language) (*discordgo.WebhookEdit, error) {
+	// TODO handle all these types
+	switch answer.GetType() {
+	case amqp.ItemType_CONSUMABLE:
+		return nil, ErrItemTypeNotHandled
+	case amqp.ItemType_COSMETIC:
+		return nil, ErrItemTypeNotHandled
+	case amqp.ItemType_EQUIPMENT:
+		return mapEquipmentToWebhookEdit(answer, isRecipe, characService,
+			emojiService, locale), nil
+	case amqp.ItemType_MOUNT:
+		return nil, ErrItemTypeNotHandled
+	case amqp.ItemType_QUEST_ITEM:
+		return nil, ErrItemTypeNotHandled
+	case amqp.ItemType_RESOURCE:
+		return nil, ErrItemTypeNotHandled
+	default:
+		return nil, ErrItemTypeNotHandled
 	}
 }
 
-func mapItemToEmbeds(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
+func mapEquipmentToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
+	characService characteristics.Service, emojiService emojis.Service,
+	locale amqp.Language) *discordgo.WebhookEdit {
+	lg := constants.MapAMQPLocale(locale)
+	return &discordgo.WebhookEdit{
+		Embeds:     mapEquipmentToEmbeds(answer, isRecipe, characService, lg),
+		Components: mapEquipmentToComponents(answer, isRecipe, emojiService, lg),
+	}
+}
+
+func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	service characteristics.Service, lg discordgo.Locale) *[]*discordgo.MessageEmbed {
+	equipment := answer.GetEquipment()
 	fields := make([]*discordgo.MessageEmbedField, 0)
 
-	if !isRecipe && len(item.GetEffects()) > 0 {
-		i18nEffects := mapEffects(item.GetEffects(), service)
+	if !isRecipe && len(equipment.GetEffects()) > 0 {
+		i18nEffects := mapEffects(equipment.GetEffects(), service)
 		effectFields := discord.SliceFields(i18nEffects, constants.MaxCharacterPerField,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
@@ -66,9 +99,9 @@ func mapItemToEmbeds(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
 			})
 
 		fields = append(fields, effectFields...)
-	} else if isRecipe && item.GetRecipe() != nil {
-		recipeFields := discord.SliceFields(item.GetRecipe().GetIngredients(), constants.MaxIngredientsPerField,
-			func(i int, items []*amqp.EncyclopediaItemAnswer_Ingredient) *discordgo.MessageEmbedField {
+	} else if isRecipe && equipment.GetRecipe() != nil {
+		recipeFields := discord.SliceFields(equipment.GetRecipe().GetIngredients(), constants.MaxIngredientsPerField,
+			func(i int, items []*amqp.EncyclopediaItemAnswer_Recipe_Ingredient) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
 				if i == 0 {
 					name = i18n.Get(lg, "item.recipe.title")
@@ -88,50 +121,51 @@ func mapItemToEmbeds(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
 
 	return &[]*discordgo.MessageEmbed{
 		{
-			Title: item.GetName(),
+			Title: equipment.GetName(),
 			Description: i18n.Get(lg, "item.description", i18n.Vars{
-				"level":       item.GetLevel(),
-				"type":        item.GetLabelType(),
-				"description": item.GetDescription(),
+				"level":       equipment.GetLevel(),
+				"type":        equipment.GetLabelType(),
+				"description": equipment.GetDescription(),
 			}),
 			Color: constants.Color,
-			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": item.GetId()}),
+			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": equipment.GetId()}),
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: item.GetIcon(),
+				URL: equipment.GetIcon(),
 			},
 			Fields: fields,
 			Author: &discordgo.MessageEmbedAuthor{
-				Name:    item.GetSource().GetName(),
-				URL:     item.GetSource().GetUrl(),
-				IconURL: item.GetSource().GetIcon(),
+				Name:    answer.GetSource().GetName(),
+				URL:     answer.GetSource().GetUrl(),
+				IconURL: answer.GetSource().GetIcon(),
 			},
 		},
 	}
 }
 
-func mapItemToComponents(item *amqp.EncyclopediaItemAnswer, isRecipe bool,
+func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	service emojis.Service, lg discordgo.Locale) *[]discordgo.MessageComponent {
+	equipment := answer.GetEquipment()
 	components := make([]discordgo.MessageComponent, 0)
 
-	if item.GetSet() != nil {
+	if equipment.GetSet() != nil {
 		components = append(components, discordgo.Button{
-			CustomID: contract.CraftSetCustomID(item.GetSet().GetId()),
-			Label:    item.GetSet().GetName(),
+			CustomID: contract.CraftSetCustomID(equipment.GetSet().GetId()),
+			Label:    equipment.GetSet().GetName(),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDSet),
 		})
 	}
 
-	if isRecipe && len(item.GetEffects()) > 0 {
+	if isRecipe && len(equipment.GetEffects()) > 0 {
 		components = append(components, discordgo.Button{
-			CustomID: contract.CraftItemEffectsCustomID(item.GetId()),
+			CustomID: contract.CraftItemEffectsCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT.String()),
 			Label:    i18n.Get(lg, "item.effects.button"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDEffect),
 		})
-	} else if item.GetRecipe() != nil {
+	} else if equipment.GetRecipe() != nil {
 		components = append(components, discordgo.Button{
-			CustomID: contract.CraftItemRecipeCustomID(item.GetId()),
+			CustomID: contract.CraftItemRecipeCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT.String()),
 			Label:    i18n.Get(lg, "item.recipe.button"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDRecipe),
@@ -151,7 +185,7 @@ type i18nIngredient struct {
 	Quantity int64
 }
 
-func mapItemIngredients(ingredients []*amqp.EncyclopediaItemAnswer_Ingredient,
+func mapItemIngredients(ingredients []*amqp.EncyclopediaItemAnswer_Recipe_Ingredient,
 	lg discordgo.Locale) []i18nIngredient {
 	result := make([]i18nIngredient, 0)
 	for _, ingredient := range ingredients {

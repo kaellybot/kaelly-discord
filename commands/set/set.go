@@ -51,7 +51,7 @@ func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapSetRequest(query, false, lg)
+	msg := mappers.MapItemRequest(query, false, amqp.ItemType_SET, lg)
 	err = command.requestManager.Request(s, i, setRequestRoutingKey, msg, command.getSetReply)
 	if err != nil {
 		panic(err)
@@ -90,7 +90,7 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapSetRequest(query, true, lg)
+	msg := mappers.MapItemRequest(query, true, amqp.ItemType_SET, lg)
 	err := command.requestManager.Request(s, i, setRequestRoutingKey,
 		msg, callback, properties)
 	if err != nil {
@@ -104,7 +104,7 @@ func (command *Command) getSetReply(_ context.Context, s *discordgo.Session,
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
-	reply := mappers.MapSetToDefaultWebhookEdit(message.EncyclopediaSetAnswer,
+	reply := mappers.MapSetToDefaultWebhookEdit(message.EncyclopediaItemAnswer,
 		command.characService, command.emojiService, message.Language)
 	_, err := s.InteractionResponseEdit(i.Interaction, reply)
 	if err != nil {
@@ -136,7 +136,7 @@ func (command *Command) updateSetReply(_ context.Context, s *discordgo.Session,
 		panic(commands.ErrRequestPropertyNotFound)
 	}
 
-	reply := mappers.MapSetToWebhookEdit(message.EncyclopediaSetAnswer, itemNumber,
+	reply := mappers.MapSetToWebhookEdit(message.EncyclopediaItemAnswer, itemNumber,
 		command.characService, command.emojiService, message.Language)
 	_, err := s.InteractionResponseEdit(i.Interaction, reply)
 	if err != nil {
@@ -147,8 +147,10 @@ func (command *Command) updateSetReply(_ context.Context, s *discordgo.Session,
 
 func isAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
-		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_ANSWER &&
-		message.EncyclopediaSetAnswer != nil
+		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER &&
+		message.EncyclopediaItemAnswer != nil &&
+		message.EncyclopediaItemAnswer.GetType() == amqp.ItemType_SET &&
+		message.EncyclopediaItemAnswer.GetSet() != nil
 }
 
 func getQueryOption(ctx context.Context) (string, error) {

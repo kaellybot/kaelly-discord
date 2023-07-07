@@ -50,7 +50,7 @@ func (command *Command) getItem(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapItemRequest(query, false, lg)
+	msg := mappers.MapItemRequest(query, false, amqp.ItemType_ANY_ITEM, lg)
 	err = command.requestManager.Request(s, i, itemRequestRoutingKey, msg, command.getItemReply)
 	if err != nil {
 		panic(err)
@@ -61,8 +61,9 @@ func (command *Command) updateItem(s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	customID := i.MessageComponentData().CustomID
 	properties := make(map[string]any)
-	var query string
-	if contract.ExtractItemCustomID(customID) {
+	var query, itemType string
+	var ok bool
+	if itemType, ok = contract.ExtractItemCustomID(customID); ok {
 		values := i.MessageComponentData().Values
 		if len(values) != 1 {
 			log.Error().
@@ -73,11 +74,9 @@ func (command *Command) updateItem(s *discordgo.Session,
 		}
 		query = values[0]
 		properties[isRecipeProperty] = false
-	} else if itemID, ok := contract.ExtractItemEffectsCustomID(customID); ok {
-		query = itemID
+	} else if query, itemType, ok = contract.ExtractItemEffectsCustomID(customID); ok {
 		properties[isRecipeProperty] = false
-	} else if itemID, ok = contract.ExtractItemRecipeCustomID(customID); ok {
-		query = itemID
+	} else if query, itemType, ok = contract.ExtractItemRecipeCustomID(customID); ok {
 		properties[isRecipeProperty] = true
 	} else {
 		log.Error().
@@ -87,7 +86,16 @@ func (command *Command) updateItem(s *discordgo.Session,
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapItemRequest(query, true, lg)
+	itemTypeID, found := amqp.ItemType_value[itemType]
+	if !found {
+		log.Error().
+			Str(constants.LogCommand, contract.ItemCommandName).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot retrieve item type from custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	msg := mappers.MapItemRequest(query, true, amqp.ItemType(itemTypeID), lg)
 	err := command.requestManager.Request(s, i, itemRequestRoutingKey,
 		msg, command.updateItemReply, properties)
 	if err != nil {
@@ -123,9 +131,15 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 		panic(commands.ErrRequestPropertyNotFound)
 	}
 
-	reply := mappers.MapItemToWebhookEdit(message.EncyclopediaItemAnswer, isRecipe,
+	reply, err := mappers.MapItemToWebhookEdit(message.GetEncyclopediaItemAnswer(), isRecipe,
 		command.characService, command.emojiService, message.Language)
-	_, err := s.InteractionResponseEdit(i.Interaction, reply)
+	if err != nil {
+		log.Error().Err(err).
+			Str(constants.LogItemType, message.GetEncyclopediaItemAnswer().GetType().String()).
+			Msgf("Cannot map item type to webhook response, panicking...")
+		panic(err)
+	}
+	_, err = s.InteractionResponseEdit(i.Interaction, reply)
 	if err != nil {
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
@@ -135,7 +149,7 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 func isAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
 		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER &&
-		message.EncyclopediaItemAnswer != nil
+		message.GetEncyclopediaItemAnswer() != nil
 }
 
 func getQueryOption(ctx context.Context) (string, error) {

@@ -16,35 +16,28 @@ import (
 
 func MapSetListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_LIST_REQUEST,
+		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_LIST_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		EncyclopediaSetListRequest: &amqp.EncyclopediaSetListRequest{
+		EncyclopediaItemListRequest: &amqp.EncyclopediaItemListRequest{
 			Query: query,
+			Type:  amqp.EncyclopediaItemListRequest_SET,
 		},
 	}
 }
 
-func MapSetRequest(query string, isID bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		EncyclopediaSetRequest: &amqp.EncyclopediaSetRequest{
-			Query: query,
-			IsID:  isID,
-		},
-	}
-}
-
-func MapSetToDefaultWebhookEdit(set *amqp.EncyclopediaSetAnswer, characService characteristics.Service,
-	emojiService emojis.Service, locale amqp.Language) *discordgo.WebhookEdit {
-	return MapSetToWebhookEdit(set, len(set.Equipments), characService, emojiService, locale)
-}
-
-func MapSetToWebhookEdit(set *amqp.EncyclopediaSetAnswer, itemNumber int,
+func MapSetToDefaultWebhookEdit(answer *amqp.EncyclopediaItemAnswer,
 	characService characteristics.Service, emojiService emojis.Service,
 	locale amqp.Language) *discordgo.WebhookEdit {
+	return MapSetToWebhookEdit(answer, len(answer.GetSet().GetEquipments()),
+		characService, emojiService, locale)
+}
+
+func MapSetToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, itemNumber int,
+	characService characteristics.Service, emojiService emojis.Service,
+	locale amqp.Language) *discordgo.WebhookEdit {
+	set := answer.GetSet()
 	lg := constants.MapAMQPLocale(locale)
-	bonus := &amqp.EncyclopediaSetAnswer_Bonus{ItemNumber: 0}
+	bonus := &amqp.EncyclopediaItemAnswer_Set_Bonus{ItemNumber: 0}
 	for _, currentBonus := range set.Bonuses {
 		if currentBonus.ItemNumber == int64(itemNumber) {
 			bonus = currentBonus
@@ -62,15 +55,17 @@ func MapSetToWebhookEdit(set *amqp.EncyclopediaSetAnswer, itemNumber int,
 	}
 
 	return &discordgo.WebhookEdit{
-		Embeds:     mapSetToEmbeds(set, bonus, characService, lg),
-		Components: mapSetToComponents(set, bonus, emojiService, lg),
+		Embeds:     mapSetToEmbeds(answer, bonus, characService, lg),
+		Components: mapSetToComponents(answer, bonus, emojiService, lg),
 	}
 }
 
-func mapSetToEmbeds(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSetAnswer_Bonus,
-	service characteristics.Service, lg discordgo.Locale) *[]*discordgo.MessageEmbed {
+func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
+	bonus *amqp.EncyclopediaItemAnswer_Set_Bonus, service characteristics.Service,
+	lg discordgo.Locale) *[]*discordgo.MessageEmbed {
+	set := answer.GetSet()
 	fields := discord.SliceFields(set.GetEquipments(), constants.MaxEquipmentPerField,
-		func(i int, items []*amqp.EncyclopediaSetAnswer_Equipment) *discordgo.MessageEmbedField {
+		func(i int, items []*amqp.EncyclopediaItemAnswer_Set_Equipment) *discordgo.MessageEmbedField {
 			name := constants.InvisibleCharacter
 			if i == 0 {
 				name = i18n.Get(lg, "set.items.title")
@@ -119,16 +114,18 @@ func mapSetToEmbeds(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSet
 			},
 			Fields: fields,
 			Author: &discordgo.MessageEmbedAuthor{
-				Name:    set.Source.Name,
-				URL:     set.Source.Url,
-				IconURL: set.Source.Icon,
+				Name:    answer.Source.Name,
+				URL:     answer.Source.Url,
+				IconURL: answer.Source.Icon,
 			},
 		},
 	}
 }
 
-func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.EncyclopediaSetAnswer_Bonus,
-	service emojis.Service, lg discordgo.Locale) *[]discordgo.MessageComponent {
+func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
+	bonus *amqp.EncyclopediaItemAnswer_Set_Bonus, service emojis.Service,
+	lg discordgo.Locale) *[]discordgo.MessageComponent {
+	set := answer.GetSet()
 	components := make([]discordgo.MessageComponent, 0)
 
 	bonuses := make([]discordgo.SelectMenuOption, 0)
@@ -168,7 +165,7 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 	components = append(components, discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
 			discordgo.SelectMenu{
-				CustomID:    contract.CraftItemCustomID(),
+				CustomID:    contract.CraftItemCustomID(amqp.ItemType_EQUIPMENT.String()),
 				MenuType:    discordgo.StringSelectMenu,
 				Placeholder: i18n.Get(lg, "set.items.placeholder"),
 				Options:     items,
@@ -179,16 +176,17 @@ func mapSetToComponents(set *amqp.EncyclopediaSetAnswer, bonus *amqp.Encyclopedi
 	return &components
 }
 
-type i18nItem struct {
+type i18nSetItem struct {
 	Name  string
 	URL   string
 	Level int64
 }
 
-func mapSetItems(items []*amqp.EncyclopediaSetAnswer_Equipment, lg discordgo.Locale) []i18nItem {
-	result := make([]i18nItem, 0)
+func mapSetItems(items []*amqp.EncyclopediaItemAnswer_Set_Equipment,
+	lg discordgo.Locale) []i18nSetItem {
+	result := make([]i18nSetItem, 0)
 	for _, item := range items {
-		result = append(result, i18nItem{
+		result = append(result, i18nSetItem{
 			Name:  item.GetName(),
 			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": item.GetId()}),
 			Level: item.GetLevel(),

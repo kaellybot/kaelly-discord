@@ -13,6 +13,7 @@ const (
 	LogEntityCount     = "entityCount"
 	LogAnkamaID        = "ankamaID"
 	LogItemNumber      = "itemNumber"
+	LogItemType        = "itemType"
 	LogEmojiType       = "emojiType"
 	LogRequestProperty = "requestProperty"
 	LogRequestValue    = "requestValue"

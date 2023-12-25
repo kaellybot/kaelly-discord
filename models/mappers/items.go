@@ -19,11 +19,11 @@ var (
 
 func MapItemListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_LIST_REQUEST,
+		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		EncyclopediaItemListRequest: &amqp.EncyclopediaItemListRequest{
+		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
 			Query: query,
-			Type:  amqp.EncyclopediaItemListRequest_ANY,
+			Type:  amqp.EncyclopediaListRequest_ITEM,
 		},
 	}
 }
@@ -138,6 +138,7 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 				URL:     answer.GetSource().GetUrl(),
 				IconURL: answer.GetSource().GetIcon(),
 			},
+			Footer: discord.BuildDefaultFooter(lg),
 		},
 	}
 }

@@ -16,11 +16,11 @@ import (
 
 func MapSetListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_LIST_REQUEST,
+		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		EncyclopediaItemListRequest: &amqp.EncyclopediaItemListRequest{
+		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
 			Query: query,
-			Type:  amqp.EncyclopediaItemListRequest_SET,
+			Type:  amqp.EncyclopediaListRequest_SET,
 		},
 	}
 }
@@ -118,6 +118,7 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 				URL:     answer.Source.Url,
 				IconURL: answer.Source.Icon,
 			},
+			Footer: discord.BuildDefaultFooter(lg),
 		},
 	}
 }

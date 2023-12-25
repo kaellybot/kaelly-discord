@@ -3,17 +3,18 @@ module github.com/kaellybot/kaelly-discord
 go 1.20
 
 // replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
-
 // replace github.com/kaellybot/kaelly-commands => ../kaelly-commands
 
 require (
 	github.com/bwmarrin/discordgo v0.27.1
-	github.com/kaellybot/kaelly-amqp v0.0.2-beta14
-	github.com/kaellybot/kaelly-commands v0.0.4-beta9
+	github.com/kaellybot/kaelly-amqp v0.0.3-beta1
+	github.com/kaellybot/kaelly-commands v0.0.4-beta10
 	github.com/kaysoro/discordgo-i18n v1.0.2
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/viper v1.14.0
+	github.com/stretchr/testify v1.8.4
 	golang.org/x/text v0.7.0
+	google.golang.org/protobuf v1.30.0
 	gorm.io/driver/mysql v1.4.4
 	gorm.io/gorm v1.24.2
 )
@@ -21,6 +22,7 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
@@ -35,6 +37,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.15.0
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
@@ -47,7 +50,6 @@ require (
 	github.com/subosito/gotenv v1.4.1 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/sys v0.6.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

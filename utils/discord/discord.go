@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/slicers"
+	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
 func SliceFields[T any](items []T, limit int, toField ItemsToField[T]) []*discordgo.MessageEmbedField {
@@ -30,4 +31,15 @@ func SliceButtons[T any](items []T, toButton ItemToButton[T]) []discordgo.Action
 	}
 
 	return actionsRow
+}
+
+func BuildDefaultFooter(lg discordgo.Locale) *discordgo.MessageEmbedFooter {
+	return &discordgo.MessageEmbedFooter{
+		Text: i18n.Get(lg, "default.footer", i18n.Vars{
+			"name":      constants.Name,
+			"version":   constants.Version,
+			"changelog": i18n.Get(lg, "default.changelog"),
+		}),
+		IconURL: constants.AvatarIcon,
+	}
 }

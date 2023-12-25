@@ -41,6 +41,19 @@
             }
         }
     },
+    "almanax": {
+        "day": {
+            "title": "Almanax du <t:{{ .date }}:D>",
+            "bonus": {
+                "title": ":cyclone: Bonus"
+            },
+            "tribute": {
+                "title": ":moneybag: Offrande",
+                "description": "**{{ .item }}** x{{ .quantity }}"
+            },
+            "missing": "Oups ! Je n'ai pas l'almanax de ce jour dans mes connaissances, je remonte le problème à mes créateurs !"
+        }
+    },
     "config": {
         "success": "Modification prise en compte !",
         "embed": {
@@ -107,10 +120,21 @@
             "option": "Effets ({{ .itemNumber }} / {{ .itemCount }} objets)"
         }
     },
+    "default": {
+        "changelog": "Commandes Slash disponibles !",
+        "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
+    },
     "checks": {
+        "date": {
+            "constraints": "La date doit respecter le format suivant : JJ/MM/AAAA :)",
+            "outOfBounds": "Cette date est en-dehors de mes connaissances ! Je sais que je suis incroyable mais quand même, je ne suis pas le dieu Xélor ! :face_with_peeking_eye:"
+         },
         "dimension": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucune dimension que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! Si tu veux toute les afficher, ne renseigne pas cette option :slight_smile:"
+        },
+        "duration": {
+            "constraints": "La durée doit être comprise entre {{ .min }} et {{ .max }} jours :)"
         },
         "feed": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun flux RSS que je connaisse ! :pensive:",

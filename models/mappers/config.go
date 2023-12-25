@@ -9,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -195,6 +196,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service
 				Inline: true,
 			},
 		},
+		Footer: discord.BuildDefaultFooter(lg),
 	}
 }
 

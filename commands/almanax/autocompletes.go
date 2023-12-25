@@ -1,4 +1,4 @@
-package set
+package almanax
 
 import (
 	"context"
@@ -17,43 +17,45 @@ func (command *Command) autocomplete(s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale) {
 	data := i.ApplicationCommandData()
 
-	for _, option := range data.Options {
-		if option.Focused {
-			switch option.Name {
-			case contract.SetQueryOptionName:
-				command.requestSetList(s, i, option.StringValue(), lg)
-			default:
-				log.Error().
-					Str(constants.LogCommandOption, option.Name).
-					Msgf("Option name not handled, ignoring it")
+	for _, subCommand := range data.Options {
+		for _, option := range subCommand.Options {
+			if option.Focused {
+				switch option.Name {
+				case contract.AlmanaxEffectOptionName:
+					command.requestAlmanaxEffectList(s, i, option.StringValue(), lg)
+				default:
+					log.Error().
+						Str(constants.LogCommandOption, option.Name).
+						Msgf("Option name not handled, ignoring it")
+				}
+				break
 			}
-			break
 		}
 	}
 }
 
-func (command *Command) requestSetList(s *discordgo.Session,
+func (command *Command) requestAlmanaxEffectList(s *discordgo.Session,
 	i *discordgo.InteractionCreate, query string, lg discordgo.Locale) {
 	if len(strings.TrimSpace(query)) == 0 {
 		return
 	}
 
-	msg := mappers.MapSetListRequest(query, lg)
-	err := command.requestManager.Request(s, i, setRequestRoutingKey,
-		msg, command.autocompleteSetList)
+	msg := mappers.MapAlmanaxEffectListRequest(query, lg)
+	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey,
+		msg, command.autocompleteAlmanaxEffectList)
 	if err != nil {
 		log.Error().Err(err).Msg("Autocomplete request ignored")
 	}
 }
 
-func (command *Command) autocompleteSetList(_ context.Context, s *discordgo.Session,
+func (command *Command) autocompleteAlmanaxEffectList(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 	var choices []*discordgo.ApplicationCommandOptionChoice
-	if isSetListAnswerValid(message) {
-		for _, set := range message.EncyclopediaListAnswer.Items {
+	if isAlmanaxEffectListAnswerValid(message) {
+		for _, effect := range message.EncyclopediaListAnswer.Items {
 			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-				Name:  set.Name,
-				Value: set.Name,
+				Name:  effect.Name,
+				Value: effect.Name,
 			})
 		}
 	} else {
@@ -64,7 +66,7 @@ func (command *Command) autocompleteSetList(_ context.Context, s *discordgo.Sess
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
 		Data: &discordgo.InteractionResponseData{
-			Choices: choices,
+			Choices: choices[:25], // TODO too much choices
 		},
 	})
 	if err != nil {
@@ -72,7 +74,7 @@ func (command *Command) autocompleteSetList(_ context.Context, s *discordgo.Sess
 	}
 }
 
-func isSetListAnswerValid(message *amqp.RabbitMQMessage) bool {
+func isAlmanaxEffectListAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
 		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER &&
 		message.EncyclopediaListAnswer != nil

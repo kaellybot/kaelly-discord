@@ -41,6 +41,19 @@
          }
       }
    },
+   "almanax": {
+      "day": {
+          "title": "Almanax of <t:{{ .date }}:D>",
+          "bonus": {
+            "title": ":cyclone: Bonus"
+        },
+        "tribute": {
+            "title": ":moneybag: Tribute",
+            "description": "**{{ .item }}** x{{ .quantity }}"
+        },
+        "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!"
+      }
+  },
    "config": {
       "success": "Change taken in account!",
       "embed": {
@@ -107,10 +120,21 @@
          "option": "Effects ({{ .itemNumber }} / {{ .itemCount }} items)"
       }
    },
+   "default": {
+      "changelog": "Slash commands available!",
+      "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
+  },
    "checks": {
+      "date": {
+         "constraints": "The date must respect the following format: DD/MM/YYYY :)",
+         "outOfBounds": "This date is out of my knowledge! I know I'm amazing but still, I'm not Xelor god! :face_with_peeking_eye:"
+      },
       "dimension": {
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
          "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
+      },
+      "duration": {
+         "constraints": "The duration must be between {{ .min }} and {{ .max }} days :)"
       },
       "feed": {
          "not_found": "Aie! '*{{ .value }}*' does not correspond to any RSS feeds I know! :pensive:",

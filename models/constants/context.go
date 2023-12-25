@@ -5,7 +5,9 @@ type ContextKey int
 const (
 	ContextKeyChannel ContextKey = iota
 	ContextKeyCity
+	ContextKeyDate
 	ContextKeyDimension
+	ContextKeyDuration
 	ContextKeyEnabled
 	ContextKeyFeed
 	ContextKeyJob

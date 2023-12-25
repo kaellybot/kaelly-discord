@@ -50,7 +50,7 @@ func (command *Command) autocompleteItemList(_ context.Context, s *discordgo.Ses
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 	var choices []*discordgo.ApplicationCommandOptionChoice
 	if isItemListAnswerValid(message) {
-		for _, item := range message.EncyclopediaItemListAnswer.Items {
+		for _, item := range message.EncyclopediaListAnswer.Items {
 			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 				Name:  item.Name,
 				Value: item.Name,
@@ -74,6 +74,6 @@ func (command *Command) autocompleteItemList(_ context.Context, s *discordgo.Ses
 
 func isItemListAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
-		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_LIST_ANSWER &&
-		message.EncyclopediaItemListAnswer != nil
+		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER &&
+		message.EncyclopediaListAnswer != nil
 }

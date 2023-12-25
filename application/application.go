@@ -5,6 +5,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/commands/about"
 	"github.com/kaellybot/kaelly-discord/commands/align"
+	"github.com/kaellybot/kaelly-discord/commands/almanax"
 	"github.com/kaellybot/kaelly-discord/commands/config"
 	"github.com/kaellybot/kaelly-discord/commands/item"
 	"github.com/kaellybot/kaelly-discord/commands/job"
@@ -96,6 +97,7 @@ func New() (*Impl, error) {
 	commands := []commands.DiscordCommand{
 		about.New(),
 		align.New(bookService, guildService, serverService, requestsManager),
+		almanax.New(emojiService, requestsManager),
 		config.New(guildService, feedService, serverService, requestsManager),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),

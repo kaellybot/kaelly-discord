@@ -52,7 +52,11 @@
             "description": "**{{ .item }}** x{{ .quantity }}"
         },
         "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!"
-      }
+      },
+      "resource": {
+         "title": "Almanax of <t:{{ .startDate }}:D> to <t:{{ .endDate }}:D>",
+         "description": "{{ if .tributes }}{{ range .tributes}}- **{{ .ItemName }}** x{{ .Quantity }}\n{{ end }}{{ else }}No needed resource!{{ end }}"
+     }
   },
    "config": {
       "success": "Change taken in account!",

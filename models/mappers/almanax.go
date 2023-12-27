@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"sort"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -85,15 +86,27 @@ func MapAlmanaxResourceToEmbed(almanaxResources *amqp.EncyclopediaAlmanaxResourc
 	locale amqp.Language) *discordgo.MessageEmbed {
 
 	lg := constants.MapAMQPLocale(locale)
+	now := time.Now()
+	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	endDate := startDate.AddDate(0, 0, int(almanaxResources.Duration))
+	collator := constants.MapCollator(lg)
+	sort.SliceStable(almanaxResources.Tributes, func(i, j int) bool {
+		return collator.CompareString(almanaxResources.Tributes[i].ItemName, almanaxResources.Tributes[j].ItemName) == -1
+	})
+
 	return &discordgo.MessageEmbed{
-		Title: "TODO",
-		Color: constants.Color,
-		//Thumbnail: &discordgo.MessageEmbedThumbnail{URL: almanax.Icon},
-		//Author: &discordgo.MessageEmbedAuthor{
-		//	Name:    almanaxResources.Source.Name,
-		//	URL:     almanaxResources.Source.Url,
-		//	IconURL: almanaxResources.Source.Icon,
-		//},
+		Title: i18n.Get(lg, "almanax.resource.title", i18n.Vars{
+			"startDate": startDate.Unix(),
+			"endDate":   endDate.Unix(),
+		}),
+		Description: i18n.Get(lg, "almanax.resource.description", i18n.Vars{"tributes": almanaxResources.Tributes}),
+		Color:       constants.Color,
+		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.GetUnknownSeason().AlmanaxIcon},
+		Author: &discordgo.MessageEmbedAuthor{
+			Name:    almanaxResources.Source.Name,
+			URL:     almanaxResources.Source.Url,
+			IconURL: almanaxResources.Source.Icon,
+		},
 		Footer: discord.BuildDefaultFooter(lg),
 	}
 }

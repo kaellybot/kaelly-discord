@@ -22,6 +22,10 @@ func GetSeason(date time.Time) Season {
 		}
 	}
 
+	return GetUnknownSeason()
+}
+
+func GetUnknownSeason() Season {
 	return Season{
 		Name:        "Unknown",
 		Color:       Color,

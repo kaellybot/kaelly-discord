@@ -56,7 +56,10 @@ func MapAlmanaxEffectRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMe
 func MapAlmanaxToEmbed(almanax *amqp.Almanax, lg discordgo.Locale) *discordgo.MessageEmbed {
 	season := constants.GetSeason(almanax.Date.AsTime())
 	return &discordgo.MessageEmbed{
-		Title:     i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": almanax.GetDate().Seconds}),
+		Title: i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": almanax.GetDate().Seconds}),
+		URL: i18n.Get(lg, "almanax.day.url", i18n.Vars{
+			"date": almanax.Date.AsTime().Format(constants.KrosmozAlmanaxDateFormat),
+		}),
 		Color:     season.Color,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: season.AlmanaxIcon},
 		Image:     &discordgo.MessageEmbedImage{URL: almanax.Tribute.Item.Icon},

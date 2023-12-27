@@ -47,6 +47,7 @@
           "bonus": {
             "title": ":cyclone: Bonus"
         },
+        "url": "https://www.krosmoz.com/en/almanax/{{ .date }}",
         "tribute": {
             "title": ":moneybag: Tribute",
             "description": "**{{ .item }}** x{{ .quantity }}"

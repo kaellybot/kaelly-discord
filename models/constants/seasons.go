@@ -15,9 +15,12 @@ type Season struct {
 func GetSeason(date time.Time) Season {
 	utcDate := date.UTC()
 	for _, season := range getSeasons() {
+		seasonPreviousStartDate := season.StartDate.AddDate(utcDate.Year()-1, 0, 0)
+		seasonPreviousEndDate := season.EndDate.AddDate(utcDate.Year()-1, 0, 0)
 		seasonStartDate := season.StartDate.AddDate(utcDate.Year(), 0, 0)
 		seasonEndDate := season.EndDate.AddDate(utcDate.Year(), 0, 0)
-		if seasonStartDate.Before(utcDate) && seasonEndDate.After(utcDate) {
+		if seasonPreviousStartDate.Before(utcDate) && seasonPreviousEndDate.After(utcDate) ||
+			seasonStartDate.Before(utcDate) && seasonEndDate.After(utcDate) {
 			return season
 		}
 	}

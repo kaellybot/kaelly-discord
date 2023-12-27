@@ -54,6 +54,9 @@
             },
             "missing": "Oups ! Je n'ai pas l'almanax de ce jour dans mes connaissances, je remonte le problème à mes créateurs !"
         },
+        "effect": {
+            "missing": "Ma boule de cristal me dit que le bonus demandé n'interviendra pas dans les trente prochains jours, je n'en sais malheureusement pas plus :persevere:"
+        },
         "resource": {
             "title": "Almanax du <t:{{ .startDate }}:D> au <t:{{ .endDate }}:D>",
             "description": "{{ if .tributes }}{{ range .tributes}}- **{{ .ItemName }}** x{{ .Quantity }}\n{{ end }}{{ else }}Aucune ressource nécessaire !{{ end }}"

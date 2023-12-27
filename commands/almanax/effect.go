@@ -9,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -34,9 +35,17 @@ func (command *Command) effectRespond(_ context.Context, s *discordgo.Session,
 	}
 
 	lg := constants.MapAMQPLocale(message.Language)
-	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &[]*discordgo.MessageEmbed{
-		mappers.MapAlmanaxToEmbed(message.GetEncyclopediaAlmanaxEffectAnswer().Almanax, lg),
-	}})
+	webhookEdit := discordgo.WebhookEdit{}
+	if message.GetEncyclopediaAlmanaxEffectAnswer().Almanax != nil {
+		webhookEdit.Embeds = &[]*discordgo.MessageEmbed{
+			mappers.MapAlmanaxToEmbed(message.GetEncyclopediaAlmanaxEffectAnswer().Almanax, lg),
+		}
+	} else {
+		content := i18n.Get(lg, "almanax.effect.missing")
+		webhookEdit.Content = &content
+	}
+
+	_, err := s.InteractionResponseEdit(i.Interaction, &webhookEdit)
 	if err != nil {
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")

@@ -1,10 +1,11 @@
 {
     "about": {
+        "help": "donne des informations à mon propos et un moyen d'obtenir de l'aide si besoin",
         "title": "{{ .name }} version {{ .version }}",
         "desc": "Bot Discord dédié au jeu {{ .game.Name }} !",
         "support": {
             "title": ":bulb: Serveur de support",
-            "desc": "Tu rencontres un problème quant à mon utilisation ? Une suggestion ? N'hésite pas à rejoindre le [serveur Discord]({{ .discord }}) !"
+            "desc": "Tu rencontres un problème quant à mon utilisation ? Une suggestion ? N'hésite pas à rejoindre le [serveur Discord]({{ .discord }}) de support !"
         },
         "twitter": {
             "title": "<:twitter:1100040368445206619> Twitter",
@@ -16,7 +17,7 @@
         },
         "free": {
             "title": ":money_with_wings: Gratuit",
-            "desc": "L'ensemble des fonctionnalités sont gratuites. Il est possible de participer financièrement mais ne te mets pas dans le rouge ! [Paypal]({{ .paypal }})"
+            "desc": "L'ensemble de mes fonctionnalités sont gratuites. Il est possible de participer financièrement mais ne te mets pas dans le rouge ! [Paypal]({{ .paypal }})"
         },
         "privacy": {
             "title": ":shield: Confidentialité des données",
@@ -29,6 +30,7 @@
         "footer": "Certaines illustrations sont la propriété d'Ankama Studio - Tous droits réservés"
     },
     "align": {
+        "help": "gère l'annuaire des alignés",
         "success": "L'annuaire a été mise à jour !",
         "embed": {
             "believers": {
@@ -42,6 +44,7 @@
         }
     },
     "almanax": {
+        "help": "donne l'almanax du jour",
         "day": {
             "title": "Almanax du <t:{{ .date }}:D>",
             "bonus": {
@@ -63,6 +66,7 @@
         }
     },
     "config": {
+        "help": "permet de configurer le serveur de jeu, l'envoi d'Almanax, de flux RSS ou de tweets",
         "success": "Modification prise en compte !",
         "embed": {
             "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** est l'actuel serveur de la guilde !{{ else }}Aucun serveur {{ .game.Name }} n'est lié à la guilde !{{ end }}",
@@ -76,7 +80,18 @@
             }
         }
     },
+    "help": {
+        "help": "apporte de l'aide à l'usage des commandes",
+        "title": "Liste des commandes",
+        "description": "{{ if .commands}}{{ range .commands }}- **{{ .Name }}** : {{ .Description }}\n{{ end }}{{ else }}Aucune commande disponible !{{ end }}",
+        "commands": {
+            "menu": "Liste des commandes",
+            "command": "{{ .command }}",
+            "placeholder": "Aide détaillée d'une commande en particulier"
+        }
+    },
     "item": {
+        "help": "donne les items, montures, familiers, ressources et consommables du jeu",
         "description": "**{{ .type }}**{{ if .level }} de niveau **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
         "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/{{ .id }}",
         "effects": {
@@ -91,6 +106,7 @@
         }
     },
     "job": {
+        "help": "gère l'annuaire des artisans",
         "success": "L'annuaire a été mise à jour !",
         "embed": {
             "craftsmen": {
@@ -104,6 +120,7 @@
         }
     },
     "pos": {
+        "help": "donne les positions de portail de dimension les plus récentes",
         "embed": {
             "unknown": "Aucune position récente trouvée :frowning:",
             "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} utilisations\n\n*Ajoutée par **{{ .createdBy}}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nEditée par **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
@@ -114,6 +131,7 @@
         }
     },
     "set": {
+        "help": "donne les panoplies du jeu",
         "description": "Niveau **{{ .level }}**",
         "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/panoplies/{{ .id }}",
         "items": {

@@ -36,8 +36,12 @@ func New(characService characteristics.Service, emojiService emojis.Service,
 	return &cmd
 }
 
+func (command *Command) GetName() string {
+	return contract.SetCommandName
+}
+
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	return matchesApplicationCommand(i) || matchesMessageCommand(i)
+	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
@@ -73,7 +77,7 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 		itemNumber, err := getBonusValue(i.MessageComponentData())
 		if err != nil {
 			log.Error().
-				Str(constants.LogCommand, contract.SetCommandName).
+				Str(constants.LogCommand, command.GetName()).
 				Str(constants.LogCustomID, customID).
 				Str(constants.LogRequestProperty, itemNumberProperty).
 				Strs(constants.LogRequestValue, i.MessageComponentData().Values).
@@ -84,7 +88,7 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 		properties[itemNumberProperty] = itemNumber
 	} else {
 		log.Error().
-			Str(constants.LogCommand, contract.SetCommandName).
+			Str(constants.LogCommand, command.GetName()).
 			Str(constants.LogCustomID, customID).
 			Msgf("Cannot handle custom ID, panicking...")
 		panic(commands.ErrInvalidInteraction)
@@ -122,7 +126,7 @@ func (command *Command) updateSetReply(_ context.Context, s *discordgo.Session,
 	itemNumberValue, found := properties[itemNumberProperty]
 	if !found {
 		log.Error().
-			Str(constants.LogCommand, contract.SetCommandName).
+			Str(constants.LogCommand, command.GetName()).
 			Str(constants.LogRequestProperty, itemNumberProperty).
 			Msgf("Cannot find request property, panicking...")
 		panic(commands.ErrRequestPropertyNotFound)
@@ -130,7 +134,7 @@ func (command *Command) updateSetReply(_ context.Context, s *discordgo.Session,
 	itemNumber, ok := itemNumberValue.(int)
 	if !ok {
 		log.Error().
-			Str(constants.LogCommand, contract.SetCommandName).
+			Str(constants.LogCommand, command.GetName()).
 			Str(constants.LogRequestProperty, itemNumberProperty).
 			Msgf("Cannot convert request property, panicking...")
 		panic(commands.ErrRequestPropertyNotFound)
@@ -170,9 +174,9 @@ func getBonusValue(data discordgo.MessageComponentInteractionData) (int, error) 
 	return strconv.Atoi(values[0])
 }
 
-func matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
+func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
 	return commands.IsApplicationCommand(i) &&
-		i.ApplicationCommandData().Name == contract.SetCommandName
+		i.ApplicationCommandData().Name == command.GetName()
 }
 
 func matchesMessageCommand(i *discordgo.InteractionCreate) bool {

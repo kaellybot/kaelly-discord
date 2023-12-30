@@ -14,6 +14,7 @@ var (
 )
 
 type DiscordCommand interface {
+	GetName() string
 	Matches(i *discordgo.InteractionCreate) bool
 	Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale)
 }

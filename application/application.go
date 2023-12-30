@@ -7,6 +7,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/align"
 	"github.com/kaellybot/kaelly-discord/commands/almanax"
 	"github.com/kaellybot/kaelly-discord/commands/config"
+	"github.com/kaellybot/kaelly-discord/commands/help"
 	"github.com/kaellybot/kaelly-discord/commands/item"
 	"github.com/kaellybot/kaelly-discord/commands/job"
 	"github.com/kaellybot/kaelly-discord/commands/pos"
@@ -94,16 +95,18 @@ func New() (*Impl, error) {
 	guildService := guilds.New(guildRepo)
 	requestsManager := requests.New(broker)
 
-	commands := []commands.DiscordCommand{
+	commands := make([]commands.DiscordCommand, 0)
+	commands = append(commands,
 		about.New(),
 		align.New(bookService, guildService, serverService, requestsManager),
 		almanax.New(emojiService, requestsManager),
 		config.New(guildService, feedService, serverService, requestsManager),
+		help.New(&commands),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),
 		pos.New(guildService, portalService, serverService, requestsManager),
 		set.New(characService, emojiService, requestsManager),
-	}
+	)
 
 	discordService, err := discord.New(
 		viper.GetString(constants.Token),

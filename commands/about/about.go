@@ -13,9 +13,13 @@ func New() *Command {
 	return &Command{}
 }
 
+func (command *Command) GetName() string {
+	return contract.AboutCommandName
+}
+
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return commands.IsApplicationCommand(i) &&
-		i.ApplicationCommandData().Name == contract.AboutCommandName
+		i.ApplicationCommandData().Name == command.GetName()
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {

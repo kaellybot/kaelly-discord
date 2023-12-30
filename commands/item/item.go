@@ -35,8 +35,12 @@ func New(characService characteristics.Service, emojiService emojis.Service,
 	return &cmd
 }
 
+func (command *Command) GetName() string {
+	return contract.ItemCommandName
+}
+
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	return matchesApplicationCommand(i) || matchesMessageCommand(i)
+	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
@@ -67,7 +71,7 @@ func (command *Command) updateItem(s *discordgo.Session,
 		values := i.MessageComponentData().Values
 		if len(values) != 1 {
 			log.Error().
-				Str(constants.LogCommand, contract.ItemCommandName).
+				Str(constants.LogCommand, command.GetName()).
 				Str(constants.LogCustomID, customID).
 				Msgf("Cannot retrieve item ID from value, panicking...")
 			panic(commands.ErrInvalidInteraction)
@@ -80,7 +84,7 @@ func (command *Command) updateItem(s *discordgo.Session,
 		properties[isRecipeProperty] = true
 	} else {
 		log.Error().
-			Str(constants.LogCommand, contract.ItemCommandName).
+			Str(constants.LogCommand, command.GetName()).
 			Str(constants.LogCustomID, customID).
 			Msgf("Cannot handle custom ID, panicking...")
 		panic(commands.ErrInvalidInteraction)
@@ -89,7 +93,7 @@ func (command *Command) updateItem(s *discordgo.Session,
 	itemTypeID, found := amqp.ItemType_value[itemType]
 	if !found {
 		log.Error().
-			Str(constants.LogCommand, contract.ItemCommandName).
+			Str(constants.LogCommand, command.GetName()).
 			Str(constants.LogCustomID, customID).
 			Msgf("Cannot retrieve item type from custom ID, panicking...")
 		panic(commands.ErrInvalidInteraction)
@@ -117,7 +121,7 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 	isRecipeValue, found := properties[isRecipeProperty]
 	if !found {
 		log.Error().
-			Str(constants.LogCommand, contract.ItemCommandName).
+			Str(constants.LogCommand, command.GetName()).
 			Str(constants.LogRequestProperty, isRecipeProperty).
 			Msgf("Cannot find request property, panicking...")
 		panic(commands.ErrRequestPropertyNotFound)
@@ -125,7 +129,7 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 	isRecipe, ok := isRecipeValue.(bool)
 	if !ok {
 		log.Error().
-			Str(constants.LogCommand, contract.ItemCommandName).
+			Str(constants.LogCommand, command.GetName()).
 			Str(constants.LogRequestProperty, isRecipeProperty).
 			Msgf("Cannot convert request property, panicking...")
 		panic(commands.ErrRequestPropertyNotFound)
@@ -161,9 +165,9 @@ func getQueryOption(ctx context.Context) (string, error) {
 	return query, nil
 }
 
-func matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
+func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
 	return commands.IsApplicationCommand(i) &&
-		i.ApplicationCommandData().Name == contract.ItemCommandName
+		i.ApplicationCommandData().Name == command.GetName()
 }
 
 func matchesMessageCommand(i *discordgo.InteractionCreate) bool {

@@ -42,9 +42,13 @@ func New(guildService guilds.Service, portalService portals.Service,
 	return &cmd
 }
 
+func (command *Command) GetName() string {
+	return contract.PosCommandName
+}
+
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return commands.IsApplicationCommand(i) &&
-		i.ApplicationCommandData().Name == contract.PosCommandName
+		i.ApplicationCommandData().Name == command.GetName()
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {

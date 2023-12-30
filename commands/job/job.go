@@ -47,10 +47,14 @@ func New(bookService books.Service, guildService guilds.Service,
 	return &cmd
 }
 
+func (command *Command) GetName() string {
+	return contract.JobSlashCommandName
+}
+
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	if commands.IsApplicationCommand(i) {
 		return len(i.ApplicationCommandData().TargetID) == 0 &&
-			contract.JobSlashCommandName == i.ApplicationCommandData().Name ||
+			command.GetName() == i.ApplicationCommandData().Name ||
 			contract.JobUserCommandName == i.ApplicationCommandData().Name
 	}
 	return false

@@ -1,6 +1,9 @@
 {
    "about": {
-      "help": "gives information about me and a way to get help",
+      "help": {
+         "overview": "gives information about me and a way to get help",
+         "tutorial": ""
+      },
       "title": "{{ .name }} version {{ .version }}",
       "desc": "Discord bot dedicated to the {{ .game.Name }} game!",
       "support": {
@@ -30,7 +33,10 @@
       "footer": "Some illustrations are the Ankama Studio property - All rights reserved"
    },
    "align": {
-      "help": "handles the alignment book",
+      "help": {
+         "overview": "handles the alignment book",
+         "tutorial": ""
+      },
       "success": "Alignment book updated!",
       "embed": {
          "believers": {
@@ -44,7 +50,10 @@
       }
    },
    "almanax": {
-      "help": "gives the almanax",
+      "help": {
+         "overview": "gives the almanax",
+         "tutorial": ""
+      },
       "day": {
           "title": "Almanax of <t:{{ .date }}:D>",
           "bonus": {
@@ -66,7 +75,10 @@
      }
   },
    "config": {
-      "help": "permits to configure game server, Almanax, RSS feeds or tweets sendings",
+      "help": {
+         "overview": "permits to configure game server, Almanax, RSS feeds or tweets sendings",
+         "tutorial": ""
+      },
       "success": "Change taken in account!",
       "embed": {
          "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
@@ -81,17 +93,28 @@
       }
    },
    "help": {
-      "help": "provides help for commands",
-      "title": "Commands list",
-      "description": "{{ if .commands}}{{ range .commands }}- **{{ .Name }}**: {{ .Description }}\n{{ end }}{{ else }}No command available!{{ end }}",
+      "help": {
+         "overview": "provides help for commands",
+         "tutorial": ""
+      },
+      "command": {
+         "title": "`{{ .command }}` command"
+      },
       "commands": {
-          "menu": "Commands list",
-          "command": "{{ .command }}",
-          "placeholder": "Detailed help from a particular command"
+         "title": "Commands list",
+         "description": "{{ if .commands}}{{ range .commands }}- **{{ .Name }}**: {{ .Description }}\n{{ end }}{{ else }}No command available!{{ end }}",
+         "choices": {
+            "menu": "Commands list",
+            "command": "{{ .command }}",
+            "placeholder": "Detailed help from a particular command"
+         }    
       }
   },
    "item": {
-      "help": "gives items, mounts, pets, resources and pets",
+      "help": {
+         "overview": "gives items, mounts, pets, resources and pets",
+         "tutorial": ""
+      },
       "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
       "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
       "effects": {
@@ -106,7 +129,10 @@
       }
    },
    "job": {
-      "help": "handles the craftsmen book",
+      "help": {
+         "overview": "handles the craftsmen book",
+         "tutorial": ""
+      },
       "success": "Craftsmen book updated!",
       "embed": {
          "craftsmen": {
@@ -120,7 +146,10 @@
       }
    },
    "pos": {
-      "help": "gives the most recent dimension portal positions",
+      "help": {
+         "overview": "gives the most recent dimension portal positions",
+         "tutorial": ""
+      },
       "embed": {
          "unknown": "No recent position found :frowning:",
          "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} uses\n\n*Added by **{{ .createdBy}}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nUpdated by **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
@@ -131,7 +160,10 @@
       }
    },
    "set": {
-      "help": "gives sets",
+      "help": {
+         "overview": "gives sets",
+         "tutorial": ""
+      },
       "description": "Level **{{ .level }}**",
       "url": "https://www.dofus.com/en/mmorpg/encyclopedia/sets/{{ .id }}",
       "items": {

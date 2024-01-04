@@ -17,6 +17,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
+	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -44,6 +45,15 @@ func New(guildService guilds.Service, portalService portals.Service,
 
 func (command *Command) GetName() string {
 	return contract.PosCommandName
+}
+
+func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
+	return []commands.Description{
+		{
+			CommandId:   "</pos:1020995396648054804>",
+			Description: i18n.Get(lg, "pos.help.detailed"),
+		},
+	}
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {

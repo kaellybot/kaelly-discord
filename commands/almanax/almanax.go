@@ -12,6 +12,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
+	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
@@ -40,6 +41,23 @@ func New(emojiService emojis.Service, requestManager requests.RequestManager) *C
 
 func (command *Command) GetName() string {
 	return contract.AlmanaxCommandName
+}
+
+func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
+	return []commands.Description{
+		{
+			CommandId:   "</almanax day:1177674483876761610>",
+			Description: i18n.Get(lg, "almanax.help.detailed.day"),
+		},
+		{
+			CommandId:   "</almanax effects:1177674483876761610>",
+			Description: i18n.Get(lg, "almanax.help.detailed.effects"),
+		},
+		{
+			CommandId:   "</almanax resources:1177674483876761610>",
+			Description: i18n.Get(lg, "almanax.help.detailed.resources"),
+		},
+	}
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {

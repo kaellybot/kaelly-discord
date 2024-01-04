@@ -17,6 +17,15 @@ func (command *Command) GetName() string {
 	return contract.AboutCommandName
 }
 
+func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
+	return []commands.Description{
+		{
+			CommandId:   "</about:1014249375154835557>",
+			Description: i18n.Get(lg, "about.help.detailed"),
+		},
+	}
+}
+
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return commands.IsApplicationCommand(i) &&
 		i.ApplicationCommandData().Name == command.GetName()

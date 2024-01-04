@@ -2,6 +2,7 @@ package help
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	"github.com/bwmarrin/discordgo"
@@ -28,6 +29,15 @@ func New(cmds *[]commands.DiscordCommand) *Command {
 
 func (command *Command) GetName() string {
 	return contract.HelpCommandName
+}
+
+func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
+	return []commands.Description{
+		{
+			CommandId:   "</help:1190612462194663555>",
+			Description: i18n.Get(lg, "help.help.detailed"),
+		},
+	}
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
@@ -82,7 +92,7 @@ func (command *Command) getHelpMenu(lg discordgo.Locale) *discordgo.WebhookEdit 
 		commandName := command.GetName()
 		i18nCommands = append(i18nCommands, i18nCommand{
 			Name:        commandName,
-			Description: i18n.Get(lg, commandName+".help"),
+			Description: i18n.Get(lg, commandName+".help.overview"),
 		})
 	}
 
@@ -93,8 +103,8 @@ func (command *Command) getHelpMenu(lg discordgo.Locale) *discordgo.WebhookEdit 
 	return &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{
 			{
-				Title:       i18n.Get(lg, "help.title"),
-				Description: i18n.Get(lg, "help.description", i18n.Vars{"commands": i18nCommands}),
+				Title:       i18n.Get(lg, "help.commands.title"),
+				Description: i18n.Get(lg, "help.commands.description", i18n.Vars{"commands": i18nCommands}),
 				Color:       constants.Color,
 				Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.AvatarIcon},
 				Footer:      discord.BuildDefaultFooter(lg),
@@ -105,15 +115,30 @@ func (command *Command) getHelpMenu(lg discordgo.Locale) *discordgo.WebhookEdit 
 }
 
 func (command *Command) getHelpCommand(commandName string, lg discordgo.Locale) *discordgo.WebhookEdit {
-	// TODO
+	var wantedCommand commands.DiscordCommand
+	for _, cmd := range *command.commands {
+		if cmd.GetName() == commandName {
+			wantedCommand = cmd
+			break
+		}
+	}
+
+	if wantedCommand == nil {
+		panic(fmt.Errorf("cannot find command (%s) while searching for its help description, panicking", commandName))
+	}
+
 	return &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{
 			{
-				Title:       i18n.Get(lg, "help.command.title", i18n.Vars{"command": commandName}),
-				Description: i18n.Get(lg, "help.command.description"),
-				Color:       constants.Color,
-				Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.AvatarIcon},
-				Footer:      discord.BuildDefaultFooter(lg),
+				Title: i18n.Get(lg, "help.command.title", i18n.Vars{"command": commandName}),
+				Description: i18n.Get(lg, "help.command.description", i18n.Vars{
+					"descriptions": wantedCommand.GetDescriptions(lg),
+					"source":       i18n.Get(lg, commandName+".help.source"),
+				}),
+				Color:     constants.Color,
+				Image:     &discordgo.MessageEmbedImage{URL: i18n.Get(lg, commandName+".help.tutorial")},
+				Thumbnail: &discordgo.MessageEmbedThumbnail{URL: constants.AvatarIcon},
+				Footer:    discord.BuildDefaultFooter(lg),
 			},
 		},
 		Components: command.getHelpComponents(commandName, lg),
@@ -124,7 +149,7 @@ func (command *Command) getHelpComponents(selectedCommandName string, lg discord
 ) *[]discordgo.MessageComponent {
 	commandChoices := make([]discordgo.SelectMenuOption, 0)
 	commandChoices = append(commandChoices, discordgo.SelectMenuOption{
-		Label:   i18n.Get(lg, "help.commands.menu"),
+		Label:   i18n.Get(lg, "help.commands.choices.menu"),
 		Value:   menuCommandName,
 		Default: selectedCommandName == menuCommandName,
 		Emoji: discordgo.ComponentEmoji{
@@ -135,9 +160,12 @@ func (command *Command) getHelpComponents(selectedCommandName string, lg discord
 	for _, command := range *command.commands {
 		commandName := command.GetName()
 		commandChoices = append(commandChoices, discordgo.SelectMenuOption{
-			Label:   i18n.Get(lg, "help.commands.command", i18n.Vars{"command": commandName}),
+			Label:   i18n.Get(lg, "help.commands.choices.command", i18n.Vars{"command": commandName}),
 			Value:   commandName,
 			Default: selectedCommandName == commandName,
+			Emoji: discordgo.ComponentEmoji{
+				Name: "📜", // TODO Quick fix to remove https://github.com/bwmarrin/discordgo/issues/1474
+			},
 		})
 	}
 
@@ -147,7 +175,7 @@ func (command *Command) getHelpComponents(selectedCommandName string, lg discord
 				discordgo.SelectMenu{
 					CustomID:    contract.CraftHelpCustomID(),
 					MenuType:    discordgo.StringSelectMenu,
-					Placeholder: i18n.Get(lg, "help.commands.placeholder"),
+					Placeholder: i18n.Get(lg, "help.commands.choices.placeholder"),
 					Options:     commandChoices,
 				},
 			},

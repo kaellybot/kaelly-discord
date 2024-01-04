@@ -56,6 +56,7 @@ func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
+
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlmanaxDurationOptionName {
@@ -79,7 +80,7 @@ func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
 		}
 	}
 
-	next(ctx)
+	next(context.WithValue(ctx, constants.ContextKeyDuration, int32(contract.AlmanaxDurationDefaultValue)))
 }
 
 func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,

@@ -16,6 +16,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
+	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
@@ -53,6 +54,31 @@ func New(guildService guilds.Service, feedService feeds.Service,
 
 func (command *Command) GetName() string {
 	return contract.ConfigCommandName
+}
+
+func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
+	return []commands.Description{
+		{
+			CommandId:   "</config get:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.get"),
+		},
+		{
+			CommandId:   "</config almanax:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.almanax"),
+		},
+		{
+			CommandId:   "</config rss:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.rss"),
+		},
+		{
+			CommandId:   "</config server:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.server"),
+		},
+		{
+			CommandId:   "</config twitter:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.twitter"),
+		},
+	}
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {

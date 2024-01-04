@@ -14,6 +14,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
+	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -37,6 +38,15 @@ func New(characService characteristics.Service, emojiService emojis.Service,
 
 func (command *Command) GetName() string {
 	return contract.ItemCommandName
+}
+
+func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
+	return []commands.Description{
+		{
+			CommandId:   "</item:1116290248587100251>",
+			Description: i18n.Get(lg, "item.help.detailed"),
+		},
+	}
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {

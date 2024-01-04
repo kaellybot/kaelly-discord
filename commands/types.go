@@ -15,11 +15,17 @@ var (
 
 type DiscordCommand interface {
 	GetName() string
+	GetDescriptions(lg discordgo.Locale) []Description
 	Matches(i *discordgo.InteractionCreate) bool
 	Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale)
 }
 
 type AbstractCommand struct{}
+
+type Description struct {
+	CommandId   string
+	Description string
+}
 
 type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale)
 type DiscordHandlers map[discordgo.InteractionType]DiscordHandler

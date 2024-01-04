@@ -15,6 +15,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
+	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
@@ -49,6 +50,19 @@ func New(bookService books.Service, guildService guilds.Service,
 
 func (command *Command) GetName() string {
 	return contract.AlignSlashCommandName
+}
+
+func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
+	return []commands.Description{
+		{
+			CommandId:   "</align get:1069057760269963295>",
+			Description: i18n.Get(lg, "align.help.detailed.get"),
+		},
+		{
+			CommandId:   "</align set:1069057760269963295>",
+			Description: i18n.Get(lg, "align.help.detailed.set"),
+		},
+	}
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {

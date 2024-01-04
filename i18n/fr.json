@@ -118,7 +118,7 @@
             "overview": "apporte de l'aide à l'usage des commandes",
             "detailed": [
                 "il est un peu étrange de consulter une aide à propos de la commande que tu es justement en train d'utiliser... il me semble que tu te débrouilles déjà plutôt bien ! :kissing_smiling_eyes:",
-                "apporte de l'aide à l'usage des commandes. *__Exemple__ : :point_right: \\*toi en train d'utiliser la commande\\**", 
+                "apporte de l'aide à l'usage des commandes. *__Exemple__ : :point_right: \\*toi en train d'utiliser la commande\\**",
                 "même les meilleurs ont besoin d'aide, mais tu pousses le bouchon un peu loin Maurice !",
                 "bon... entre nous, tu ne vas pas t'abaisser à ca quand même ? :rolling_eyes:",
                 "ça aide. :nerd:"
@@ -188,7 +188,6 @@
             "detailed": "donne les positions de portail de dimension les plus récentes\n   - Le champ `dimension` est optionnel et correspond à une dimension souhaitée. Si non renseigné, la position des portails de l'ensemble des dimensions est renvoyée. *__Exemple__ : Enutrosor*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
             "source": "Les données proviennent de [dofus-portals.fr](https://dofus-portals.fr/) qui mise sur la participation des chercheurs de portails.",
             "tutorial": ""
-           
         },
         "embed": {
             "unknown": "Aucune position récente trouvée :frowning:",
@@ -228,7 +227,7 @@
         "date": {
             "constraints": "La date doit respecter le format suivant : JJ/MM/AAAA :)",
             "outOfBounds": "Cette date est en-dehors de mes connaissances ! Je sais que je suis incroyable mais quand même, je ne suis pas le dieu Xélor ! :face_with_peeking_eye:"
-         },
+        },
         "dimension": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucune dimension que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! Si tu veux toute les afficher, ne renseigne pas cette option :slight_smile:"

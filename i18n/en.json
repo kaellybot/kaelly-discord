@@ -1,256 +1,296 @@
 {
-   "about": {
-      "help": {
-         "overview": "gives information about me and a way to get help",
-         "tutorial": ""
-      },
-      "title": "{{ .name }} version {{ .version }}",
-      "desc": "Discord bot dedicated to the {{ .game.Name }} game!",
-      "support": {
-         "title": ":bulb: Support server",
-         "desc": "You have a problem with its use? A suggestion ? Feel free to join the support [Discord server]({{ .discord }}) !"
-      },
-      "twitter": {
-         "title": "<:twitter:1100040368445206619> Twitter",
-         "desc": "I'm also on [Twitter]({{ .twitter }}): you will find the last news!"
-      },
-      "opensource": {
-         "title": "<:github:372093338628784148> Open source",
-         "desc": "All my source code is licensed under GPL-3.0 and accessible on [Github]({{ .github }})"
-      },
-      "free": {
-         "title": ":money_with_wings: Free",
-         "desc": "All my features are free. You can participate financially but do not go into the red! [Paypal]({{ .paypal }})"
-      },
-      "privacy": {
-         "title": ":shield: Data privacy",
-         "desc": "I take care to collect the strict minimum data needed to run. More informations on the support server!"
-      },
-      "graphist": {
-         "title": ":art: Visuals",
-         "desc": "Visuals made by the great [{{ .graphist.Name }}]({{ .graphist.URL }})!"
-      },
-      "footer": "Some illustrations are the Ankama Studio property - All rights reserved"
-   },
-   "align": {
-      "help": {
-         "overview": "handles the alignment book",
-         "tutorial": ""
-      },
-      "success": "Alignment book updated!",
-      "embed": {
-         "believers": {
-            "title": "Aligned list",
-            "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}"
-         },
-         "beliefs": {
-            "title": "{{ .username }} alignments",
-            "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }} lvl. {{ .Level }}\n{{ end }}{{ else }}No alignment for the moment!{{ end }}"
-         }
-      }
-   },
-   "almanax": {
-      "help": {
-         "overview": "gives the almanax",
-         "tutorial": ""
-      },
-      "day": {
-          "title": "Almanax of <t:{{ .date }}:D>",
-          "bonus": {
-            "title": ":cyclone: Bonus"
+    "about": {
+        "help": {
+            "overview": "provides information about me and a way to get help",
+            "detailed": "provides detailed information about me (invitation link, source code, handling of private data...) and a way to get help if needed (support Discord, Twitter)",
+            "source": "",
+            "tutorial": ""
         },
-        "url": "https://www.krosmoz.com/en/almanax/{{ .date }}",
-        "tribute": {
-            "title": ":moneybag: Tribute",
-            "description": "**{{ .item }}** x{{ .quantity }}"
+        "title": "{{ .name }} version {{ .version }}",
+        "desc": "Discord bot dedicated to the {{ .game.Name }} game!",
+        "support": {
+            "title": ":bulb: Support server",
+            "desc": "You have a problem with its use? A suggestion ? Feel free to join the support [Discord server]({{ .discord }}) !"
         },
-        "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!"
-      },
-      "effect": {
-          "missing": "My crystal ball tells me that the desired bonus will not intervene in the next thirty days, I unfortunately not know more :persevere:"
-      },
-      "resource": {
-         "title": "Almanax of <t:{{ .startDate }}:D> to <t:{{ .endDate }}:D>",
-         "description": "{{ if .tributes }}{{ range .tributes}}- **{{ .ItemName }}** x{{ .Quantity }}\n{{ end }}{{ else }}No needed resource!{{ end }}"
-     }
-  },
-   "config": {
-      "help": {
-         "overview": "permits to configure game server, Almanax, RSS feeds or tweets sendings",
-         "tutorial": ""
-      },
-      "success": "Change taken in account!",
-      "embed": {
-         "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
-         "server": {
-            "name": "{{ .game.Emoji }} Channels linked to servers",
-            "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
-         },
-         "webhook": {
-            "name": ":bell: Notified channels",
-            "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}** ({{.Language}})\n{{ end }}{{ else }}No configured channels!{{ end }}"
-         }
-      }
-   },
-   "help": {
-      "help": {
-         "overview": "provides help for commands",
-         "tutorial": ""
-      },
-      "command": {
-         "title": "`{{ .command }}` command"
-      },
-      "commands": {
-         "title": "Commands list",
-         "description": "{{ if .commands}}{{ range .commands }}- **{{ .Name }}**: {{ .Description }}\n{{ end }}{{ else }}No command available!{{ end }}",
-         "choices": {
-            "menu": "Commands list",
-            "command": "{{ .command }}",
-            "placeholder": "Detailed help from a particular command"
-         }    
-      }
-  },
-   "item": {
-      "help": {
-         "overview": "gives items, mounts, pets, resources and pets",
-         "tutorial": ""
-      },
-      "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
-      "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
-      "effects": {
-         "title": "Effects",
-         "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}No effect!{{ end }}",
-         "button": "Effects"
-      },
-      "recipe": {
-         "title": "Recipe",
-         "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}**x [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}No ingredient!{{ end }}",
-         "button": "Recipe"
-      }
-   },
-   "job": {
-      "help": {
-         "overview": "handles the craftsmen book",
-         "tutorial": ""
-      },
-      "success": "Craftsmen book updated!",
-      "embed": {
-         "craftsmen": {
-            "title": "{{ .job }}s list",
-            "description": "{{ if .craftsmen }}{{ range .craftsmen}}Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No craftsman found at this moment!{{ end }}"
-         },
-         "craftsman": {
-            "title": "{{ .username }} jobs",
-            "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Lvl. {{ .Level }}\n{{ end }}{{ else }}No job for the moment!{{ end }}"
-         }
-      }
-   },
-   "pos": {
-      "help": {
-         "overview": "gives the most recent dimension portal positions",
-         "tutorial": ""
-      },
-      "embed": {
-         "unknown": "No recent position found :frowning:",
-         "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} uses\n\n*Added by **{{ .createdBy}}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nUpdated by **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
-         "transport": {
-            "name": "{{ .emoji }} {{ .type }} nearby",
-            "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
-         }
-      }
-   },
-   "set": {
-      "help": {
-         "overview": "gives sets",
-         "tutorial": ""
-      },
-      "description": "Level **{{ .level }}**",
-      "url": "https://www.dofus.com/en/mmorpg/encyclopedia/sets/{{ .id }}",
-      "items": {
-         "title": "Items",
-         "description": "{{ if .items }}{{ range .items}}{{ .Name }}, lvl {{ .Level }}\n{{ end }}{{ else }}No item!{{ end }}",
-         "placeholder": "Set items"
-      },
-      "effects": {
-         "title": "Effects ({{ .itemNumber }} items)",
-         "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}No effect!{{ end }}",
-         "placeholder": "Set bonuses",
-         "option": "Effects ({{ .itemNumber }} / {{ .itemCount }} items)"
-      }
-   },
-   "default": {
-      "changelog": "Slash commands available!",
-      "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
-  },
-   "checks": {
-      "date": {
-         "constraints": "The date must respect the following format: DD/MM/YYYY :)",
-         "outOfBounds": "This date is out of my knowledge! I know I'm amazing but still, I'm not Xelor god! :face_with_peeking_eye:"
-      },
-      "dimension": {
-         "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
-         "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
-      },
-      "duration": {
-         "constraints": "The duration must be between {{ .min }} and {{ .max }} days :)"
-      },
-      "feed": {
-         "not_found": "Aie! '*{{ .value }}*' does not correspond to any RSS feeds I know! :pensive:",
-         "too_many": "Outch! '*{{ .value }}*' matches too many RSS feeds ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
-      },
-      "job": {
-         "not_found": "Aie! '*{{ .value }}*' does not correspond to any jobs I know! :pensive:",
-         "too_many": "Outch! '*{{ .value }}*' matches too many jobs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
-      },
-      "level": {
-         "constraints": "The level must be between {{ .min }} and {{ .max }}! :grin:"
-      },
-      "query": {
-         "constraints": "The field must be filled! :grin:"
-      },
-      "server": {
-         "required": "Oops! It seems no {{ .game.Name }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/config server` command :grin:",
-         "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
-         "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
-      },
-      "permission": {
-         "webhook": "I don't have the right to manage webhooks! Sorry I can't do anything more without this permission :("
-      }
-   },
-   "webhooks": {
-      "ALMANAX": {
-         "name": "Almanax",
-         "emoji": "<:almanax:1100067553830768682>"
-      },
-      "RSS": {
-         "name": "RSS",
-         "emoji": "<:rss:1100040212136071269>"
-      },
-      "TWITTER": {
-         "name": "Twitter",
-         "emoji": "<:twitter:1100040368445206619>"
-      }
-   },
-   "locales": {
-      "FR": {
-         "name": "French",
-         "emoji": ":flag_fr:"
-      },
-      "EN": {
-         "name": "English",
-         "emoji": ":flag_gb:"
-      },
-      "ES": {
-         "name": "Spanish",
-         "emoji": ":flag_es:"
-      },
-      "DE": {
-         "name": "German",
-         "emoji": ":flag_de:"
-      }
-   },
-   "panic": [
-      "I have encountered an error :frowning:... This will be processed as soon as possible!",
-      "Oops, it seems I've crashed... I'm reporting this event to my creators, sorry!"
-   ]
+        "twitter": {
+            "title": "<:twitter:1100040368445206619> Twitter",
+            "desc": "I'm also on [Twitter]({{ .twitter }}): you will find the last news!"
+        },
+        "opensource": {
+            "title": "<:github:372093338628784148> Open source",
+            "desc": "All my source code is licensed under GPL-3.0 and accessible on [Github]({{ .github }})"
+        },
+        "free": {
+            "title": ":money_with_wings: Free",
+            "desc": "All my features are free. You can participate financially but do not go into the red! [Paypal]({{ .paypal }})"
+        },
+        "privacy": {
+            "title": ":shield: Data privacy",
+            "desc": "I take care to collect the strict minimum data needed to run. More informations on the support server!"
+        },
+        "graphist": {
+            "title": ":art: Visuals",
+            "desc": "Visuals made by the great [{{ .graphist.Name }}]({{ .graphist.URL }})!"
+        },
+        "footer": "Some illustrations are the Ankama Studio property - All rights reserved"
+    },
+    "align": {
+        "help": {
+            "overview": "handles the alignment book",
+            "detailed": {
+                "get": "displays the book of aligned players on your Discord server\n   - The `city` field is optional and corresponds to the city to which players have pledged allegiance. If not specified, the directory is displayed without considering this filter. *__Example__: Bonta*\n - The `order` field is optional and corresponds to the order joined by players. If not specified, the directory is displayed without considering this filter. *__Example__: Spirit*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
+                "set": "records your alignment in the book, independently of the Discord server; this recording cannot be done for others.\n   - The `city` field is mandatory and corresponds to the city to which players have pledged allegiance. *__Example__: Bonta*\n - The `order` field is mandatory and corresponds to the order joined by players. *__Example__: Spirit*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__: 200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*"
+            },
+            "source": "The collected data is used only for my proper functioning.",
+            "tutorial": ""
+        },
+        "success": "Alignment book updated!",
+        "embed": {
+            "believers": {
+                "title": "Aligned list",
+                "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}"
+            },
+            "beliefs": {
+                "title": "{{ .username }} alignments",
+                "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }} lvl. {{ .Level }}\n{{ end }}{{ else }}No alignment for the moment!{{ end }}"
+            }
+        }
+    },
+    "almanax": {
+        "help": {
+            "overview": "provides the almanax",
+            "detailed": {
+                "day": "provides the Almanax for a given day\n   - The `date` field is optional and corresponds to the desired Almanax date, in the format DD/MM/YYYY. If not specified, the Almanax for the current day is returned. *__Example__: 01/02/2024*",
+                "effects": "provides the next Almanax day corresponding to the chosen effect\n   - The `effect` field is mandatory and corresponds to the desired Almanax bonus. *__Example__: Plenty of fish*",
+                "resources": "provides the necessary resources for a given period\n   - The `duration` field is optional and corresponds to the desired number of days, ranging from 1 to 30. If not specified, the necessary resources for the next 7 days are returned. *__Example__: 30*"
+            },
+            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them.",
+            "tutorial": ""
+        },
+        "day": {
+            "title": "Almanax of <t:{{ .date }}:D>",
+            "bonus": {
+                "title": ":cyclone: Bonus"
+            },
+            "url": "https://www.krosmoz.com/en/almanax/{{ .date }}",
+            "tribute": {
+                "title": ":moneybag: Tribute",
+                "description": "**{{ .item }}** x{{ .quantity }}"
+            },
+            "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!"
+        },
+        "effect": {
+            "missing": "My crystal ball tells me that the desired bonus will not intervene in the next thirty days, I unfortunately not know more :persevere:"
+        },
+        "resource": {
+            "title": "Almanax of <t:{{ .startDate }}:D> to <t:{{ .endDate }}:D>",
+            "description": "{{ if .tributes }}{{ range .tributes}}- **{{ .ItemName }}** x{{ .Quantity }}\n{{ end }}{{ else }}No needed resource!{{ end }}"
+        }
+    },
+    "config": {
+        "help": {
+            "overview": "permits to configure game server, Almanax, RSS feeds or tweets automatic sendings",
+            "detailed": {
+                "get": "displays my current configuration for this Discord server",
+                "almanax": "enables/disables the automatic sending of Almanax at midnight\n  - The `enabled` field is mandatory and corresponds to the activation or deactivation of this feature. *__Example__: True*\n - The `language` field is optional and corresponds to the desired language. If not specified, the language of the server at the time of registration is used. *__Example__: English*\n - The `channel` field is optional and corresponds to the channel where messages will be posted. If not specified, the current channel is used. *__Example__: #general*",
+                "rss": "enables/disables the automatic sending of [RSS feeds](https://en.wikipedia.org/wiki/RSS)\n  - The `feed` field is mandatory and corresponds to a type of RSS feed. *__Example__: Devblog*\n - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`.",
+                "server": "links the Discord server to a game server\n  - The `server` field is mandatory and corresponds to a game server. Once specified, it will be the default value for certain commands such as `align`, `job`, or `pos`. *__Example__: Imagiro*\n - The `channel` field is optional and is used to link a game server to a specific channel. This link takes priority over the link to the Discord server. *__Example__: #general*",
+                "twitter": "enables/disables the automatic sending of tweets from the official Twitter account of the game\n  - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`."
+            },
+            "source": "The collected data is used only for my proper functioning.",
+            "tutorial": ""
+        },
+        "success": "Change taken in account!",
+        "embed": {
+            "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
+            "server": {
+                "name": "{{ .game.Emoji }} Channels linked to servers",
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
+            },
+            "webhook": {
+                "name": ":bell: Notified channels",
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}** ({{.Language}})\n{{ end }}{{ else }}No configured channels!{{ end }}"
+            }
+        }
+    },
+    "help": {
+        "help": {
+            "overview": "provides help for commands",
+            "detailed": [
+                "It's a bit strange to consult help about the command you're currently using... it seems like you're already doing quite well! :kissing_smiling_eyes:",
+                "Provides assistance on command usage. *__Example__: :point_right: \\*you using the command\\**",
+                "Even the best need help, but you're pushing it a bit too far!",
+                "Well... between us, you're not going to stoop to that, are you? :rolling_eyes:",
+                "It helps. :nerd:"
+            ],
+            "source": "",
+            "tutorial": "https://media1.tenor.com/m/D2oqW_eeFNgAAAAd/dofus-book1julith-dofus.gif"
+        },
+        "command": {
+            "title": "`{{ .command }}` command"
+        },
+        "commands": {
+            "title": "Commands list",
+            "description": "{{ if .commands}}{{ range .commands }}- **{{ .Name }}**: {{ .Description }}\n{{ end }}{{ else }}No command available!{{ end }}",
+            "choices": {
+                "menu": "Commands list",
+                "command": "{{ .command }}",
+                "placeholder": "Detailed help from a particular command"
+            }
+        }
+    },
+    "item": {
+        "help": {
+            "overview": "provides items, mounts, pets, resources and consumables",
+            "detailed": "provides information about items, mounts, pets, resources and consumables in the game\n  - The `query` field is mandatory and corresponds to the name of the item you want to look up. *__Example__: Gobball Headgear*",
+            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them.",
+            "tutorial": ""
+        },
+        "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
+        "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
+        "effects": {
+            "title": "Effects",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}No effect!{{ end }}",
+            "button": "Effects"
+        },
+        "recipe": {
+            "title": "Recipe",
+            "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}**x [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}No ingredient!{{ end }}",
+            "button": "Recipe"
+        }
+    },
+    "job": {
+        "help": {
+            "overview": "handles the craftsmen book",
+            "detailed": {
+                "get": "displays the craftsmen players on your Discord server\n   - The `job` field is mandatory and corresponds to a profession in the game. *__Example__: Lumberjack*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
+                "set": "records your profession in the book, independently of the Discord server; this recording cannot be done for others.\n    - The `job` field is mandatory and corresponds to a profession in the game. *__Example__: Lumberjack*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__: 200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*"
+            },
+            "source": "The collected data is used only for my proper functioning.",
+            "tutorial": ""
+        },
+        "success": "Craftsmen book updated!",
+        "embed": {
+            "craftsmen": {
+                "title": "{{ .job }}s list",
+                "description": "{{ if .craftsmen }}{{ range .craftsmen}}Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No craftsman found at this moment!{{ end }}"
+            },
+            "craftsman": {
+                "title": "{{ .username }} jobs",
+                "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Lvl. {{ .Level }}\n{{ end }}{{ else }}No job for the moment!{{ end }}"
+            }
+        }
+    },
+    "pos": {
+        "help": {
+            "overview": "provides the most recent dimension portal positions",
+            "detailed": "provides the most recent positions of dimensional portals\n   - The `dimension` field is optional and corresponds to a desired dimension. If not specified, the positions of portals for all dimensions are returned. *__Example__: Enurado*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
+            "source": "The data comes from [dofus-portals.fr](https://dofus-portals.fr/), which relies on the participation of portal seekers.",
+            "tutorial": ""
+        },
+        "embed": {
+            "unknown": "No recent position found :frowning:",
+            "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} uses\n\n*Added by **{{ .createdBy}}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nUpdated by **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
+            "transport": {
+                "name": "{{ .emoji }} {{ .type }} nearby",
+                "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
+            }
+        }
+    },
+    "set": {
+        "help": {
+            "overview": "provides sets",
+            "detailed": "provides information about sets in the game\n   - The `query` field is mandatory and corresponds to the name of the set you want to look up. *__Example__: Boon Set*",
+            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them.",
+            "tutorial": ""
+        },
+        "description": "Level **{{ .level }}**",
+        "url": "https://www.dofus.com/en/mmorpg/encyclopedia/sets/{{ .id }}",
+        "items": {
+            "title": "Items",
+            "description": "{{ if .items }}{{ range .items}}{{ .Name }}, lvl {{ .Level }}\n{{ end }}{{ else }}No item!{{ end }}",
+            "placeholder": "Set items"
+        },
+        "effects": {
+            "title": "Effects ({{ .itemNumber }} items)",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}No effect!{{ end }}",
+            "placeholder": "Set bonuses",
+            "option": "Effects ({{ .itemNumber }} / {{ .itemCount }} items)"
+        }
+    },
+    "default": {
+        "changelog": "Slash commands available!",
+        "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
+    },
+    "checks": {
+        "date": {
+            "constraints": "The date must respect the following format: DD/MM/YYYY :)",
+            "outOfBounds": "This date is out of my knowledge! I know I'm amazing but still, I'm not Xelor god! :face_with_peeking_eye:"
+        },
+        "dimension": {
+            "not_found": "Aie! '*{{ .value }}*' does not correspond to any dimensions I know! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' matches too many dimensions ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! If you want to get all, don't fill this option :slight_smile:"
+        },
+        "duration": {
+            "constraints": "The duration must be between {{ .min }} and {{ .max }} days :)"
+        },
+        "feed": {
+            "not_found": "Aie! '*{{ .value }}*' does not correspond to any RSS feeds I know! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' matches too many RSS feeds ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "job": {
+            "not_found": "Aie! '*{{ .value }}*' does not correspond to any jobs I know! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' matches too many jobs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "level": {
+            "constraints": "The level must be between {{ .min }} and {{ .max }}! :grin:"
+        },
+        "query": {
+            "constraints": "The field must be filled! :grin:"
+        },
+        "server": {
+            "required": "Oops! It seems no {{ .game.Name }} server is linked to your guild (or your channel), use the server option like `/pos server Djaul` or link your guild to a server with `/config server` command :grin:",
+            "not_found": "Aie! '*{{ .value }}*' does not correspond to any servers I know! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' matches too many servers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Retry by selecting an existing one in the list :slight_smile:"
+        },
+        "permission": {
+            "webhook": "I don't have the right to manage webhooks! Sorry I can't do anything more without this permission :("
+        }
+    },
+    "webhooks": {
+        "ALMANAX": {
+            "name": "Almanax",
+            "emoji": "<:almanax:1100067553830768682>"
+        },
+        "RSS": {
+            "name": "RSS",
+            "emoji": "<:rss:1100040212136071269>"
+        },
+        "TWITTER": {
+            "name": "Twitter",
+            "emoji": "<:twitter:1100040368445206619>"
+        }
+    },
+    "locales": {
+        "FR": {
+            "name": "French",
+            "emoji": ":flag_fr:"
+        },
+        "EN": {
+            "name": "English",
+            "emoji": ":flag_gb:"
+        },
+        "ES": {
+            "name": "Spanish",
+            "emoji": ":flag_es:"
+        },
+        "DE": {
+            "name": "German",
+            "emoji": ":flag_de:"
+        }
+    },
+    "panic": [
+        "I have encountered an error :frowning:... This will be processed as soon as possible!",
+        "Oops, it seems I've crashed... I'm reporting this event to my creators, sorry!"
+    ]
 }

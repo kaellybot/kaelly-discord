@@ -110,7 +110,7 @@
             },
             "webhook": {
                 "name": ":bell: Salons notifiés",
-                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}** ({{.Language}})\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}**{{ if .Language}} ({{.Language}}){{ end }}\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
             }
         }
     },
@@ -275,6 +275,10 @@
         "TWITTER": {
             "name": "Twitter",
             "emoji": "<:twitter:1100040368445206619>"
+        },
+        "YOUTUBE": {
+            "name": "Youtube",
+            "emoji": "<:youtube:1198370949133783040>"
         }
     },
     "locales": {

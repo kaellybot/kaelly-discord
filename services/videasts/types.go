@@ -9,6 +9,7 @@ import (
 
 type Service interface {
 	GetVideasts() []entities.Videast
+	GetVideast(ID string) *entities.Videast
 	FindVideasts(name string, locale discordgo.Locale) []entities.Videast
 }
 

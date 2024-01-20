@@ -37,6 +37,16 @@ func (service *Impl) GetVideasts() []entities.Videast {
 	return service.videasts
 }
 
+func (service *Impl) GetVideast(ID string) *entities.Videast {
+	for _, videast := range service.videasts {
+		if videast.ID == ID {
+			return &videast
+		}
+	}
+
+	return nil
+}
+
 func (service *Impl) FindVideasts(name string, locale discordgo.Locale) []entities.Videast {
 	videastsFound := make([]entities.Videast, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))

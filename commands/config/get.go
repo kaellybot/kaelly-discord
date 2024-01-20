@@ -31,7 +31,8 @@ func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
 
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Embeds: &[]*discordgo.MessageEmbed{
-				mappers.MapConfigToEmbed(guild, command.serverService, command.feedService, message.Language),
+				mappers.MapConfigToEmbed(guild, command.serverService, command.feedService,
+					command.videastService, message.Language),
 			},
 		})
 		if err != nil {
@@ -58,6 +59,7 @@ func (command *Command) getGuildConfigData(s *discordgo.Session,
 		AlmanaxWebhooks: getValidAlmanaxWebhooks(s, answer, cache),
 		RssWebhooks:     getValidRSSWebhooks(s, answer, cache),
 		TwitterWebhooks: getValidTwitterWebhooks(s, answer, cache),
+		YoutubeWebhooks: getValidYoutubeWebhooks(s, answer, cache),
 	}
 
 	return result, nil
@@ -183,6 +185,38 @@ func getValidTwitterWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGet
 					Channel: channel,
 					Locale:  webhook.Language,
 				},
+			})
+		}
+	}
+
+	return result
+}
+
+func getValidYoutubeWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
+	cache map[string]*discordgo.Channel) []constants.YoutubeWebhook {
+	result := make([]constants.YoutubeWebhook, 0)
+	for _, webhook := range answer.YoutubeWebhooks {
+		channel, found := cache[webhook.ChannelId]
+		if !found {
+			discordChannel, errChan := s.Channel(webhook.ChannelId)
+			if errChan != nil {
+				log.Warn().Err(errChan).
+					Str(constants.LogGuildID, answer.GuildId).
+					Str(constants.LogChannelID, webhook.ChannelId).
+					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
+				continue
+			}
+
+			cache[webhook.ChannelId] = discordChannel
+			channel = discordChannel
+		}
+
+		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
+			result = append(result, constants.YoutubeWebhook{
+				ChannelWebhook: constants.ChannelWebhook{
+					Channel: channel,
+				},
+				VideastID: webhook.VideastId,
 			})
 		}
 	}

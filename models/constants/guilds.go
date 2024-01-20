@@ -13,6 +13,7 @@ type GuildConfig struct {
 	AlmanaxWebhooks []AlmanaxWebhook
 	RssWebhooks     []RssWebhook
 	TwitterWebhooks []TwitterWebhook
+	YoutubeWebhooks []YoutubeWebhook
 }
 
 type ChannelServer struct {
@@ -37,4 +38,9 @@ type RssWebhook struct {
 type TwitterWebhook struct {
 	ChannelWebhook
 	TwitterName string
+}
+
+type YoutubeWebhook struct {
+	ChannelWebhook
+	VideastID string
 }

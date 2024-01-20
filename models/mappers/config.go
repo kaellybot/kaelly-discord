@@ -9,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -160,7 +161,8 @@ func MapConfigurationWebhookYoutubeRequest(webhook *discordgo.Webhook, guildID, 
 }
 
 func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service,
-	feedService feeds.Service, locale amqp.Language) *discordgo.MessageEmbed {
+	feedService feeds.Service, videastService videasts.Service, locale amqp.Language,
+) *discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 
 	var guildServer *i18nServer
@@ -200,6 +202,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service
 	channelWebhooks = append(channelWebhooks, mapAlmanaxWebhooksToI18n(guild.AlmanaxWebhooks, lg)...)
 	channelWebhooks = append(channelWebhooks, mapRssWebhooksToI18n(guild.RssWebhooks, feedService, lg)...)
 	channelWebhooks = append(channelWebhooks, mapTwitterWebhooksToI18n(guild.TwitterWebhooks, lg)...)
+	channelWebhooks = append(channelWebhooks, mapYoutubeWebhooksToI18n(guild.YoutubeWebhooks, videastService, lg)...)
 
 	return &discordgo.MessageEmbed{
 		Title:       guild.Name,
@@ -273,6 +276,31 @@ func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, lg discordgo.
 				Emoji: i18n.Get(lg, "webhooks.TWITTER.emoji"),
 			},
 			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
+		})
+	}
+	return i18nWebhooks
+}
+
+func mapYoutubeWebhooksToI18n(webhooks []constants.YoutubeWebhook, videastService videasts.Service,
+	lg discordgo.Locale) []i18nChannelWebhook {
+	i18nWebhooks := make([]i18nChannelWebhook, 0)
+	for _, webhook := range webhooks {
+		var providerName string
+		videast := videastService.GetVideast(webhook.VideastID)
+		if videast != nil {
+			providerName = translators.GetEntityLabel(videast, lg)
+		} else {
+			log.Warn().Str(constants.LogEntity, webhook.VideastID).
+				Msgf("Cannot find videast based on ID sent internally, ignoring this webhook")
+			continue
+		}
+
+		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
+			Channel: webhook.Channel.Mention(),
+			Provider: i18nProvider{
+				Name:  providerName,
+				Emoji: i18n.Get(lg, "webhooks.YOUTUBE.emoji"),
+			},
 		})
 	}
 	return i18nWebhooks

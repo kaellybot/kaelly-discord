@@ -13,6 +13,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
@@ -21,11 +22,13 @@ import (
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(guildService guilds.Service, feedService feeds.Service,
-	serverService servers.Service, requestManager requests.RequestManager) *Command {
+	serverService servers.Service, videastService videasts.Service,
+	requestManager requests.RequestManager) *Command {
 	cmd := Command{
 		guildService:   guildService,
 		feedService:    feedService,
 		serverService:  serverService,
+		videastService: videastService,
 		requestManager: requestManager,
 	}
 
@@ -42,6 +45,8 @@ func New(guildService guilds.Service, feedService feeds.Service,
 			Use(checkServer, cmd.checkChannelID, cmd.serverRequest),
 		contract.ConfigTwitterSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.twitterRequest),
+		contract.ConfigYoutubeSubCommandName: middlewares.
+			Use(cmd.checkEnabled, cmd.checkVideast, cmd.checkChannelID, cmd.youtubeRequest),
 	})
 
 	cmd.handlers = commands.DiscordHandlers{
@@ -77,6 +82,10 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			CommandId:   "</config twitter:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.twitter"),
+		},
+		{
+			CommandId:   "</config youtube:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.youtube"),
 		},
 	}
 }
@@ -184,4 +193,27 @@ func getWebhookRssOptions(ctx context.Context) (
 	}
 
 	return channelID, feed, enabled, locale, nil
+}
+
+func getWebhookYoutubeOptions(ctx context.Context) (
+	string, entities.Videast, bool, error) {
+	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
+	if !ok {
+		return "", entities.Videast{}, false,
+			fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
+	}
+
+	videast, ok := ctx.Value(constants.ContextKeyVideast).(entities.Videast)
+	if !ok {
+		return "", entities.Videast{}, false,
+			fmt.Errorf("cannot cast %v as entities.Videast", ctx.Value(constants.ContextKeyVideast))
+	}
+
+	enabled, ok := ctx.Value(constants.ContextKeyEnabled).(bool)
+	if !ok {
+		return "", entities.Videast{}, false,
+			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyEnabled))
+	}
+
+	return channelID, videast, enabled, nil
 }

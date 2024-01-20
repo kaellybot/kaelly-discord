@@ -137,6 +137,28 @@ func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildID, 
 	}
 }
 
+func MapConfigurationWebhookYoutubeRequest(webhook *discordgo.Webhook, guildID, channelID string,
+	videast entities.Videast, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	var webhookID, webhookToken string
+	if webhook != nil {
+		webhookID = webhook.ID
+		webhookToken = webhook.Token
+	}
+
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_YOUTUBE_WEBHOOK_REQUEST,
+		Language: constants.MapDiscordLocale(lg),
+		ConfigurationSetYoutubeWebhookRequest: &amqp.ConfigurationSetYoutubeWebhookRequest{
+			GuildId:      guildID,
+			ChannelId:    channelID,
+			VideastId:    videast.ID,
+			WebhookId:    webhookID,
+			WebhookToken: webhookToken,
+			Enabled:      enabled,
+		},
+	}
+}
+
 func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service,
 	feedService feeds.Service, locale amqp.Language) *discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)

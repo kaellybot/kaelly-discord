@@ -37,6 +37,31 @@ func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 	next(ctx)
 }
 
+func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	data := i.ApplicationCommandData()
+	for _, subCommand := range data.Options {
+		for _, option := range subCommand.Options {
+			if option.Name == contract.ConfigVideastOptionName {
+				videasts := command.videastService.FindVideasts(option.StringValue(), lg)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.videast", option.StringValue(), videasts, lg)
+				if checkSuccess {
+					next(context.WithValue(ctx, constants.ContextKeyVideast, videasts[0]))
+				} else {
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("Videast check response ignored")
+					}
+				}
+
+				return
+			}
+		}
+	}
+
+	next(ctx)
+}
+
 func (command *Command) checkLanguage(ctx context.Context, _ *discordgo.Session,
 	i *discordgo.InteractionCreate, _ discordgo.Locale, next middlewares.NextFunc) {
 	locale := amqp.Language_ANY

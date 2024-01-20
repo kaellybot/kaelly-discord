@@ -25,6 +25,7 @@ import (
 	serverRepo "github.com/kaellybot/kaelly-discord/repositories/servers"
 	"github.com/kaellybot/kaelly-discord/repositories/subareas"
 	"github.com/kaellybot/kaelly-discord/repositories/transports"
+	videastRepo "github.com/kaellybot/kaelly-discord/repositories/videasts"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/discord"
@@ -33,6 +34,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/rs/zerolog/log"
@@ -79,6 +81,12 @@ func New() (*Impl, error) {
 		log.Fatal().Err(err).Msgf("Feed Service instantiation failed, shutting down.")
 	}
 
+	videastRepo := videastRepo.New(db)
+	videastService, err := videasts.New(videastRepo)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Vidast Service instantiation failed, shutting down.")
+	}
+
 	characRepo := characRepo.New(db)
 	characService, err := characteristics.New(characRepo)
 	if err != nil {
@@ -100,7 +108,7 @@ func New() (*Impl, error) {
 		about.New(),
 		align.New(bookService, guildService, serverService, requestsManager),
 		almanax.New(emojiService, requestsManager),
-		config.New(guildService, feedService, serverService, requestsManager),
+		config.New(guildService, feedService, serverService, videastService, requestsManager),
 		help.New(&commands),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),

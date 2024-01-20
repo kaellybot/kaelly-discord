@@ -1,6 +1,9 @@
 package config
 
 import (
+	"sort"
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
@@ -20,6 +23,8 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 					choices = command.findServers(option.StringValue(), lg)
 				case contract.ConfigFeedTypeOptionName:
 					choices = command.findFeedTypes(option.StringValue(), lg)
+				case contract.ConfigVideastOptionName:
+					choices = command.findVideasts(option.StringValue(), lg)
 				default:
 					log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
 				}
@@ -52,6 +57,10 @@ func (command *Command) findServers(serverName string, lg discordgo.Locale) []*d
 		})
 	}
 
+	sort.SliceStable(choices, func(i, j int) bool {
+		return choices[i].Name < choices[j].Name
+	})
+
 	return choices
 }
 
@@ -67,6 +76,34 @@ func (command *Command) findFeedTypes(feedTypeName string, lg discordgo.Locale) 
 			Value: label,
 		})
 	}
+
+	sort.SliceStable(choices, func(i, j int) bool {
+		return choices[i].Name < choices[j].Name
+	})
+
+	return choices
+}
+
+func (command *Command) findVideasts(videastName string, lg discordgo.Locale) []*discordgo.
+	ApplicationCommandOptionChoice {
+	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
+
+	if len(strings.TrimSpace(videastName)) == 0 {
+		return choices
+	}
+
+	videasts := command.videastService.FindVideasts(videastName, lg)
+	for _, videast := range videasts {
+		label := translators.GetEntityLabel(videast, lg)
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  label,
+			Value: label,
+		})
+	}
+
+	sort.SliceStable(choices, func(i, j int) bool {
+		return choices[i].Name < choices[j].Name
+	})
 
 	return choices
 }

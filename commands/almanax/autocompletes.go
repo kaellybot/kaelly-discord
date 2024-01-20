@@ -66,7 +66,7 @@ func (command *Command) autocompleteAlmanaxEffectList(_ context.Context, s *disc
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
 		Data: &discordgo.InteractionResponseData{
-			Choices: choices[:25], // TODO too much choices
+			Choices: choices,
 		},
 	})
 	if err != nil {

@@ -218,6 +218,7 @@ func getValidTwitterWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGet
 					Channel: channel,
 					Locale:  webhook.Language,
 				},
+				TwitterName: webhook.Name,
 			})
 		}
 	}

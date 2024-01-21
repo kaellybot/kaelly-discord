@@ -13,8 +13,8 @@ import (
 )
 
 func (command *Command) getRequest(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	msg := mappers.MapConfigurationGetRequest(i.Interaction.GuildID, lg)
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	msg := mappers.MapConfigurationGetRequest(i.Interaction.GuildID, i.Locale)
 	err := command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.getRespond)
 	if err != nil {
 		panic(err)

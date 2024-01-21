@@ -14,7 +14,7 @@ import (
 )
 
 func (command *Command) autocomplete(s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate) {
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -22,7 +22,7 @@ func (command *Command) autocomplete(s *discordgo.Session,
 			if option.Focused {
 				switch option.Name {
 				case contract.AlmanaxEffectOptionName:
-					command.requestAlmanaxEffectList(s, i, option.StringValue(), lg)
+					command.requestAlmanaxEffectList(s, i, option.StringValue())
 				default:
 					log.Error().
 						Str(constants.LogCommandOption, option.Name).
@@ -35,12 +35,12 @@ func (command *Command) autocomplete(s *discordgo.Session,
 }
 
 func (command *Command) requestAlmanaxEffectList(s *discordgo.Session,
-	i *discordgo.InteractionCreate, query string, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate, query string) {
 	if len(strings.TrimSpace(query)) == 0 {
 		return
 	}
 
-	msg := mappers.MapAlmanaxEffectListRequest(query, lg)
+	msg := mappers.MapAlmanaxEffectListRequest(query, i.Locale)
 	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey,
 		msg, command.autocompleteAlmanaxEffectList)
 	if err != nil {

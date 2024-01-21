@@ -31,9 +31,9 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 		i.ApplicationCommandData().Name == command.GetName()
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-		Embeds: &[]*discordgo.MessageEmbed{command.getAboutEmbed(lg)},
+		Embeds: &[]*discordgo.MessageEmbed{command.getAboutEmbed(i.Locale)},
 	})
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle about reponse")

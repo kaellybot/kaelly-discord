@@ -13,7 +13,7 @@ import (
 )
 
 func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, option := range data.Options {
 		if option.Name == contract.ItemQueryOptionName && len(strings.TrimSpace(option.StringValue())) > 0 {
@@ -22,7 +22,7 @@ func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
 		}
 	}
 
-	content := i18n.Get(lg, "checks.query.constraints")
+	content := i18n.Get(i.Locale, "checks.query.constraints")
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Content: &content,
 	})

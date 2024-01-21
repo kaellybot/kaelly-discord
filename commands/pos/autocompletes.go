@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	data := i.ApplicationCommandData()
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
 
@@ -16,20 +16,20 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 		if option.Focused {
 			switch option.Name {
 			case contract.PosDimensionOptionName:
-				dimensions := command.portalService.FindDimensions(option.StringValue(), lg)
+				dimensions := command.portalService.FindDimensions(option.StringValue(), i.Locale)
 
 				for _, dimension := range dimensions {
-					label := translators.GetEntityLabel(dimension, lg)
+					label := translators.GetEntityLabel(dimension, i.Locale)
 					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 						Name:  label,
 						Value: label,
 					})
 				}
 			case contract.PosServerOptionName:
-				servers := command.serverService.FindServers(option.StringValue(), lg)
+				servers := command.serverService.FindServers(option.StringValue(), i.Locale)
 
 				for _, server := range servers {
-					label := translators.GetEntityLabel(server, lg)
+					label := translators.GetEntityLabel(server, i.Locale)
 					choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 						Name:  label,
 						Value: label,

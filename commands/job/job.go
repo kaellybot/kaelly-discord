@@ -74,17 +74,17 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return false
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if len(i.ApplicationCommandData().TargetID) == 0 {
-		command.CallHandler(s, i, lg, command.slashHandlers)
+		command.CallHandler(s, i, command.slashHandlers)
 	} else {
-		command.CallHandler(s, i, lg, command.userHandlers)
+		command.CallHandler(s, i, command.userHandlers)
 	}
 }
 
 func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	command.userJobRequest(ctx, s, i, lg)
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	command.userJobRequest(ctx, s, i)
 }
 
 func getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {

@@ -7,10 +7,10 @@ import (
 )
 
 func (command *AbstractCommand) CallHandler(s *discordgo.Session, i *discordgo.InteractionCreate,
-	lg discordgo.Locale, handlers DiscordHandlers) {
+	handlers DiscordHandlers) {
 	handler, found := handlers[i.Type]
 	if found {
-		handler(s, i, lg)
+		handler(s, i)
 	} else {
 		log.Error().
 			Uint32(constants.LogInteractionType, uint32(i.Type)).
@@ -19,13 +19,13 @@ func (command *AbstractCommand) CallHandler(s *discordgo.Session, i *discordgo.I
 }
 
 func (command *AbstractCommand) HandleSubCommand(handlers map[string]DiscordHandler) DiscordHandler {
-	return func(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if IsApplicationCommand(i) {
 			data := i.ApplicationCommandData()
 			for _, subCommand := range data.Options {
 				handler, found := handlers[subCommand.Name]
 				if found {
-					handler(s, i, lg)
+					handler(s, i)
 				} else {
 					panic(ErrNoSubCommandHandler)
 				}

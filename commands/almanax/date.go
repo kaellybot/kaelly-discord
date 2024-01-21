@@ -14,13 +14,13 @@ import (
 )
 
 func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	date, err := getDateOption(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapAlmanaxRequest(date, lg)
+	msg := mappers.MapAlmanaxRequest(date, i.Locale)
 	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.almanaxRespond)
 	if err != nil {
 		panic(err)

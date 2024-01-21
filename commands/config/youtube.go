@@ -12,14 +12,14 @@ import (
 )
 
 func (command *Command) youtubeRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	channelID, videast, enabled, err := getWebhookYoutubeOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
 	if !validators.HasWebhookPermission(s, channelID) {
-		content := i18n.Get(lg, "checks.permissions.webhook")
+		content := i18n.Get(i.Locale, "checks.permissions.webhook")
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
@@ -37,7 +37,7 @@ func (command *Command) youtubeRequest(ctx context.Context, s *discordgo.Session
 		}
 	}
 
-	msg := mappers.MapConfigurationWebhookYoutubeRequest(webhook, i.GuildID, channelID, videast, enabled, lg)
+	msg := mappers.MapConfigurationWebhookYoutubeRequest(webhook, i.GuildID, channelID, videast, enabled, i.Locale)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

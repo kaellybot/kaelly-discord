@@ -12,7 +12,7 @@ import (
 )
 
 func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	server, err := getUserOptions(ctx)
 	if err != nil {
 		panic(err)
@@ -25,7 +25,7 @@ func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
 	}
 	member.User = user
 
-	msg := mappers.MapBookAlignGetUserRequest(member.User.ID, server.ID, lg)
+	msg := mappers.MapBookAlignGetUserRequest(member.User.ID, server.ID, i.Locale)
 	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.userRespond,
 		map[string]any{userProperty: member})
 	if err != nil {

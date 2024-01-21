@@ -65,8 +65,8 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 		i.ApplicationCommandData().Name == command.GetName()
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
-	command.CallHandler(s, i, lg, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	command.CallHandler(s, i, command.handlers)
 }
 
 func getDateOption(ctx context.Context) (*time.Time, error) {

@@ -14,13 +14,13 @@ import (
 )
 
 func (command *Command) setRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	city, order, level, server, err := getSetOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapBookAlignSetRequest(i.Interaction.Member.User.ID, city.ID, order.ID, server.ID, level, lg)
+	msg := mappers.MapBookAlignSetRequest(i.Interaction.Member.User.ID, city.ID, order.ID, server.ID, level, i.Locale)
 	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

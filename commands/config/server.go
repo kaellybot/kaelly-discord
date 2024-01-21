@@ -14,13 +14,13 @@ import (
 )
 
 func (command *Command) serverRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	server, channelID, err := getServerOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapConfigurationServerRequest(i.Interaction.GuildID, channelID, server.ID, lg)
+	msg := mappers.MapConfigurationServerRequest(i.Interaction.GuildID, channelID, server.ID, i.Locale)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.serverRespond)
 	if err != nil {
 		panic(err)

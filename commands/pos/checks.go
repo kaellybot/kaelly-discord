@@ -12,14 +12,14 @@ import (
 )
 
 func (command *Command) checkDimension(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] dimension
 	for _, option := range data.Options {
 		if option.Name == contract.PosDimensionOptionName {
-			dimensions := command.portalService.FindDimensions(option.StringValue(), lg)
-			response, checkSuccess := validators.ExpectOnlyOneElement("checks.dimension", option.StringValue(), dimensions, lg)
+			dimensions := command.portalService.FindDimensions(option.StringValue(), i.Locale)
+			response, checkSuccess := validators.ExpectOnlyOneElement("checks.dimension", option.StringValue(), dimensions, i.Locale)
 			if checkSuccess {
 				next(context.WithValue(ctx, constants.ContextKeyDimension, dimensions[0]))
 			} else {

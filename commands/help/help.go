@@ -44,20 +44,20 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
-	command.CallHandler(s, i, lg, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	command.CallHandler(s, i, command.handlers)
 }
 
 func (command *Command) getHelp(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
-	_, err := s.InteractionResponseEdit(i.Interaction, command.getHelpMenu(lg))
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	_, err := s.InteractionResponseEdit(i.Interaction, command.getHelpMenu(i.Locale))
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle help reponse")
 	}
 }
 
 func (command *Command) updateHelp(s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate) {
 	values := i.MessageComponentData().Values
 	if len(values) != 1 {
 		log.Error().
@@ -70,9 +70,9 @@ func (command *Command) updateHelp(s *discordgo.Session,
 
 	var webhookEdit *discordgo.WebhookEdit
 	if commandName == menuCommandName {
-		webhookEdit = command.getHelpMenu(lg)
+		webhookEdit = command.getHelpMenu(i.Locale)
 	} else {
-		webhookEdit = command.getHelpCommand(commandName, lg)
+		webhookEdit = command.getHelpCommand(commandName, i.Locale)
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)

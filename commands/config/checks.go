@@ -13,13 +13,13 @@ import (
 )
 
 func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigFeedTypeOptionName {
-				feedTypes := command.feedService.FindFeedTypes(option.StringValue(), lg)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.feed", option.StringValue(), feedTypes, lg)
+				feedTypes := command.feedService.FindFeedTypes(option.StringValue(), i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.feed", option.StringValue(), feedTypes, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyFeed, feedTypes[0]))
 				} else {
@@ -38,13 +38,13 @@ func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigVideastOptionName {
-				videasts := command.videastService.FindVideasts(option.StringValue(), lg)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.videast", option.StringValue(), videasts, lg)
+				videasts := command.videastService.FindVideasts(option.StringValue(), i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.videast", option.StringValue(), videasts, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyVideast, videasts[0]))
 				} else {
@@ -63,7 +63,7 @@ func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) checkLanguage(ctx context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, _ discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	locale := amqp.Language_ANY
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
@@ -79,7 +79,7 @@ func (command *Command) checkLanguage(ctx context.Context, _ *discordgo.Session,
 }
 
 func (command *Command) checkChannelID(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
@@ -100,7 +100,7 @@ func (command *Command) checkChannelID(ctx context.Context, s *discordgo.Session
 }
 
 func (command *Command) checkEnabled(ctx context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, _ discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {

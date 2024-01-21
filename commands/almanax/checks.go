@@ -15,7 +15,7 @@ import (
 )
 
 func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 
 	date := time.Now()
 	data := i.ApplicationCommandData()
@@ -24,7 +24,7 @@ func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 			if option.Name == contract.AlmanaxDateOptionName && len(strings.TrimSpace(option.StringValue())) > 0 {
 				parsedDate, err := parsing.ParseDate(option.StringValue())
 				if err != nil {
-					content := i18n.Get(lg, "checks.date.constraints")
+					content := i18n.Get(i.Locale, "checks.date.constraints")
 					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 						Content: &content,
 					})
@@ -40,7 +40,7 @@ func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 	}
 
 	if date.Before(constants.GetAlmanaxFirstDate()) || date.After(constants.GetAlmanaxLastDate()) {
-		content := i18n.Get(lg, "checks.date.outOfBounds")
+		content := i18n.Get(i.Locale, "checks.date.outOfBounds")
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
@@ -54,7 +54,7 @@ func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -65,7 +65,7 @@ func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
 				if duration >= contract.AlmanaxDurationMinimumValue && duration <= contract.AlmanaxDurationMaximumValue {
 					next(context.WithValue(ctx, constants.ContextKeyDuration, duration))
 				} else {
-					content := i18n.Get(lg, "checks.duration.constraints",
+					content := i18n.Get(i.Locale, "checks.duration.constraints",
 						i18n.Vars{"min": contract.AlmanaxDurationMinimumValue, "max": contract.AlmanaxDurationMaximumValue})
 					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 						Content: &content,
@@ -84,7 +84,7 @@ func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
@@ -96,7 +96,7 @@ func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
 		}
 	}
 
-	content := i18n.Get(lg, "checks.query.constraints")
+	content := i18n.Get(i.Locale, "checks.query.constraints")
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Content: &content,
 	})

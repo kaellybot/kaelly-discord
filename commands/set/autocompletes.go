@@ -13,15 +13,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) autocomplete(s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	data := i.ApplicationCommandData()
 
 	for _, option := range data.Options {
 		if option.Focused {
 			switch option.Name {
 			case contract.SetQueryOptionName:
-				command.requestSetList(s, i, option.StringValue(), lg)
+				command.requestSetList(s, i, option.StringValue())
 			default:
 				log.Error().
 					Str(constants.LogCommandOption, option.Name).
@@ -33,12 +32,12 @@ func (command *Command) autocomplete(s *discordgo.Session,
 }
 
 func (command *Command) requestSetList(s *discordgo.Session,
-	i *discordgo.InteractionCreate, query string, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate, query string) {
 	if len(strings.TrimSpace(query)) == 0 {
 		return
 	}
 
-	msg := mappers.MapSetListRequest(query, lg)
+	msg := mappers.MapSetListRequest(query, i.Locale)
 	err := command.requestManager.Request(s, i, setRequestRoutingKey,
 		msg, command.autocompleteSetList)
 	if err != nil {

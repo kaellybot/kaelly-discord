@@ -13,15 +13,15 @@ import (
 )
 
 func (command *Command) checkJob(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] job
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.JobJobOptionName {
-				jobs := command.bookService.FindJobs(option.StringValue(), lg)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.job", option.StringValue(), jobs, lg)
+				jobs := command.bookService.FindJobs(option.StringValue(), i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.job", option.StringValue(), jobs, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyJob, jobs[0]))
 				} else {
@@ -40,7 +40,7 @@ func (command *Command) checkJob(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -51,7 +51,7 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 				if level >= constants.JobMinLevel && level <= constants.JobMaxLevel {
 					next(context.WithValue(ctx, constants.ContextKeyLevel, level))
 				} else {
-					content := i18n.Get(lg, "checks.level.constraints",
+					content := i18n.Get(i.Locale, "checks.level.constraints",
 						i18n.Vars{"min": constants.JobMinLevel, "max": constants.JobMaxLevel})
 					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 						Content: &content,

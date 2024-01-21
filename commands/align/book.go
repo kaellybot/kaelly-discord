@@ -14,7 +14,7 @@ import (
 )
 
 func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	city, order, server, err := getGetOptions(ctx)
 	if err != nil {
 		panic(err)
@@ -36,7 +36,7 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 		properties[member.User.ID] = username
 	}
 
-	msg := mappers.MapBookAlignGetBookRequest(city.ID, order.ID, server.ID, userIDs, believerListLimit, lg)
+	msg := mappers.MapBookAlignGetBookRequest(city.ID, order.ID, server.ID, userIDs, believerListLimit, i.Locale)
 	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.getRespond, properties)
 	if err != nil {
 		panic(err)

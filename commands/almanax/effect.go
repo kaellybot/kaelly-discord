@@ -14,14 +14,14 @@ import (
 )
 
 func (command *Command) effectRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 
 	query, err := getQueryOption(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapAlmanaxEffectRequest(query, lg)
+	msg := mappers.MapAlmanaxEffectRequest(query, i.Locale)
 	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.effectRespond)
 	if err != nil {
 		panic(err)

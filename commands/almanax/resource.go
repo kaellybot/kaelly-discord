@@ -12,14 +12,14 @@ import (
 )
 
 func (command *Command) resourceRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 
 	duration, err := getDurationOption(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapAlmanaxResourceRequest(duration, lg)
+	msg := mappers.MapAlmanaxResourceRequest(duration, i.Locale)
 	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.resourceRespond)
 	if err != nil {
 		panic(err)

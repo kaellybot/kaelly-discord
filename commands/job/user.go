@@ -11,7 +11,7 @@ import (
 )
 
 func (command *Command) userJobRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate) {
 	server, err := getUserOptions(ctx)
 	if err != nil {
 		panic(err)
@@ -24,7 +24,7 @@ func (command *Command) userJobRequest(ctx context.Context, s *discordgo.Session
 	}
 	member.User = user
 
-	msg := mappers.MapBookJobGetUserRequest(member.User.ID, server.ID, lg)
+	msg := mappers.MapBookJobGetUserRequest(member.User.ID, server.ID, i.Locale)
 	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.userRespond,
 		map[string]any{userProperty: member})
 	if err != nil {

@@ -15,13 +15,13 @@ import (
 
 func CheckServer(optionName string, serverService servers.Service) middlewares.MiddlewareCommand {
 	return func(ctx context.Context, s *discordgo.Session,
-		i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+		i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 		data := i.ApplicationCommandData()
 		for _, subCommand := range data.Options {
 			for _, option := range subCommand.Options {
 				if option.Name == optionName {
-					servers := serverService.FindServers(option.StringValue(), lg)
-					response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, lg)
+					servers := serverService.FindServers(option.StringValue(), i.Locale)
+					response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, i.Locale)
 					if checkSuccess {
 						next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
 					} else {
@@ -43,15 +43,15 @@ func CheckServer(optionName string, serverService servers.Service) middlewares.M
 func CheckServerWithFallback(optionName string, serverService servers.Service,
 	guildService guilds.Service) middlewares.MiddlewareCommand {
 	return func(ctx context.Context, s *discordgo.Session,
-		i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+		i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 		data := i.ApplicationCommandData()
 
 		// Filled case, expecting [1, 1] server
 		for _, option := range data.Options {
 			serverValue, found := getServerValue(optionName, option)
 			if found {
-				servers := serverService.FindServers(serverValue, lg)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", serverValue, servers, lg)
+				servers := serverService.FindServers(serverValue, i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", serverValue, servers, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
 				} else {
@@ -66,7 +66,7 @@ func CheckServerWithFallback(optionName string, serverService servers.Service,
 		}
 
 		// Option not filled (refers to guild and/or channel)
-		tryFallback(ctx, s, i, lg, next, guildService)
+		tryFallback(ctx, s, i, next, guildService)
 	}
 }
 
@@ -86,14 +86,14 @@ func getServerValue(optionName string, option *discordgo.ApplicationCommandInter
 }
 
 func tryFallback(ctx context.Context, s *discordgo.Session, i *discordgo.InteractionCreate,
-	lg discordgo.Locale, next middlewares.NextFunc, guildService guilds.Service) {
+	next middlewares.NextFunc, guildService guilds.Service) {
 	server, found, err := guildService.GetServer(i.GuildID, i.ChannelID)
 	if err != nil {
 		panic(err)
 	}
 
 	if !found {
-		content := i18n.Get(lg, "checks.server.required", i18n.Vars{"game": constants.GetGame()})
+		content := i18n.Get(i.Locale, "checks.server.required", i18n.Vars{"game": constants.GetGame()})
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})

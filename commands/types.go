@@ -17,7 +17,7 @@ type DiscordCommand interface {
 	GetName() string
 	GetDescriptions(lg discordgo.Locale) []Description
 	Matches(i *discordgo.InteractionCreate) bool
-	Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale)
+	Handle(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
 type AbstractCommand struct{}
@@ -27,6 +27,6 @@ type Description struct {
 	Description string
 }
 
-type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale)
+type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)
 type DiscordHandlers map[discordgo.InteractionType]DiscordHandler
 type SubCommandHandlers map[string]DiscordHandler

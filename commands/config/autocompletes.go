@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
+func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	data := i.ApplicationCommandData()
 	var choices []*discordgo.ApplicationCommandOptionChoice
 
@@ -20,11 +20,11 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 			if option.Focused {
 				switch option.Name {
 				case contract.ConfigServerOptionName:
-					choices = command.findServers(option.StringValue(), lg)
+					choices = command.findServers(option.StringValue(), i.Locale)
 				case contract.ConfigFeedTypeOptionName:
-					choices = command.findFeedTypes(option.StringValue(), lg)
+					choices = command.findFeedTypes(option.StringValue(), i.Locale)
 				case contract.ConfigVideastOptionName:
-					choices = command.findVideasts(option.StringValue(), lg)
+					choices = command.findVideasts(option.StringValue(), i.Locale)
 				default:
 					log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
 				}

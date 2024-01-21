@@ -53,18 +53,18 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
-	command.CallHandler(s, i, lg, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	command.CallHandler(s, i, command.handlers)
 }
 
 func (command *Command) getItem(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	query, err := getQueryOption(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapItemRequest(query, false, amqp.ItemType_ANY_ITEM, lg)
+	msg := mappers.MapItemRequest(query, false, amqp.ItemType_ANY_ITEM, i.Locale)
 	err = command.requestManager.Request(s, i, itemRequestRoutingKey, msg, command.getItemReply)
 	if err != nil {
 		panic(err)
@@ -72,7 +72,7 @@ func (command *Command) getItem(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) updateItem(s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate) {
 	customID := i.MessageComponentData().CustomID
 	properties := make(map[string]any)
 	var query, itemType string
@@ -109,7 +109,7 @@ func (command *Command) updateItem(s *discordgo.Session,
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapItemRequest(query, true, amqp.ItemType(itemTypeID), lg)
+	msg := mappers.MapItemRequest(query, true, amqp.ItemType(itemTypeID), i.Locale)
 	err := command.requestManager.Request(s, i, itemRequestRoutingKey,
 		msg, command.updateItemReply, properties)
 	if err != nil {

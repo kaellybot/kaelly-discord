@@ -13,15 +13,15 @@ import (
 )
 
 func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] city
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignCityOptionName {
-				cities := command.bookService.FindCities(option.StringValue(), lg)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, lg)
+				cities := command.bookService.FindCities(option.StringValue(), i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				} else {
@@ -38,15 +38,15 @@ func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Ses
 }
 
 func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] city
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignCityOptionName {
-				cities := command.bookService.FindCities(option.StringValue(), lg)
-				_, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, lg)
+				cities := command.bookService.FindCities(option.StringValue(), i.Locale)
+				_, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				} else {
@@ -62,15 +62,15 @@ func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Sess
 }
 
 func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] order
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignOrderOptionName {
-				orders := command.bookService.FindOrders(option.StringValue(), lg)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, lg)
+				orders := command.bookService.FindOrders(option.StringValue(), i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				} else {
@@ -87,15 +87,15 @@ func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Se
 }
 
 func (command *Command) checkOptionalOrder(ctx context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] order
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignOrderOptionName {
-				orders := command.bookService.FindOrders(option.StringValue(), lg)
-				_, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, lg)
+				orders := command.bookService.FindOrders(option.StringValue(), i.Locale)
+				_, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				} else {
@@ -111,7 +111,7 @@ func (command *Command) checkOptionalOrder(ctx context.Context, _ *discordgo.Ses
 }
 
 func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -122,7 +122,7 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 				if level >= constants.AlignmentMinLevel && level <= constants.AlignmentMaxLevel {
 					next(context.WithValue(ctx, constants.ContextKeyLevel, level))
 				} else {
-					content := i18n.Get(lg, "checks.level.constraints",
+					content := i18n.Get(i.Locale, "checks.level.constraints",
 						i18n.Vars{"min": constants.AlignmentMinLevel, "max": constants.AlignmentMaxLevel})
 					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 						Content: &content,

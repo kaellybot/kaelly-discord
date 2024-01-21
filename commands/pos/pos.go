@@ -61,18 +61,18 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 		i.ApplicationCommandData().Name == command.GetName()
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate, lg discordgo.Locale) {
-	command.CallHandler(s, i, lg, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	command.CallHandler(s, i, command.handlers)
 }
 
 func (command *Command) request(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	dimension, server, err := getOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	msg := mappers.MapPortalPositionRequest(dimension, server, lg)
+	msg := mappers.MapPortalPositionRequest(dimension, server, i.Locale)
 	err = command.requestManager.Request(s, i, portalRequestRoutingKey, msg, command.respond)
 	if err != nil {
 		panic(err)

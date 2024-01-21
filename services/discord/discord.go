@@ -67,14 +67,9 @@ func (service *Impl) interactionCreate(session *discordgo.Session, event *discor
 		panic(err)
 	}
 
-	locale := event.Locale
-	if event.GuildLocale != nil {
-		locale = *event.GuildLocale
-	}
-
 	for _, command := range service.commands {
 		if command.Matches(event) {
-			command.Handle(session, event, locale)
+			command.Handle(session, event)
 			return
 		}
 	}

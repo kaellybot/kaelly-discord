@@ -14,14 +14,14 @@ import (
 )
 
 func (command *Command) autocomplete(s *discordgo.Session,
-	i *discordgo.InteractionCreate, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate) {
 	data := i.ApplicationCommandData()
 
 	for _, option := range data.Options {
 		if option.Focused {
 			switch option.Name {
 			case contract.ItemQueryOptionName:
-				command.requestItemList(s, i, option.StringValue(), lg)
+				command.requestItemList(s, i, option.StringValue())
 			default:
 				log.Error().
 					Str(constants.LogCommandOption, option.Name).
@@ -33,12 +33,12 @@ func (command *Command) autocomplete(s *discordgo.Session,
 }
 
 func (command *Command) requestItemList(s *discordgo.Session,
-	i *discordgo.InteractionCreate, query string, lg discordgo.Locale) {
+	i *discordgo.InteractionCreate, query string) {
 	if len(strings.TrimSpace(query)) == 0 {
 		return
 	}
 
-	msg := mappers.MapItemListRequest(query, lg)
+	msg := mappers.MapItemListRequest(query, i.Locale)
 	err := command.requestManager.Request(s, i, itemRequestRoutingKey,
 		msg, command.autocompleteItemList)
 	if err != nil {

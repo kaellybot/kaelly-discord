@@ -12,6 +12,7 @@ type GuildConfig struct {
 	ChannelServers  []ChannelServer
 	AlmanaxWebhooks []AlmanaxWebhook
 	RssWebhooks     []RssWebhook
+	TwitchWebhooks  []TwitchWebhook
 	TwitterWebhooks []TwitterWebhook
 	YoutubeWebhooks []YoutubeWebhook
 }
@@ -33,6 +34,11 @@ type AlmanaxWebhook struct {
 type RssWebhook struct {
 	ChannelWebhook
 	FeedID string
+}
+
+type TwitchWebhook struct {
+	ChannelWebhook
+	StreamerID string
 }
 
 type TwitterWebhook struct {

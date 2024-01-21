@@ -5,6 +5,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/services/streamers"
 	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
@@ -17,10 +18,11 @@ const (
 
 type Command struct {
 	commands.AbstractCommand
-	guildService   guilds.Service
-	feedService    feeds.Service
-	serverService  servers.Service
-	videastService videasts.Service
-	requestManager requests.RequestManager
-	handlers       commands.DiscordHandlers
+	guildService    guilds.Service
+	feedService     feeds.Service
+	serverService   servers.Service
+	streamerService streamers.Service
+	videastService  videasts.Service
+	requestManager  requests.RequestManager
+	handlers        commands.DiscordHandlers
 }

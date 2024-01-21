@@ -16,5 +16,6 @@ const (
 	ContextKeyOrder
 	ContextKeyQuery
 	ContextKeyServer
+	ContextKeyStreamer
 	ContextKeyVideast
 )

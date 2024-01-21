@@ -62,6 +62,31 @@ func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
 	next(ctx)
 }
 
+func (command *Command) checkStreamer(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	data := i.ApplicationCommandData()
+	for _, subCommand := range data.Options {
+		for _, option := range subCommand.Options {
+			if option.Name == contract.ConfigStreamerOptionName {
+				streamers := command.streamerService.FindStreamers(option.StringValue(), i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.streamer", option.StringValue(), streamers, i.Locale)
+				if checkSuccess {
+					next(context.WithValue(ctx, constants.ContextKeyStreamer, streamers[0]))
+				} else {
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("Streamer check response ignored")
+					}
+				}
+
+				return
+			}
+		}
+	}
+
+	next(ctx)
+}
+
 func (command *Command) checkLanguage(ctx context.Context, _ *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	locale := amqp.Language_ANY

@@ -9,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/services/streamers"
 	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
@@ -112,6 +113,28 @@ func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildID, chan
 	}
 }
 
+func MapConfigurationWebhookTwitchRequest(webhook *discordgo.Webhook, guildID, channelID string,
+	streamer entities.Streamer, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	var webhookID, webhookToken string
+	if webhook != nil {
+		webhookID = webhook.ID
+		webhookToken = webhook.Token
+	}
+
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITCH_WEBHOOK_REQUEST,
+		Language: constants.MapDiscordLocale(lg),
+		ConfigurationSetTwitchWebhookRequest: &amqp.ConfigurationSetTwitchWebhookRequest{
+			GuildId:      guildID,
+			ChannelId:    channelID,
+			StreamerId:   streamer.ID,
+			WebhookId:    webhookID,
+			WebhookToken: webhookToken,
+			Enabled:      enabled,
+		},
+	}
+}
+
 func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildID, channelID string,
 	enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	if locale == amqp.Language_ANY {
@@ -161,7 +184,8 @@ func MapConfigurationWebhookYoutubeRequest(webhook *discordgo.Webhook, guildID, 
 }
 
 func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service,
-	feedService feeds.Service, videastService videasts.Service, locale amqp.Language,
+	feedService feeds.Service, videastService videasts.Service, streamerService streamers.Service,
+	locale amqp.Language,
 ) *discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 
@@ -203,6 +227,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service
 	channelWebhooks = append(channelWebhooks, mapRssWebhooksToI18n(guild.RssWebhooks, feedService, lg)...)
 	channelWebhooks = append(channelWebhooks, mapTwitterWebhooksToI18n(guild.TwitterWebhooks, lg)...)
 	channelWebhooks = append(channelWebhooks, mapYoutubeWebhooksToI18n(guild.YoutubeWebhooks, videastService, lg)...)
+	channelWebhooks = append(channelWebhooks, mapTwitchWebhooksToI18n(guild.TwitchWebhooks, streamerService, lg)...)
 
 	return &discordgo.MessageEmbed{
 		Title:       guild.Name,
@@ -261,6 +286,31 @@ func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.Ser
 				Emoji: i18n.Get(lg, "webhooks.RSS.emoji"),
 			},
 			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
+		})
+	}
+	return i18nWebhooks
+}
+
+func mapTwitchWebhooksToI18n(webhooks []constants.TwitchWebhook, streamerService streamers.Service,
+	lg discordgo.Locale) []i18nChannelWebhook {
+	i18nWebhooks := make([]i18nChannelWebhook, 0)
+	for _, webhook := range webhooks {
+		var providerName string
+		streamer := streamerService.GetStreamer(webhook.StreamerID)
+		if streamer != nil {
+			providerName = translators.GetEntityLabel(streamer, lg)
+		} else {
+			log.Warn().Str(constants.LogEntity, webhook.StreamerID).
+				Msgf("Cannot find streamer based on ID sent internally, ignoring this webhook")
+			continue
+		}
+
+		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
+			Channel: webhook.Channel.Mention(),
+			Provider: i18nProvider{
+				Name:  providerName,
+				Emoji: i18n.Get(lg, "webhooks.TWITCH.emoji"),
+			},
 		})
 	}
 	return i18nWebhooks

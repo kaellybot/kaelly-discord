@@ -13,6 +13,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/services/streamers"
 	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -22,14 +23,16 @@ import (
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(guildService guilds.Service, feedService feeds.Service,
-	serverService servers.Service, videastService videasts.Service,
+	serverService servers.Service, streamerService streamers.Service,
+	videastService videasts.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		guildService:   guildService,
-		feedService:    feedService,
-		serverService:  serverService,
-		videastService: videastService,
-		requestManager: requestManager,
+		guildService:    guildService,
+		feedService:     feedService,
+		serverService:   serverService,
+		streamerService: streamerService,
+		videastService:  videastService,
+		requestManager:  requestManager,
 	}
 
 	checkServer := checks.CheckServer(contract.ConfigServerOptionName, cmd.serverService)
@@ -43,6 +46,8 @@ func New(guildService guilds.Service, feedService feeds.Service,
 			Use(cmd.checkEnabled, cmd.checkFeedType, cmd.checkLanguage, cmd.checkChannelID, cmd.rssRequest),
 		contract.ConfigServerSubCommandName: middlewares.
 			Use(checkServer, cmd.checkChannelID, cmd.serverRequest),
+		contract.ConfigTwitchSubCommandName: middlewares.
+			Use(cmd.checkEnabled, cmd.checkStreamer, cmd.checkChannelID, cmd.twitchRequest),
 		contract.ConfigTwitterSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.twitterRequest),
 		contract.ConfigYoutubeSubCommandName: middlewares.
@@ -78,6 +83,10 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			CommandId:   "</config server:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.server"),
+		},
+		{
+			CommandId:   "</config twitch:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.twitch"),
 		},
 		{
 			CommandId:   "</config twitter:1055459522812067840>",
@@ -142,6 +151,29 @@ func getWebhookAlmanaxOptions(ctx context.Context) (string, bool, amqp.Language,
 	}
 
 	return channelID, enabled, locale, nil
+}
+
+func getWebhookTwitchOptions(ctx context.Context) (
+	string, entities.Streamer, bool, error) {
+	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
+	if !ok {
+		return "", entities.Streamer{}, false,
+			fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
+	}
+
+	streamer, ok := ctx.Value(constants.ContextKeyStreamer).(entities.Streamer)
+	if !ok {
+		return "", entities.Streamer{}, false,
+			fmt.Errorf("cannot cast %v as entities.Streamer", ctx.Value(constants.ContextKeyStreamer))
+	}
+
+	enabled, ok := ctx.Value(constants.ContextKeyEnabled).(bool)
+	if !ok {
+		return "", entities.Streamer{}, false,
+			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyEnabled))
+	}
+
+	return channelID, streamer, enabled, nil
 }
 
 func getWebhookTwitterOptions(ctx context.Context) (string, bool, amqp.Language, error) {

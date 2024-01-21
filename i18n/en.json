@@ -95,8 +95,9 @@
                 "almanax": "enables/disables the automatic sending of Almanax at midnight\n  - The `enabled` field is mandatory and corresponds to the activation or deactivation of this feature. *__Example__: True*\n - The `language` field is optional and corresponds to the desired language. If not specified, the language of the server at the time of registration is used. *__Example__: English*\n - The `channel` field is optional and corresponds to the channel where messages will be posted. If not specified, the current channel is used. *__Example__: #general*",
                 "rss": "enables/disables the automatic sending of [RSS feeds](https://en.wikipedia.org/wiki/RSS)\n  - The `feed` field is mandatory and corresponds to a type of RSS feed. *__Example__: Devblog*\n - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`.",
                 "server": "links the Discord server to a game server\n  - The `server` field is mandatory and corresponds to a game server. Once specified, it will be the default value for certain commands such as `align`, `job`, or `pos`. *__Example__: Imagiro*\n - The `channel` field is optional and is used to link a game server to a specific channel. This link takes priority over the link to the Discord server. *__Example__: #general*",
+                "twitch": "enables/disables the automatic sending of Twitch streamer live starting\n  - The `streamer` field is mandatory and corresponds to a Twitch streamer name. *__Example__: Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`.",
                 "twitter": "enables/disables the automatic sending of tweets from the official Twitter account of the game\n  - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`.",
-                "youtube": "enables/disables the automatic sending of videos\n  - The `videast` field is mandatory and corresponds to a Youtube creator name. *__Example__: Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`."
+                "youtube": "enables/disables the automatic sending of Youtube creators videos\n  - The `videast` field is mandatory and corresponds to a Youtube creator name. *__Example__: Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`."
             },
             "source": "The collected data is used only for my proper functioning.",
             "tutorial": ""
@@ -128,7 +129,8 @@
             "tutorial": "https://media1.tenor.com/m/D2oqW_eeFNgAAAAd/dofus-book1julith-dofus.gif"
         },
         "command": {
-            "title": "`{{ .command }}` command"
+            "title": "Commande `{{ .command }}`",
+            "description": "{{ if .descriptions }}{{ range .descriptions }}- **{{ .CommandId }}** : {{ .Description }}\n{{ end }}{{ else }}No detailed description available!{{ end }}{{ if .source}}\n\n*{{ .source }}*{{ end }}"
         },
         "commands": {
             "title": "Commands list",
@@ -260,6 +262,10 @@
         "videast": {
             "not_found": "Aie! '*{{ .value }}*' does not correspond to any Youtube creators I know! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' matches too many Youtube creators ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "streamer": {
+            "not_found": "Aie! '*{{ .value }}*' does not correspond to any Twitch streamers I know! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' matches too many Twitch streamers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }})! :slight_smile:"
         }
     },
     "webhooks": {

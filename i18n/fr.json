@@ -95,6 +95,7 @@
                 "almanax": "(dés)active l'envoi automatique de l'Almanax à minuit\n  - Le champ `enabled` est obligatoire et correspond à l'activation ou non de cette fonctionnalité. *__Exemple__ : Vrai*\n - Le champ `language` est optionnel et correspond à la langue souhaitée. Si non renseigné, la langue du serveur à date d'enregistrement est utilisé. *__Exemple__ : Français*\n - Le champ `channel` est optionnel et correspond au salon où les messages seront postés. Si non renseigné, le salon en cours est utilisé. *__Exemple__ : #general*",
                 "rss": "(dés)active l'envoi automatique de [flux RSS](https://fr.wikipedia.org/wiki/RSS)\n  - Le champ `feed` est obligatoire et correspond à un type de flux RSS. *__Exemple__ : Devblog*\n - Les champs `enabled`, `language` et `channel` sont identiques à `/config almanax`.",
                 "server": "lie le serveur Discord à un serveur de jeu\n  - Le champ `server` est obligatoire et correspond à un serveur de jeu. Une fois renseigné, il sera la valeur par défaut pour certaines commandes tels que `align`, `job` ou `pos`. *__Exemple__ : Imagiro*\n - Le champ `channel` est optionnel et sert à lier un serveur de jeu pour un salon spécifique. Cette liaison est prioritaire sur la liaison au serveur Discord. *__Exemple__ : #general*",
+                "twitch": "(dés)active l'envoi automatique de démarrage de live de streamers Twitch\n  - Le champ `streamer` est obligatoire et correspond à un nom de créateur Twitch. *__Exemple__ : Humility*\n - Les champs `enabled` et `channel` sont identiques à `/config almanax`.",
                 "twitter": "(dés)active l'envoi automatique de tweets du compte Twitter officiel du jeu\n  - Les champs `enabled`, `language` et `channel` sont identiques à `/config almanax`.",
                 "youtube": "(dés)active l'envoi automatique de nouvelles vidéos de créateurs Youtube\n  - Le champ `videast` est obligatoire et correspond à un nom de créateur Youtube. *__Exemple__ : Humility*\n - Les champs `enabled` et `channel` sont identiques à `/config almanax`."
             },
@@ -261,6 +262,10 @@
         "videast": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun créateur Youtube que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs créateurs Youtube ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }}) ! :slight_smile:"
+        },
+        "streamer": {
+            "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun streamer Twitch que je connaisse ! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs streamers Twitch ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }}) ! :slight_smile:"
         }
     },
     "webhooks": {

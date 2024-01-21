@@ -32,7 +32,7 @@ func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Embeds: &[]*discordgo.MessageEmbed{
 				mappers.MapConfigToEmbed(guild, command.serverService, command.feedService,
-					command.videastService, message.Language),
+					command.videastService, command.streamerService, message.Language),
 			},
 		})
 		if err != nil {
@@ -58,6 +58,7 @@ func (command *Command) getGuildConfigData(s *discordgo.Session,
 		ChannelServers:  getValidChannelServers(s, answer, cache),
 		AlmanaxWebhooks: getValidAlmanaxWebhooks(s, answer, cache),
 		RssWebhooks:     getValidRSSWebhooks(s, answer, cache),
+		TwitchWebhooks:  getValidTwitchWebhooks(s, answer, cache),
 		TwitterWebhooks: getValidTwitterWebhooks(s, answer, cache),
 		YoutubeWebhooks: getValidYoutubeWebhooks(s, answer, cache),
 	}
@@ -152,6 +153,38 @@ func getValidRSSWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnsw
 					Locale:  webhook.Language,
 				},
 				FeedID: webhook.FeedId,
+			})
+		}
+	}
+
+	return result
+}
+
+func getValidTwitchWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
+	cache map[string]*discordgo.Channel) []constants.TwitchWebhook {
+	result := make([]constants.TwitchWebhook, 0)
+	for _, webhook := range answer.TwitchWebhooks {
+		channel, found := cache[webhook.ChannelId]
+		if !found {
+			discordChannel, errChan := s.Channel(webhook.ChannelId)
+			if errChan != nil {
+				log.Warn().Err(errChan).
+					Str(constants.LogGuildID, answer.GuildId).
+					Str(constants.LogChannelID, webhook.ChannelId).
+					Msgf("Cannot retrieve channel from Discord, ignoring this line...")
+				continue
+			}
+
+			cache[webhook.ChannelId] = discordChannel
+			channel = discordChannel
+		}
+
+		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
+			result = append(result, constants.TwitchWebhook{
+				ChannelWebhook: constants.ChannelWebhook{
+					Channel: channel,
+				},
+				StreamerID: webhook.StreamerId,
 			})
 		}
 	}

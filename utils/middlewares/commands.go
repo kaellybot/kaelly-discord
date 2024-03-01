@@ -13,12 +13,11 @@ type MiddlewareCommand func(ctx context.Context, s *discordgo.Session,
 
 func Use(chainedFunctions ...MiddlewareCommand) commands.DiscordHandler {
 	return func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
-		wrapped := func(ctx context.Context) {}
+		wrapped := func(_ context.Context) {}
 		for i := len(chainedFunctions) - 1; i >= 0; i-- {
-			index := i
 			currentNext := wrapped
 			wrapped = func(ctx context.Context) {
-				chainedFunctions[index](ctx, session, interaction, currentNext)
+				chainedFunctions[i](ctx, session, interaction, currentNext)
 			}
 		}
 

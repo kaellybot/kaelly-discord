@@ -37,9 +37,9 @@ func (service *Impl) GetVideasts() []entities.Videast {
 	return service.videasts
 }
 
-func (service *Impl) GetVideast(ID string) *entities.Videast {
+func (service *Impl) GetVideast(id string) *entities.Videast {
 	for _, videast := range service.videasts {
-		if videast.ID == ID {
+		if videast.ID == id {
 			return &videast
 		}
 	}

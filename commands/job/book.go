@@ -25,10 +25,10 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	var userIds []string
+	var userIDs []string
 	properties := make(map[string]any)
 	for _, member := range members {
-		userIds = append(userIds, member.User.ID)
+		userIDs = append(userIDs, member.User.ID)
 		username := member.Nick
 		if len(username) == 0 {
 			username = member.User.Username
@@ -36,7 +36,7 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 		properties[member.User.ID] = username
 	}
 
-	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID, userIds, craftsmenListLimit, i.Locale)
+	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID, userIDs, craftsmenListLimit, i.Locale)
 	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.getRespond, properties)
 	if err != nil {
 		panic(err)

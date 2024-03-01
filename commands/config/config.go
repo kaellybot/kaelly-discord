@@ -69,31 +69,31 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			CommandId:   "</config get:1055459522812067840>",
+			CommandID:   "</config get:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.get"),
 		},
 		{
-			CommandId:   "</config almanax:1055459522812067840>",
+			CommandID:   "</config almanax:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.almanax"),
 		},
 		{
-			CommandId:   "</config rss:1055459522812067840>",
+			CommandID:   "</config rss:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.rss"),
 		},
 		{
-			CommandId:   "</config server:1055459522812067840>",
+			CommandID:   "</config server:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.server"),
 		},
 		{
-			CommandId:   "</config twitch:1055459522812067840>",
+			CommandID:   "</config twitch:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.twitch"),
 		},
 		{
-			CommandId:   "</config twitter:1055459522812067840>",
+			CommandID:   "</config twitter:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.twitter"),
 		},
 		{
-			CommandId:   "</config youtube:1055459522812067840>",
+			CommandID:   "</config youtube:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.youtube"),
 		},
 	}

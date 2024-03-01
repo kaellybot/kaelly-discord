@@ -74,7 +74,7 @@ func TestParseDate(t *testing.T) {
 	}
 }
 
-// helper function to create time.Time objects easily
+// helper function to create time.Time objects easily.
 func createDate(year int, month time.Month, day int) *time.Time {
 	date := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 	return &date

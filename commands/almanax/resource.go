@@ -13,7 +13,6 @@ import (
 
 func (command *Command) resourceRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
-
 	duration, err := getDurationOption(ctx)
 	if err != nil {
 		panic(err)

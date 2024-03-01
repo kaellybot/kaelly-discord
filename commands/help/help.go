@@ -1,7 +1,6 @@
 package help
 
 import (
-	"context"
 	"fmt"
 	"sort"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
-	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
@@ -21,7 +19,7 @@ func New(cmds *[]commands.DiscordCommand) *Command {
 	}
 
 	cmd.handlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(cmd.getHelp),
+		discordgo.InteractionApplicationCommand: cmd.getHelp,
 		discordgo.InteractionMessageComponent:   cmd.updateHelp,
 	}
 	return cmd
@@ -34,7 +32,7 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			CommandId:   "</help:1190612462194663555>",
+			CommandID:   "</help:1190612462194663555>",
 			Description: i18n.Get(lg, "help.help.detailed"),
 		},
 	}
@@ -48,8 +46,7 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 	command.CallHandler(s, i, command.handlers)
 }
 
-func (command *Command) getHelp(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+func (command *Command) getHelp(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	_, err := s.InteractionResponseEdit(i.Interaction, command.getHelpMenu(i.Locale))
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle help reponse")

@@ -16,7 +16,6 @@ import (
 
 func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
-
 	date := time.Now()
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
@@ -25,10 +24,10 @@ func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 				parsedDate, err := parsing.ParseDate(option.StringValue())
 				if err != nil {
 					content := i18n.Get(i.Locale, "checks.date.constraints")
-					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+					_, errInteraction := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 						Content: &content,
 					})
-					if err != nil {
+					if errInteraction != nil {
 						log.Error().Err(err).Msg("Date check response ignored")
 					}
 					return
@@ -85,7 +84,6 @@ func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
 
 func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
-
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {

@@ -46,15 +46,15 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			CommandId:   "</almanax day:1177674483876761610>",
+			CommandID:   "</almanax day:1177674483876761610>",
 			Description: i18n.Get(lg, "almanax.help.detailed.day"),
 		},
 		{
-			CommandId:   "</almanax effects:1177674483876761610>",
+			CommandID:   "</almanax effects:1177674483876761610>",
 			Description: i18n.Get(lg, "almanax.help.detailed.effects"),
 		},
 		{
-			CommandId:   "</almanax resources:1177674483876761610>",
+			CommandID:   "</almanax resources:1177674483876761610>",
 			Description: i18n.Get(lg, "almanax.help.detailed.resources"),
 		},
 	}

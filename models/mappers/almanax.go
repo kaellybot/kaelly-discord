@@ -87,7 +87,6 @@ func MapAlmanaxToEmbed(almanax *amqp.Almanax, lg discordgo.Locale) *discordgo.Me
 
 func MapAlmanaxResourceToEmbed(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,
 	locale amqp.Language) *discordgo.MessageEmbed {
-
 	lg := constants.MapAMQPLocale(locale)
 	now := time.Now()
 	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)

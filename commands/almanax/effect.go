@@ -15,7 +15,6 @@ import (
 
 func (command *Command) effectRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
-
 	query, err := getQueryOption(ctx)
 	if err != nil {
 		panic(err)

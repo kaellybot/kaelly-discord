@@ -4,6 +4,13 @@ import (
 	"time"
 )
 
+const (
+	springColor = 9358615
+	summerColor = 16776960
+	autumnColor = 15301376
+	winterColor = 50912
+)
+
 type Season struct {
 	Name        string
 	StartDate   time.Time // exclusive
@@ -42,28 +49,28 @@ func getSeasons() []Season {
 			Name:        "Spring",
 			StartDate:   time.Date(0, 3, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 6, 21, 0, 0, 0, 0, time.UTC),
-			Color:       9358615,
+			Color:       springColor,
 			AlmanaxIcon: "https://i.imgur.com/xVjno4K.png",
 		},
 		{
 			Name:        "Summer",
 			StartDate:   time.Date(0, 6, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 9, 21, 0, 0, 0, 0, time.UTC),
-			Color:       16776960,
+			Color:       summerColor,
 			AlmanaxIcon: "https://i.imgur.com/WALcoBk.png",
 		},
 		{
 			Name:        "Autumn",
 			StartDate:   time.Date(0, 9, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 12, 21, 0, 0, 0, 0, time.UTC),
-			Color:       15301376,
+			Color:       autumnColor,
 			AlmanaxIcon: "https://i.imgur.com/b4GqhjE.png",
 		},
 		{
 			Name:        "Winter",
 			StartDate:   time.Date(0, 12, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(1, 3, 21, 0, 0, 0, 0, time.UTC),
-			Color:       50912,
+			Color:       winterColor,
 			AlmanaxIcon: "https://i.imgur.com/TjoR5Ti.png",
 		},
 	}

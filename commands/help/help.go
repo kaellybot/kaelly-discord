@@ -18,6 +18,7 @@ func New(cmds *[]commands.DiscordCommand) *Command {
 		commands: cmds,
 	}
 
+	//nolint:exhaustive // no need to implement everything, only that matters
 	cmd.handlers = commands.DiscordHandlers{
 		discordgo.InteractionApplicationCommand: cmd.getHelp,
 		discordgo.InteractionMessageComponent:   cmd.updateHelp,

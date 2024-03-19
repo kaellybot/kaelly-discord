@@ -37,9 +37,9 @@ func (service *Impl) GetStreamers() []entities.Streamer {
 	return service.streamers
 }
 
-func (service *Impl) GetStreamer(ID string) *entities.Streamer {
+func (service *Impl) GetStreamer(id string) *entities.Streamer {
 	for _, streamer := range service.streamers {
-		if streamer.ID == ID {
+		if streamer.ID == id {
 			return &streamer
 		}
 	}

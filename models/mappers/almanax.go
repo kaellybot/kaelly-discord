@@ -8,6 +8,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -84,7 +85,7 @@ func MapAlmanaxToEmbed(almanax *amqp.Almanax, lg discordgo.Locale) *discordgo.Me
 			{
 				Name: i18n.Get(lg, "almanax.day.reward.title"),
 				Value: i18n.Get(lg, "almanax.day.reward.description", i18n.Vars{
-					"reward": almanax.Reward,
+					"reward": translators.FormatNumber(almanax.Reward, lg),
 				}),
 			},
 		},

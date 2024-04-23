@@ -74,8 +74,12 @@
             },
             "url": "https://www.krosmoz.com/en/almanax/{{ .date }}",
             "tribute": {
-                "title": ":moneybag: Tribute",
+                "title": ":bouquet: Tribute",
                 "description": "**{{ .item }}** x{{ .quantity }}"
+            },
+            "reward": {
+                "title": ":moneybag: Rewards",
+                "description": "**{{ .reward }}** <:kama:1232433925566103662>"
             },
             "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!"
         },

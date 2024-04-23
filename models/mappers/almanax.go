@@ -81,6 +81,12 @@ func MapAlmanaxToEmbed(almanax *amqp.Almanax, lg discordgo.Locale) *discordgo.Me
 					"quantity": almanax.Tribute.Quantity,
 				}),
 			},
+			{
+				Name: i18n.Get(lg, "almanax.day.reward.title"),
+				Value: i18n.Get(lg, "almanax.day.reward.description", i18n.Vars{
+					"reward": almanax.Reward,
+				}),
+			},
 		},
 	}
 }

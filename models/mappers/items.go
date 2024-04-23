@@ -173,6 +173,10 @@ func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool
 		})
 	}
 
+	if len(components) == 0 {
+		return nil
+	}
+
 	return &[]discordgo.MessageComponent{
 		discordgo.ActionsRow{
 			Components: components,

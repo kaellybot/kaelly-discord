@@ -130,7 +130,7 @@
         },
         "command": {
             "title": "Commande `{{ .command }}`",
-            "description": "{{ if .descriptions }}{{ range .descriptions }}- **{{ .CommandId }}** : {{ .Description }}\n{{ end }}{{ else }}No detailed description available!{{ end }}{{ if .source}}\n\n*{{ .source }}*{{ end }}"
+            "description": "{{ if .descriptions }}{{ range .descriptions }}- **{{ .CommandID }}** : {{ .Description }}\n{{ end }}{{ else }}No detailed description available!{{ end }}{{ if .source}}\n\n*{{ .source }}*{{ end }}"
         },
         "commands": {
             "title": "Commands list",

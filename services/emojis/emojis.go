@@ -38,7 +38,7 @@ func New(repository repository.Repository) (*Impl, error) {
 	}, nil
 }
 
-func (service *Impl) GetMiscEmoji(emojiMiscID constants.EmojiMiscID) discordgo.ComponentEmoji {
+func (service *Impl) GetMiscEmoji(emojiMiscID constants.EmojiMiscID) *discordgo.ComponentEmoji {
 	innerStore, found := service.emojiStore[constants.EmojiTypeMisc]
 	if !found {
 		log.Warn().
@@ -59,7 +59,7 @@ func (service *Impl) GetMiscEmoji(emojiMiscID constants.EmojiMiscID) discordgo.C
 	return mapEmoji(emoji)
 }
 
-func (service *Impl) GetEquipmentEmoji(equipmentType amqp.EquipmentType) discordgo.ComponentEmoji {
+func (service *Impl) GetEquipmentEmoji(equipmentType amqp.EquipmentType) *discordgo.ComponentEmoji {
 	innerStore, found := service.emojiStore[constants.EmojiTypeEquipment]
 	if !found {
 		log.Warn().
@@ -80,7 +80,7 @@ func (service *Impl) GetEquipmentEmoji(equipmentType amqp.EquipmentType) discord
 	return mapEmoji(emoji)
 }
 
-func (service *Impl) GetSetBonusEmoji(equipedItemNumber, itemNumber int) discordgo.ComponentEmoji {
+func (service *Impl) GetSetBonusEmoji(equipedItemNumber, itemNumber int) *discordgo.ComponentEmoji {
 	innerStore, found := service.emojiStore[constants.EmojiTypeBonusSet]
 	if !found {
 		log.Warn().
@@ -101,8 +101,8 @@ func (service *Impl) GetSetBonusEmoji(equipedItemNumber, itemNumber int) discord
 	return mapEmoji(emoji)
 }
 
-func mapEmoji(emoji entities.Emoji) discordgo.ComponentEmoji {
-	return discordgo.ComponentEmoji{
+func mapEmoji(emoji entities.Emoji) *discordgo.ComponentEmoji {
+	return &discordgo.ComponentEmoji{
 		ID:   emoji.Snowflake,
 		Name: emoji.Name,
 	}

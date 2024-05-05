@@ -10,7 +10,7 @@
         "desc": "Discord bot dedicated to the {{ .game.Name }} game!",
         "support": {
             "title": ":bulb: Support server",
-            "desc": "You have a problem with its use? A suggestion ? Feel free to join the support [Discord server]({{ .discord }}) !"
+            "desc": "You have a problem with its use? A suggestion? Feel free to join the support [Discord server]({{ .discord }})!"
         },
         "twitter": {
             "title": "<:twitter:1100040368445206619> Twitter",

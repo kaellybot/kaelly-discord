@@ -150,7 +150,7 @@ func (command *Command) getHelpComponents(selectedCommandName string, lg discord
 		Label:   i18n.Get(lg, "help.commands.choices.menu"),
 		Value:   menuCommandName,
 		Default: selectedCommandName == menuCommandName,
-		Emoji: discordgo.ComponentEmoji{
+		Emoji: &discordgo.ComponentEmoji{
 			Name: "📜",
 		},
 	})
@@ -161,9 +161,7 @@ func (command *Command) getHelpComponents(selectedCommandName string, lg discord
 			Label:   i18n.Get(lg, "help.commands.choices.command", i18n.Vars{"command": commandName}),
 			Value:   commandName,
 			Default: selectedCommandName == commandName,
-			Emoji: discordgo.ComponentEmoji{
-				Name: "📜", // TODO Quick fix to remove https://github.com/bwmarrin/discordgo/issues/1474
-			},
+			Emoji:   nil,
 		})
 	}
 

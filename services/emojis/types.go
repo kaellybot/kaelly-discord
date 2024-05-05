@@ -9,9 +9,9 @@ import (
 )
 
 type Service interface {
-	GetMiscEmoji(emojiID constants.EmojiMiscID) discordgo.ComponentEmoji
-	GetEquipmentEmoji(equipmentType amqp.EquipmentType) discordgo.ComponentEmoji
-	GetSetBonusEmoji(equipedItemNumber, itemNumber int) discordgo.ComponentEmoji
+	GetMiscEmoji(emojiID constants.EmojiMiscID) *discordgo.ComponentEmoji
+	GetEquipmentEmoji(equipmentType amqp.EquipmentType) *discordgo.ComponentEmoji
+	GetSetBonusEmoji(equipedItemNumber, itemNumber int) *discordgo.ComponentEmoji
 }
 
 type Impl struct {

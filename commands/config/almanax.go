@@ -20,7 +20,7 @@ func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session
 	}
 
 	if !validators.HasWebhookPermission(s, channelID) {
-		content := i18n.Get(i.Locale, "checks.permissions.webhook")
+		content := i18n.Get(i.Locale, "checks.permission.webhook")
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})

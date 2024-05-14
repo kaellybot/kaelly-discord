@@ -161,7 +161,6 @@ func (command *Command) getHelpComponents(selectedCommandName string, lg discord
 			Label:   i18n.Get(lg, "help.commands.choices.command", i18n.Vars{"command": commandName}),
 			Value:   commandName,
 			Default: selectedCommandName == commandName,
-			Emoji:   nil,
 		})
 	}
 

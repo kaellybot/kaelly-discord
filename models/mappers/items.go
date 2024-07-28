@@ -21,6 +21,7 @@ func MapItemListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
 			Query: query,
 			Type:  amqp.EncyclopediaListRequest_ITEM,
@@ -33,6 +34,7 @@ func MapItemRequest(query string, isID bool, itemType amqp.ItemType,
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		EncyclopediaItemRequest: &amqp.EncyclopediaItemRequest{
 			Query: query,
 			IsID:  isID,
@@ -41,28 +43,11 @@ func MapItemRequest(query string, isID bool, itemType amqp.ItemType,
 	}
 }
 
-//nolint:nolintlint,exhaustive
 func MapItemToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	characService characteristics.Service, emojiService emojis.Service,
-	locale amqp.Language) (*discordgo.WebhookEdit, error) {
-	// TODO handle all these types
-	switch answer.GetType() {
-	case amqp.ItemType_CONSUMABLE:
-		return nil, ErrItemTypeNotHandled
-	case amqp.ItemType_COSMETIC:
-		return nil, ErrItemTypeNotHandled
-	case amqp.ItemType_EQUIPMENT:
-		return mapEquipmentToWebhookEdit(answer, isRecipe, characService,
-			emojiService, locale), nil
-	case amqp.ItemType_MOUNT:
-		return nil, ErrItemTypeNotHandled
-	case amqp.ItemType_QUEST_ITEM:
-		return nil, ErrItemTypeNotHandled
-	case amqp.ItemType_RESOURCE:
-		return nil, ErrItemTypeNotHandled
-	default:
-		return nil, ErrItemTypeNotHandled
-	}
+	locale amqp.Language) *discordgo.WebhookEdit {
+	return mapEquipmentToWebhookEdit(answer, isRecipe, characService,
+		emojiService, locale)
 }
 
 func mapEquipmentToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,

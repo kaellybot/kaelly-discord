@@ -6,6 +6,7 @@ type Job struct {
 	ID     string `gorm:"primaryKey"`
 	Icon   string
 	Color  int
+	Game   amqp.Game
 	Labels []JobLabel `gorm:"foreignKey:JobID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 

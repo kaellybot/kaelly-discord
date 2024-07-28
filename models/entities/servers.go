@@ -9,6 +9,7 @@ type Server struct {
 	DofusEncyclopediaID string `gorm:"unique"`
 	Icon                string
 	Emoji               string
+	Game                amqp.Game
 	Labels              []ServerLabel `gorm:"foreignKey:ServerID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 

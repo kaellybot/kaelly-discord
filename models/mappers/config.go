@@ -42,6 +42,7 @@ func MapConfigurationGetRequest(guildID string, lg discordgo.Locale) *amqp.Rabbi
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_GET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		ConfigurationGetRequest: &amqp.ConfigurationGetRequest{
 			GuildId: guildID,
 		},
@@ -52,6 +53,7 @@ func MapConfigurationServerRequest(guildID, channelID, serverID string, lg disco
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_SERVER_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		ConfigurationSetServerRequest: &amqp.ConfigurationSetServerRequest{
 			GuildId:   guildID,
 			ChannelId: channelID,
@@ -75,6 +77,7 @@ func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildID, 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		ConfigurationSetAlmanaxWebhookRequest: &amqp.ConfigurationSetAlmanaxWebhookRequest{
 			GuildId:      guildID,
 			ChannelId:    channelID,
@@ -101,6 +104,7 @@ func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildID, chan
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		ConfigurationSetRssWebhookRequest: &amqp.ConfigurationSetRssWebhookRequest{
 			GuildId:      guildID,
 			ChannelId:    channelID,
@@ -124,6 +128,7 @@ func MapConfigurationWebhookTwitchRequest(webhook *discordgo.Webhook, guildID, c
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITCH_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		ConfigurationSetTwitchWebhookRequest: &amqp.ConfigurationSetTwitchWebhookRequest{
 			GuildId:      guildID,
 			ChannelId:    channelID,
@@ -150,6 +155,7 @@ func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildID, 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		ConfigurationSetTwitterWebhookRequest: &amqp.ConfigurationSetTwitterWebhookRequest{
 			GuildId:      guildID,
 			ChannelId:    channelID,
@@ -172,6 +178,7 @@ func MapConfigurationWebhookYoutubeRequest(webhook *discordgo.Webhook, guildID, 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_YOUTUBE_WEBHOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
+		Game:     constants.GetGame().AmqpGame,
 		ConfigurationSetYoutubeWebhookRequest: &amqp.ConfigurationSetYoutubeWebhookRequest{
 			GuildId:      guildID,
 			ChannelId:    channelID,

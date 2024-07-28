@@ -145,15 +145,10 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 		panic(commands.ErrRequestPropertyNotFound)
 	}
 
-	reply, err := mappers.MapItemToWebhookEdit(message.GetEncyclopediaItemAnswer(), isRecipe,
+	reply := mappers.MapItemToWebhookEdit(message.GetEncyclopediaItemAnswer(), isRecipe,
 		command.characService, command.emojiService, message.Language)
-	if err != nil {
-		log.Error().Err(err).
-			Str(constants.LogItemType, message.GetEncyclopediaItemAnswer().GetType().String()).
-			Msgf("Cannot map item type to webhook response, panicking...")
-		panic(err)
-	}
-	_, err = s.InteractionResponseEdit(i.Interaction, reply)
+
+	_, err := s.InteractionResponseEdit(i.Interaction, reply)
 	if err != nil {
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")

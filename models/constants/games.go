@@ -21,7 +21,7 @@ func getDofusGame() AnkamaGame {
 	return AnkamaGame{
 		Name:     "DOFUS",
 		Icon:     "https://i.imgur.com/n3fJCSu.png",
-		Emoji:    "<:dofus:1065724887525773353>",
+		Emoji:    "<:dofus:1279136774811160596>",
 		AmqpGame: amqp.Game_DOFUS_GAME,
 	}
 }

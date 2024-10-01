@@ -57,10 +57,12 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			CommandID:   "</align get:1069057760269963295>",
 			Description: i18n.Get(lg, "align.help.detailed.get"),
+			TutorialURL: i18n.Get(lg, "align.help.align.get"),
 		},
 		{
 			CommandID:   "</align set:1069057760269963295>",
 			Description: i18n.Get(lg, "align.help.detailed.set"),
+			TutorialURL: i18n.Get(lg, "align.help.align.set"),
 		},
 	}
 }

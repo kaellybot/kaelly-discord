@@ -48,14 +48,17 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			CommandID:   "</almanax day:1177674483876761610>",
 			Description: i18n.Get(lg, "almanax.help.detailed.day"),
+			TutorialURL: i18n.Get(lg, "almanax.help.tutorial.day"),
 		},
 		{
 			CommandID:   "</almanax effects:1177674483876761610>",
 			Description: i18n.Get(lg, "almanax.help.detailed.effects"),
+			TutorialURL: i18n.Get(lg, "almanax.help.tutorial.effects"),
 		},
 		{
 			CommandID:   "</almanax resources:1177674483876761610>",
 			Description: i18n.Get(lg, "almanax.help.detailed.resources"),
+			TutorialURL: i18n.Get(lg, "almanax.help.tutorial.resources"),
 		},
 	}
 }

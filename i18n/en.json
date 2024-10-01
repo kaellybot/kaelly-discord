@@ -41,8 +41,11 @@
                 "get": "displays the book of aligned players on your Discord server\n   - The `city` field is optional and corresponds to the city to which players have pledged allegiance. If not specified, the directory is displayed without considering this filter. *__Example__: Bonta*\n - The `order` field is optional and corresponds to the order joined by players. If not specified, the directory is displayed without considering this filter. *__Example__: Spirit*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
                 "set": "records your alignment in the book, independently of the Discord server; this recording cannot be done for others.\n   - The `city` field is mandatory and corresponds to the city to which players have pledged allegiance. *__Example__: Bonta*\n - The `order` field is mandatory and corresponds to the order joined by players. *__Example__: Spirit*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__: 200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*"
             },
-            "source": "The collected data is used only for my proper functioning.",
-            "tutorial": ""
+            "tutorial": {
+                "get": "",
+                "set": ""
+            },
+            "source": "The collected data is used only for my proper functioning."
         },
         "success": "Alignment book updated!",
         "embed": {
@@ -64,8 +67,12 @@
                 "effects": "provides the next Almanax day corresponding to the chosen effect\n   - The `effect` field is mandatory and corresponds to the desired Almanax bonus. *__Example__: Plenty of fish*",
                 "resources": "provides the necessary resources for a given period\n   - The `duration` field is optional and corresponds to the desired number of days, ranging from 1 to 30. If not specified, the necessary resources for the next 7 days are returned. *__Example__: 30*"
             },
-            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them.",
-            "tutorial": ""
+            "tutorial": {
+                "day": "",
+                "effects": "",
+                "resources": ""
+            },
+            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them."
         },
         "day": {
             "title": "Almanax of <t:{{ .date }}:D>",
@@ -103,8 +110,16 @@
                 "twitter": "enables/disables the automatic sending of tweets from the official Twitter account of the game\n  - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`.",
                 "youtube": "enables/disables the automatic sending of Youtube creators videos\n  - The `videast` field is mandatory and corresponds to a Youtube creator name. *__Example__: Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`."
             },
-            "source": "The collected data is used only for my proper functioning.",
-            "tutorial": ""
+            "tutorial": {
+                "get": "",
+                "almanax": "",
+                "rss": "",
+                "server": "",
+                "twitch": "",
+                "twitter": "",
+                "youtube": ""
+            },
+            "source": "The collected data is used only for my proper functioning."
         },
         "success": "Change taken in account!",
         "embed": {
@@ -129,8 +144,9 @@
                 "Well... between us, you're not going to stoop to that, are you? :rolling_eyes:",
                 "It helps. :nerd:"
             ],
-            "source": "",
-            "tutorial": "https://media1.tenor.com/m/D2oqW_eeFNgAAAAd/dofus-book1julith-dofus.gif"
+            "tutorial": "https://media1.tenor.com/m/D2oqW_eeFNgAAAAd/dofus-book1julith-dofus.gif",
+            "source": ""
+            
         },
         "command": {
             "title": "Commande `{{ .command }}`",
@@ -150,8 +166,8 @@
         "help": {
             "overview": "provides items, mounts, pets, resources and consumables",
             "detailed": "provides information about items, mounts, pets, resources and consumables in the game\n  - The `query` field is mandatory and corresponds to the name of the item you want to look up. *__Example__: Gobball Headgear*",
-            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them.",
-            "tutorial": ""
+            "tutorial": "",
+            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them."
         },
         "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
         "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
@@ -173,8 +189,11 @@
                 "get": "displays the craftsmen players on your Discord server\n   - The `job` field is mandatory and corresponds to a profession in the game. *__Example__: Lumberjack*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
                 "set": "records your profession in the book, independently of the Discord server; this recording cannot be done for others.\n    - The `job` field is mandatory and corresponds to a profession in the game. *__Example__: Lumberjack*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__: 200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*"
             },
-            "source": "The collected data is used only for my proper functioning.",
-            "tutorial": ""
+            "tutorial": {
+                "get": "",
+                "set": ""
+            },
+            "source": "The collected data is used only for my proper functioning."
         },
         "success": "Craftsmen book updated!",
         "embed": {
@@ -192,8 +211,8 @@
         "help": {
             "overview": "provides the most recent dimension portal positions",
             "detailed": "provides the most recent positions of dimensional portals\n   - The `dimension` field is optional and corresponds to a desired dimension. If not specified, the positions of portals for all dimensions are returned. *__Example__: Enurado*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
-            "source": "The data comes from [dofus-portals.fr](https://dofus-portals.fr/), which relies on the participation of portal seekers.",
-            "tutorial": ""
+            "tutorial": "",
+            "source": "The data comes from [dofus-portals.fr](https://dofus-portals.fr/), which relies on the participation of portal seekers."
         },
         "embed": {
             "unknown": "No recent position found :frowning:",
@@ -208,8 +227,8 @@
         "help": {
             "overview": "provides sets",
             "detailed": "provides information about sets in the game\n   - The `query` field is mandatory and corresponds to the name of the set you want to look up. *__Example__: Boon Set*",
-            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them.",
-            "tutorial": ""
+             "tutorial": "",
+            "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them." 
         },
         "description": "Level **{{ .level }}**",
         "url": "https://www.dofus.com/en/mmorpg/encyclopedia/sets/{{ .id }}",

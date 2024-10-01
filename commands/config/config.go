@@ -71,30 +71,37 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			CommandID:   "</config get:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.get"),
+			TutorialURL: i18n.Get(lg, "config.help.tutorial.get"),
 		},
 		{
 			CommandID:   "</config almanax:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.almanax"),
+			TutorialURL: i18n.Get(lg, "config.help.tutorial.almanax"),
 		},
 		{
 			CommandID:   "</config rss:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.rss"),
+			TutorialURL: i18n.Get(lg, "config.help.tutorial.rss"),
 		},
 		{
 			CommandID:   "</config server:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.server"),
+			TutorialURL: i18n.Get(lg, "config.help.tutorial.server"),
 		},
 		{
 			CommandID:   "</config twitch:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.twitch"),
+			TutorialURL: i18n.Get(lg, "config.help.tutorial.twitch"),
 		},
 		{
 			CommandID:   "</config twitter:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.twitter"),
+			TutorialURL: i18n.Get(lg, "config.help.tutorial.twitter"),
 		},
 		{
 			CommandID:   "</config youtube:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.youtube"),
+			TutorialURL: i18n.Get(lg, "config.help.tutorial.youtube"),
 		},
 	}
 }

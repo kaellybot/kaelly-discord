@@ -57,10 +57,12 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			CommandID:   "</job get:1062090620656681092>",
 			Description: i18n.Get(lg, "job.help.detailed.get"),
+			TutorialURL: i18n.Get(lg, "job.help.tutorial.get"),
 		},
 		{
 			CommandID:   "</job set:1062090620656681092>",
 			Description: i18n.Get(lg, "job.help.detailed.set"),
+			TutorialURL: i18n.Get(lg, "job.help.tutorial.set"),
 		},
 	}
 }

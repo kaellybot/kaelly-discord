@@ -42,7 +42,10 @@
                 "set": "enregistre ton alignement dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n   - Le champ `city` est obligatoire et correspond à la cité auquel les joueurs ont fait allégeance. *__Exemple__ : Bonta*\n - Le champ `order` est obligatoire et correspond à l'ordre rejoint par les joueurs. *__Exemple__ : Esprit*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
             },
             "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement.",
-            "tutorial": ""
+            "tutorial": {
+                "get": "",
+                "set": ""
+            }
         },
         "success": "L'annuaire a été mise à jour !",
         "embed": {
@@ -64,8 +67,12 @@
                 "effects": "donne le prochain jour de l'almanax correspondant à l'effet choisi\n   - Le champ `effect` est obligatoire et correspond au bonus de l'almanax désiré. *__Exemple__ : Pêche abondante*",
                 "resources": "donne les ressources nécessaires pour une période donnée\n   - Le champ `duration` est optionnel et correspond au nombre de jours souhaité, allant de 1 à 30. Si non renseigné, les ressources nécessaires pour les 7 prochains jours sont remontées. *__Exemple__ : 30*"
             },
-            "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de) qui se charge de les récolter et de les exposer.",
-            "tutorial": ""
+            "tutorial": {
+                "day": "",
+                "effects": "",
+                "resources": ""
+            },
+            "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de) qui se charge de les récolter et de les exposer."
         },
         "day": {
             "title": "Almanax du <t:{{ .date }}:D>",
@@ -103,8 +110,16 @@
                 "twitter": "(dés)active l'envoi automatique de tweets du compte Twitter officiel du jeu\n  - Les champs `enabled`, `language` et `channel` sont identiques à `/config almanax`.",
                 "youtube": "(dés)active l'envoi automatique de nouvelles vidéos de créateurs Youtube\n  - Le champ `videast` est obligatoire et correspond à un nom de créateur Youtube. *__Exemple__ : Humility*\n - Les champs `enabled` et `channel` sont identiques à `/config almanax`."
             },
-            "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement.",
-            "tutorial": ""
+            "tutorial": {
+                "get": "",
+                "almanax": "",
+                "rss": "",
+                "server": "",
+                "twitch": "",
+                "twitter": "",
+                "youtube": ""
+            },
+            "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },
         "success": "Modification prise en compte !",
         "embed": {
@@ -129,8 +144,8 @@
                 "bon... entre nous, tu ne vas pas t'abaisser à ca quand même ? :rolling_eyes:",
                 "ça aide. :nerd:"
             ],
-            "source": "",
-            "tutorial": "https://media1.tenor.com/m/D2oqW_eeFNgAAAAd/dofus-book1julith-dofus.gif"
+            "tutorial": "https://media1.tenor.com/m/D2oqW_eeFNgAAAAd/dofus-book1julith-dofus.gif",
+            "source": ""
         },
         "command": {
             "title": "Commande `{{ .command }}`",
@@ -150,8 +165,8 @@
         "help": {
             "overview": "donne les items, montures, familiers, ressources et consommables du jeu",
             "detailed": "donne les items, montures, familiers, ressources et consommables du jeu\n  - Le champ `query` est obligatoire et correspond au nom de l'objet que tu souhaites consulter. *__Exemple__ : Coiffe du bouftou*",
-            "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de) qui se charge de les récolter et de les exposer.",
-            "tutorial": ""
+            "tutorial": "",
+            "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de) qui se charge de les récolter et de les exposer."
         },
         "description": "**{{ .type }}**{{ if .level }} de niveau **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
         "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/{{ .id }}",
@@ -173,8 +188,11 @@
                 "get": "affiche l'annuaire des joueurs artisans de ton serveur Discord\n   - Le champ `job` est obligatoire et correspond à un métier du jeu. *__Exemple__ : Bûcheron*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
                 "set": "enregistre ta profession dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n    - Le champ `job` est obligatoire et correspond à un métier du jeu. *__Exemple__ : Bûcheron*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
             },
-            "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement.",
-            "tutorial": ""
+            "tutorial": {
+                "get": "",
+                "set": ""
+            },
+            "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },
         "success": "L'annuaire a été mise à jour !",
         "embed": {
@@ -192,8 +210,8 @@
         "help": {
             "overview": "donne les positions de portail de dimension les plus récentes",
             "detailed": "donne les positions de portail de dimension les plus récentes\n   - Le champ `dimension` est optionnel et correspond à une dimension souhaitée. Si non renseigné, la position des portails de l'ensemble des dimensions est renvoyée. *__Exemple__ : Enutrosor*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
-            "source": "Les données proviennent de [dofus-portals.fr](https://dofus-portals.fr/) qui mise sur la participation des chercheurs de portails.",
-            "tutorial": ""
+            "tutorial": "",
+            "source": "Les données proviennent de [dofus-portals.fr](https://dofus-portals.fr/) qui mise sur la participation des chercheurs de portails."
         },
         "embed": {
             "unknown": "Aucune position récente trouvée :frowning:",
@@ -208,8 +226,8 @@
         "help": {
             "overview": "donne les panoplies du jeu",
             "detailed": "donne les panoplies du jeu\n   - Le champ `query` est obligatoire et correspond au nom de la panoplie que tu souhaites consulter. *__Exemple__ : Panoplie du Boune*",
-            "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de) qui se charge de les récolter et de les exposer.",
-            "tutorial": ""
+            "tutorial": "",
+            "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de) qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau **{{ .level }}**",
         "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/panoplies/{{ .id }}",

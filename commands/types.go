@@ -25,6 +25,7 @@ type AbstractCommand struct{}
 type Description struct {
 	CommandID   string
 	Description string
+	TutorialURL string
 }
 
 type DiscordHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)

@@ -181,7 +181,7 @@ func mapItemIngredients(ingredients []*amqp.EncyclopediaItemAnswer_Recipe_Ingred
 	for _, ingredient := range ingredients {
 		result = append(result, i18nIngredient{
 			Name:     ingredient.GetName(),
-			URL:      i18n.Get(lg, "item.url", i18n.Vars{"id": ingredient.GetId()}), // TODO not so simple
+			URL:      i18n.Get(lg, "item.url", i18n.Vars{"id": ingredient.GetId()}),
 			Quantity: ingredient.GetQuantity(),
 		})
 	}

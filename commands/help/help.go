@@ -3,6 +3,7 @@ package help
 import (
 	"fmt"
 	"sort"
+	"strconv"
 
 	"github.com/bwmarrin/discordgo"
 	contract "github.com/kaellybot/kaelly-commands"
@@ -58,6 +59,9 @@ func (command *Command) getHelp(s *discordgo.Session, i *discordgo.InteractionCr
 
 func (command *Command) updateHelp(s *discordgo.Session,
 	i *discordgo.InteractionCreate) {
+	var commandName string
+	var page int
+	customID := i.MessageComponentData().CustomID
 	values := i.MessageComponentData().Values
 	if len(values) != 1 {
 		log.Error().
@@ -66,14 +70,35 @@ func (command *Command) updateHelp(s *discordgo.Session,
 			Msgf("Cannot retrieve command name from value, panicking...")
 		panic(commands.ErrInvalidInteraction)
 	}
-	commandName := values[0]
+
+	if customCmdName, ok := contract.ExtractHelpPageCustomID(customID); ok {
+		commandName = customCmdName
+		customPage, err := strconv.Atoi(values[0])
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str(constants.LogCommand, command.GetName()).
+				Str(constants.LogCustomID, customID).
+				Msgf("Cannot convert page value to int, panicking...")
+			panic(commands.ErrInvalidInteraction)
+		}
+		page = customPage
+	} else if contract.IsBelongsToHelp(customID) {
+		commandName = values[0]
+		page = 0
+	} else {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
 
 	var webhookEdit *discordgo.WebhookEdit
 	if commandName == menuCommandName {
 		webhookEdit = command.getHelpMenu(i.Locale)
 	} else {
-		// TODO Following customID, page must be reset
-		webhookEdit = command.getHelpCommand(commandName, 0, i.Locale)
+		webhookEdit = command.getHelpCommand(commandName, page, i.Locale)
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
@@ -115,7 +140,8 @@ func (command *Command) getHelpMenu(lg discordgo.Locale) *discordgo.WebhookEdit 
 	}
 }
 
-func (command *Command) getHelpCommand(commandName string, page int, lg discordgo.Locale) *discordgo.WebhookEdit {
+func (command *Command) getHelpCommand(commandName string, page int,
+	lg discordgo.Locale) *discordgo.WebhookEdit {
 	var wantedCommand commands.DiscordCommand
 	for _, cmd := range *command.commands {
 		if cmd.GetName() == commandName {
@@ -125,7 +151,8 @@ func (command *Command) getHelpCommand(commandName string, page int, lg discordg
 	}
 
 	if wantedCommand == nil {
-		panic(fmt.Errorf("cannot find command (%s) while searching for its help description, panicking", commandName))
+		panic(fmt.Errorf("cannot find command (%s) while searching"+
+			" for its help description, panicking", commandName))
 	}
 
 	details := wantedCommand.GetDescriptions(lg)
@@ -205,7 +232,7 @@ func (command *Command) getHelpComponents(selectedCommandName string, page int,
 		components = append(components, discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.SelectMenu{
-					CustomID:    contract.CraftHelpPageCustomID(selectedCommandName, page),
+					CustomID:    contract.CraftHelpPageCustomID(selectedCommandName),
 					MenuType:    discordgo.StringSelectMenu,
 					Placeholder: i18n.Get(lg, "help.commands.pages.placeholder"),
 					Options:     commandPages,

@@ -43,9 +43,10 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
+			Name:        "/item",
 			CommandID:   "</item:1116290248587100251>",
 			Description: i18n.Get(lg, "item.help.detailed"),
-			TutorialURL: i18n.Get(lg, "item.tutorial.detailed"),
+			TutorialURL: i18n.Get(lg, "item.help.tutorial"),
 		},
 	}
 }

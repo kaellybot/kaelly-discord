@@ -55,14 +55,16 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
+			Name:        "/align get",
 			CommandID:   "</align get:1069057760269963295>",
 			Description: i18n.Get(lg, "align.help.detailed.get"),
-			TutorialURL: i18n.Get(lg, "align.help.align.get"),
+			TutorialURL: i18n.Get(lg, "align.help.tutorial.get"),
 		},
 		{
+			Name:        "/align set",
 			CommandID:   "</align set:1069057760269963295>",
 			Description: i18n.Get(lg, "align.help.detailed.set"),
-			TutorialURL: i18n.Get(lg, "align.help.align.set"),
+			TutorialURL: i18n.Get(lg, "align.help.tutorial.set"),
 		},
 	}
 }

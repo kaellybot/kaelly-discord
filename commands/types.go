@@ -23,6 +23,7 @@ type DiscordCommand interface {
 type AbstractCommand struct{}
 
 type Description struct {
+	Name        string
 	CommandID   string
 	Description string
 	TutorialURL string

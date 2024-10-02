@@ -69,36 +69,43 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
+			Name:        "/config get",
 			CommandID:   "</config get:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.get"),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.get"),
 		},
 		{
+			Name:        "/config almanax",
 			CommandID:   "</config almanax:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.almanax"),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.almanax"),
 		},
 		{
+			Name:        "/config rss",
 			CommandID:   "</config rss:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.rss"),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.rss"),
 		},
 		{
+			Name:        "/config server",
 			CommandID:   "</config server:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.server"),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.server"),
 		},
 		{
+			Name:        "/config twitch",
 			CommandID:   "</config twitch:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.twitch"),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.twitch"),
 		},
 		{
+			Name:        "/config twitter",
 			CommandID:   "</config twitter:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.twitter"),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.twitter"),
 		},
 		{
+			Name:        "/config youtube",
 			CommandID:   "</config youtube:1055459522812067840>",
 			Description: i18n.Get(lg, "config.help.detailed.youtube"),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.youtube"),

@@ -33,6 +33,7 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
+			Name:        "/help",
 			CommandID:   "</help:1190612462194663555>",
 			Description: i18n.Get(lg, "help.help.detailed"),
 			TutorialURL: i18n.Get(lg, "help.help.tutorial"),
@@ -71,7 +72,8 @@ func (command *Command) updateHelp(s *discordgo.Session,
 	if commandName == menuCommandName {
 		webhookEdit = command.getHelpMenu(i.Locale)
 	} else {
-		webhookEdit = command.getHelpCommand(commandName, i.Locale)
+		// TODO Following customID, page must be reset
+		webhookEdit = command.getHelpCommand(commandName, 0, i.Locale)
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
@@ -91,7 +93,7 @@ func (command *Command) getHelpMenu(lg discordgo.Locale) *discordgo.WebhookEdit 
 		commandName := command.GetName()
 		i18nCommands = append(i18nCommands, i18nCommand{
 			Name:        commandName,
-			Description: i18n.Get(lg, commandName+".help.overview"),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.overview", commandName)),
 		})
 	}
 
@@ -109,11 +111,11 @@ func (command *Command) getHelpMenu(lg discordgo.Locale) *discordgo.WebhookEdit 
 				Footer:      discord.BuildDefaultFooter(lg),
 			},
 		},
-		Components: command.getHelpComponents(menuCommandName, lg),
+		Components: command.getHelpComponents(menuCommandName, 0, nil, lg),
 	}
 }
 
-func (command *Command) getHelpCommand(commandName string, lg discordgo.Locale) *discordgo.WebhookEdit {
+func (command *Command) getHelpCommand(commandName string, page int, lg discordgo.Locale) *discordgo.WebhookEdit {
 	var wantedCommand commands.DiscordCommand
 	for _, cmd := range *command.commands {
 		if cmd.GetName() == commandName {
@@ -126,26 +128,38 @@ func (command *Command) getHelpCommand(commandName string, lg discordgo.Locale) 
 		panic(fmt.Errorf("cannot find command (%s) while searching for its help description, panicking", commandName))
 	}
 
+	details := wantedCommand.GetDescriptions(lg)
+	detail := details[page]
+	commandID := detail.CommandID
+	var subCommandID string
+	if len(details) > 1 {
+		commandID = commandName
+		subCommandID = detail.CommandID
+	}
+
 	return &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{
 			{
-				Title: i18n.Get(lg, "help.command.title", i18n.Vars{"command": commandName}),
+				Title: i18n.Get(lg, "help.command.title", i18n.Vars{
+					"command":   commandID,
+					"commandID": subCommandID,
+				}),
 				Description: i18n.Get(lg, "help.command.description", i18n.Vars{
-					"descriptions": wantedCommand.GetDescriptions(lg),
-					"source":       i18n.Get(lg, commandName+".help.source"),
+					"detail": detail,
+					"source": i18n.Get(lg, fmt.Sprintf("%v.help.source", commandName)),
 				}),
 				Color:     constants.Color,
-				Image:     &discordgo.MessageEmbedImage{URL: i18n.Get(lg, commandName+".help.tutorial")},
+				Image:     &discordgo.MessageEmbedImage{URL: detail.TutorialURL},
 				Thumbnail: &discordgo.MessageEmbedThumbnail{URL: constants.AvatarIcon},
 				Footer:    discord.BuildDefaultFooter(lg),
 			},
 		},
-		Components: command.getHelpComponents(commandName, lg),
+		Components: command.getHelpComponents(commandName, page, details, lg),
 	}
 }
 
-func (command *Command) getHelpComponents(selectedCommandName string, lg discordgo.Locale,
-) *[]discordgo.MessageComponent {
+func (command *Command) getHelpComponents(selectedCommandName string, page int,
+	descriptions []commands.Description, lg discordgo.Locale) *[]discordgo.MessageComponent {
 	commandChoices := make([]discordgo.SelectMenuOption, 0)
 	commandChoices = append(commandChoices, discordgo.SelectMenuOption{
 		Label:   i18n.Get(lg, "help.commands.choices.menu"),
@@ -165,7 +179,7 @@ func (command *Command) getHelpComponents(selectedCommandName string, lg discord
 		})
 	}
 
-	return &[]discordgo.MessageComponent{
+	components := []discordgo.MessageComponent{
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.SelectMenu{
@@ -177,6 +191,31 @@ func (command *Command) getHelpComponents(selectedCommandName string, lg discord
 			},
 		},
 	}
+
+	if len(descriptions) > 1 {
+		commandPages := make([]discordgo.SelectMenuOption, 0)
+		for i, description := range descriptions {
+			commandPages = append(commandPages, discordgo.SelectMenuOption{
+				Label:   description.Name,
+				Value:   fmt.Sprintf("%v", i),
+				Default: i == page,
+			})
+		}
+
+		components = append(components, discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.SelectMenu{
+					CustomID:    contract.CraftHelpPageCustomID(selectedCommandName, page),
+					MenuType:    discordgo.StringSelectMenu,
+					Placeholder: i18n.Get(lg, "help.commands.pages.placeholder"),
+					Options:     commandPages,
+				},
+			},
+		})
+	}
+
+	return &components
+
 }
 
 func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {

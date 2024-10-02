@@ -148,8 +148,8 @@
             "source": ""
         },
         "command": {
-            "title": "Commande `{{ .command }}`",
-            "description": "{{ if .descriptions }}{{ range .descriptions }}- **{{ .CommandID }}** : {{ .Description }}\n{{ end }}{{ else }}Aucune description détaillée disponible !{{ end }}{{ if .source}}\n\n*{{ .source }}*{{ end }}"
+            "title": "Commande **{{ .command }}**{{ if .commandID }} : {{ .commandID }}{{ end }}",
+            "description": "{{ if .detail }}- {{ .detail.CommandID }} : {{ .detail.Description }}\n{{ else }}Aucune description détaillée disponible !{{ end }}{{ if .source}}\n\n*{{ .source }}*{{ end }}"
         },
         "commands": {
             "title": "Liste des commandes",
@@ -158,6 +158,10 @@
                 "menu": "Liste des commandes",
                 "command": "{{ .command }}",
                 "placeholder": "Aide détaillée d'une commande en particulier"
+            },
+            "pages": {
+                "page": "{{ .page }}",
+                "placeholder": "Aide détaillée d'une sous-commande"
             }
         }
     },

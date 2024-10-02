@@ -7,6 +7,7 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	"github.com/rs/zerolog/log"
 )
@@ -19,8 +20,9 @@ func (command *Command) checkDimension(ctx context.Context, s *discordgo.Session
 	for _, option := range data.Options {
 		if option.Name == contract.PosDimensionOptionName {
 			dimensions := command.portalService.FindDimensions(option.StringValue(), i.Locale)
+			labels := translators.GetDimensionsLabels(dimensions, i.Locale)
 			response, checkSuccess := validators.
-				ExpectOnlyOneElement("checks.dimension", option.StringValue(), dimensions, i.Locale)
+				ExpectOnlyOneElement("checks.dimension", option.StringValue(), labels, i.Locale)
 			if checkSuccess {
 				next(context.WithValue(ctx, constants.ContextKeyDimension, dimensions[0]))
 			} else {

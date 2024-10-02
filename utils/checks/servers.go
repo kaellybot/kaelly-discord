@@ -8,6 +8,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -21,7 +22,9 @@ func CheckServer(optionName string, serverService servers.Service) middlewares.M
 			for _, option := range subCommand.Options {
 				if option.Name == optionName {
 					servers := serverService.FindServers(option.StringValue(), i.Locale)
-					response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", option.StringValue(), servers, i.Locale)
+					labels := translators.GetServersLabels(servers, i.Locale)
+					response, checkSuccess := validators.
+						ExpectOnlyOneElement("checks.server", option.StringValue(), labels, i.Locale)
 					if checkSuccess {
 						next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
 					} else {
@@ -51,7 +54,9 @@ func CheckServerWithFallback(optionName string, serverService servers.Service,
 			serverValue, found := getServerValue(optionName, option)
 			if found {
 				servers := serverService.FindServers(serverValue, i.Locale)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.server", serverValue, servers, i.Locale)
+				labels := translators.GetServersLabels(servers, i.Locale)
+				response, checkSuccess := validators.
+					ExpectOnlyOneElement("checks.server", serverValue, labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
 				} else {

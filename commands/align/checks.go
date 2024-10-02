@@ -7,6 +7,7 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -21,7 +22,8 @@ func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Ses
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignCityOptionName {
 				cities := command.bookService.FindCities(option.StringValue(), i.Locale)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, i.Locale)
+				labels := translators.GetCitiesLabels(cities, i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				} else {
@@ -46,7 +48,8 @@ func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Sess
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignCityOptionName {
 				cities := command.bookService.FindCities(option.StringValue(), i.Locale)
-				_, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), cities, i.Locale)
+				labels := translators.GetCitiesLabels(cities, i.Locale)
+				_, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				} else {
@@ -70,7 +73,8 @@ func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Se
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignOrderOptionName {
 				orders := command.bookService.FindOrders(option.StringValue(), i.Locale)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, i.Locale)
+				labels := translators.GetOrdersLabels(orders, i.Locale)
+				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				} else {
@@ -95,7 +99,8 @@ func (command *Command) checkOptionalOrder(ctx context.Context, _ *discordgo.Ses
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignOrderOptionName {
 				orders := command.bookService.FindOrders(option.StringValue(), i.Locale)
-				_, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), orders, i.Locale)
+				labels := translators.GetOrdersLabels(orders, i.Locale)
+				_, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				} else {

@@ -8,6 +8,7 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	"github.com/rs/zerolog/log"
 )
@@ -19,7 +20,9 @@ func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigFeedTypeOptionName {
 				feedTypes := command.feedService.FindFeedTypes(option.StringValue(), i.Locale)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.feed", option.StringValue(), feedTypes, i.Locale)
+				labels := translators.GetFeedTypesLabels(feedTypes, i.Locale)
+				response, checkSuccess := validators.
+					ExpectOnlyOneElement("checks.feed", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyFeed, feedTypes[0]))
 				} else {
@@ -44,8 +47,9 @@ func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigVideastOptionName {
 				videasts := command.videastService.FindVideasts(option.StringValue(), i.Locale)
+				labels := translators.GetVideastsLabels(videasts, i.Locale)
 				response, checkSuccess := validators.
-					ExpectOnlyOneElement("checks.videast", option.StringValue(), videasts, i.Locale)
+					ExpectOnlyOneElement("checks.videast", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyVideast, videasts[0]))
 				} else {
@@ -70,8 +74,9 @@ func (command *Command) checkStreamer(ctx context.Context, s *discordgo.Session,
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigStreamerOptionName {
 				streamers := command.streamerService.FindStreamers(option.StringValue(), i.Locale)
+				labels := translators.GetStreamersLabels(streamers, i.Locale)
 				response, checkSuccess := validators.
-					ExpectOnlyOneElement("checks.streamer", option.StringValue(), streamers, i.Locale)
+					ExpectOnlyOneElement("checks.streamer", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyStreamer, streamers[0]))
 				} else {

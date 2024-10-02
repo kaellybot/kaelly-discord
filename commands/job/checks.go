@@ -7,6 +7,7 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -21,7 +22,9 @@ func (command *Command) checkJob(ctx context.Context, s *discordgo.Session,
 		for _, option := range subCommand.Options {
 			if option.Name == contract.JobJobOptionName {
 				jobs := command.bookService.FindJobs(option.StringValue(), i.Locale)
-				response, checkSuccess := validators.ExpectOnlyOneElement("checks.job", option.StringValue(), jobs, i.Locale)
+				labels := translators.GetJobsLabels(jobs, i.Locale)
+				response, checkSuccess := validators.
+					ExpectOnlyOneElement("checks.job", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyJob, jobs[0]))
 				} else {

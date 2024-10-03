@@ -3,8 +3,8 @@
         "help": {
             "overview": "donne des informations à mon propos et un moyen d'obtenir de l'aide si besoin",
             "detailed": "donne des informations à mon propos (lien d'invitation, code source, gestion des données privées...) et un moyen d'obtenir de l'aide si besoin (discord de support, twitter)",
-            "source": "",
-            "tutorial": ""
+            "tutorial": "https://i.imgur.com/QYkz2JA.gif",
+            "source": ""
         },
         "title": "{{ .name }} version {{ .version }}",
         "desc": "Bot Discord dédié au jeu {{ .game.Name }} {{ .game.Emoji }} !",
@@ -111,13 +111,13 @@
                 "youtube": "(dés)active l'envoi automatique de nouvelles vidéos de créateurs Youtube\n  - Le champ `videast` est obligatoire et correspond à un nom de créateur Youtube. *__Exemple__ : Humility*\n - Les champs `enabled` et `channel` sont identiques à `/config almanax`."
             },
             "tutorial": {
-                "get": "",
-                "almanax": "",
-                "rss": "",
-                "server": "",
-                "twitch": "",
-                "twitter": "",
-                "youtube": ""
+                "get": "https://i.imgur.com/7Lli9BE.gif",
+                "almanax": "https://i.imgur.com/LguF6vv.gif",
+                "rss": "https://i.imgur.com/YbQOHqf.gif",
+                "server": "https://i.imgur.com/tZ55Uf1.gif",
+                "twitch": "https://i.imgur.com/2ZyN0al.gif",
+                "twitter": "https://i.imgur.com/rIt6se4.gif",
+                "youtube": "https://i.imgur.com/z7SVwSw.gif"
             },
             "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },
@@ -214,7 +214,7 @@
         "help": {
             "overview": "donne les positions de portail de dimension les plus récentes",
             "detailed": "donne les positions de portail de dimension les plus récentes\n   - Le champ `dimension` est optionnel et correspond à une dimension souhaitée. Si non renseigné, la position des portails de l'ensemble des dimensions est renvoyée. *__Exemple__ : Enutrosor*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
-            "tutorial": "",
+            "tutorial": "https://i.imgur.com/NeRt5Iy.gif",
             "source": "Les données proviennent de [dofus-portals.fr](https://dofus-portals.fr/) qui mise sur la participation des chercheurs de portails."
         },
         "embed": {

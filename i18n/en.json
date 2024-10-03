@@ -4,7 +4,7 @@
             "overview": "provides information about me and a way to get help",
             "detailed": "provides detailed information about me (invitation link, source code, handling of private data...) and a way to get help if needed (support Discord, Twitter)",
             "source": "",
-            "tutorial": "https://i.imgur.com/YYGFp2m.gif"
+            "tutorial": "https://i.imgur.com/6otf3t7.gif"
         },
         "title": "{{ .name }} version {{ .version }}",
         "desc": "Discord bot dedicated to the {{ .game.Name }} {{ .game.Emoji }} game!",
@@ -111,13 +111,13 @@
                 "youtube": "enables/disables the automatic sending of Youtube creators videos\n  - The `videast` field is mandatory and corresponds to a Youtube creator name. *__Example__: Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`."
             },
             "tutorial": {
-                "get": "",
-                "almanax": "",
-                "rss": "",
-                "server": "",
-                "twitch": "",
-                "twitter": "",
-                "youtube": ""
+                "get": "https://i.imgur.com/Uxx3bvh.gif",
+                "almanax": "https://i.imgur.com/UoUNhEL.gif",
+                "rss": "https://i.imgur.com/0T0D9rr.gif",
+                "server": "https://i.imgur.com/48xcGdP.gif",
+                "twitch": "https://i.imgur.com/HNUaHAD.gif",
+                "twitter": "https://i.imgur.com/sm6ITnQ.gif",
+                "youtube": "https://i.imgur.com/OCWsJea.gif"
             },
             "source": "The collected data is used only for my proper functioning."
         },
@@ -215,7 +215,7 @@
         "help": {
             "overview": "provides the most recent dimension portal positions",
             "detailed": "provides the most recent positions of dimensional portals\n   - The `dimension` field is optional and corresponds to a desired dimension. If not specified, the positions of portals for all dimensions are returned. *__Example__: Enurado*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
-            "tutorial": "",
+            "tutorial": "https://i.imgur.com/AezytWc.gif",
             "source": "The data comes from [dofus-portals.fr](https://dofus-portals.fr/), which relies on the participation of portal seekers."
         },
         "embed": {

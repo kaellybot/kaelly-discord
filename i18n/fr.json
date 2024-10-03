@@ -7,7 +7,7 @@
             "tutorial": ""
         },
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Bot Discord dédié au jeu {{ .game.Name }} !",
+        "desc": "Bot Discord dédié au jeu {{ .game.Name }} {{ .game.Emoji }} !",
         "support": {
             "title": ":bulb: Serveur de support",
             "desc": "Tu rencontres un problème quant à mon utilisation ? Une suggestion ? N'hésite pas à rejoindre le [serveur Discord]({{ .discord }}) de support !"

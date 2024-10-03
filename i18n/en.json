@@ -7,7 +7,7 @@
             "tutorial": "https://i.imgur.com/YYGFp2m.gif"
         },
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Discord bot dedicated to the {{ .game.Name }} game!",
+        "desc": "Discord bot dedicated to the {{ .game.Name }} {{ .game.Emoji }} game!",
         "support": {
             "title": ":bulb: Support server",
             "desc": "You have a problem with its use? A suggestion? Feel free to join the support [Discord server]({{ .discord }})!"

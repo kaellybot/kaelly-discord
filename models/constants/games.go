@@ -14,20 +14,19 @@ const (
 )
 
 func GetGame() AnkamaGame {
-	return getDofusGame()
+	return GetDofusGame()
 }
 
-func getDofusGame() AnkamaGame {
+func GetDofusGame() AnkamaGame {
 	return AnkamaGame{
 		Name:     "DOFUS",
-		Icon:     "https://i.imgur.com/n3fJCSu.png",
-		Emoji:    "<:dofus:1279136774811160596>",
+		Icon:     "https://i.imgur.com/duP1rhM.png",
+		Emoji:    "<:dofus:1291317932961304606>",
 		AmqpGame: amqp.Game_DOFUS_GAME,
 	}
 }
 
-//nolint:unused // could be used later
-func getDofusTouchGame() AnkamaGame {
+func GetDofusTouchGame() AnkamaGame {
 	return AnkamaGame{
 		Name:     "DOFUS Touch",
 		Icon:     "https://i.imgur.com/lYLm648.png",
@@ -36,8 +35,7 @@ func getDofusTouchGame() AnkamaGame {
 	}
 }
 
-//nolint:unused // could be used later
-func getDofusRetroGame() AnkamaGame {
+func GetDofusRetroGame() AnkamaGame {
 	return AnkamaGame{
 		Name:     "DOFUS Retro",
 		Icon:     "https://i.imgur.com/PagFd6V.png",

@@ -4,7 +4,7 @@
             "overview": "provides information about me and a way to get help",
             "detailed": "provides detailed information about me (invitation link, source code, handling of private data...) and a way to get help if needed (support Discord, Twitter)",
             "source": "",
-            "tutorial": ""
+            "tutorial": "https://i.imgur.com/YYGFp2m.gif"
         },
         "title": "{{ .name }} version {{ .version }}",
         "desc": "Discord bot dedicated to the {{ .game.Name }} game!",

@@ -6,6 +6,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/about"
 	"github.com/kaellybot/kaelly-discord/commands/align"
 	"github.com/kaellybot/kaelly-discord/commands/almanax"
+	"github.com/kaellybot/kaelly-discord/commands/competition"
 	"github.com/kaellybot/kaelly-discord/commands/config"
 	"github.com/kaellybot/kaelly-discord/commands/help"
 	"github.com/kaellybot/kaelly-discord/commands/item"
@@ -125,6 +126,7 @@ func New() (*Impl, error) {
 		help.New(&commands),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),
+		competition.New(emojiService, requestsManager),
 		pos.New(guildService, portalService, serverService, requestsManager),
 		set.New(characService, emojiService, requestsManager),
 	)

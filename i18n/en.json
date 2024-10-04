@@ -146,7 +146,6 @@
             ],
             "tutorial": "https://media1.tenor.com/m/D2oqW_eeFNgAAAAd/dofus-book1julith-dofus.gif",
             "source": ""
-            
         },
         "command": {
             "title": "**{{ .command }}** command{{ if .commandID }}: {{ .commandID }}{{ end }}",
@@ -209,6 +208,40 @@
                 "title": "{{ .username }} jobs",
                 "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Lvl. {{ .Level }}\n{{ end }}{{ else }}No job for the moment!{{ end }}"
             }
+        }
+    },
+    "map": {
+        "help": {
+            "overview": "randomly draws a competitive map",
+            "detailed": "TODO",
+            "tutorial": "",
+            "source": ""
+        },
+        "title": "Map {{ .mapNumber }}",
+        "taunt": [
+            "Ah! sorry :smirk:",
+            "Oh! It promises :joy:",
+            "CHAMPAGNE! :champagne:",
+            "Hihi :relaxed:",
+            "It gonna be terrible. :sunglasses:",
+            "Good luck. BIIIIIIIIIP BIIIIIIIP :telephone_receiver:",
+            "Ouuuuh! Red team gonna undergo! :open_mouth:",
+            "It's simply a collective hallucination! :dizzy_face:",
+            "After this draw, don't come stutter, Blue team! :kissing:",
+            "This fight will be really dirty! :underage:",
+            "Don't criticize too much my draw, if you continue I draw in loop the map IX.",
+            "Is it me or does it smell like melon? :melon:",
+            "Oh no waaaay... It will still last over an hour... :weary:",
+            "Challenge: statue. How's that, *nooo* ? Oh come on, for the beauty of the game! :relieved:",
+            "I wanted to draw a cool map, and I remembered participants didn't deserve that. :rolling_eyes:",
+            "Mmmmmmh, that's the smell of butchery! :horse:",
+            "Wecome in hell :smiling_imp:",
+            "Deads in perspective! :skull:",
+            ":puissance: It's time to the the-the-the-dual! :puissance:"
+        ],
+        "button": {
+            "normal": "Normal mode",
+            "tactical": "Tactical mode"
         }
     },
     "pos": {
@@ -274,6 +307,9 @@
         },
         "level": {
             "constraints": "The level must be between {{ .min }} and {{ .max }}! :grin:"
+        },
+        "map": {
+            "constraints": "The map number must be between {{ .min }} and {{ .max }}! :grin:"
         },
         "query": {
             "constraints": "The field must be filled! :grin:"

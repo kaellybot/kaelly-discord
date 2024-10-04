@@ -210,6 +210,40 @@
             }
         }
     },
+    "map": {
+        "help": {
+            "overview": "tire au hasard une carte compétitive",
+            "detailed": "TODO",
+            "tutorial": "",
+            "source": ""
+        },
+        "title": "Carte {{ .mapNumber }}",
+        "taunt": [
+            "Ah ! Dommage :smirk:",
+            "Oh! Ça promet :joy:",
+            "CHAMPAGNE ! :champagne:",
+            "Hihi :relaxed:",
+            "Ça va chier. :sunglasses:",
+            "Bon chance. BIIIIIIIIIP BIIIIIIIP :telephone_receiver:",
+            "Ouuuh ! L'équipe rouge va prendre teeeeeellement cher ! :open_mouth:",
+            "C'est tout simplement une hallucination collective ! :dizzy_face:",
+            "Après ce tirage, faudra pas venir bégayer Equipe bleue ! :kissing:",
+            "Ce combat va être sale ! :underage:",
+            "Critiquez pas trop mon tirage, si vous continuez je sors la carte IX en boucle.",
+            "C'est moi ou ça sent le melon là ? :melon:",
+            "Oh non c'est pas vrai... Ça va encore durer plus d'une heure... :weary:",
+            "Challenge : Statue. Comment ça *noon* ? Oh allez, pour le beau jeu ! :relieved:",
+            "J'voulais sortir une chouette carte, et puis je me suis rappelé que les participants ne la méritaient pas. :rolling_eyes:",
+            "Mmmmmmh, mais c'est l'odeur de la boucherie ça ! :horse:",
+            "Bienvenue en enfer :smiling_imp:",
+            "Morts en perspective ! :skull:",
+            ":puissance: C'est l'heure du du-du-du-duel ! :puissance:"
+        ],
+        "button": {
+            "normal": "Mode normal",
+            "tactical": "Mode tactique"
+        }
+    },
     "pos": {
         "help": {
             "overview": "donne les positions de portail de dimension les plus récentes",
@@ -274,6 +308,9 @@
         "level": {
             "constraints": "Le niveau doit être compris entre {{ .min }} et {{ .max }} ! :grin:"
         },
+        "map": {
+            "constraints": "Le numéro de carte doit être compris entre {{ .min }} et {{ .max }} ! :grin:"
+        },
         "query": {
             "constraints": "Le champs ne doit pas être vide ! :grin:"
         },
@@ -282,7 +319,7 @@
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun serveur que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs serveurs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Réessaie en sélectionnant un serveur de la liste :slight_smile:"
         },
-        "permissions": {
+        "permission": {
             "webhook": "Je n'ai pas le droit de gérer les webhooks ! Désolée je ne peux pas aller plus loin sans cette permission :("
         },
         "videast": {

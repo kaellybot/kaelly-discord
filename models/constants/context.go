@@ -13,6 +13,7 @@ const (
 	ContextKeyJob
 	ContextKeyLanguage
 	ContextKeyLevel
+	ContextKeyMap
 	ContextKeyOrder
 	ContextKeyQuery
 	ContextKeyServer

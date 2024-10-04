@@ -21,7 +21,7 @@ func MapItemListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
 			Query: query,
 			Type:  amqp.EncyclopediaListRequest_ITEM,
@@ -34,7 +34,7 @@ func MapItemRequest(query string, isID bool, itemType amqp.ItemType,
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		EncyclopediaItemRequest: &amqp.EncyclopediaItemRequest{
 			Query: query,
 			IsID:  isID,

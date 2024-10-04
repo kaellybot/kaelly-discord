@@ -6,7 +6,7 @@ type AnkamaGame struct {
 	Name     string
 	Icon     string
 	Emoji    string
-	AmqpGame amqp.Game
+	AMQPGame amqp.Game
 }
 
 const (
@@ -22,7 +22,7 @@ func GetDofusGame() AnkamaGame {
 		Name:     "DOFUS",
 		Icon:     "https://i.imgur.com/duP1rhM.png",
 		Emoji:    "<:dofus:1291317932961304606>",
-		AmqpGame: amqp.Game_DOFUS_GAME,
+		AMQPGame: amqp.Game_DOFUS_GAME,
 	}
 }
 
@@ -31,7 +31,7 @@ func GetDofusTouchGame() AnkamaGame {
 		Name:     "DOFUS Touch",
 		Icon:     "https://i.imgur.com/lYLm648.png",
 		Emoji:    "<:dofustouch:1065724958203981944>",
-		AmqpGame: amqp.Game_DOFUS_TOUCH,
+		AMQPGame: amqp.Game_DOFUS_TOUCH,
 	}
 }
 
@@ -40,6 +40,6 @@ func GetDofusRetroGame() AnkamaGame {
 		Name:     "DOFUS Retro",
 		Icon:     "https://i.imgur.com/PagFd6V.png",
 		Emoji:    "<:dofusretro:1065724870392041483>",
-		AmqpGame: amqp.Game_DOFUS_RETRO,
+		AMQPGame: amqp.Game_DOFUS_RETRO,
 	}
 }

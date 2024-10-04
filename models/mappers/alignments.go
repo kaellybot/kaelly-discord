@@ -26,7 +26,7 @@ func MapBookAlignGetBookRequest(cityID, orderID, serverID string, userIDs []stri
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ALIGN_GET_BOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		AlignGetBookRequest: &amqp.AlignGetBookRequest{
 			UserIds:  userIDs,
 			CityId:   cityID,
@@ -41,7 +41,7 @@ func MapBookAlignGetUserRequest(userID, serverID string, lg discordgo.Locale) *a
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ALIGN_GET_USER_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		AlignGetUserRequest: &amqp.AlignGetUserRequest{
 			UserId:   userID,
 			ServerId: serverID,
@@ -54,7 +54,7 @@ func MapBookAlignSetRequest(userID, cityID, orderID, serverID string, level int6
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ALIGN_SET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		AlignSetRequest: &amqp.AlignSetRequest{
 			UserId:   userID,
 			CityId:   cityID,

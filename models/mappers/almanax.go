@@ -17,7 +17,7 @@ func MapAlmanaxRequest(date *time.Time, lg discordgo.Locale) *amqp.RabbitMQMessa
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		EncyclopediaAlmanaxRequest: &amqp.EncyclopediaAlmanaxRequest{
 			Date: timestamppb.New(*date),
 		},
@@ -28,7 +28,7 @@ func MapAlmanaxResourceRequest(duration int32, lg discordgo.Locale) *amqp.Rabbit
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		EncyclopediaAlmanaxResourceRequest: &amqp.EncyclopediaAlmanaxResourceRequest{
 			Duration: duration,
 		},
@@ -39,7 +39,7 @@ func MapAlmanaxEffectListRequest(query string, lg discordgo.Locale) *amqp.Rabbit
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
 			Query: query,
 			Type:  amqp.EncyclopediaListRequest_ALMANAX_EFFECT,
@@ -51,7 +51,7 @@ func MapAlmanaxEffectRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMe
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		EncyclopediaAlmanaxEffectRequest: &amqp.EncyclopediaAlmanaxEffectRequest{
 			Query: query,
 		},

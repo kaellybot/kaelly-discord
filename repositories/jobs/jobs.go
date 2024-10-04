@@ -13,7 +13,7 @@ func New(db databases.MySQLConnection) *Impl {
 func (repo *Impl) GetJobs() ([]entities.Job, error) {
 	var jobs []entities.Job
 	response := repo.db.GetDB().Model(&entities.Job{}).
-		Where("game = ?", constants.GetGame().AmqpGame).
+		Where("game = ?", constants.GetGame().AMQPGame).
 		Preload("Labels").Find(&jobs)
 	return jobs, response.Error
 }

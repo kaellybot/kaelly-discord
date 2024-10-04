@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//nolint:dupl // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
@@ -40,6 +41,7 @@ func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 	next(ctx)
 }
 
+//nolint:dupl // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
@@ -67,6 +69,7 @@ func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
 	next(ctx)
 }
 
+//nolint:dupl // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkStreamer(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()

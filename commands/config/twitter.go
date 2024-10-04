@@ -1,4 +1,4 @@
-//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
+//nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 package config
 
 import (

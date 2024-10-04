@@ -43,7 +43,9 @@ import (
 	"github.com/spf13/viper"
 )
 
+//nolint:funlen,nolintlint // Yup, but much clearer like that.
 func New() (*Impl, error) {
+	// Misc
 	db, err := databases.New()
 	if err != nil {
 		log.Fatal().Err(err).Msgf("DB instantiation failed, shutting down.")
@@ -54,60 +56,63 @@ func New() (*Impl, error) {
 		log.Fatal().Err(err).Msgf("Broker instantiation failed, shutting down.")
 	}
 
+	// Repositories
 	dimensionRepo := dimensions.New(db)
 	areaRepo := areas.New(db)
 	subAreaRepo := subareas.New(db)
 	transportTypeRepo := transports.New(db)
+	serverRepo := serverRepo.New(db)
+	jobRepo := jobs.New(db)
+	cityRepo := cities.New(db)
+	orderRepo := orders.New(db)
+	feedRepo := feedRepo.New(db)
+	videastRepo := videastRepo.New(db)
+	streamerRepo := streamerRepo.New(db)
+	characRepo := characRepo.New(db)
+	emojiRepo := emojiRepo.New(db)
+	guildRepo := guildRepo.New(db)
+
+	// Services
 	portalService, err := portals.New(dimensionRepo, areaRepo, subAreaRepo, transportTypeRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Dimension Service instantiation failed, shutting down.")
 	}
 
-	serverRepo := serverRepo.New(db)
 	serverService, err := servers.New(serverRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Server Service instantiation failed, shutting down.")
 	}
 
-	jobRepo := jobs.New(db)
-	cityRepo := cities.New(db)
-	orderRepo := orders.New(db)
 	bookService, err := books.New(jobRepo, cityRepo, orderRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Book Service instantiation failed, shutting down.")
 	}
 
-	feedRepo := feedRepo.New(db)
 	feedService, err := feeds.New(feedRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Feed Service instantiation failed, shutting down.")
 	}
 
-	videastRepo := videastRepo.New(db)
 	videastService, err := videasts.New(videastRepo)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Vidast Service instantiation failed, shutting down.")
+		log.Fatal().Err(err).Msgf("Videast Service instantiation failed, shutting down.")
 	}
 
-	streamerRepo := streamerRepo.New(db)
 	streamerService, err := streamers.New(streamerRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Streamer Service instantiation failed, shutting down.")
 	}
 
-	characRepo := characRepo.New(db)
 	characService, err := characteristics.New(characRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Characteristic Service instantiation failed, shutting down.")
 	}
 
-	emojiRepo := emojiRepo.New(db)
 	emojiService, err := emojis.New(emojiRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Emoji Service instantiation failed, shutting down.")
 	}
 
-	guildRepo := guildRepo.New(db)
 	guildService := guilds.New(guildRepo)
 	requestsManager := requests.New(broker)
 
@@ -136,10 +141,6 @@ func New() (*Impl, error) {
 		db:             db,
 		broker:         broker,
 		requestManager: requestsManager,
-		bookService:    bookService,
-		guildService:   guildService,
-		portalService:  portalService,
-		serverService:  serverService,
 		discordService: discordService,
 	}, nil
 }

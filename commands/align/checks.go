@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
@@ -39,6 +40,7 @@ func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Ses
 	}
 }
 
+//nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
@@ -64,6 +66,7 @@ func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Sess
 	next(ctx)
 }
 
+//nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
@@ -90,6 +93,7 @@ func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Se
 	}
 }
 
+//nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkOptionalOrder(ctx context.Context, _ *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()

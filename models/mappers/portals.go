@@ -17,7 +17,7 @@ func MapPortalPositionRequest(dimension entities.Dimension, server entities.Serv
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_PORTAL_POSITION_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		PortalPositionRequest: &amqp.PortalPositionRequest{
 			DimensionId: dimension.ID,
 			ServerId:    server.ID,

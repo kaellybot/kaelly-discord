@@ -18,7 +18,7 @@ func MapSetListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage 
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
 			Query: query,
 			Type:  amqp.EncyclopediaListRequest_SET,

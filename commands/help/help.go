@@ -242,7 +242,6 @@ func (command *Command) getHelpComponents(selectedCommandName string, page int,
 	}
 
 	return &components
-
 }
 
 func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {

@@ -24,7 +24,7 @@ func MapBookJobGetBookRequest(jobID, serverID string, userIDs []string,
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_GET_BOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		JobGetBookRequest: &amqp.JobGetBookRequest{
 			UserIds:  userIDs,
 			JobId:    jobID,
@@ -38,7 +38,7 @@ func MapBookJobGetUserRequest(userID, serverID string, lg discordgo.Locale) *amq
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_GET_USER_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		JobGetUserRequest: &amqp.JobGetUserRequest{
 			UserId:   userID,
 			ServerId: serverID,
@@ -51,7 +51,7 @@ func MapBookJobSetRequest(userID, jobID, serverID string, level int64,
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_SET_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AmqpGame,
+		Game:     constants.GetGame().AMQPGame,
 		JobSetRequest: &amqp.JobSetRequest{
 			UserId:   userID,
 			JobId:    jobID,

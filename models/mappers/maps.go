@@ -70,14 +70,14 @@ func mapCompetitionMapToComponents(competitiveMap *amqp.CompetitionMapAnswer, ma
 			CustomID: contract.CraftMapTacticalCustomID(competitiveMap.GetMapNumber()),
 			Label:    i18n.Get(lg, "map.button.tactical"),
 			Style:    discordgo.PrimaryButton,
-			Emoji:    service.GetMiscEmoji(constants.EmojiIDRecipe),
+			Emoji:    service.GetMiscEmoji(constants.EmojiIDTacticalMap),
 		})
 	case constants.MapTypeTactical:
 		components = append(components, discordgo.Button{
 			CustomID: contract.CraftMapNormalCustomID(competitiveMap.GetMapNumber()),
 			Label:    i18n.Get(lg, "map.button.normal"),
 			Style:    discordgo.PrimaryButton,
-			Emoji:    service.GetMiscEmoji(constants.EmojiIDRecipe), // TODO change emoji
+			Emoji:    service.GetMiscEmoji(constants.EmojiIDNormalMap),
 		})
 	}
 

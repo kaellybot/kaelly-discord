@@ -213,9 +213,9 @@
     "map": {
         "help": {
             "overview": "tire au hasard une carte compétitive",
-            "detailed": "TODO",
-            "tutorial": "",
-            "source": ""
+            "detailed": "tire au hasard une carte compétitive\n   - Le champ `number` est optionnel et correspond au numéro de carte compétitive souhaité. Si non renseigné, la carte est tirée aléatoirement. *__Exemple__ : 42*",
+            "tutorial": "https://i.imgur.com/eBhDyVc.gif",
+            "source": "Les captures d'écran proviennent de [Krosmoz Tournaments Arena](https://ktarena.com/)."
         },
         "title": "Carte {{ .mapNumber }}",
         "taunt": [

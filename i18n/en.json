@@ -213,9 +213,9 @@
     "map": {
         "help": {
             "overview": "randomly draws a competitive map",
-            "detailed": "TODO",
-            "tutorial": "",
-            "source": ""
+            "detailed": "randomly draws a competitive map\n   - The `number` field is optional and corresponds to a desired competitive map. If not specified, the map is drawn at random. *__Example__: 42*",
+            "tutorial": "https://i.imgur.com/zEBSx94.gif",
+            "source": "Screenshots come from [Krosmoz Tournaments Arena](https://ktarena.com/)."
         },
         "title": "Map {{ .mapNumber }}",
         "taunt": [

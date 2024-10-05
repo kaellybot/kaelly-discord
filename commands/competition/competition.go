@@ -26,8 +26,9 @@ func New(emojiService emojis.Service, requestManager requests.RequestManager,
 	}
 
 	cmd.handlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(
-			cmd.checkOptionalMapNumber, cmd.request),
+		discordgo.InteractionApplicationCommand: middlewares.
+			Use(cmd.checkOptionalMapNumber, cmd.getMap),
+		discordgo.InteractionMessageComponent: cmd.updateMap,
 	}
 
 	return &cmd
@@ -49,15 +50,14 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	return commands.IsApplicationCommand(i) &&
-		i.ApplicationCommandData().Name == command.GetName()
+	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	command.CallHandler(s, i, command.handlers)
 }
 
-func (command *Command) request(ctx context.Context, s *discordgo.Session,
+func (command *Command) getMap(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	mapNumber, err := getOptions(ctx)
 	if err != nil {
@@ -65,21 +65,68 @@ func (command *Command) request(ctx context.Context, s *discordgo.Session,
 	}
 
 	msg := mappers.MapCompetitionMapRequest(mapNumber, i.Locale)
-	err = command.requestManager.Request(s, i, competitionRequestRoutingKey, msg, command.respond)
+	err = command.requestManager.Request(s, i, competitionRequestRoutingKey, msg, command.getMapReply)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *Command) respond(_ context.Context, s *discordgo.Session,
+func (command *Command) updateMap(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	customID := i.MessageComponentData().CustomID
+	properties := make(map[string]any)
+	var mapNumber int64
+	var ok bool
+	if mapNumber, ok = contract.ExtractMapNormalCustomID(customID); ok {
+		properties[mapTypeProperty] = constants.MapTypeNormal
+	} else if mapNumber, ok = contract.ExtractMapTacticalCustomID(customID); ok {
+		properties[mapTypeProperty] = constants.MapTypeTactical
+	} else {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	msg := mappers.MapCompetitionMapRequest(mapNumber, i.Locale)
+	err := command.requestManager.Request(s, i, competitionRequestRoutingKey,
+		msg, command.updateMapReply, properties)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (command *Command) getMapReply(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	command.updateMapReply(ctx, s, i, message, map[string]any{mapTypeProperty: constants.MapTypeNormal})
+}
+
+func (command *Command) updateMapReply(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 	if !isAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
-	_, err := s.InteractionResponseEdit(i.Interaction,
-		mappers.MapCompetitionMapToWebhookEdit(message.GetCompetitionMapAnswer(),
-			constants.MapTypeNormal, command.emojiService, message.Language))
+	mapTypeValue, found := properties[mapTypeProperty]
+	if !found {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogRequestProperty, mapTypeProperty).
+			Msgf("Cannot find request property, panicking...")
+		panic(commands.ErrRequestPropertyNotFound)
+	}
+	mapType, ok := mapTypeValue.(constants.MapType)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogRequestProperty, mapTypeProperty).
+			Msgf("Cannot convert request property, panicking...")
+		panic(commands.ErrRequestPropertyNotFound)
+	}
+
+	reply := mappers.MapCompetitionMapToWebhookEdit(message.GetCompetitionMapAnswer(),
+		mapType, command.emojiService, message.Language)
+	_, err := s.InteractionResponseEdit(i.Interaction, reply)
 	if err != nil {
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
@@ -100,4 +147,14 @@ func isAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
 		message.Type == amqp.RabbitMQMessage_COMPETITION_MAP_ANSWER &&
 		message.CompetitionMapAnswer != nil
+}
+
+func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsApplicationCommand(i) &&
+		i.ApplicationCommandData().Name == command.GetName()
+}
+
+func matchesMessageCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsMessageCommand(i) &&
+		contract.IsBelongsToMap(i.MessageComponentData().CustomID)
 }

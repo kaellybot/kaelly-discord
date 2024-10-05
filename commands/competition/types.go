@@ -8,6 +8,8 @@ import (
 
 const (
 	competitionRequestRoutingKey = "requests.competitions"
+
+	mapTypeProperty = "mapType"
 )
 
 type Command struct {

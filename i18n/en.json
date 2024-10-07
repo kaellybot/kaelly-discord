@@ -172,7 +172,7 @@
             "tutorial": "",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), which collects and exposes them."
         },
-        "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end}}\n\n*{{ .description }}*",
+        "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end }}{{ if .description }}\n\n*{{ .description }}*{{ end }}",
         "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
         "effects": {
             "title": "Effects",

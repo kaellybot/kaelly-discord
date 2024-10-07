@@ -169,7 +169,7 @@
         "help": {
             "overview": "donne les items, montures, familiers, ressources et consommables du jeu",
             "detailed": "donne les items, montures, familiers, ressources et consommables du jeu\n  - Le champ `query` est obligatoire et correspond au nom de l'objet que tu souhaites consulter. *__Exemple__ : Coiffe du bouftou*",
-            "tutorial": "",
+            "tutorial": "https://i.imgur.com/7sfCA3Q.gif",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "**{{ .type }}**{{ if .level }} de niveau **{{ .level }}**{{ end }}{{ if .description }}\n\n*{{ .description }}*{{ end }}",

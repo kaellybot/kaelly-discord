@@ -119,11 +119,11 @@ func New() (*Impl, error) {
 
 	commands := make([]commands.DiscordCommand, 0)
 	commands = append(commands,
-		about.New(),
+		about.New(broker),
 		align.New(bookService, guildService, serverService, requestsManager),
 		almanax.New(emojiService, requestsManager),
 		config.New(guildService, feedService, serverService, streamerService, videastService, requestsManager),
-		help.New(&commands),
+		help.New(broker, &commands),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),
 		competition.New(emojiService, requestsManager),

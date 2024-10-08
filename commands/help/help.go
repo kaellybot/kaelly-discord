@@ -1,28 +1,33 @@
 package help
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
+	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
-func New(cmds *[]commands.DiscordCommand) *Command {
+func New(broker amqp.MessageBroker, cmds *[]commands.DiscordCommand) *Command {
 	cmd := &Command{
+		broker:   broker,
 		commands: cmds,
 	}
 
 	//nolint:exhaustive // no need to implement everything, only that matters
 	cmd.handlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: cmd.getHelp,
-		discordgo.InteractionMessageComponent:   cmd.updateHelp,
+		discordgo.InteractionApplicationCommand: middlewares.Use(cmd.trace, cmd.getHelp),
+		discordgo.InteractionMessageComponent:   middlewares.Use(cmd.trace, cmd.updateHelp),
 	}
 	return cmd
 }
@@ -50,15 +55,27 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 	command.CallHandler(s, i, command.handlers)
 }
 
-func (command *Command) getHelp(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) trace(ctx context.Context, _ *discordgo.Session,
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	message := mappers.MapHelpRequest(i.Locale)
+	errBroker := command.broker.Publish(message, amqp.ExchangeRequest, routingKey, i.ID)
+	if errBroker != nil {
+		log.Error().Err(errBroker).Msgf("Cannot trace help interaction through AMQP")
+	}
+
+	next(ctx)
+}
+
+func (command *Command) getHelp(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	_, err := s.InteractionResponseEdit(i.Interaction, command.getHelpMenu(i.Locale))
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle help reponse")
 	}
 }
 
-func (command *Command) updateHelp(s *discordgo.Session,
-	i *discordgo.InteractionCreate) {
+func (command *Command) updateHelp(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	var commandName string
 	var page int
 	customID := i.MessageComponentData().CustomID

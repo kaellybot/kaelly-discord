@@ -2,15 +2,19 @@ package about
 
 import (
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/mappers"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
-func New() *Command {
-	return &Command{}
+func New(broker amqp.MessageBroker) *Command {
+	return &Command{
+		broker: broker,
+	}
 }
 
 func (command *Command) GetName() string {
@@ -34,6 +38,12 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	message := mappers.MapAboutRequest(i.Locale)
+	errBroker := command.broker.Publish(message, amqp.ExchangeRequest, routingKey, i.ID)
+	if errBroker != nil {
+		log.Error().Err(errBroker).Msgf("Cannot trace about interaction through AMQP")
+	}
+
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{command.getAboutEmbed(i.Locale)},
 	})

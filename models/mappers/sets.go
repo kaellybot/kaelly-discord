@@ -110,10 +110,8 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 			Description: i18n.Get(lg, "set.description", i18n.Vars{"level": set.Level}),
 			Color:       constants.Color,
 			URL:         i18n.Get(lg, "set.url", i18n.Vars{"id": set.Id}),
-			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: "https://i.imgur.com/zY6C2ai.png", // TODO URL
-			},
-			Fields: fields,
+			Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: set.GetIcon()},
+			Fields:      fields,
 			Author: &discordgo.MessageEmbedAuthor{
 				Name:    answer.Source.Name,
 				URL:     answer.Source.Url,

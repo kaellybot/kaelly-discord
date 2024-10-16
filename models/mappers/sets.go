@@ -128,13 +128,20 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 	set := answer.GetSet()
 	components := make([]discordgo.MessageComponent, 0)
 
+	var maxItemNumber int
+	for _, currentBonus := range set.Bonuses {
+		itemNumber := int(currentBonus.ItemNumber)
+		if itemNumber > maxItemNumber {
+			maxItemNumber = itemNumber
+		}
+	}
 	bonuses := make([]discordgo.SelectMenuOption, 0)
 	for _, currentBonus := range set.Bonuses {
-		emoji := service.GetSetBonusEmoji(int(currentBonus.ItemNumber), len(set.Equipments))
+		emoji := service.GetSetBonusEmoji(int(currentBonus.ItemNumber), maxItemNumber)
 		bonuses = append(bonuses, discordgo.SelectMenuOption{
 			Label: i18n.Get(lg, "set.effects.option", i18n.Vars{
 				"itemNumber": currentBonus.ItemNumber,
-				"itemCount":  len(set.Equipments),
+				"itemCount":  maxItemNumber,
 			}),
 			Value:   fmt.Sprintf("%v", currentBonus.ItemNumber),
 			Default: currentBonus.ItemNumber == bonus.ItemNumber,

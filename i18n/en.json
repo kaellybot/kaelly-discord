@@ -264,7 +264,7 @@
         "help": {
             "overview": "provides sets",
             "detailed": "provides information about sets in the game\n   - The `query` field is mandatory and corresponds to the name of the set you want to look up. *__Example__: Boon Set*",
-            "tutorial": "",
+            "tutorial": "https://i.imgur.com/jU9zhMz.gif",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
         "description": "Level **{{ .level }}**",

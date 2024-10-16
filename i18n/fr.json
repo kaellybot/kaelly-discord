@@ -264,7 +264,7 @@
         "help": {
             "overview": "donne les panoplies du jeu",
             "detailed": "donne les panoplies du jeu\n   - Le champ `query` est obligatoire et correspond au nom de la panoplie que tu souhaites consulter. *__Exemple__ : Panoplie du Boune*",
-            "tutorial": "",
+            "tutorial": "https://i.imgur.com/fKRDCnZ.gif",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau **{{ .level }}**",

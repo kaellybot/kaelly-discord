@@ -84,7 +84,11 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 			})
 
 		fields = append(fields, effectFields...)
-	} else if isRecipe && equipment.GetRecipe() != nil {
+	}
+
+	// TODO conditions, weapon details
+
+	if isRecipe && equipment.GetRecipe() != nil {
 		recipeFields := discord.SliceFields(equipment.GetRecipe().GetIngredients(), constants.MaxIngredientsPerField,
 			func(i int, items []*amqp.EncyclopediaItemAnswer_Recipe_Ingredient) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter

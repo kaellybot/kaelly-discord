@@ -77,7 +77,7 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 				Value: i18n.Get(lg, "set.items.description", i18n.Vars{
 					"items": mapSetItems(items, lg),
 				}),
-				Inline: false,
+				Inline: true,
 			}
 		})
 
@@ -101,7 +101,10 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 				}
 			})
 
-		fields = append(fields, bonusFields...)
+		if len(bonusFields) > 0 {
+			fields = append(fields, discord.GhostInlineField())
+			fields = append(fields, bonusFields...)
+		}
 	}
 
 	return &[]*discordgo.MessageEmbed{

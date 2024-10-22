@@ -33,6 +33,13 @@ func SliceButtons[T any](items []T, toButton ItemToButton[T]) []discordgo.Action
 	return actionsRow
 }
 
+func GhostInlineField() *discordgo.MessageEmbedField {
+	return &discordgo.MessageEmbedField{
+		Name:   constants.InvisibleCharacter,
+		Inline: false,
+	}
+}
+
 func BuildDefaultFooter(lg discordgo.Locale) *discordgo.MessageEmbedFooter {
 	return &discordgo.MessageEmbedFooter{
 		Text: i18n.Get(lg, "default.footer", i18n.Vars{

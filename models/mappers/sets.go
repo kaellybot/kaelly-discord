@@ -174,10 +174,17 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 		})
 	}
 
+	var itemType amqp.ItemType
+	if set.GetIsCosmetic() {
+		itemType = amqp.ItemType_COSMETIC
+	} else {
+		itemType = amqp.ItemType_EQUIPMENT
+	}
+
 	components = append(components, discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
 			discordgo.SelectMenu{
-				CustomID:    contract.CraftItemCustomID(amqp.ItemType_EQUIPMENT.String()),
+				CustomID:    contract.CraftItemCustomID(itemType.String()),
 				MenuType:    discordgo.StringSelectMenu,
 				Placeholder: i18n.Get(lg, "set.items.placeholder"),
 				Options:     items,

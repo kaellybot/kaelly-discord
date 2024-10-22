@@ -7,5 +7,4 @@ type Emoji struct {
 	Type      constants.EmojiType `gorm:"primaryKey"`
 	Snowflake string
 	Name      string
-	DebugName string
 }

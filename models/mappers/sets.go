@@ -149,16 +149,18 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 		})
 	}
 
-	components = append(components, discordgo.ActionsRow{
-		Components: []discordgo.MessageComponent{
-			discordgo.SelectMenu{
-				CustomID:    contract.CraftSetBonusCustomID(set.Id),
-				MenuType:    discordgo.StringSelectMenu,
-				Placeholder: i18n.Get(lg, "set.effects.placeholder"),
-				Options:     bonuses,
+	if len(bonuses) > 0 {
+		components = append(components, discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.SelectMenu{
+					CustomID:    contract.CraftSetBonusCustomID(set.Id),
+					MenuType:    discordgo.StringSelectMenu,
+					Placeholder: i18n.Get(lg, "set.effects.placeholder"),
+					Options:     bonuses,
+				},
 			},
-		},
-	})
+		})
+	}
 
 	items := make([]discordgo.SelectMenuOption, 0)
 	for _, item := range set.Equipments {

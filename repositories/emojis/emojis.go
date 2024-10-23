@@ -4,7 +4,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -21,7 +20,6 @@ func (repo *Impl) GetEmojis() ([]entities.Emoji, error) {
 			Model(&entities.Emoji{}).
 			Find(&emojis)
 	} else {
-		log.Info().Msgf("Development mode enabled, retrieving debug emojis")
 		response = repo.db.GetDB().
 			Model(&entities.Emoji{}).
 			Select("id, snowflake_dev AS snowflake, type, name").

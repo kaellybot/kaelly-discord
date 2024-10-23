@@ -2,10 +2,12 @@ package constants
 
 const (
 	EmojiIDEffect      EmojiMiscID = "effect"
-	EmojiIDRecipe      EmojiMiscID = "recipe"
-	EmojiIDSet         EmojiMiscID = "set"
+	EmojiIDNext        EmojiMiscID = "next"
 	EmojiIDNormalMap   EmojiMiscID = "normalMap"
+	EmojiIDPrevious    EmojiMiscID = "previous"
+	EmojiIDRecipe      EmojiMiscID = "recipe"
 	EmojiIDTacticalMap EmojiMiscID = "tacticalMap"
+	EmojiIDSet         EmojiMiscID = "set"
 
 	EmojiTypeEquipment EmojiType = "Equipment"
 	EmojiTypeBonusSet  EmojiType = "BonusSet"

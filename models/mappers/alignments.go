@@ -99,10 +99,17 @@ func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverID stri
 			order = entities.Order{}
 		}
 
+		var orderEmoji string
+		if city.Type == constants.CityTypeLight {
+			orderEmoji = order.EmojiLight
+		} else {
+			orderEmoji = order.EmojiDark
+		}
+
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
 			Username: alignXp.Username,
 			City:     city.Emoji,
-			Order:    order.Emoji,
+			Order:    orderEmoji,
 			Level:    alignXp.Level,
 		})
 	}
@@ -167,9 +174,16 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 			order = entities.Order{}
 		}
 
+		var orderEmoji string
+		if city.Type == constants.CityTypeLight {
+			orderEmoji = order.EmojiLight
+		} else {
+			orderEmoji = order.EmojiDark
+		}
+
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
 			City:  city.Emoji,
-			Order: order.Emoji,
+			Order: orderEmoji,
 			Level: alignXp.Level,
 		})
 	}

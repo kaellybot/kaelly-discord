@@ -1,8 +1,13 @@
 package constants
 
+type CityType string
+
 const (
 	AlignmentMinLevel = 0
 	AlignmentMaxLevel = 100
+
+	CityTypeDark  CityType = "dark"
+	CityTypeLight CityType = "light"
 
 	NeutralCityColor = 12506502
 )

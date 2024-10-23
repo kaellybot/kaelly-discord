@@ -9,6 +9,7 @@ type City struct {
 	ID     string `gorm:"primaryKey"`
 	Icon   string
 	Emoji  string
+	Type   constants.CityType
 	Color  int
 	Labels []CityLabel `gorm:"foreignKey:CityID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
@@ -36,6 +37,6 @@ func (city City) GetLabels() map[amqp.Language]string {
 func GetNeutralCity() City {
 	return City{
 		Color: constants.NeutralCityColor,
-		Icon:  "https://i.imgur.com/i74Rh8o.png",
+		Icon:  "https://i.imgur.com/cA5bKgy.png",
 	}
 }

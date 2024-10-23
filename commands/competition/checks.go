@@ -14,7 +14,7 @@ import (
 func (command *Command) checkOptionalMapNumber(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
-	var mapNumber int64 = 0
+	var mapNumber int64
 	for _, option := range data.Options {
 		if option.Name == contract.MapNumberOptionName {
 			desiredMapNumber := option.IntValue()
@@ -22,17 +22,17 @@ func (command *Command) checkOptionalMapNumber(ctx context.Context, s *discordgo
 			if desiredMapNumber >= constants.MapNumberMin && desiredMapNumber <= constants.MapNumberMax {
 				mapNumber = desiredMapNumber
 				break
-			} else {
-				content := i18n.Get(i.Locale, "checks.map.constraints",
-					i18n.Vars{"min": constants.MapNumberMin, "max": constants.MapNumberMax})
-				_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-					Content: &content,
-				})
-				if err != nil {
-					log.Error().Err(err).Msg("Map number check response ignored")
-				}
-				return
 			}
+
+			content := i18n.Get(i.Locale, "checks.map.constraints",
+				i18n.Vars{"min": constants.MapNumberMin, "max": constants.MapNumberMax})
+			_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+				Content: &content,
+			})
+			if err != nil {
+				log.Error().Err(err).Msg("Map number check response ignored")
+			}
+			return
 		}
 	}
 

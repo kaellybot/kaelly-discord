@@ -2,7 +2,6 @@ package entities
 
 import amqp "github.com/kaellybot/kaelly-amqp"
 
-//nolint:lll
 type Server struct {
 	ID     string `gorm:"primaryKey"`
 	Icon   string

@@ -4,11 +4,10 @@ import amqp "github.com/kaellybot/kaelly-amqp"
 
 //nolint:lll
 type Dimension struct {
-	ID             string `gorm:"primaryKey"`
-	DofusPortalsID string `gorm:"unique"`
-	Icon           string
-	Color          int
-	Labels         []DimensionLabel `gorm:"foreignKey:DimensionID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ID     string `gorm:"primaryKey"`
+	Icon   string
+	Color  int
+	Labels []DimensionLabel `gorm:"foreignKey:DimensionID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type DimensionLabel struct {

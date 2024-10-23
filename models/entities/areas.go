@@ -3,9 +3,8 @@ package entities
 import amqp "github.com/kaellybot/kaelly-amqp"
 
 type Area struct {
-	ID             string      `gorm:"primaryKey"`
-	DofusPortalsID string      `gorm:"unique"`
-	Labels         []AreaLabel `gorm:"foreignKey:AreaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ID     string      `gorm:"primaryKey"`
+	Labels []AreaLabel `gorm:"foreignKey:AreaID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type AreaLabel struct {

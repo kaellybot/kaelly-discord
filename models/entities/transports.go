@@ -6,10 +6,9 @@ import (
 
 //nolint:lll
 type TransportType struct {
-	ID             string `gorm:"primaryKey"`
-	DofusPortalsID string `gorm:"unique"`
-	Emoji          string
-	Labels         []TransportTypeLabel `gorm:"foreignKey:TransportTypeID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ID     string `gorm:"primaryKey"`
+	Emoji  string
+	Labels []TransportTypeLabel `gorm:"foreignKey:TransportTypeID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type TransportTypeLabel struct {

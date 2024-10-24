@@ -31,7 +31,7 @@ func New(bookService books.Service, guildService guilds.Service,
 	checkServer := checks.CheckServerWithFallback(contract.AlignServerOptionName,
 		cmd.serverService, cmd.guildService)
 
-	subCommandHandlers := cmd.HandleSubCommand(commands.SubCommandHandlers{
+	subCommandHandlers := cmd.HandleSubCommands(commands.SubCommandHandlers{
 		contract.AlignGetSubCommandName: middlewares.
 			Use(cmd.checkOptionalCity, cmd.checkOptionalOrder, checkServer, cmd.getRequest),
 		contract.AlignSetSubCommandName: middlewares.

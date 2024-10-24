@@ -22,18 +22,23 @@ func New(emojiService emojis.Service, requestManager requests.RequestManager) *C
 		requestManager: requestManager,
 	}
 
-	subCommandHandlers := cmd.HandleSubCommand(commands.SubCommandHandlers{
+	subCommandHandlers := cmd.HandleSubCommands(commands.SubCommandHandlers{
 		contract.AlmanaxDaySubCommandName: middlewares.
-			Use(cmd.checkDate, cmd.almanaxRequest),
+			Use(cmd.checkDate, cmd.getAlmanax),
 		contract.AlmanaxResourcesSubCommandName: middlewares.
-			Use(cmd.checkDuration, cmd.resourceRequest),
+			Use(cmd.checkDuration, cmd.getResources),
 		contract.AlmanaxEffectsSubCommandName: middlewares.
-			Use(cmd.checkQuery, cmd.effectRequest),
+			Use(cmd.checkQuery, cmd.getAlmanaxWithEffect),
+	})
+
+	interactionHandlers := cmd.HandleInteractionMessages(commands.InteractionMessageHandlers{
+		contract.AlmanaxDayCustomID: cmd.updateAlmanax,
 	})
 
 	cmd.handlers = commands.DiscordHandlers{
 		discordgo.InteractionApplicationCommand:             subCommandHandlers,
 		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
+		discordgo.InteractionMessageComponent:               interactionHandlers,
 	}
 
 	return &cmd
@@ -67,8 +72,7 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	return commands.IsApplicationCommand(i) &&
-		i.ApplicationCommandData().Name == command.GetName()
+	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -100,4 +104,14 @@ func getQueryOption(ctx context.Context) (string, error) {
 	}
 
 	return query, nil
+}
+
+func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsApplicationCommand(i) &&
+		i.ApplicationCommandData().Name == command.GetName()
+}
+
+func matchesMessageCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsMessageCommand(i) &&
+		contract.IsBelongsToAlmanax(i.MessageComponentData().CustomID)
 }

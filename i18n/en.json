@@ -88,7 +88,9 @@
                 "title": ":moneybag: Rewards",
                 "description": "**{{ .reward }}** {{ .kamaIcon }}"
             },
-            "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!"
+            "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!",
+            "next": "Next day",
+            "previous": "Previous day"
         },
         "effect": {
             "missing": "My crystal ball tells me that the desired bonus will not intervene in the next thirty days, I unfortunately not know more :persevere:"

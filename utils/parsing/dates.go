@@ -13,7 +13,7 @@ var (
 
 func ParseDate(dateInput string) (*time.Time, error) {
 	for _, dateFormat := range constants.SupportedDateFormats() {
-		date, err := time.Parse(dateFormat, dateInput)
+		date, err := time.ParseInLocation(dateFormat, dateInput, time.UTC)
 		if err == nil {
 			return &date, nil
 		}

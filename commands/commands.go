@@ -18,7 +18,7 @@ func (command *AbstractCommand) CallHandler(s *discordgo.Session, i *discordgo.I
 	}
 }
 
-func (command *AbstractCommand) HandleSubCommand(handlers map[string]DiscordHandler) DiscordHandler {
+func (command *AbstractCommand) HandleSubCommands(handlers SubCommandHandlers) DiscordHandler {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if IsApplicationCommand(i) {
 			data := i.ApplicationCommandData()
@@ -27,9 +27,27 @@ func (command *AbstractCommand) HandleSubCommand(handlers map[string]DiscordHand
 				if found {
 					handler(s, i)
 				} else {
-					panic(ErrNoSubCommandHandler)
+					panic(ErrNoProvidedHandler)
 				}
 			}
+			return
+		}
+	}
+}
+
+func (command *AbstractCommand) HandleInteractionMessages(handlers InteractionMessageHandlers,
+) DiscordHandler {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if IsMessageCommand(i) {
+			customID := i.MessageComponentData().CustomID
+			for regex, handler := range handlers {
+				if regex.MatchString(customID) {
+					handler(s, i)
+					return
+				}
+			}
+
+			panic(ErrNoProvidedHandler)
 		}
 	}
 }

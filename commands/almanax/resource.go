@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) resourceRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) getResources(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	duration, err := getDurationOption(ctx)
 	if err != nil {

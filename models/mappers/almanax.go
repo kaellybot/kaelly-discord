@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
@@ -59,41 +60,82 @@ func MapAlmanaxEffectRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMe
 	}
 }
 
-func MapAlmanaxToEmbed(almanax *amqp.Almanax, lg discordgo.Locale,
-	emojiService emojis.Service) *discordgo.MessageEmbed {
+func MapAlmanaxToWebhook(almanax *amqp.Almanax, missingAlmanaxKey string,
+	lg discordgo.Locale, emojiService emojis.Service) *discordgo.WebhookEdit {
+	if almanax == nil {
+		content := i18n.Get(lg, missingAlmanaxKey)
+		return &discordgo.WebhookEdit{
+			Content: &content,
+		}
+	}
+
+	return &discordgo.WebhookEdit{
+		Embeds:     mapAlmanaxToEmbeds(almanax, lg, emojiService),
+		Components: mapAlmanaxToComponents(almanax, lg, emojiService),
+	}
+}
+
+func mapAlmanaxToEmbeds(almanax *amqp.Almanax, lg discordgo.Locale,
+	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
 	season := constants.GetSeason(almanax.Date.AsTime())
-	return &discordgo.MessageEmbed{
-		Title: i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": almanax.GetDate().Seconds}),
-		URL: i18n.Get(lg, "almanax.day.url", i18n.Vars{
-			"date": almanax.Date.AsTime().Format(constants.KrosmozAlmanaxDateFormat),
-		}),
-		Color:     season.Color,
-		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: season.AlmanaxIcon},
-		Image:     &discordgo.MessageEmbedImage{URL: almanax.Tribute.Item.Icon},
-		Author: &discordgo.MessageEmbedAuthor{
-			Name:    almanax.Source.Name,
-			URL:     almanax.Source.Url,
-			IconURL: almanax.Source.Icon,
+	return &[]*discordgo.MessageEmbed{
+		{
+			Title: i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": almanax.GetDate().Seconds}),
+			URL: i18n.Get(lg, "almanax.day.url", i18n.Vars{
+				"date": almanax.Date.AsTime().Format(constants.KrosmozAlmanaxDateFormat),
+			}),
+			Color:     season.Color,
+			Thumbnail: &discordgo.MessageEmbedThumbnail{URL: season.AlmanaxIcon},
+			Image:     &discordgo.MessageEmbedImage{URL: almanax.Tribute.Item.Icon},
+			Author: &discordgo.MessageEmbedAuthor{
+				Name:    almanax.Source.Name,
+				URL:     almanax.Source.Url,
+				IconURL: almanax.Source.Icon,
+			},
+			Footer: discord.BuildDefaultFooter(lg),
+			Fields: []*discordgo.MessageEmbedField{
+				{
+					Name:  i18n.Get(lg, "almanax.day.bonus.title"),
+					Value: almanax.Bonus,
+				},
+				{
+					Name: i18n.Get(lg, "almanax.day.tribute.title"),
+					Value: i18n.Get(lg, "almanax.day.tribute.description", i18n.Vars{
+						"item":     almanax.Tribute.Item.Name,
+						"quantity": almanax.Tribute.Quantity,
+					}),
+				},
+				{
+					Name: i18n.Get(lg, "almanax.day.reward.title"),
+					Value: i18n.Get(lg, "almanax.day.reward.description", i18n.Vars{
+						"reward":   translators.FormatNumber(almanax.Reward, lg),
+						"kamaIcon": emojiService.GetMiscStringEmoji(constants.EmojiIDKama),
+					}),
+				},
+			},
 		},
-		Footer: discord.BuildDefaultFooter(lg),
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:  i18n.Get(lg, "almanax.day.bonus.title"),
-				Value: almanax.Bonus,
-			},
-			{
-				Name: i18n.Get(lg, "almanax.day.tribute.title"),
-				Value: i18n.Get(lg, "almanax.day.tribute.description", i18n.Vars{
-					"item":     almanax.Tribute.Item.Name,
-					"quantity": almanax.Tribute.Quantity,
-				}),
-			},
-			{
-				Name: i18n.Get(lg, "almanax.day.reward.title"),
-				Value: i18n.Get(lg, "almanax.day.reward.description", i18n.Vars{
-					"reward":   translators.FormatNumber(almanax.Reward, lg),
-					"kamaIcon": emojiService.GetMiscStringEmoji(constants.EmojiIDKama),
-				}),
+	}
+}
+
+func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
+	emojiService emojis.Service) *[]discordgo.MessageComponent {
+	previousDate := almanax.Date.AsTime().AddDate(0, 0, -1)
+	nextDate := almanax.Date.AsTime().AddDate(0, 0, 1)
+	return &[]discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					CustomID: contract.CraftAlmanaxDayCustomID(previousDate),
+					Label:    i18n.Get(lg, "almanax.day.previous"),
+					Style:    discordgo.PrimaryButton,
+					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDPrevious),
+				},
+				discordgo.Button{
+					CustomID: contract.CraftAlmanaxDayCustomID(nextDate),
+					Label:    i18n.Get(lg, "almanax.day.next"),
+					Style:    discordgo.PrimaryButton,
+					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDNext),
+				},
 			},
 		},
 	}

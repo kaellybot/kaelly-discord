@@ -39,7 +39,7 @@ func New(emojiService emojis.Service, feedService feeds.Service,
 
 	checkServer := checks.CheckServer(contract.ConfigServerOptionName, cmd.serverService)
 
-	subCommandHandlers := cmd.HandleSubCommand(commands.SubCommandHandlers{
+	subCommandHandlers := cmd.HandleSubCommands(commands.SubCommandHandlers{
 		contract.ConfigAlmanaxSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.almanaxRequest),
 		contract.ConfigGetSubCommandName: middlewares.

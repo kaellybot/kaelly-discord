@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -58,7 +59,8 @@ func MapAlmanaxEffectRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMe
 	}
 }
 
-func MapAlmanaxToEmbed(almanax *amqp.Almanax, lg discordgo.Locale) *discordgo.MessageEmbed {
+func MapAlmanaxToEmbed(almanax *amqp.Almanax, lg discordgo.Locale,
+	emojiService emojis.Service) *discordgo.MessageEmbed {
 	season := constants.GetSeason(almanax.Date.AsTime())
 	return &discordgo.MessageEmbed{
 		Title: i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": almanax.GetDate().Seconds}),
@@ -89,7 +91,8 @@ func MapAlmanaxToEmbed(almanax *amqp.Almanax, lg discordgo.Locale) *discordgo.Me
 			{
 				Name: i18n.Get(lg, "almanax.day.reward.title"),
 				Value: i18n.Get(lg, "almanax.day.reward.description", i18n.Vars{
-					"reward": translators.FormatNumber(almanax.Reward, lg),
+					"reward":   translators.FormatNumber(almanax.Reward, lg),
+					"kamaIcon": emojiService.GetMiscStringEmoji(constants.EmojiIDKama),
 				}),
 			},
 		},

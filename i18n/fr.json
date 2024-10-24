@@ -7,17 +7,17 @@
             "source": ""
         },
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Bot Discord dédié au jeu {{ .game.Name }} {{ .gameEmoji }} !",
+        "desc": "Bot Discord dédié au jeu {{ .game.Name }} {{ .gameLogo }} !",
         "support": {
             "title": ":bulb: Serveur de support",
             "desc": "Tu rencontres un problème quant à mon utilisation ? Une suggestion ? N'hésite pas à rejoindre le [serveur Discord]({{ .discord }}) de support !"
         },
         "twitter": {
-            "title": "<:twitter:1100040368445206619> Twitter",
+            "title": "{{ .twitterLogo }} Twitter",
             "desc": "Je suis aussi sur [Twitter]({{ .twitter }}) : tu y trouveras les dernières nouveautés !"
         },
         "opensource": {
-            "title": "<:github:372093338628784148> Open source",
+            "title": "{{ .githubLogo }} Open source",
             "desc": "L'intégralité de mon code source est sous licence GPL-3.0 et accessible sur [Github]({{ .github }})"
         },
         "free": {
@@ -86,7 +86,7 @@
             },
             "reward": {
                 "title": ":moneybag: Gains",
-                "description": "**{{ .reward }}** <:kama:1232433925566103662>"
+                "description": "**{{ .reward }}** {{ .kamaIcon }}"
             },
             "missing": "Oups ! Je n'ai pas l'almanax de ce jour dans mes connaissances, je remonte le problème à mes créateurs !"
         },
@@ -125,7 +125,7 @@
         "embed": {
             "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** est l'actuel serveur de la guilde !{{ else }}Aucun serveur {{ .game.Name }} n'est lié à la guilde !{{ end }}",
             "server": {
-                "name": "{{ .gameEmoji }} Salons liés à un serveur",
+                "name": "{{ .gameLogo }} Salons liés à un serveur",
                 "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
             },
             "webhook": {

@@ -245,7 +245,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name: i18n.Get(lg, "config.embed.server.name", i18n.Vars{
-					"gameEmoji": emojiService.GetMiscStringEmoji(constants.EmojiIDGame),
+					"gameLogo": emojiService.GetMiscStringEmoji(constants.EmojiIDGame),
 				}),
 				Value:  i18n.Get(lg, "config.embed.server.value", i18n.Vars{"channels": channelServers}),
 				Inline: true,

@@ -38,7 +38,8 @@ func (command *Command) almanaxRespond(_ context.Context, s *discordgo.Session,
 	webhookEdit := discordgo.WebhookEdit{}
 	if message.GetEncyclopediaAlmanaxAnswer().Almanax != nil {
 		webhookEdit.Embeds = &[]*discordgo.MessageEmbed{
-			mappers.MapAlmanaxToEmbed(message.GetEncyclopediaAlmanaxAnswer().Almanax, lg),
+			mappers.MapAlmanaxToEmbed(message.GetEncyclopediaAlmanaxAnswer().Almanax, lg,
+				command.emojiService),
 		}
 	} else {
 		content := i18n.Get(lg, "almanax.day.missing")

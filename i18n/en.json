@@ -7,17 +7,17 @@
             "tutorial": "https://i.imgur.com/6otf3t7.gif"
         },
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Discord bot dedicated to the {{ .game.Name }} {{ .gameEmoji }} game!",
+        "desc": "Discord bot dedicated to the {{ .game.Name }} {{ .gameLogo }} game!",
         "support": {
             "title": ":bulb: Support server",
             "desc": "You have a problem with its use? A suggestion? Feel free to join the support [Discord server]({{ .discord }})!"
         },
         "twitter": {
-            "title": "<:twitter:1100040368445206619> Twitter",
+            "title": "{{ .twitterLogo }} Twitter",
             "desc": "I'm also on [Twitter]({{ .twitter }}): you will find the last news!"
         },
         "opensource": {
-            "title": "<:github:372093338628784148> Open source",
+            "title": "{{ .githubLogo }} Open source",
             "desc": "All my source code is licensed under GPL-3.0 and accessible on [Github]({{ .github }})"
         },
         "free": {
@@ -86,7 +86,7 @@
             },
             "reward": {
                 "title": ":moneybag: Rewards",
-                "description": "**{{ .reward }}** <:kama:1232433925566103662>"
+                "description": "**{{ .reward }}** {{ .kamaIcon }}"
             },
             "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!"
         },
@@ -125,7 +125,7 @@
         "embed": {
             "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
             "server": {
-                "name": "{{ .gameEmoji }} Channels linked to servers",
+                "name": "{{ .gameLogo }} Channels linked to servers",
                 "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
             },
             "webhook": {

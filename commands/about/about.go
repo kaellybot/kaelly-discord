@@ -58,8 +58,8 @@ func (command *Command) getAboutEmbed(locale discordgo.Locale) *discordgo.Messag
 	return &discordgo.MessageEmbed{
 		Title: i18n.Get(locale, "about.title", i18n.Vars{"name": constants.Name, "version": constants.Version}),
 		Description: i18n.Get(locale, "about.desc", i18n.Vars{
-			"game":      constants.GetGame(),
-			"gameEmoji": command.emojiService.GetMiscStringEmoji(constants.EmojiIDGame),
+			"game":     constants.GetGame(),
+			"gameLogo": command.emojiService.GetMiscStringEmoji(constants.EmojiIDGame),
 		}),
 		Color:     constants.Color,
 		Image:     &discordgo.MessageEmbedImage{URL: constants.AvatarImage},
@@ -75,12 +75,16 @@ func (command *Command) getAboutEmbed(locale discordgo.Locale) *discordgo.Messag
 				Inline: false,
 			},
 			{
-				Name:   i18n.Get(locale, "about.twitter.title"),
+				Name: i18n.Get(locale, "about.twitter.title", i18n.Vars{
+					"twitterLogo": command.emojiService.GetMiscStringEmoji(constants.EmojiIDTwitter),
+				}),
 				Value:  i18n.Get(locale, "about.twitter.desc", i18n.Vars{"twitter": constants.Twitter}),
 				Inline: false,
 			},
 			{
-				Name:   i18n.Get(locale, "about.opensource.title"),
+				Name: i18n.Get(locale, "about.opensource.title", i18n.Vars{
+					"githubLogo": command.emojiService.GetMiscStringEmoji(constants.EmojiIDGithub),
+				}),
 				Value:  i18n.Get(locale, "about.opensource.desc", i18n.Vars{"github": constants.Github}),
 				Inline: false,
 			},

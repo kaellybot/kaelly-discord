@@ -66,7 +66,7 @@ func (command *Command) getItem(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapItemRequest(query, false, amqp.ItemType_ANY_ITEM, i.Locale)
+	msg := mappers.MapItemRequest(query, false, amqp.ItemType_ANY_ITEM_TYPE, i.Locale)
 	err = command.requestManager.Request(s, i, itemRequestRoutingKey, msg, command.getItemReply)
 	if err != nil {
 		panic(err)

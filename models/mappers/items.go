@@ -55,13 +55,14 @@ func mapEquipmentToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe boo
 	locale amqp.Language) *discordgo.WebhookEdit {
 	lg := constants.MapAMQPLocale(locale)
 	return &discordgo.WebhookEdit{
-		Embeds:     mapEquipmentToEmbeds(answer, isRecipe, characService, lg),
+		Embeds:     mapEquipmentToEmbeds(answer, isRecipe, characService, emojiService, lg),
 		Components: mapEquipmentToComponents(answer, isRecipe, emojiService, lg),
 	}
 }
 
 func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
-	service characteristics.Service, lg discordgo.Locale) *[]*discordgo.MessageEmbed {
+	service characteristics.Service, emojiService emojis.Service, lg discordgo.Locale,
+) *[]*discordgo.MessageEmbed {
 	equipment := answer.GetEquipment()
 	fields := make([]*discordgo.MessageEmbedField, 0)
 
@@ -99,7 +100,7 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 				return &discordgo.MessageEmbedField{
 					Name: name,
 					Value: i18n.Get(lg, "item.recipe.description", i18n.Vars{
-						"ingredients": mapItemIngredients(items, lg),
+						"ingredients": mapItemIngredients(items, emojiService, lg),
 					}),
 					Inline: true,
 				}
@@ -142,20 +143,20 @@ func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool
 			CustomID: contract.CraftSetCustomID(equipment.GetSet().GetId()),
 			Label:    equipment.GetSet().GetName(),
 			Style:    discordgo.PrimaryButton,
-			Emoji:    service.GetMiscEmoji(constants.EmojiIDSet),
+			Emoji:    service.GetItemTypeEmoji(amqp.ItemType_SET_TYPE),
 		})
 	}
 
 	if isRecipe && len(equipment.GetEffects()) > 0 {
 		components = append(components, discordgo.Button{
-			CustomID: contract.CraftItemEffectsCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT.String()),
+			CustomID: contract.CraftItemEffectsCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT_TYPE.String()),
 			Label:    i18n.Get(lg, "item.effects.button"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDEffect),
 		})
 	} else if equipment.GetRecipe() != nil {
 		components = append(components, discordgo.Button{
-			CustomID: contract.CraftItemRecipeCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT.String()),
+			CustomID: contract.CraftItemRecipeCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT_TYPE.String()),
 			Label:    i18n.Get(lg, "item.recipe.button"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDRecipe),
@@ -176,16 +177,18 @@ func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool
 type i18nIngredient struct {
 	Name     string
 	URL      string
+	Emoji    string
 	Quantity int64
 }
 
 func mapItemIngredients(ingredients []*amqp.EncyclopediaItemAnswer_Recipe_Ingredient,
-	lg discordgo.Locale) []i18nIngredient {
+	emojiService emojis.Service, lg discordgo.Locale) []i18nIngredient {
 	result := make([]i18nIngredient, 0)
 	for _, ingredient := range ingredients {
 		result = append(result, i18nIngredient{
 			Name:     ingredient.GetName(),
 			URL:      i18n.Get(lg, "item.url", i18n.Vars{"id": ingredient.GetId()}),
+			Emoji:    emojiService.GetItemTypeStringEmoji(ingredient.GetType()),
 			Quantity: ingredient.GetQuantity(),
 		})
 	}

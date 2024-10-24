@@ -78,6 +78,7 @@ func MapAlmanaxToWebhook(almanax *amqp.Almanax, missingAlmanaxKey string,
 func mapAlmanaxToEmbeds(almanax *amqp.Almanax, lg discordgo.Locale,
 	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
 	season := constants.GetSeason(almanax.Date.AsTime())
+
 	return &[]*discordgo.MessageEmbed{
 		{
 			Title: i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": almanax.GetDate().Seconds}),
@@ -102,6 +103,7 @@ func mapAlmanaxToEmbeds(almanax *amqp.Almanax, lg discordgo.Locale,
 					Name: i18n.Get(lg, "almanax.day.tribute.title"),
 					Value: i18n.Get(lg, "almanax.day.tribute.description", i18n.Vars{
 						"item":     almanax.Tribute.Item.Name,
+						"emoji":    emojiService.GetItemTypeStringEmoji(almanax.GetTribute().Item.GetType()),
 						"quantity": almanax.Tribute.Quantity,
 					}),
 				},
@@ -142,24 +144,48 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 }
 
 func MapAlmanaxResourceToEmbed(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,
-	locale amqp.Language) *discordgo.MessageEmbed {
+	locale amqp.Language, emojiService emojis.Service) *discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 	now := time.Now()
 	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	endDate := startDate.AddDate(0, 0, int(almanaxResources.Duration))
 	collator := constants.MapCollator(lg)
+
 	sort.SliceStable(almanaxResources.Tributes, func(i, j int) bool {
-		return collator.CompareString(almanaxResources.Tributes[i].ItemName, almanaxResources.Tributes[j].ItemName) == -1
+		if almanaxResources.Tributes[i].ItemType == almanaxResources.Tributes[j].ItemType {
+			return collator.CompareString(almanaxResources.Tributes[i].ItemName,
+				almanaxResources.Tributes[j].ItemName) == -1
+		}
+
+		return almanaxResources.Tributes[i].ItemType < almanaxResources.Tributes[j].ItemType
 	})
+
+	type i18nTribute struct {
+		Name     string
+		Emoji    string
+		Quantity int32
+	}
+
+	i18nTributes := make([]i18nTribute, 0)
+	for _, tribute := range almanaxResources.Tributes {
+		i18nTributes = append(i18nTributes, i18nTribute{
+			Name:     tribute.GetItemName(),
+			Emoji:    emojiService.GetItemTypeStringEmoji(tribute.GetItemType()),
+			Quantity: tribute.GetQuantity(),
+		})
+	}
 
 	return &discordgo.MessageEmbed{
 		Title: i18n.Get(lg, "almanax.resource.title", i18n.Vars{
 			"startDate": startDate.Unix(),
 			"endDate":   endDate.Unix(),
 		}),
-		Description: i18n.Get(lg, "almanax.resource.description", i18n.Vars{"tributes": almanaxResources.Tributes}),
-		Color:       constants.Color,
-		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.GetUnknownSeason().AlmanaxIcon},
+		Description: i18n.Get(lg, "almanax.resource.description", i18n.Vars{
+			"number":   1, // TODO multiple characters
+			"tributes": i18nTributes,
+		}),
+		Color:     constants.Color,
+		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: constants.GetUnknownSeason().AlmanaxIcon},
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    almanaxResources.Source.Name,
 			URL:     almanaxResources.Source.Url,

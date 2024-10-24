@@ -67,7 +67,7 @@ func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapItemRequest(query, false, amqp.ItemType_SET, i.Locale)
+	msg := mappers.MapItemRequest(query, false, amqp.ItemType_SET_TYPE, i.Locale)
 	err = command.requestManager.Request(s, i, setRequestRoutingKey, msg, command.getSetReply)
 	if err != nil {
 		panic(err)
@@ -105,7 +105,7 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapItemRequest(query, true, amqp.ItemType_SET, i.Locale)
+	msg := mappers.MapItemRequest(query, true, amqp.ItemType_SET_TYPE, i.Locale)
 	err := command.requestManager.Request(s, i, setRequestRoutingKey,
 		msg, callback, properties)
 	if err != nil {
@@ -164,7 +164,7 @@ func isAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
 		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER &&
 		message.EncyclopediaItemAnswer != nil &&
-		message.EncyclopediaItemAnswer.GetType() == amqp.ItemType_SET &&
+		message.EncyclopediaItemAnswer.GetType() == amqp.ItemType_SET_TYPE &&
 		message.EncyclopediaItemAnswer.GetSet() != nil
 }
 

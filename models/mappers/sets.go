@@ -176,9 +176,9 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 
 	var itemType amqp.ItemType
 	if set.GetIsCosmetic() {
-		itemType = amqp.ItemType_COSMETIC
+		itemType = amqp.ItemType_COSMETIC_TYPE
 	} else {
-		itemType = amqp.ItemType_EQUIPMENT
+		itemType = amqp.ItemType_EQUIPMENT_TYPE
 	}
 
 	components = append(components, discordgo.ActionsRow{

@@ -82,7 +82,7 @@
             "url": "https://www.krosmoz.com/fr/almanax/{{ .date }}",
             "tribute": {
                 "title": ":bouquet: Offrande",
-                "description": "**{{ .item }}** x{{ .quantity }}"
+                "description": "**{{ .quantity }}**x {{ .emoji }} {{ .item }}"
             },
             "reward": {
                 "title": ":moneybag: Gains",
@@ -97,7 +97,7 @@
         },
         "resource": {
             "title": "Almanax du <t:{{ .startDate }}:D> au <t:{{ .endDate }}:D>",
-            "description": "{{ if .tributes }}{{ range .tributes}}- **{{ .ItemName }}** x{{ .Quantity }}\n{{ end }}{{ else }}Aucune ressource nécessaire !{{ end }}"
+            "description": "Offrandes nécessaires pour **{{ .number }}** personnage\n{{ if .tributes }}{{ range .tributes}}- **{{ .Quantity }}**x {{ .Emoji }} {{ .Name }}\n{{ end }}{{ else }}Aucune ressource nécessaire !{{ end }}"
         }
     },
     "config": {
@@ -183,7 +183,7 @@
         },
         "recipe": {
             "title": "Recette",
-            "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}**x [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}Aucun ingrédient !{{ end }}",
+            "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}**x {{ .Emoji }} [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}Aucun ingrédient !{{ end }}",
             "button": "Recette"
         }
     },

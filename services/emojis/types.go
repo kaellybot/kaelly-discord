@@ -12,6 +12,8 @@ type Service interface {
 	GetMiscStringEmoji(emojiID constants.EmojiMiscID) string
 	GetMiscEmoji(emojiID constants.EmojiMiscID) *discordgo.ComponentEmoji
 	GetEquipmentEmoji(equipmentType amqp.EquipmentType) *discordgo.ComponentEmoji
+	GetItemTypeStringEmoji(itemType amqp.ItemType) string
+	GetItemTypeEmoji(itemType amqp.ItemType) *discordgo.ComponentEmoji
 	GetSetBonusEmoji(equipedItemNumber, itemNumber int) *discordgo.ComponentEmoji
 }
 

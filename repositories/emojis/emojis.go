@@ -18,7 +18,7 @@ func (repo *Impl) GetEmojis() ([]entities.Emoji, error) {
 
 	if !viper.GetBool(constants.Production) {
 		response = response.
-			Select("id, snowflake_dev AS snowflake, type, name")
+			Select("id, snowflake_dev AS snowflake, type, name, discord_name")
 	}
 
 	response = response.Find(&emojis)

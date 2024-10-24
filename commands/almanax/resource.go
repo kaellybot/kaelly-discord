@@ -32,7 +32,8 @@ func (command *Command) resourceRespond(_ context.Context, s *discordgo.Session,
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &[]*discordgo.MessageEmbed{
-		mappers.MapAlmanaxResourceToEmbed(message.GetEncyclopediaAlmanaxResourceAnswer(), message.Language),
+		mappers.MapAlmanaxResourceToEmbed(message.GetEncyclopediaAlmanaxResourceAnswer(), message.Language,
+			command.emojiService),
 	}})
 	if err != nil {
 		log.Warn().Err(err).

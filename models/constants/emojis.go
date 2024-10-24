@@ -11,13 +11,13 @@ const (
 	EmojiIDPrevious    EmojiMiscID = "previous"
 	EmojiIDRecipe      EmojiMiscID = "recipe"
 	EmojiIDRSS         EmojiMiscID = "rss"
-	EmojiIDSet         EmojiMiscID = "set"
 	EmojiIDTacticalMap EmojiMiscID = "tacticalMap"
 	EmojiIDTwitch      EmojiMiscID = "twitch"
 	EmojiIDTwitter     EmojiMiscID = "twitter"
 	EmojiIDYoutube     EmojiMiscID = "youtube"
 
 	EmojiTypeEquipment EmojiType = "Equipment"
+	EmojiTypeItem      EmojiType = "Item"
 	EmojiTypeBonusSet  EmojiType = "BonusSet"
 	EmojiTypeMisc      EmojiType = "Miscellaneous"
 )

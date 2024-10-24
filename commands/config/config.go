@@ -10,6 +10,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -22,13 +23,14 @@ import (
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
-func New(guildService guilds.Service, feedService feeds.Service,
-	serverService servers.Service, streamerService streamers.Service,
-	videastService videasts.Service,
+func New(emojiService emojis.Service, feedService feeds.Service,
+	guildService guilds.Service, serverService servers.Service,
+	streamerService streamers.Service, videastService videasts.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		guildService:    guildService,
+		emojiService:    emojiService,
 		feedService:     feedService,
+		guildService:    guildService,
 		serverService:   serverService,
 		streamerService: streamerService,
 		videastService:  videastService,

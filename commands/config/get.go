@@ -31,8 +31,9 @@ func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
 
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Embeds: &[]*discordgo.MessageEmbed{
-				mappers.MapConfigToEmbed(guild, command.serverService, command.feedService,
-					command.videastService, command.streamerService, message.Language),
+				mappers.MapConfigToEmbed(guild, command.emojiService, command.serverService,
+					command.feedService, command.videastService, command.streamerService,
+					message.Language),
 			},
 		})
 		if err != nil {

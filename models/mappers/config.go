@@ -7,6 +7,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/streamers"
@@ -190,9 +191,9 @@ func MapConfigurationWebhookYoutubeRequest(webhook *discordgo.Webhook, guildID, 
 	}
 }
 
-func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service,
-	feedService feeds.Service, videastService videasts.Service, streamerService streamers.Service,
-	locale amqp.Language,
+func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
+	serverService servers.Service, feedService feeds.Service, videastService videasts.Service,
+	streamerService streamers.Service, locale amqp.Language,
 ) *discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 
@@ -238,12 +239,14 @@ func MapConfigToEmbed(guild constants.GuildConfig, serverService servers.Service
 
 	return &discordgo.MessageEmbed{
 		Title:       guild.Name,
-		Description: i18n.Get(lg, "config.embed.description", i18n.Vars{"server": guildServer, "game": constants.GetGame()}),
+		Description: i18n.Get(lg, "config.embed.description", i18n.Vars{"server": guildServer}),
 		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: guild.Icon},
 		Color:       constants.Color,
 		Fields: []*discordgo.MessageEmbedField{
 			{
-				Name:   i18n.Get(lg, "config.embed.server.name", i18n.Vars{"game": constants.GetGame()}),
+				Name: i18n.Get(lg, "config.embed.server.name", i18n.Vars{
+					"gameEmoji": emojiService.GetMiscStringEmoji(constants.EmojiIDGame),
+				}),
 				Value:  i18n.Get(lg, "config.embed.server.value", i18n.Vars{"channels": channelServers}),
 				Inline: true,
 			},

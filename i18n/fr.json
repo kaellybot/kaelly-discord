@@ -7,7 +7,7 @@
             "source": ""
         },
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Bot Discord dédié au jeu {{ .game.Name }} {{ .game.Emoji }} !",
+        "desc": "Bot Discord dédié au jeu {{ .game.Name }} {{ .gameEmoji }} !",
         "support": {
             "title": ":bulb: Serveur de support",
             "desc": "Tu rencontres un problème quant à mon utilisation ? Une suggestion ? N'hésite pas à rejoindre le [serveur Discord]({{ .discord }}) de support !"
@@ -125,7 +125,7 @@
         "embed": {
             "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** est l'actuel serveur de la guilde !{{ else }}Aucun serveur {{ .game.Name }} n'est lié à la guilde !{{ end }}",
             "server": {
-                "name": "{{ .game.Emoji }} Salons liés à un serveur",
+                "name": "{{ .gameEmoji }} Salons liés à un serveur",
                 "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}Aucun salon configuré !{{ end }}"
             },
             "webhook": {

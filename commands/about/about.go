@@ -7,13 +7,15 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
-func New(broker amqp.MessageBroker) *Command {
+func New(broker amqp.MessageBroker, emojiService emojis.Service) *Command {
 	return &Command{
-		broker: broker,
+		broker:       broker,
+		emojiService: emojiService,
 	}
 }
 
@@ -54,11 +56,14 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 
 func (command *Command) getAboutEmbed(locale discordgo.Locale) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       i18n.Get(locale, "about.title", i18n.Vars{"name": constants.Name, "version": constants.Version}),
-		Description: i18n.Get(locale, "about.desc", i18n.Vars{"game": constants.GetGame()}),
-		Color:       constants.Color,
-		Image:       &discordgo.MessageEmbedImage{URL: constants.AvatarImage},
-		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: constants.GetGame().Icon},
+		Title: i18n.Get(locale, "about.title", i18n.Vars{"name": constants.Name, "version": constants.Version}),
+		Description: i18n.Get(locale, "about.desc", i18n.Vars{
+			"game":      constants.GetGame(),
+			"gameEmoji": command.emojiService.GetMiscStringEmoji(constants.EmojiIDGame),
+		}),
+		Color:     constants.Color,
+		Image:     &discordgo.MessageEmbedImage{URL: constants.AvatarImage},
+		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: constants.GetGame().Icon},
 		Footer: &discordgo.MessageEmbedFooter{
 			Text:    i18n.Get(locale, "about.footer"),
 			IconURL: constants.AnkamaLogo,

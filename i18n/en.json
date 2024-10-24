@@ -7,7 +7,7 @@
             "tutorial": "https://i.imgur.com/6otf3t7.gif"
         },
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Discord bot dedicated to the {{ .game.Name }} {{ .game.Emoji }} game!",
+        "desc": "Discord bot dedicated to the {{ .game.Name }} {{ .gameEmoji }} game!",
         "support": {
             "title": ":bulb: Support server",
             "desc": "You have a problem with its use? A suggestion? Feel free to join the support [Discord server]({{ .discord }})!"
@@ -125,7 +125,7 @@
         "embed": {
             "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
             "server": {
-                "name": "{{ .game.Emoji }} Channels linked to servers",
+                "name": "{{ .gameEmoji }} Channels linked to servers",
                 "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
             },
             "webhook": {

@@ -123,10 +123,11 @@ func New() (*Impl, error) {
 
 	commands := make([]commands.DiscordCommand, 0)
 	commands = append(commands,
-		about.New(broker),
+		about.New(broker, emojiService),
 		align.New(bookService, guildService, serverService, requestsManager),
 		almanax.New(emojiService, requestsManager),
-		config.New(guildService, feedService, serverService, streamerService, videastService, requestsManager),
+		config.New(emojiService, feedService, guildService, serverService,
+			streamerService, videastService, requestsManager),
 		help.New(broker, &commands),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, requestsManager),

@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/kaellybot/kaelly-discord/commands"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -18,8 +19,9 @@ const (
 
 type Command struct {
 	commands.AbstractCommand
-	guildService    guilds.Service
+	emojiService    emojis.Service
 	feedService     feeds.Service
+	guildService    guilds.Service
 	serverService   servers.Service
 	streamerService streamers.Service
 	videastService  videasts.Service

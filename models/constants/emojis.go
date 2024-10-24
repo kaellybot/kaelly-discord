@@ -2,6 +2,7 @@ package constants
 
 const (
 	EmojiIDEffect      EmojiMiscID = "effect"
+	EmojiIDGame        EmojiMiscID = "dofusGame"
 	EmojiIDNext        EmojiMiscID = "next"
 	EmojiIDNormalMap   EmojiMiscID = "normalMap"
 	EmojiIDPrevious    EmojiMiscID = "previous"

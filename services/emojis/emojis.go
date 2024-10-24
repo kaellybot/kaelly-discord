@@ -2,6 +2,7 @@ package emojis
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -36,6 +37,19 @@ func New(repository repository.Repository) (*Impl, error) {
 		emojiStore: emojiStore,
 		repository: repository,
 	}, nil
+}
+
+func (service *Impl) GetMiscStringEmoji(emojiMiscID constants.EmojiMiscID) string {
+	emoji := service.GetMiscEmoji(emojiMiscID)
+	if emoji != nil {
+		if len(strings.TrimSpace(emoji.Name)) > 0 {
+			return emoji.Name
+		}
+
+		return fmt.Sprintf("<:%v:%v>", emojiMiscID, emoji.ID)
+	}
+
+	return ""
 }
 
 func (service *Impl) GetMiscEmoji(emojiMiscID constants.EmojiMiscID) *discordgo.ComponentEmoji {

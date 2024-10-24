@@ -231,11 +231,16 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 	}
 
 	channelWebhooks := make([]i18nChannelWebhook, 0)
-	channelWebhooks = append(channelWebhooks, mapAlmanaxWebhooksToI18n(guild.AlmanaxWebhooks, lg)...)
-	channelWebhooks = append(channelWebhooks, mapRssWebhooksToI18n(guild.RssWebhooks, feedService, lg)...)
-	channelWebhooks = append(channelWebhooks, mapTwitterWebhooksToI18n(guild.TwitterWebhooks, lg)...)
-	channelWebhooks = append(channelWebhooks, mapYoutubeWebhooksToI18n(guild.YoutubeWebhooks, videastService, lg)...)
-	channelWebhooks = append(channelWebhooks, mapTwitchWebhooksToI18n(guild.TwitchWebhooks, streamerService, lg)...)
+	channelWebhooks = append(channelWebhooks, mapAlmanaxWebhooksToI18n(guild.AlmanaxWebhooks,
+		emojiService, lg)...)
+	channelWebhooks = append(channelWebhooks, mapRssWebhooksToI18n(guild.RssWebhooks,
+		emojiService, feedService, lg)...)
+	channelWebhooks = append(channelWebhooks, mapTwitterWebhooksToI18n(guild.TwitterWebhooks,
+		emojiService, lg)...)
+	channelWebhooks = append(channelWebhooks, mapYoutubeWebhooksToI18n(guild.YoutubeWebhooks,
+		emojiService, videastService, lg)...)
+	channelWebhooks = append(channelWebhooks, mapTwitchWebhooksToI18n(guild.TwitchWebhooks,
+		emojiService, streamerService, lg)...)
 
 	return &discordgo.MessageEmbed{
 		Title:       guild.Name,
@@ -260,14 +265,15 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 	}
 }
 
-func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, lg discordgo.Locale) []i18nChannelWebhook {
+func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, emojiService emojis.Service,
+	lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
 		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
 			Channel: webhook.Channel.Mention(),
 			Provider: i18nProvider{
 				Name:  i18n.Get(lg, "webhooks.ALMANAX.name"),
-				Emoji: i18n.Get(lg, "webhooks.ALMANAX.emoji"),
+				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDAlmanax),
 			},
 			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
 		})
@@ -275,8 +281,8 @@ func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, lg discordgo.
 	return i18nWebhooks
 }
 
-func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.Service,
-	lg discordgo.Locale) []i18nChannelWebhook {
+func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, emojiService emojis.Service,
+	feedService feeds.Service, lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
 		var providerName string
@@ -293,7 +299,7 @@ func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.Ser
 			Channel: webhook.Channel.Mention(),
 			Provider: i18nProvider{
 				Name:  providerName,
-				Emoji: i18n.Get(lg, "webhooks.RSS.emoji"),
+				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDRSS),
 			},
 			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
 		})
@@ -301,8 +307,8 @@ func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, feedService feeds.Ser
 	return i18nWebhooks
 }
 
-func mapTwitchWebhooksToI18n(webhooks []constants.TwitchWebhook, streamerService streamers.Service,
-	lg discordgo.Locale) []i18nChannelWebhook {
+func mapTwitchWebhooksToI18n(webhooks []constants.TwitchWebhook, emojiService emojis.Service,
+	streamerService streamers.Service, lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
 		var providerName string
@@ -319,21 +325,22 @@ func mapTwitchWebhooksToI18n(webhooks []constants.TwitchWebhook, streamerService
 			Channel: webhook.Channel.Mention(),
 			Provider: i18nProvider{
 				Name:  providerName,
-				Emoji: i18n.Get(lg, "webhooks.TWITCH.emoji"),
+				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDTwitch),
 			},
 		})
 	}
 	return i18nWebhooks
 }
 
-func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, lg discordgo.Locale) []i18nChannelWebhook {
+func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, emojiService emojis.Service,
+	lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
 		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
 			Channel: webhook.Channel.Mention(),
 			Provider: i18nProvider{
 				Name:  webhook.TwitterName,
-				Emoji: i18n.Get(lg, "webhooks.TWITTER.emoji"),
+				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDTwitter),
 			},
 			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
 		})
@@ -341,8 +348,8 @@ func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, lg discordgo.
 	return i18nWebhooks
 }
 
-func mapYoutubeWebhooksToI18n(webhooks []constants.YoutubeWebhook, videastService videasts.Service,
-	lg discordgo.Locale) []i18nChannelWebhook {
+func mapYoutubeWebhooksToI18n(webhooks []constants.YoutubeWebhook, emojiService emojis.Service,
+	videastService videasts.Service, lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
 		var providerName string
@@ -359,7 +366,7 @@ func mapYoutubeWebhooksToI18n(webhooks []constants.YoutubeWebhook, videastServic
 			Channel: webhook.Channel.Mention(),
 			Provider: i18nProvider{
 				Name:  providerName,
-				Emoji: i18n.Get(lg, "webhooks.YOUTUBE.emoji"),
+				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDYoutube),
 			},
 		})
 	}

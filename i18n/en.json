@@ -333,24 +333,19 @@
     },
     "webhooks": {
         "ALMANAX": {
-            "name": "Almanax",
-            "emoji": "<:almanax:1100067553830768682>"
+            "name": "Almanax"
         },
         "RSS": {
-            "name": "RSS",
-            "emoji": "<:rss:1100040212136071269>"
+            "name": "RSS"
         },
         "TWITCH": {
-            "name": "Twitch",
-            "emoji": "<:twitch:1198567150680547348>"
+            "name": "Twitch"
         },
         "TWITTER": {
-            "name": "Twitter",
-            "emoji": "<:twitter:1100040368445206619>"
+            "name": "Twitter"
         },
         "YOUTUBE": {
-            "name": "Youtube",
-            "emoji": "<:youtube:1198370949133783040>"
+            "name": "Youtube"
         }
     },
     "locales": {

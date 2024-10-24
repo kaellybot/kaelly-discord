@@ -91,14 +91,14 @@ func initI18n() {
 }
 
 func main() {
-	app, err := application.New()
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Shutting down after failing to instantiate application")
+	app, errNew := application.New()
+	if errNew != nil {
+		log.Fatal().Err(errNew).Msgf("Shutting down after failing to instantiate application")
 	}
 
-	err = app.Run()
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Shutting down after failing to run application.")
+	errRun := app.Run()
+	if errRun != nil {
+		log.Fatal().Err(errRun).Msgf("Shutting down after failing to run application.")
 	}
 
 	sc := make(chan os.Signal, 1)

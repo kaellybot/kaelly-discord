@@ -5,7 +5,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 	"github.com/spf13/viper"
-	"gorm.io/gorm"
 )
 
 func New(db databases.MySQLConnection) *Impl {
@@ -13,20 +12,16 @@ func New(db databases.MySQLConnection) *Impl {
 }
 
 func (repo *Impl) GetTransportTypes() ([]entities.TransportType, error) {
-	var response *gorm.DB
 	var transportTypes []entities.TransportType
-	if viper.GetBool(constants.Production) {
-		response = repo.db.GetDB().
-			Model(&entities.TransportType{}).
-			Preload("Labels").
-			Find(&transportTypes)
-	} else {
-		response = repo.db.GetDB().
-			Model(&entities.TransportType{}).
-			Select("id, emoji_dev AS emoji").
-			Preload("Labels").
-			Find(&transportTypes)
+	response := repo.db.GetDB().
+		Model(&entities.TransportType{}).
+		Preload("Labels")
+
+	if !viper.GetBool(constants.Production) {
+		response = response.
+			Select("id, emoji_dev AS emoji")
 	}
 
+	response = response.Find(&transportTypes)
 	return transportTypes, response.Error
 }

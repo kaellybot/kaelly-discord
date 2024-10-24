@@ -11,6 +11,8 @@ func New(db databases.MySQLConnection) *Impl {
 
 func (repo *Impl) GetVideasts() ([]entities.Videast, error) {
 	var videasts []entities.Videast
-	response := repo.db.GetDB().Model(&entities.Videast{}).Find(&videasts)
+	response := repo.db.GetDB().
+		Model(&entities.Videast{}).
+		Find(&videasts)
 	return videasts, response.Error
 }

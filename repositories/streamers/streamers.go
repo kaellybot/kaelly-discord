@@ -11,6 +11,8 @@ func New(db databases.MySQLConnection) *Impl {
 
 func (repo *Impl) GetStreamers() ([]entities.Streamer, error) {
 	var streamers []entities.Streamer
-	response := repo.db.GetDB().Model(&entities.Streamer{}).Find(&streamers)
+	response := repo.db.GetDB().
+		Model(&entities.Streamer{}).
+		Find(&streamers)
 	return streamers, response.Error
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 	"github.com/spf13/viper"
-	"gorm.io/gorm"
 )
 
 func New(db databases.MySQLConnection) *Impl {
@@ -13,17 +12,15 @@ func New(db databases.MySQLConnection) *Impl {
 }
 
 func (repo *Impl) GetEmojis() ([]entities.Emoji, error) {
-	var response *gorm.DB
 	var emojis []entities.Emoji
-	if viper.GetBool(constants.Production) {
-		response = repo.db.GetDB().
-			Model(&entities.Emoji{}).
-			Find(&emojis)
-	} else {
-		response = repo.db.GetDB().
-			Model(&entities.Emoji{}).
-			Select("id, snowflake_dev AS snowflake, type, name").
-			Find(&emojis)
+	response := repo.db.GetDB().
+		Model(&entities.Emoji{})
+
+	if !viper.GetBool(constants.Production) {
+		response = response.
+			Select("id, snowflake_dev AS snowflake, type, name")
 	}
+
+	response = response.Find(&emojis)
 	return emojis, response.Error
 }

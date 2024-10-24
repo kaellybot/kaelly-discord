@@ -19,9 +19,9 @@ import (
 
 func New(jobRepository jobs.Repository, cityRepository cities.Repository,
 	orderRepository orders.Repository) (*Impl, error) {
-	jobs, err := jobRepository.GetJobs()
-	if err != nil {
-		return nil, err
+	jobs, errJob := jobRepository.GetJobs()
+	if errJob != nil {
+		return nil, errJob
 	}
 
 	log.Info().
@@ -33,9 +33,9 @@ func New(jobRepository jobs.Repository, cityRepository cities.Repository,
 		jobsMap[job.ID] = job
 	}
 
-	cities, err := cityRepository.GetCities()
-	if err != nil {
-		return nil, err
+	cities, errCity := cityRepository.GetCities()
+	if errCity != nil {
+		return nil, errCity
 	}
 
 	log.Info().
@@ -47,9 +47,9 @@ func New(jobRepository jobs.Repository, cityRepository cities.Repository,
 		citiesMap[city.ID] = city
 	}
 
-	orders, err := orderRepository.GetOrders()
-	if err != nil {
-		return nil, err
+	orders, errOrder := orderRepository.GetOrders()
+	if errOrder != nil {
+		return nil, errOrder
 	}
 
 	log.Info().

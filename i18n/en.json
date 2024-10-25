@@ -97,7 +97,9 @@
         },
         "resource": {
             "title": "Almanax of <t:{{ .startDate }}:D> to <t:{{ .endDate }}:D>",
-            "description": "Required tributes for **{{ .number }}** character\n{{ if .tributes }}{{ range .tributes}}- **{{ .Quantity }}**x {{ .Emoji }} {{ .Name }}\n{{ end }}{{ else }}No needed resource!{{ end }}"
+            "description": "{{ if .tributes }}{{ range .tributes}}- **{{ .Quantity }}**x {{ .Emoji }} {{ .Name }}\n{{ end }}{{ else }}No needed resource!{{ end }}",
+            "character": "Tributes for {{ .number }} character{{ if gt .number 1 }}s{{ end }}",
+            "placeholder": "Character number"
         }
     },
     "config": {

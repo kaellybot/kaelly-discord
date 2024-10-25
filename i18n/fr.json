@@ -97,7 +97,9 @@
         },
         "resource": {
             "title": "Almanax du <t:{{ .startDate }}:D> au <t:{{ .endDate }}:D>",
-            "description": "Offrandes nécessaires pour **{{ .number }}** personnage\n{{ if .tributes }}{{ range .tributes}}- **{{ .Quantity }}**x {{ .Emoji }} {{ .Name }}\n{{ end }}{{ else }}Aucune ressource nécessaire !{{ end }}"
+            "description": "{{ if .tributes }}{{ range .tributes}}- **{{ .Quantity }}**x {{ .Emoji }} {{ .Name }}\n{{ end }}{{ else }}Aucune ressource nécessaire !{{ end }}",
+            "character": "Offrandes pour {{ .number }} personnage{{ if gt .number 1 }}s{{ end }}",
+            "placeholder": "Nombre de personnage"
         }
     },
     "config": {

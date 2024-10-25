@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"fmt"
 	"sort"
 	"time"
 
@@ -143,14 +144,22 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 	}
 }
 
-func MapAlmanaxResourceToEmbed(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,
-	locale amqp.Language, emojiService emojis.Service) *discordgo.MessageEmbed {
-	lg := constants.MapAMQPLocale(locale)
+func MapAlmanaxResourceToWebhook(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,
+	characterNumber int32, lg discordgo.Locale, emojiService emojis.Service) *discordgo.WebhookEdit {
 	now := time.Now()
 	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	endDate := startDate.AddDate(0, 0, int(almanaxResources.Duration))
-	collator := constants.MapCollator(lg)
+	return &discordgo.WebhookEdit{
+		Embeds: MapAlmanaxResourceToEmbeds(almanaxResources, startDate, endDate,
+			characterNumber, lg, emojiService),
+		Components: mapAlmanaxResourceToComponents(startDate, endDate, characterNumber, lg),
+	}
+}
 
+func MapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,
+	startDate, endDate time.Time, characterNumber int32, lg discordgo.Locale,
+	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
+	collator := constants.MapCollator(lg)
 	sort.SliceStable(almanaxResources.Tributes, func(i, j int) bool {
 		if almanaxResources.Tributes[i].ItemType == almanaxResources.Tributes[j].ItemType {
 			return collator.CompareString(almanaxResources.Tributes[i].ItemName,
@@ -171,26 +180,56 @@ func MapAlmanaxResourceToEmbed(almanaxResources *amqp.EncyclopediaAlmanaxResourc
 		i18nTributes = append(i18nTributes, i18nTribute{
 			Name:     tribute.GetItemName(),
 			Emoji:    emojiService.GetItemTypeStringEmoji(tribute.GetItemType()),
-			Quantity: tribute.GetQuantity(),
+			Quantity: tribute.GetQuantity() * characterNumber,
 		})
 	}
 
-	return &discordgo.MessageEmbed{
-		Title: i18n.Get(lg, "almanax.resource.title", i18n.Vars{
-			"startDate": startDate.Unix(),
-			"endDate":   endDate.Unix(),
-		}),
-		Description: i18n.Get(lg, "almanax.resource.description", i18n.Vars{
-			"number":   1, // TODO multiple characters
-			"tributes": i18nTributes,
-		}),
-		Color:     constants.Color,
-		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: constants.GetUnknownSeason().AlmanaxIcon},
-		Author: &discordgo.MessageEmbedAuthor{
-			Name:    almanaxResources.Source.Name,
-			URL:     almanaxResources.Source.Url,
-			IconURL: almanaxResources.Source.Icon,
+	return &[]*discordgo.MessageEmbed{
+		{
+			Title: i18n.Get(lg, "almanax.resource.title", i18n.Vars{
+				"startDate": startDate.Unix(),
+				"endDate":   endDate.Unix(),
+			}),
+			Description: i18n.Get(lg, "almanax.resource.description", i18n.Vars{
+				"number":   characterNumber,
+				"tributes": i18nTributes,
+			}),
+			Color:     constants.Color,
+			Thumbnail: &discordgo.MessageEmbedThumbnail{URL: constants.GetUnknownSeason().AlmanaxIcon},
+			Author: &discordgo.MessageEmbedAuthor{
+				Name:    almanaxResources.Source.Name,
+				URL:     almanaxResources.Source.Url,
+				IconURL: almanaxResources.Source.Icon,
+			},
+			Footer: discord.BuildDefaultFooter(lg),
 		},
-		Footer: discord.BuildDefaultFooter(lg),
+	}
+}
+
+func mapAlmanaxResourceToComponents(startDate, endDate time.Time, characterNumber int32,
+	lg discordgo.Locale) *[]discordgo.MessageComponent {
+	customID := contract.CraftAlmanaxResourceCustomID(startDate, endDate)
+	characterNumbers := make([]discordgo.SelectMenuOption, 0)
+	for _, number := range constants.GetCharacterNumbers() {
+		characterNumbers = append(characterNumbers, discordgo.SelectMenuOption{
+			Label: i18n.Get(lg, "almanax.resource.character", i18n.Vars{
+				"number": number,
+			}),
+			Value:   fmt.Sprintf("%v", number),
+			Default: characterNumber == number,
+		})
+	}
+
+	return &[]discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.SelectMenu{
+					CustomID:    customID,
+					MenuType:    discordgo.StringSelectMenu,
+					Placeholder: i18n.Get(lg, "almanax.resource.placeholder"),
+					Options:     characterNumbers,
+				},
+			},
+		},
 	}
 }

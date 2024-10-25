@@ -10,7 +10,9 @@ const (
 	almanaxRequestRoutingKey = "requests.encyclopedias"
 
 	characterNumberProperty = "characterNumber"
-	defaultCharacterNumber  = 1
+	dayDurationProperty        = "dayDuration"
+
+	defaultCharacterNumber = 1
 )
 
 type Command struct {

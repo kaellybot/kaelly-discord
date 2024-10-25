@@ -90,10 +90,10 @@ func getDateOption(ctx context.Context) (*time.Time, error) {
 	return date, nil
 }
 
-func getDurationOption(ctx context.Context) (int32, error) {
-	duration, ok := ctx.Value(constants.ContextKeyDuration).(int32)
+func getDurationOption(ctx context.Context) (int64, error) {
+	duration, ok := ctx.Value(constants.ContextKeyDuration).(int64)
 	if !ok {
-		return -1, fmt.Errorf("cannot cast %v as int32", ctx.Value(constants.ContextKeyDuration))
+		return -1, fmt.Errorf("cannot cast %v as int64", ctx.Value(constants.ContextKeyDuration))
 	}
 
 	return duration, nil

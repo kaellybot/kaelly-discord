@@ -27,13 +27,13 @@ func MapAlmanaxRequest(date *time.Time, lg discordgo.Locale) *amqp.RabbitMQMessa
 	}
 }
 
-func MapAlmanaxResourceRequest(duration int32, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapAlmanaxResourceRequest(duration int64, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
 		Game:     constants.GetGame().AMQPGame,
 		EncyclopediaAlmanaxResourceRequest: &amqp.EncyclopediaAlmanaxResourceRequest{
-			Duration: duration,
+			Duration: int32(duration),
 		},
 	}
 }

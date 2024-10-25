@@ -2,9 +2,11 @@ package almanax
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
@@ -27,15 +29,8 @@ func (command *Command) getResources(ctx context.Context, s *discordgo.Session,
 }
 
 func (command *Command) updateResourceCharacter(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	// TODO
-}
-
-func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	// TODO
-	/**
 	customID := i.MessageComponentData().CustomID
-	properties := make(map[string]any)
-	duration, characterNumber, ok := contract.ExtractAlmanaxResourceCustomID(customID)
+	dayDuration, ok := contract.ExtractAlmanaxResourceCharacterCustomID(customID)
 	if !ok {
 		log.Error().
 			Str(constants.LogCommand, command.GetName()).
@@ -44,24 +39,61 @@ func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordg
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapCompetitionMapRequest(mapNumber, i.Locale)
-	err := command.requestManager.Request(s, i, competitionRequestRoutingKey,
-		msg, command.updateMapReply, properties)
-	if err != nil {
-		panic(err)
+	characterNumber, errConv := getInt64Value(i.MessageComponentData())
+	if errConv != nil {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Str(constants.LogRequestProperty, characterNumberProperty).
+			Strs(constants.LogRequestValue, i.MessageComponentData().Values).
+			Msgf("Cannot retrieve duration from values selected by user, panicking...")
+		panic(errConv)
 	}
 
-	duration, err := getDurationOption(ctx)
-	if err != nil {
-		panic(err)
+	properties := map[string]any{
+		characterNumberProperty: characterNumber,
+	}
+
+	msg := mappers.MapAlmanaxResourceRequest(dayDuration, i.Locale)
+	errReq := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
+		command.updateResourcesReply, properties)
+	if errReq != nil {
+		panic(errReq)
+	}
+}
+
+func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	customID := i.MessageComponentData().CustomID
+	characterNumber, ok := contract.ExtractAlmanaxResourceDurationCustomID(customID)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	properties := map[string]any{
+		characterNumberProperty: characterNumber,
+	}
+
+	duration, errConv := getInt64Value(i.MessageComponentData())
+	if errConv != nil {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Str(constants.LogRequestProperty, dayDurationProperty).
+			Strs(constants.LogRequestValue, i.MessageComponentData().Values).
+			Msgf("Cannot retrieve duration from values selected by user, panicking...")
+		panic(errConv)
 	}
 
 	msg := mappers.MapAlmanaxResourceRequest(duration, i.Locale)
-	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.updateResourcesReply)
-	if err != nil {
-		panic(err)
+	errReq := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
+		command.updateResourcesReply, properties)
+	if errReq != nil {
+		panic(errReq)
 	}
-	**/
 }
 
 func (command *Command) getResourcesReply(ctx context.Context, s *discordgo.Session,
@@ -102,6 +134,14 @@ func (command *Command) updateResourcesReply(_ context.Context, s *discordgo.Ses
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+}
+
+func getInt64Value(data discordgo.MessageComponentInteractionData) (int64, error) {
+	values := data.Values
+	if len(values) != 1 {
+		return 0, commands.ErrInvalidInteraction
+	}
+	return strconv.ParseInt(values[0], 10, 64)
 }
 
 func isAlmanaxResourceAnswerValid(message *amqp.RabbitMQMessage) bool {

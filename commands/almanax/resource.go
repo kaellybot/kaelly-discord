@@ -20,21 +20,82 @@ func (command *Command) getResources(ctx context.Context, s *discordgo.Session,
 	}
 
 	msg := mappers.MapAlmanaxResourceRequest(duration, i.Locale)
-	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.resourceRespond)
+	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.getResourcesReply)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *Command) resourceRespond(_ context.Context, s *discordgo.Session,
+func (command *Command) updateResourceCharacter(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	// TODO
+}
+
+func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	// TODO
+	/**
+	customID := i.MessageComponentData().CustomID
+	properties := make(map[string]any)
+	duration, characterNumber, ok := contract.ExtractAlmanaxResourceCustomID(customID)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	msg := mappers.MapCompetitionMapRequest(mapNumber, i.Locale)
+	err := command.requestManager.Request(s, i, competitionRequestRoutingKey,
+		msg, command.updateMapReply, properties)
+	if err != nil {
+		panic(err)
+	}
+
+	duration, err := getDurationOption(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	msg := mappers.MapAlmanaxResourceRequest(duration, i.Locale)
+	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.updateResourcesReply)
+	if err != nil {
+		panic(err)
+	}
+	**/
+}
+
+func (command *Command) getResourcesReply(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	command.updateResourcesReply(ctx, s, i, message, map[string]any{
+		characterNumberProperty: int64(defaultCharacterNumber),
+	})
+}
+
+func (command *Command) updateResourcesReply(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 	if !isAlmanaxResourceAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
-	// TODO 1 PERSONNAGE ATM
+	characterNumberValue, found := properties[characterNumberProperty]
+	if !found {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogRequestProperty, characterNumberProperty).
+			Msgf("Cannot find request property, panicking...")
+		panic(commands.ErrRequestPropertyNotFound)
+	}
+	characterNumber, ok := characterNumberValue.(int64)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogRequestProperty, characterNumberProperty).
+			Msgf("Cannot convert request property, panicking...")
+		panic(commands.ErrRequestPropertyNotFound)
+	}
+
 	webhookEdit := mappers.MapAlmanaxResourceToWebhook(message.GetEncyclopediaAlmanaxResourceAnswer(),
-		1, constants.MapAMQPLocale(message.Language), command.emojiService)
+		characterNumber, constants.MapAMQPLocale(message.Language), command.emojiService)
 
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
 	if err != nil {

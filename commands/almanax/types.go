@@ -8,6 +8,9 @@ import (
 
 const (
 	almanaxRequestRoutingKey = "requests.encyclopedias"
+
+	characterNumberProperty = "characterNumber"
+	defaultCharacterNumber  = 1
 )
 
 type Command struct {

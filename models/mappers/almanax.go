@@ -145,19 +145,19 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 }
 
 func MapAlmanaxResourceToWebhook(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,
-	characterNumber int32, lg discordgo.Locale, emojiService emojis.Service) *discordgo.WebhookEdit {
+	characterNumber int64, lg discordgo.Locale, emojiService emojis.Service) *discordgo.WebhookEdit {
 	now := time.Now()
 	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	endDate := startDate.AddDate(0, 0, int(almanaxResources.Duration))
 	return &discordgo.WebhookEdit{
 		Embeds: MapAlmanaxResourceToEmbeds(almanaxResources, startDate, endDate,
 			characterNumber, lg, emojiService),
-		Components: mapAlmanaxResourceToComponents(startDate, endDate, characterNumber, lg),
+		Components: mapAlmanaxResourceToComponents(int64(almanaxResources.Duration), characterNumber, lg),
 	}
 }
 
 func MapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,
-	startDate, endDate time.Time, characterNumber int32, lg discordgo.Locale,
+	startDate, endDate time.Time, characterNumber int64, lg discordgo.Locale,
 	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
 	collator := constants.MapCollator(lg)
 	sort.SliceStable(almanaxResources.Tributes, func(i, j int) bool {
@@ -172,7 +172,7 @@ func MapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 	type i18nTribute struct {
 		Name     string
 		Emoji    string
-		Quantity int32
+		Quantity int64
 	}
 
 	i18nTributes := make([]i18nTribute, 0)
@@ -180,7 +180,7 @@ func MapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 		i18nTributes = append(i18nTributes, i18nTribute{
 			Name:     tribute.GetItemName(),
 			Emoji:    emojiService.GetItemTypeStringEmoji(tribute.GetItemType()),
-			Quantity: tribute.GetQuantity() * characterNumber,
+			Quantity: int64(tribute.GetQuantity()) * characterNumber,
 		})
 	}
 
@@ -206,13 +206,25 @@ func MapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 	}
 }
 
-func mapAlmanaxResourceToComponents(startDate, endDate time.Time, characterNumber int32,
+func mapAlmanaxResourceToComponents(duration, characterNumber int64,
 	lg discordgo.Locale) *[]discordgo.MessageComponent {
-	customID := contract.CraftAlmanaxResourceCustomID(startDate, endDate)
+	durationCustomID := contract.CraftAlmanaxResourceDurationCustomID(characterNumber)
+	durationValues := make([]discordgo.SelectMenuOption, 0)
+	for _, number := range constants.GetAlmanaxDayDuration() {
+		durationValues = append(durationValues, discordgo.SelectMenuOption{
+			Label: i18n.Get(lg, "almanax.resource.duration.label", i18n.Vars{
+				"number": number,
+			}),
+			Value:   fmt.Sprintf("%v", number),
+			Default: duration == number,
+		})
+	}
+
+	characterCustomID := contract.CraftAlmanaxResourceCharacterCustomID(duration)
 	characterNumbers := make([]discordgo.SelectMenuOption, 0)
 	for _, number := range constants.GetCharacterNumbers() {
 		characterNumbers = append(characterNumbers, discordgo.SelectMenuOption{
-			Label: i18n.Get(lg, "almanax.resource.character", i18n.Vars{
+			Label: i18n.Get(lg, "almanax.resource.character.label", i18n.Vars{
 				"number": number,
 			}),
 			Value:   fmt.Sprintf("%v", number),
@@ -224,9 +236,19 @@ func mapAlmanaxResourceToComponents(startDate, endDate time.Time, characterNumbe
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.SelectMenu{
-					CustomID:    customID,
+					CustomID:    durationCustomID,
 					MenuType:    discordgo.StringSelectMenu,
-					Placeholder: i18n.Get(lg, "almanax.resource.placeholder"),
+					Placeholder: i18n.Get(lg, "almanax.resource.duration.placeholder"),
+					Options:     durationValues,
+				},
+			},
+		},
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.SelectMenu{
+					CustomID:    characterCustomID,
+					MenuType:    discordgo.StringSelectMenu,
+					Placeholder: i18n.Get(lg, "almanax.resource.character.placeholder"),
 					Options:     characterNumbers,
 				},
 			},

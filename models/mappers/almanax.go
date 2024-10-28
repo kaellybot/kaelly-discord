@@ -50,14 +50,27 @@ func MapAlmanaxEffectListRequest(query string, lg discordgo.Locale) *amqp.Rabbit
 	}
 }
 
-func MapAlmanaxEffectRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapAlmanaxEffectRequest(query *string, date *time.Time, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	var effectRequest amqp.EncyclopediaAlmanaxEffectRequest
+	if query != nil {
+		effectRequest = amqp.EncyclopediaAlmanaxEffectRequest{
+			Query: *query,
+			Type:  amqp.EncyclopediaAlmanaxEffectRequest_QUERY,
+		}
+	} else if date != nil {
+		effectRequest = amqp.EncyclopediaAlmanaxEffectRequest{
+			Date: timestamppb.New(*date),
+			Type: amqp.EncyclopediaAlmanaxEffectRequest_DATE,
+		}
+	} else {
+		return nil
+	}
+
 	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		EncyclopediaAlmanaxEffectRequest: &amqp.EncyclopediaAlmanaxEffectRequest{
-			Query: query,
-		},
+		Type:                             amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_REQUEST,
+		Language:                         constants.MapDiscordLocale(lg),
+		Game:                             constants.GetGame().AMQPGame,
+		EncyclopediaAlmanaxEffectRequest: &effectRequest,
 	}
 }
 
@@ -158,8 +171,12 @@ func MapAlmanaxEffectsToWebhook(answer *amqp.EncyclopediaAlmanaxEffectAnswer, pa
 		pages++
 	}
 
+	// Trick to store effect ID in customID based on day
+	dayWithWantedEffect := answer.GetAlmanaxes()[0].Date.AsTime()
 	crafter := func(page int) string {
-		return contract.CraftAlmanaxEffectCustomID(answer.GetQuery(), page)
+		customID := contract.CraftAlmanaxEffectCustomID(dayWithWantedEffect, page)
+		fmt.Println(customID)
+		return customID
 	}
 
 	return &discordgo.WebhookEdit{

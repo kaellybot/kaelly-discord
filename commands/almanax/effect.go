@@ -25,7 +25,7 @@ func (command *Command) getAlmanaxesByEffect(ctx context.Context, s *discordgo.S
 		pageProperty: constants.DefaultPage,
 	}
 
-	msg := mappers.MapAlmanaxEffectRequest(query, i.Locale)
+	msg := mappers.MapAlmanaxEffectRequest(&query, nil, i.Locale)
 	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
 		command.effectRespond, properties)
 	if err != nil {
@@ -35,7 +35,7 @@ func (command *Command) getAlmanaxesByEffect(ctx context.Context, s *discordgo.S
 
 func (command *Command) updateAlmanaxesByEffect(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	customID := i.MessageComponentData().CustomID
-	query, page, ok := contract.ExtractAlmanaxEffectCustomID(customID)
+	day, page, ok := contract.ExtractAlmanaxEffectCustomID(customID)
 	if !ok {
 		log.Error().
 			Str(constants.LogCommand, command.GetName()).
@@ -48,7 +48,7 @@ func (command *Command) updateAlmanaxesByEffect(s *discordgo.Session, i *discord
 		pageProperty: page,
 	}
 
-	msg := mappers.MapAlmanaxEffectRequest(query, i.Locale)
+	msg := mappers.MapAlmanaxEffectRequest(nil, day, i.Locale)
 	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
 		command.effectRespond, properties)
 	if err != nil {

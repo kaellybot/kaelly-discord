@@ -28,11 +28,12 @@ func New(emojiService emojis.Service, requestManager requests.RequestManager) *C
 		contract.AlmanaxResourcesSubCommandName: middlewares.
 			Use(cmd.checkDuration, cmd.getResources),
 		contract.AlmanaxEffectsSubCommandName: middlewares.
-			Use(cmd.checkQuery, cmd.getAlmanaxWithEffect),
+			Use(cmd.checkQuery, cmd.getAlmanaxesByEffect),
 	})
 
 	interactionHandlers := cmd.HandleInteractionMessages(commands.InteractionMessageHandlers{
 		contract.AlmanaxDayCustomID:               cmd.updateAlmanax,
+		contract.AlmanaxEffectCustomID:            cmd.updateAlmanaxesByEffect,
 		contract.AlmanaxResourceCharacterCustomID: cmd.updateResourceCharacter,
 		contract.AlmanaxResourceDurationCustomID:  cmd.updateResourceDuration,
 	})

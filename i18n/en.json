@@ -93,11 +93,14 @@
             "previous": "Previous day"
         },
         "effect": {
+            "title": "{{ .query }}",
+            "description": "*{{ .len }} result{{ if gt .len 1 }}s{{ end }}, page {{ .page }} on {{ .pages }}*",
+            "day": "<t:{{ .date }}:D>",
             "missing": "My crystal ball tells me that the desired bonus will not intervene in the next thirty days, I unfortunately not know more :persevere:"
         },
         "resource": {
             "title": "Almanax of <t:{{ .startDate }}:D> to <t:{{ .endDate }}:D>",
-            "description": "{{ if .tributes }}{{ range .tributes}}- **{{ .Quantity }}**x {{ .Emoji }} {{ .Name }}\n{{ end }}{{ else }}No needed resource!{{ end }}",
+            "description": "{{ if .tributes }}{{ range .tributes}}- {{ .Emoji }} **{{ .Quantity }}**x {{ .Name }}\n{{ end }}{{ else }}No needed resource!{{ end }}",
             "duration": {
                 "label": "{{ .number }} day{{ if gt .number 1 }}s{{ end }} period",
                 "placeholder": "X days period"
@@ -292,6 +295,12 @@
         }
     },
     "default": {
+        "page": {
+            "first": "First page",
+            "previous": "Previous page",
+            "next": "Next page",
+            "last": "Last page"
+        },
         "changelog": "Slash commands available!",
         "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
     },

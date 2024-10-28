@@ -10,7 +10,8 @@ const (
 	almanaxRequestRoutingKey = "requests.encyclopedias"
 
 	characterNumberProperty = "characterNumber"
-	dayDurationProperty        = "dayDuration"
+	dayDurationProperty     = "dayDuration"
+	pageProperty            = "page"
 
 	defaultCharacterNumber = 1
 )

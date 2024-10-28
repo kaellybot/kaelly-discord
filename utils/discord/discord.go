@@ -3,9 +3,59 @@ package discord
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/slicers"
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
+
+func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
+	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
+	previousPage := page - 1
+	if previousPage < constants.DefaultPage {
+		previousPage = constants.DefaultPage
+	}
+
+	lastPage := pages - 1
+	nextPage := page + 1
+	if nextPage > lastPage {
+		nextPage = lastPage
+	}
+
+	return &[]discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					CustomID: crafter(constants.DefaultPage),
+					Label:    i18n.Get(lg, "default.page.first"),
+					Style:    discordgo.PrimaryButton,
+					Disabled: page <= constants.DefaultPage,
+					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDFirst),
+				},
+				discordgo.Button{
+					CustomID: crafter(previousPage),
+					Label:    i18n.Get(lg, "default.page.previous"),
+					Style:    discordgo.PrimaryButton,
+					Disabled: page <= constants.DefaultPage,
+					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDPrevious),
+				},
+				discordgo.Button{
+					CustomID: crafter(nextPage),
+					Label:    i18n.Get(lg, "default.page.next"),
+					Style:    discordgo.PrimaryButton,
+					Disabled: page >= lastPage,
+					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDNext),
+				},
+				discordgo.Button{
+					CustomID: crafter(lastPage),
+					Label:    i18n.Get(lg, "default.page.last"),
+					Style:    discordgo.PrimaryButton,
+					Disabled: page >= lastPage,
+					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDLast),
+				},
+			},
+		},
+	}
+}
 
 func SliceFields[T any](items []T, limit int, toField ItemsToField[T]) []*discordgo.MessageEmbedField {
 	fields := make([]*discordgo.MessageEmbedField, 0)

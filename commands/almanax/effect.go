@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
@@ -13,28 +14,73 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) getAlmanaxWithEffect(ctx context.Context, s *discordgo.Session,
+func (command *Command) getAlmanaxesByEffect(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	query, err := getQueryOption(ctx)
 	if err != nil {
 		panic(err)
 	}
 
+	properties := map[string]any{
+		pageProperty: constants.DefaultPage,
+	}
+
 	msg := mappers.MapAlmanaxEffectRequest(query, i.Locale)
-	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.effectRespond)
+	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
+		command.effectRespond, properties)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (command *Command) updateAlmanaxesByEffect(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	customID := i.MessageComponentData().CustomID
+	query, page, ok := contract.ExtractAlmanaxEffectCustomID(customID)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	properties := map[string]any{
+		pageProperty: page,
+	}
+
+	msg := mappers.MapAlmanaxEffectRequest(query, i.Locale)
+	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
+		command.effectRespond, properties)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (command *Command) effectRespond(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 	if !isAlmanaxEffectAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
-	webhookEdit := mappers.MapAlmanaxToWebhook(message.GetEncyclopediaAlmanaxEffectAnswer().Almanax,
-		"almanax.effect.missing", constants.MapAMQPLocale(message.Language), command.emojiService)
+	pageValue, found := properties[pageProperty]
+	if !found {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogRequestProperty, pageProperty).
+			Msgf("Cannot find request property, panicking...")
+		panic(commands.ErrRequestPropertyNotFound)
+	}
+	page, ok := pageValue.(int)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogRequestProperty, pageProperty).
+			Msgf("Cannot find request property, panicking...")
+		panic(commands.ErrRequestPropertyNotFound)
+	}
+
+	webhookEdit := mappers.MapAlmanaxEffectsToWebhook(message.GetEncyclopediaAlmanaxEffectAnswer(),
+		page, constants.MapAMQPLocale(message.Language), command.emojiService)
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
 	if err != nil {
 		log.Warn().Err(err).

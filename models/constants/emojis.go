@@ -3,9 +3,11 @@ package constants
 const (
 	EmojiIDAlmanax     EmojiMiscID = "almanax"
 	EmojiIDEffect      EmojiMiscID = "effect"
+	EmojiIDFirst       EmojiMiscID = "first"
 	EmojiIDGame        EmojiMiscID = "dofusGame"
 	EmojiIDGithub      EmojiMiscID = "github"
 	EmojiIDKama        EmojiMiscID = "kama"
+	EmojiIDLast        EmojiMiscID = "last"
 	EmojiIDNext        EmojiMiscID = "next"
 	EmojiIDNormalMap   EmojiMiscID = "normalMap"
 	EmojiIDPrevious    EmojiMiscID = "previous"

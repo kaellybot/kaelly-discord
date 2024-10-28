@@ -53,7 +53,7 @@ func (command *Command) almanaxRespond(_ context.Context, s *discordgo.Session,
 	}
 
 	webhookEdit := mappers.MapAlmanaxToWebhook(message.GetEncyclopediaAlmanaxAnswer().Almanax,
-		"almanax.day.missing", constants.MapAMQPLocale(message.Language), command.emojiService)
+		constants.MapAMQPLocale(message.Language), command.emojiService)
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
 	if err != nil {
 		log.Warn().Err(err).

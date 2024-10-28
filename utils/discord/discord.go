@@ -21,38 +21,44 @@ func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 		nextPage = lastPage
 	}
 
+	buttons := make([]discordgo.MessageComponent, 0)
+	if previousPage > constants.DefaultPage {
+		buttons = append(buttons, discordgo.Button{
+			CustomID: crafter(previousPage),
+			Label:    i18n.Get(lg, "default.page.previous"),
+			Style:    discordgo.PrimaryButton,
+			Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDPrevious),
+		})
+	} else {
+		buttons = append(buttons, discordgo.Button{
+			CustomID: crafter(constants.DefaultPage),
+			Label:    i18n.Get(lg, "default.page.first"),
+			Style:    discordgo.PrimaryButton,
+			Disabled: page <= constants.DefaultPage,
+			Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDFirst),
+		})
+	}
+
+	if nextPage < lastPage {
+		buttons = append(buttons, discordgo.Button{
+			CustomID: crafter(nextPage),
+			Label:    i18n.Get(lg, "default.page.next"),
+			Style:    discordgo.PrimaryButton,
+			Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDNext),
+		})
+	} else {
+		buttons = append(buttons, discordgo.Button{
+			CustomID: crafter(lastPage),
+			Label:    i18n.Get(lg, "default.page.last"),
+			Style:    discordgo.PrimaryButton,
+			Disabled: page >= lastPage,
+			Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDLast),
+		})
+	}
+
 	return &[]discordgo.MessageComponent{
 		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.Button{
-					CustomID: crafter(constants.DefaultPage),
-					Label:    i18n.Get(lg, "default.page.first"),
-					Style:    discordgo.PrimaryButton,
-					Disabled: page <= constants.DefaultPage,
-					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDFirst),
-				},
-				discordgo.Button{
-					CustomID: crafter(previousPage),
-					Label:    i18n.Get(lg, "default.page.previous"),
-					Style:    discordgo.PrimaryButton,
-					Disabled: page <= constants.DefaultPage,
-					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDPrevious),
-				},
-				discordgo.Button{
-					CustomID: crafter(nextPage),
-					Label:    i18n.Get(lg, "default.page.next"),
-					Style:    discordgo.PrimaryButton,
-					Disabled: page >= lastPage,
-					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDNext),
-				},
-				discordgo.Button{
-					CustomID: crafter(lastPage),
-					Label:    i18n.Get(lg, "default.page.last"),
-					Style:    discordgo.PrimaryButton,
-					Disabled: page >= lastPage,
-					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDLast),
-				},
-			},
+			Components: buttons,
 		},
 	}
 }

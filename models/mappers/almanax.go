@@ -174,9 +174,7 @@ func MapAlmanaxEffectsToWebhook(answer *amqp.EncyclopediaAlmanaxEffectAnswer, pa
 	// Trick to store effect ID in customID based on day
 	dayWithWantedEffect := answer.GetAlmanaxes()[0].Date.AsTime()
 	crafter := func(page int) string {
-		customID := contract.CraftAlmanaxEffectCustomID(dayWithWantedEffect, page)
-		fmt.Println(customID)
-		return customID
+		return contract.CraftAlmanaxEffectCustomID(dayWithWantedEffect, page)
 	}
 
 	return &discordgo.WebhookEdit{

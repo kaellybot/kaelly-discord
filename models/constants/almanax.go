@@ -14,7 +14,7 @@ func GetAlmanaxLastDate() time.Time {
 	return time.Date(9999, 12, 31, 0, 0, 0, 0, time.UTC)
 }
 
-// 25 values with most used days duration
+// 25 values with most used days duration.
 func GetAlmanaxDayDuration() []int64 {
 	return []int64{
 		7, 8, 9, 10,
@@ -23,7 +23,7 @@ func GetAlmanaxDayDuration() []int64 {
 	}
 }
 
-// 25 values with most used character numbers
+// 25 values with most used character numbers.
 func GetCharacterNumbers() []int64 {
 	return []int64{
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10,

@@ -59,7 +59,7 @@ func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlmanaxDurationOptionName {
-				duration := int64(option.IntValue())
+				duration := option.IntValue()
 
 				if duration >= contract.AlmanaxDurationMinimumValue && duration <= contract.AlmanaxDurationMaximumValue {
 					next(context.WithValue(ctx, constants.ContextKeyDuration, duration))

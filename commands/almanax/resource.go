@@ -103,6 +103,7 @@ func (command *Command) getResourcesReply(ctx context.Context, s *discordgo.Sess
 	})
 }
 
+//nolint:dupl // Refactor would be tedious and useless here, not DRY.
 func (command *Command) updateResourcesReply(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 	if !isAlmanaxResourceAnswerValid(message) {

@@ -52,17 +52,18 @@ func MapAlmanaxEffectListRequest(query string, lg discordgo.Locale) *amqp.Rabbit
 
 func MapAlmanaxEffectRequest(query *string, date *time.Time, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	var effectRequest amqp.EncyclopediaAlmanaxEffectRequest
-	if query != nil {
+	switch {
+	case query != nil:
 		effectRequest = amqp.EncyclopediaAlmanaxEffectRequest{
 			Query: *query,
 			Type:  amqp.EncyclopediaAlmanaxEffectRequest_QUERY,
 		}
-	} else if date != nil {
+	case date != nil:
 		effectRequest = amqp.EncyclopediaAlmanaxEffectRequest{
 			Date: timestamppb.New(*date),
 			Type: amqp.EncyclopediaAlmanaxEffectRequest_DATE,
 		}
-	} else {
+	default:
 		return nil
 	}
 
@@ -151,6 +152,12 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 					Label:    i18n.Get(lg, "almanax.day.next"),
 					Style:    discordgo.PrimaryButton,
 					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDNext),
+				},
+				discordgo.Button{
+					CustomID: contract.CraftAlmanaxEffectCustomID(almanax.Date.AsTime(), constants.DefaultPage),
+					Label:    i18n.Get(lg, "almanax.day.effect"),
+					Style:    discordgo.SecondaryButton,
+					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDEffect),
 				},
 			},
 		},

@@ -10,12 +10,16 @@ import (
 
 func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
+	lastPage := pages - 1
+	if constants.DefaultPage == lastPage {
+		return &[]discordgo.MessageComponent{}
+	}
+
 	previousPage := page - 1
 	if previousPage < constants.DefaultPage {
 		previousPage = constants.DefaultPage
 	}
 
-	lastPage := pages - 1
 	nextPage := page + 1
 	if nextPage > lastPage {
 		nextPage = lastPage

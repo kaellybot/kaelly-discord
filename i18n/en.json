@@ -90,7 +90,8 @@
             },
             "missing": "Oops! I don't have the almanax of this day in my knowledge, I go back this problem to my creators!",
             "next": "Next day",
-            "previous": "Previous day"
+            "previous": "Previous day",
+            "effect": "Similar effects"
         },
         "effect": {
             "title": "{{ .query }}",

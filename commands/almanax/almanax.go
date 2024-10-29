@@ -33,6 +33,7 @@ func New(emojiService emojis.Service, requestManager requests.RequestManager) *C
 
 	interactionHandlers := cmd.HandleInteractionMessages(commands.InteractionMessageHandlers{
 		contract.AlmanaxDayCustomID:               cmd.updateAlmanax,
+		contract.AlmanaxDayChoiceCustomID:         cmd.updateAlmanaxByDate,
 		contract.AlmanaxEffectCustomID:            cmd.updateAlmanaxesByEffect,
 		contract.AlmanaxResourceCharacterCustomID: cmd.updateResourceCharacter,
 		contract.AlmanaxResourceDurationCustomID:  cmd.updateResourceDuration,

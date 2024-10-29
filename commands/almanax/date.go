@@ -3,6 +3,7 @@ package almanax
 
 import (
 	"context"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -10,6 +11,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/rs/zerolog/log"
 )
@@ -40,6 +42,25 @@ func (command *Command) updateAlmanax(s *discordgo.Session, i *discordgo.Interac
 	}
 
 	msg := mappers.MapAlmanaxRequest(date, i.Locale)
+	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.almanaxRespond)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (command *Command) updateAlmanaxByDate(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	seconds, errConv := discord.GetInt64Value(i.MessageComponentData())
+	if errConv != nil {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, i.MessageComponentData().CustomID).
+			Strs(constants.LogRequestValue, i.MessageComponentData().Values).
+			Msgf("Cannot retrieve duration from values selected by user, panicking...")
+		panic(errConv)
+	}
+
+	day := time.Unix(seconds, 0).UTC()
+	msg := mappers.MapAlmanaxRequest(&day, i.Locale)
 	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.almanaxRespond)
 	if err != nil {
 		panic(err)

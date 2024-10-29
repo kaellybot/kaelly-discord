@@ -1,7 +1,10 @@
 package discord
 
 import (
+	"strconv"
+
 	"github.com/bwmarrin/discordgo"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/slicers"
@@ -9,10 +12,10 @@ import (
 )
 
 func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
-	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
+	lg discordgo.Locale, emojiService emojis.Service) []discordgo.MessageComponent {
 	lastPage := pages - 1
 	if constants.DefaultPage == lastPage {
-		return &[]discordgo.MessageComponent{}
+		return []discordgo.MessageComponent{}
 	}
 
 	previousPage := page - 1
@@ -60,11 +63,7 @@ func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 		})
 	}
 
-	return &[]discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: buttons,
-		},
-	}
+	return buttons
 }
 
 func SliceFields[T any](items []T, limit int, toField ItemsToField[T]) []*discordgo.MessageEmbedField {
@@ -109,4 +108,12 @@ func BuildDefaultFooter(lg discordgo.Locale) *discordgo.MessageEmbedFooter {
 		}),
 		IconURL: constants.AvatarIcon,
 	}
+}
+
+func GetInt64Value(data discordgo.MessageComponentInteractionData) (int64, error) {
+	values := data.Values
+	if len(values) != 1 {
+		return 0, commands.ErrInvalidInteraction
+	}
+	return strconv.ParseInt(values[0], 10, 64)
 }

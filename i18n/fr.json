@@ -82,7 +82,7 @@
             "url": "https://www.krosmoz.com/fr/almanax/{{ .date }}",
             "tribute": {
                 "title": ":bouquet: Offrande",
-                "description": "**{{ .quantity }}**x {{ .emoji }} {{ .item }}"
+                "description": "{{ .emoji }} **{{ .quantity }}**x {{ .item }}"
             },
             "reward": {
                 "title": ":moneybag: Gains",
@@ -96,8 +96,12 @@
         "effect": {
             "title": "{{ .query }}",
             "description": "*{{ .len }} résultat{{ if gt .len 1 }}s{{ end }}, page {{ .page }} sur {{ .pages }}*",
-            "day": "<t:{{ .date }}:D>",
-            "missing": "Ma boule de cristal me dit que le bonus demandé n'interviendra pas dans les trente prochains jours, je n'en sais malheureusement pas plus :persevere:"
+            "day": "{{ .emoji }} <t:{{ .date }}:D>",
+            "missing": "Ma boule de cristal me dit que le bonus demandé n'interviendra pas dans les trente prochains jours, je n'en sais malheureusement pas plus :persevere:",
+            "choice": {
+                "placeholder": "Voir un Almanax",
+                "value": "Almanax du {{ .date }}"
+            }
         },
         "resource": {
             "title": "Almanax du <t:{{ .startDate }}:D> au <t:{{ .endDate }}:D>",
@@ -195,7 +199,7 @@
         },
         "recipe": {
             "title": "Recette",
-            "description": "{{ if .ingredients }}{{ range .ingredients}}**{{ .Quantity }}**x {{ .Emoji }} [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}Aucun ingrédient !{{ end }}",
+            "description": "{{ if .ingredients }}{{ range .ingredients}}{{ .Emoji }} **{{ .Quantity }}**x [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}Aucun ingrédient !{{ end }}",
             "button": "Recette"
         }
     },

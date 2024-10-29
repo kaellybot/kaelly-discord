@@ -178,28 +178,29 @@ func MapAlmanaxEffectsToWebhook(answer *amqp.EncyclopediaAlmanaxEffectAnswer, pa
 		pages++
 	}
 
-	// Trick to store effect ID in customID based on day
-	dayWithWantedEffect := answer.GetAlmanaxes()[0].Date.AsTime()
-	crafter := func(page int) string {
-		return contract.CraftAlmanaxEffectCustomID(dayWithWantedEffect, page)
+	offset := constants.MaxAlmanaxEffectPerEmbed * page
+	almanaxes := make([]*amqp.Almanax, 0)
+	for i := offset; i < constants.MaxAlmanaxEffectPerEmbed+offset && i < len(answer.GetAlmanaxes()); i++ {
+		almanaxes = append(almanaxes, answer.GetAlmanaxes()[i])
 	}
 
 	return &discordgo.WebhookEdit{
-		Embeds:     mapAlmanaxEffectsToEmbeds(answer, page, pages, lg),
-		Components: discord.GetPaginationButtons(page, pages, crafter, lg, emojiService),
+		Embeds: mapAlmanaxEffectsToEmbeds(answer.GetQuery(), almanaxes,
+			len(answer.Almanaxes), page, pages, lg, emojiService),
+		Components: mapAlmanaxEffectsToComponents(almanaxes, page, pages, lg, emojiService),
 	}
 }
 
-func mapAlmanaxEffectsToEmbeds(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
-	page, pages int, lg discordgo.Locale) *[]*discordgo.MessageEmbed {
-	offset := constants.MaxAlmanaxEffectPerEmbed * page
+func mapAlmanaxEffectsToEmbeds(query string, almanaxes []*amqp.Almanax, len, page, pages int,
+	lg discordgo.Locale, emojiService emojis.Service) *[]*discordgo.MessageEmbed {
 	almanaxFields := make([]*discordgo.MessageEmbedField, 0)
-	for i := offset; i < constants.MaxAlmanaxEffectPerEmbed+offset && i < len(answer.GetAlmanaxes()); i++ {
+	for _, almanax := range almanaxes {
 		almanaxFields = append(almanaxFields, &discordgo.MessageEmbedField{
 			Name: i18n.Get(lg, "almanax.effect.day", i18n.Vars{
-				"date": answer.GetAlmanaxes()[i].GetDate().Seconds,
+				"emoji": emojiService.GetMiscStringEmoji(constants.EmojiIDCalendar),
+				"date":  almanax.GetDate().Seconds,
 			}),
-			Value:  answer.GetAlmanaxes()[i].GetBonus(),
+			Value:  almanax.GetBonus(),
 			Inline: false,
 		})
 	}
@@ -207,10 +208,10 @@ func mapAlmanaxEffectsToEmbeds(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	return &[]*discordgo.MessageEmbed{
 		{
 			Title: i18n.Get(lg, "almanax.effect.title", i18n.Vars{
-				"query": answer.GetQuery(),
+				"query": query,
 			}),
 			Description: i18n.Get(lg, "almanax.effect.description", i18n.Vars{
-				"len":   len(answer.GetAlmanaxes()),
+				"len":   len,
 				"page":  page + 1,
 				"pages": pages,
 			}),
@@ -219,14 +220,55 @@ func mapAlmanaxEffectsToEmbeds(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 				URL: constants.GetUnknownSeason().AlmanaxIcon,
 			},
 			Author: &discordgo.MessageEmbedAuthor{
-				Name:    answer.GetAlmanaxes()[offset].Source.Name,
-				URL:     answer.GetAlmanaxes()[offset].Source.Url,
-				IconURL: answer.GetAlmanaxes()[offset].Source.Icon,
+				Name:    almanaxes[0].Source.Name,
+				URL:     almanaxes[0].Source.Url,
+				IconURL: almanaxes[0].Source.Icon,
 			},
 			Fields: almanaxFields,
 			Footer: discord.BuildDefaultFooter(lg),
 		},
 	}
+}
+
+func mapAlmanaxEffectsToComponents(almanaxes []*amqp.Almanax, page, pages int,
+	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
+	// Trick to store effect ID in customID based on day
+	dayWithWantedEffect := almanaxes[0].Date.AsTime()
+	crafter := func(page int) string {
+		return contract.CraftAlmanaxEffectCustomID(dayWithWantedEffect, page)
+	}
+
+	almanaxChoices := make([]discordgo.SelectMenuOption, 0)
+	for _, almanax := range almanaxes {
+		almanaxChoices = append(almanaxChoices, discordgo.SelectMenuOption{
+			Label: i18n.Get(lg, "almanax.effect.choice.value", i18n.Vars{
+				"date": almanax.Date.AsTime().Format(constants.KrosmozAlmanaxDateFormat),
+			}),
+			Value: fmt.Sprintf("%v", almanax.Date.Seconds),
+			Emoji: emojiService.GetMiscEmoji(constants.EmojiIDCalendar),
+		})
+	}
+
+	components := make([]discordgo.MessageComponent, 0)
+	paginations := discord.GetPaginationButtons(page, pages, crafter, lg, emojiService)
+	if len(paginations) > 0 {
+		components = append(components, discordgo.ActionsRow{
+			Components: paginations,
+		})
+	}
+
+	components = append(components, discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{
+			discordgo.SelectMenu{
+				CustomID:    contract.CraftAlmanaxDayChoiceCustomID(),
+				MenuType:    discordgo.StringSelectMenu,
+				Placeholder: i18n.Get(lg, "almanax.effect.choice.placeholder"),
+				Options:     almanaxChoices,
+			},
+		},
+	})
+
+	return &components
 }
 
 func MapAlmanaxResourceToWebhook(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,

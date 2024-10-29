@@ -2,6 +2,7 @@ package constants
 
 const (
 	EmojiIDAlmanax     EmojiMiscID = "almanax"
+	EmojiIDCalendar    EmojiMiscID = "calendar"
 	EmojiIDEffect      EmojiMiscID = "effect"
 	EmojiIDFirst       EmojiMiscID = "first"
 	EmojiIDGame        EmojiMiscID = "dofusGame"

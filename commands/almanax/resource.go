@@ -2,7 +2,6 @@ package almanax
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -10,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/rs/zerolog/log"
 )
@@ -39,7 +39,7 @@ func (command *Command) updateResourceCharacter(s *discordgo.Session, i *discord
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	characterNumber, errConv := getInt64Value(i.MessageComponentData())
+	characterNumber, errConv := discord.GetInt64Value(i.MessageComponentData())
 	if errConv != nil {
 		log.Error().
 			Str(constants.LogCommand, command.GetName()).
@@ -77,7 +77,7 @@ func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordg
 		characterNumberProperty: characterNumber,
 	}
 
-	duration, errConv := getInt64Value(i.MessageComponentData())
+	duration, errConv := discord.GetInt64Value(i.MessageComponentData())
 	if errConv != nil {
 		log.Error().
 			Str(constants.LogCommand, command.GetName()).
@@ -135,14 +135,6 @@ func (command *Command) updateResourcesReply(_ context.Context, s *discordgo.Ses
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
-}
-
-func getInt64Value(data discordgo.MessageComponentInteractionData) (int64, error) {
-	values := data.Values
-	if len(values) != 1 {
-		return 0, commands.ErrInvalidInteraction
-	}
-	return strconv.ParseInt(values[0], 10, 64)
 }
 
 func isAlmanaxResourceAnswerValid(message *amqp.RabbitMQMessage) bool {

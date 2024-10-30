@@ -95,7 +95,7 @@
         },
         "effect": {
             "title": "{{ .query }}",
-            "description": "*{{ .len }} result{{ if gt .len 1 }}s{{ end }}, page {{ .page }} on {{ .pages }}*",
+            "description": "*{{ .total }} result{{ if gt .total 1 }}s{{ end }}, page {{ .page }} on {{ .pages }}*",
             "day": "{{ .emoji }} <t:{{ .date }}:D>",
             "missing": "My crystal ball tells me that the desired bonus will not intervene in the next thirty days, I unfortunately not know more :persevere:",
             "choice": {

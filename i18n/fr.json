@@ -95,7 +95,7 @@
         },
         "effect": {
             "title": "{{ .query }}",
-            "description": "*{{ .len }} résultat{{ if gt .len 1 }}s{{ end }}, page {{ .page }} sur {{ .pages }}*",
+            "description": "*{{ .total }} résultat{{ if gt .total 1 }}s{{ end }}, page {{ .page }} sur {{ .pages }}*",
             "day": "{{ .emoji }} <t:{{ .date }}:D>",
             "missing": "Ma boule de cristal me dit que le bonus demandé n'interviendra pas dans les trente prochains jours, je n'en sais malheureusement pas plus :persevere:",
             "choice": {

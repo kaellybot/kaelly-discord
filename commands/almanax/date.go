@@ -73,7 +73,7 @@ func (command *Command) almanaxRespond(_ context.Context, s *discordgo.Session,
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
-	webhookEdit := mappers.MapAlmanaxToWebhook(message.GetEncyclopediaAlmanaxAnswer().Almanax,
+	webhookEdit := mappers.MapAlmanaxToWebhook(message.GetEncyclopediaAlmanaxAnswer(),
 		constants.MapAMQPLocale(message.Language), command.emojiService)
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
 	if err != nil {

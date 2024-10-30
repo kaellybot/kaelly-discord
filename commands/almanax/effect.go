@@ -21,13 +21,9 @@ func (command *Command) getAlmanaxesByEffect(ctx context.Context, s *discordgo.S
 		panic(err)
 	}
 
-	properties := map[string]any{
-		pageProperty: constants.DefaultPage,
-	}
-
-	msg := mappers.MapAlmanaxEffectRequest(&query, nil, i.Locale)
+	msg := mappers.MapAlmanaxEffectRequest(&query, nil, constants.DefaultPage, i.Locale)
 	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
-		command.effectRespond, properties)
+		command.effectRespond)
 	if err != nil {
 		panic(err)
 	}
@@ -44,43 +40,22 @@ func (command *Command) updateAlmanaxesByEffect(s *discordgo.Session, i *discord
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	properties := map[string]any{
-		pageProperty: page,
-	}
-
-	msg := mappers.MapAlmanaxEffectRequest(nil, day, i.Locale)
-	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
-		command.effectRespond, properties)
+	msg := mappers.MapAlmanaxEffectRequest(nil, day, page, i.Locale)
+	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey,
+		msg, command.effectRespond)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (command *Command) effectRespond(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 	if !isAlmanaxEffectAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
-	pageValue, found := properties[pageProperty]
-	if !found {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, pageProperty).
-			Msgf("Cannot find request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
-	}
-	page, ok := pageValue.(int)
-	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, pageProperty).
-			Msgf("Cannot find request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
-	}
-
 	webhookEdit := mappers.MapAlmanaxEffectsToWebhook(message.GetEncyclopediaAlmanaxEffectAnswer(),
-		page, constants.MapAMQPLocale(message.Language), command.emojiService)
+		constants.MapAMQPLocale(message.Language), command.emojiService)
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
 	if err != nil {
 		log.Warn().Err(err).

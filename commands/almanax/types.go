@@ -11,7 +11,6 @@ const (
 
 	characterNumberProperty = "characterNumber"
 	dayDurationProperty     = "dayDuration"
-	pageProperty            = "page"
 
 	defaultCharacterNumber = 1
 )

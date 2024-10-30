@@ -33,14 +33,14 @@ func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 		buttons = append(buttons, discordgo.Button{
 			CustomID: crafter(previousPage),
 			Label:    i18n.Get(lg, "default.page.previous"),
-			Style:    discordgo.PrimaryButton,
+			Style:    discordgo.SecondaryButton,
 			Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDPrevious),
 		})
 	} else {
 		buttons = append(buttons, discordgo.Button{
 			CustomID: crafter(constants.DefaultPage),
 			Label:    i18n.Get(lg, "default.page.first"),
-			Style:    discordgo.PrimaryButton,
+			Style:    discordgo.SecondaryButton,
 			Disabled: page <= constants.DefaultPage,
 			Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDFirst),
 		})
@@ -50,14 +50,14 @@ func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 		buttons = append(buttons, discordgo.Button{
 			CustomID: crafter(nextPage),
 			Label:    i18n.Get(lg, "default.page.next"),
-			Style:    discordgo.PrimaryButton,
+			Style:    discordgo.SecondaryButton,
 			Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDNext),
 		})
 	} else {
 		buttons = append(buttons, discordgo.Button{
 			CustomID: crafter(lastPage),
 			Label:    i18n.Get(lg, "default.page.last"),
-			Style:    discordgo.PrimaryButton,
+			Style:    discordgo.SecondaryButton,
 			Disabled: page >= lastPage,
 			Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDLast),
 		})

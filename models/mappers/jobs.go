@@ -5,10 +5,13 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/books"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -62,22 +65,51 @@ func MapBookJobSetRequest(userID, jobID, serverID string, level int64,
 	}
 }
 
-func MapJobBookToEmbed(craftsmen []constants.JobUserLevel, jobID, serverID string, jobService books.Service,
-	serverService servers.Service, locale amqp.Language) *[]*discordgo.MessageEmbed {
-	lg := constants.MapAMQPLocale(locale)
+func MapJobBookToWebhook(answer *amqp.JobGetBookAnswer,
+	craftsmen []constants.JobUserLevel, jobService books.Service,
+	serverService servers.Service, emojiService emojis.Service,
+	lg discordgo.Locale) *discordgo.WebhookEdit {
+	return &discordgo.WebhookEdit{
+		Embeds:     mapJobBookToEmbeds(answer, craftsmen, jobService, serverService, lg),
+		Components: mapJobBookToComponents(answer, lg, emojiService),
+	}
+}
 
-	job, found := jobService.GetJob(jobID)
-	if !found {
-		log.Warn().Str(constants.LogEntity, jobID).
-			Msgf("Cannot find job based on ID sent internally, continuing with empty job")
-		job = entities.Job{ID: jobID}
+func mapJobBookToComponents(answer *amqp.JobGetBookAnswer,
+	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
+	jobID := answer.GetJobId()
+	serverID := answer.GetServerId()
+	crafter := func(page int) string {
+		return contract.CraftJobBookCustomID(jobID, serverID, page)
 	}
 
-	server, found := serverService.GetServer(serverID)
+	paginations := discord.GetPaginationButtons(int(answer.GetPage()), int(answer.GetPages()),
+		crafter, lg, emojiService)
+	if len(paginations) == 0 {
+		return &paginations
+	}
+
+	return &[]discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: paginations,
+		},
+	}
+}
+
+func mapJobBookToEmbeds(answer *amqp.JobGetBookAnswer, craftsmen []constants.JobUserLevel, jobService books.Service,
+	serverService servers.Service, lg discordgo.Locale) *[]*discordgo.MessageEmbed {
+	job, found := jobService.GetJob(answer.GetJobId())
 	if !found {
-		log.Warn().Str(constants.LogEntity, serverID).
+		log.Warn().Str(constants.LogEntity, answer.GetJobId()).
+			Msgf("Cannot find job based on ID sent internally, continuing with empty job")
+		job = entities.Job{ID: answer.GetJobId()}
+	}
+
+	server, found := serverService.GetServer(answer.GetServerId())
+	if !found {
+		log.Warn().Str(constants.LogEntity, answer.GetServerId()).
 			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-		server = entities.Server{ID: serverID}
+		server = entities.Server{ID: answer.GetServerId()}
 	}
 
 	sort.SliceStable(craftsmen, func(i, j int) bool {
@@ -88,10 +120,15 @@ func MapJobBookToEmbed(craftsmen []constants.JobUserLevel, jobID, serverID strin
 	})
 
 	embed := discordgo.MessageEmbed{
-		Title:       i18n.Get(lg, "job.embed.craftsmen.title", i18n.Vars{"job": translators.GetEntityLabel(job, lg)}),
-		Description: i18n.Get(lg, "job.embed.craftsmen.description", i18n.Vars{"craftsmen": craftsmen}),
-		Color:       job.Color,
-		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: job.Icon},
+		Title: i18n.Get(lg, "job.embed.craftsmen.title", i18n.Vars{"job": translators.GetEntityLabel(job, lg)}),
+		Description: i18n.Get(lg, "job.embed.craftsmen.description", i18n.Vars{
+			"craftsmen": craftsmen,
+			"total":     answer.GetTotal(),
+			"page":      answer.GetPage() + 1,
+			"pages":     answer.GetPages(),
+		}),
+		Color:     job.Color,
+		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: job.Icon},
 		Footer: &discordgo.MessageEmbedFooter{
 			Text:    translators.GetEntityLabel(server, lg),
 			IconURL: server.Icon,

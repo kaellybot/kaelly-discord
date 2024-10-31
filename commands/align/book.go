@@ -17,14 +17,14 @@ import (
 
 func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
-	city, order, server, err := getGetOptions(ctx)
-	if err != nil {
-		panic(err)
+	city, order, server, errOpt := getGetOptions(ctx)
+	if errOpt != nil {
+		panic(errOpt)
 	}
 
-	properties, err := discord.GetMemberNickNames(s, i.GuildID)
-	if err != nil {
-		panic(err)
+	properties, errMembers := discord.GetMemberNickNames(s, i.GuildID)
+	if errMembers != nil {
+		panic(errMembers)
 	}
 
 	var userIDs []string
@@ -34,10 +34,10 @@ func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 
 	msg := mappers.MapBookAlignGetBookRequest(city.ID, order.ID, server.ID,
 		constants.DefaultPage, userIDs, i.Locale)
-	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg,
+	errReq := command.requestManager.Request(s, i, alignRequestRoutingKey, msg,
 		command.getBookReply, properties)
-	if err != nil {
-		panic(err)
+	if errReq != nil {
+		panic(errReq)
 	}
 }
 

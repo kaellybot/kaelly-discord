@@ -36,14 +36,19 @@ func New(bookService books.Service, guildService guilds.Service,
 
 	subCommandHandlers := cmd.HandleSubCommands(commands.SubCommandHandlers{
 		contract.JobGetSubCommandName: middlewares.
-			Use(cmd.checkJob, checkServer, cmd.getRequest),
+			Use(cmd.checkJob, checkServer, cmd.getBook),
 		contract.JobSetSubCommandName: middlewares.
-			Use(cmd.checkJob, cmd.checkLevel, checkServer, cmd.setRequest),
+			Use(cmd.checkJob, cmd.checkLevel, checkServer, cmd.setBook),
+	})
+
+	interactionHandlers := cmd.HandleInteractionMessages(commands.InteractionMessageHandlers{
+		contract.JobBookCustomID: cmd.updateBook,
 	})
 
 	cmd.slashHandlers = commands.DiscordHandlers{
 		discordgo.InteractionApplicationCommand:             subCommandHandlers,
 		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
+		discordgo.InteractionMessageComponent:               interactionHandlers,
 	}
 	cmd.userHandlers = commands.DiscordHandlers{
 		discordgo.InteractionApplicationCommand: middlewares.Use(checkServer, cmd.userRequest),
@@ -73,19 +78,18 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	if commands.IsApplicationCommand(i) {
-		return len(i.ApplicationCommandData().TargetID) == 0 &&
-			command.GetName() == i.ApplicationCommandData().Name ||
-			contract.JobUserCommandName == i.ApplicationCommandData().Name
-	}
-	return false
+	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if len(i.ApplicationCommandData().TargetID) == 0 {
+	if commands.IsApplicationCommand(i) {
+		if len(i.ApplicationCommandData().TargetID) == 0 {
+			command.CallHandler(s, i, command.slashHandlers)
+		} else {
+			command.CallHandler(s, i, command.userHandlers)
+		}
+	} else if commands.IsMessageCommand(i) {
 		command.CallHandler(s, i, command.slashHandlers)
-	} else {
-		command.CallHandler(s, i, command.userHandlers)
 	}
 }
 
@@ -140,4 +144,18 @@ func getUserOptions(ctx context.Context) (entities.Server, error) {
 	}
 
 	return server, nil
+}
+
+func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
+	if commands.IsApplicationCommand(i) {
+		return len(i.ApplicationCommandData().TargetID) == 0 &&
+			command.GetName() == i.ApplicationCommandData().Name ||
+			contract.JobUserCommandName == i.ApplicationCommandData().Name
+	}
+	return false
+}
+
+func matchesMessageCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsMessageCommand(i) &&
+		contract.IsBelongsToJob(i.MessageComponentData().CustomID)
 }

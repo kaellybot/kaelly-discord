@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
@@ -14,7 +15,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	job, server, err := getGetOptions(ctx)
 	if err != nil {
@@ -34,36 +35,72 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID,
 		constants.DefaultPage, userIDs, i.Locale)
 	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg,
-		command.getRespond, properties)
+		command.getBookReply, properties)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-		craftsmen := make([]constants.JobUserLevel, 0)
-		for _, craftsman := range message.JobGetBookAnswer.Craftsmen {
-			username, found := properties[craftsman.UserId]
-			if found {
-				craftsmen = append(craftsmen, constants.JobUserLevel{
-					Username: fmt.Sprintf("%v", username),
-					Level:    craftsman.Level,
-				})
-			} else {
-				log.Warn().Msgf("MemberId not found in property, item ignored...")
-			}
-		}
+func (command *Command) updateBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	customID := i.MessageComponentData().CustomID
+	jobID, serverID, page, ok := contract.ExtractJobBookCustomID(customID)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
 
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Embeds: mappers.MapJobBookToEmbed(craftsmen, message.JobGetBookAnswer.JobId, message.JobGetBookAnswer.ServerId,
-				command.bookService, command.serverService, message.Language),
-		})
-		if err != nil {
-			log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
-		}
-	} else {
+	properties, errMembers := discord.GetMemberNickNames(s, i.GuildID)
+	if errMembers != nil {
+		panic(errMembers)
+	}
+
+	var userIDs []string
+	for userID := range properties {
+		userIDs = append(userIDs, userID)
+	}
+
+	msg := mappers.MapBookJobGetBookRequest(jobID, serverID,
+		page, userIDs, i.Locale)
+	errReq := command.requestManager.Request(s, i, jobRequestRoutingKey, msg,
+		command.getBookReply, properties)
+	if errReq != nil {
+		panic(errReq)
+	}
+}
+
+func (command *Command) getBookReply(_ context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+	if !isJobGetBookAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}
+
+	craftsmen := make([]constants.JobUserLevel, 0)
+	for _, craftsman := range message.JobGetBookAnswer.Craftsmen {
+		username, found := properties[craftsman.UserId]
+		if found {
+			craftsmen = append(craftsmen, constants.JobUserLevel{
+				Username: fmt.Sprintf("%v", username),
+				Level:    craftsman.Level,
+			})
+		} else {
+			log.Warn().Msgf("MemberId not found in property, item ignored...")
+		}
+	}
+
+	webhook := mappers.MapJobBookToWebhook(message.GetJobGetBookAnswer(), craftsmen,
+		command.bookService, command.serverService, command.emojiService,
+		constants.MapAMQPLocale(message.Language))
+	_, err := s.InteractionResponseEdit(i.Interaction, webhook)
+	if err != nil {
+		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+	}
+}
+
+func isJobGetBookAnswerValid(message *amqp.RabbitMQMessage) bool {
+	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
+		message.Type == amqp.RabbitMQMessage_JOB_GET_BOOK_ANSWER &&
+		message.GetJobGetBookAnswer() != nil
 }

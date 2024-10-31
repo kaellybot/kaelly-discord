@@ -68,9 +68,9 @@
                 "resources": "donne les ressources nécessaires pour une période donnée\n   - Le champ `duration` est optionnel et correspond au nombre de jours souhaité, allant de 1 à 30. Si non renseigné, les ressources nécessaires pour les 7 prochains jours sont remontées. *__Exemple__ : 30*"
             },
             "tutorial": {
-                "day": "",
-                "effects": "",
-                "resources": ""
+                "day": "https://i.imgur.com/ofhuhvS.gif",
+                "effects": "https://i.imgur.com/atAlFxu.gif",
+                "resources": "https://i.imgur.com/ZLrrbmn.gif"
             },
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
@@ -187,7 +187,7 @@
         "help": {
             "overview": "donne les items, montures, familiers, ressources et consommables du jeu",
             "detailed": "donne les items, montures, familiers, ressources et consommables du jeu\n  - Le champ `query` est obligatoire et correspond au nom de l'objet que tu souhaites consulter. *__Exemple__ : Coiffe du bouftou*",
-            "tutorial": "https://i.imgur.com/7sfCA3Q.gif",
+            "tutorial": "",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "**{{ .type }}**{{ if .level }} de niveau **{{ .level }}**{{ end }}{{ if .description }}\n\n*{{ .description }}*{{ end }}",
@@ -282,7 +282,7 @@
         "help": {
             "overview": "donne les panoplies du jeu",
             "detailed": "donne les panoplies du jeu\n   - Le champ `query` est obligatoire et correspond au nom de la panoplie que tu souhaites consulter. *__Exemple__ : Panoplie du Boune*",
-            "tutorial": "https://i.imgur.com/fKRDCnZ.gif",
+            "tutorial": "",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau **{{ .level }}**",

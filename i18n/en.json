@@ -68,9 +68,9 @@
                 "resources": "provides the necessary resources for a given period\n   - The `duration` field is optional and corresponds to the desired number of days, ranging from 1 to 30. If not specified, the necessary resources for the next 7 days are returned. *__Example__: 30*"
             },
             "tutorial": {
-                "day": "",
-                "effects": "",
-                "resources": ""
+                "day": "https://i.imgur.com/9Rh42ym.gif",
+                "effects": "https://i.imgur.com/gGxD1hV.gif",
+                "resources": "https://i.imgur.com/SQYEZs8.gif"
             },
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
@@ -187,7 +187,7 @@
         "help": {
             "overview": "provides items, mounts, pets, resources and consumables",
             "detailed": "provides information about items, mounts, pets, resources and consumables in the game\n  - The `query` field is mandatory and corresponds to the name of the item you want to look up. *__Example__: Gobball Headgear*",
-            "tutorial": "https://i.imgur.com/pzPpOqj.gif",
+            "tutorial": "",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
         "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end }}{{ if .description }}\n\n*{{ .description }}*{{ end }}",
@@ -282,7 +282,7 @@
         "help": {
             "overview": "provides sets",
             "detailed": "provides information about sets in the game\n   - The `query` field is mandatory and corresponds to the name of the set you want to look up. *__Example__: Boon Set*",
-            "tutorial": "https://i.imgur.com/jU9zhMz.gif",
+            "tutorial": "",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
         "description": "Level **{{ .level }}**",

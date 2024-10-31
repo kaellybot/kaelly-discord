@@ -10,6 +10,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/books"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/checks"
@@ -20,9 +21,11 @@ import (
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(bookService books.Service, guildService guilds.Service,
-	serverService servers.Service, requestManager requests.RequestManager) *Command {
+	serverService servers.Service, emojiService emojis.Service,
+	requestManager requests.RequestManager) *Command {
 	cmd := Command{
 		bookService:    bookService,
+		emojiService:   emojiService,
 		guildService:   guildService,
 		serverService:  serverService,
 		requestManager: requestManager,

@@ -3,6 +3,7 @@ package align
 import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/services/books"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
@@ -11,8 +12,7 @@ import (
 const (
 	alignRequestRoutingKey = "requests.books"
 
-	memberListLimit   = 1000
-	believerListLimit = 30
+	memberListLimit = 1000
 
 	userProperty = "user"
 )
@@ -20,6 +20,7 @@ const (
 type Command struct {
 	commands.AbstractCommand
 	bookService    books.Service
+	emojiService   emojis.Service
 	guildService   guilds.Service
 	serverService  servers.Service
 	requestManager requests.RequestManager

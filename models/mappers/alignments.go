@@ -5,10 +5,13 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/books"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -21,8 +24,8 @@ type i18nAlignmentExperience struct {
 	Level    int64
 }
 
-func MapBookAlignGetBookRequest(cityID, orderID, serverID string, userIDs []string,
-	craftsmenListLimit int64, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapBookAlignGetBookRequest(cityID, orderID, serverID string, page int,
+	userIDs []string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ALIGN_GET_BOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
@@ -32,7 +35,8 @@ func MapBookAlignGetBookRequest(cityID, orderID, serverID string, userIDs []stri
 			CityId:   cityID,
 			OrderId:  orderID,
 			ServerId: serverID,
-			Limit:    craftsmenListLimit,
+			Offset:   int32(page) * constants.MaxBookRowPerEmbed,
+			Size:     constants.MaxBookRowPerEmbed,
 		},
 	}
 }
@@ -65,14 +69,24 @@ func MapBookAlignSetRequest(userID, cityID, orderID, serverID string, level int6
 	}
 }
 
-func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverID string, alignService books.Service,
-	serverService servers.Service, locale amqp.Language) *[]*discordgo.MessageEmbed {
-	lg := constants.MapAMQPLocale(locale)
-	server, found := serverService.GetServer(serverID)
+func MapAlignBookToWebhook(answer *amqp.AlignGetBookAnswer,
+	believers []constants.AlignmentUserLevel, alignService books.Service,
+	serverService servers.Service, emojiService emojis.Service,
+	lg discordgo.Locale) *discordgo.WebhookEdit {
+	return &discordgo.WebhookEdit{
+		Embeds:     mapAlignBookToEmbeds(answer, believers, alignService, serverService, lg),
+		Components: mapAlignBookToComponents(answer, lg, emojiService),
+	}
+}
+
+func mapAlignBookToEmbeds(answer *amqp.AlignGetBookAnswer,
+	believers []constants.AlignmentUserLevel, alignService books.Service,
+	serverService servers.Service, lg discordgo.Locale) *[]*discordgo.MessageEmbed {
+	server, found := serverService.GetServer(answer.GetServerId())
 	if !found {
-		log.Warn().Str(constants.LogEntity, serverID).
+		log.Warn().Str(constants.LogEntity, answer.GetServerId()).
 			Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-		server = entities.Server{ID: serverID}
+		server = entities.Server{ID: answer.GetServerId()}
 	}
 
 	cityValues := make(map[string]int64)
@@ -126,10 +140,15 @@ func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverID stri
 
 	winningCity := mapWinningCity(cityValues, alignService)
 	embed := discordgo.MessageEmbed{
-		Title:       i18n.Get(lg, "align.embed.believers.title"),
-		Description: i18n.Get(lg, "align.embed.believers.description", i18n.Vars{"believers": i18nAlignXp}),
-		Color:       winningCity.Color,
-		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: winningCity.Icon},
+		Title: i18n.Get(lg, "align.embed.believers.title"),
+		Description: i18n.Get(lg, "align.embed.believers.description", i18n.Vars{
+			"believers": i18nAlignXp,
+			"total":     answer.GetTotal(),
+			"page":      answer.GetPage() + 1,
+			"pages":     answer.GetPages(),
+		}),
+		Color:     winningCity.Color,
+		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: winningCity.Icon},
 		Footer: &discordgo.MessageEmbedFooter{
 			Text:    translators.GetEntityLabel(server, lg),
 			IconURL: server.Icon,
@@ -137,6 +156,28 @@ func MapAlignBookToEmbed(believers []constants.AlignmentUserLevel, serverID stri
 	}
 
 	return &[]*discordgo.MessageEmbed{&embed}
+}
+
+func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer,
+	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
+	cityID := answer.GetCityId()
+	orderID := answer.GetOrderId()
+	serverID := answer.GetServerId()
+	crafter := func(page int) string {
+		return contract.CraftAlignBookCustomID(cityID, orderID, serverID, page)
+	}
+
+	paginations := discord.GetPaginationButtons(int(answer.GetPage()), int(answer.GetPages()),
+		crafter, lg, emojiService)
+	if len(paginations) == 0 {
+		return &paginations
+	}
+
+	return &[]discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: paginations,
+		},
+	}
 }
 
 func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperience, member *discordgo.Member,

@@ -51,7 +51,7 @@
         "embed": {
             "believers": {
                 "title": "Liste des alignés",
-                "description": "{{ if .believers }}{{ range .believers}}{{ .City }} {{ .Order }} niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun aligné pour le moment !{{ end }}"
+                "description": "{{ if .believers }}*{{ .total }} résultat{{ if gt .total 1 }}s{{ end }}, page {{ .page }} sur {{ .pages }}*\n\n{{ range .believers}}{{ .City }} {{ .Order }} niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun aligné pour le moment !{{ end }}"
             },
             "beliefs": {
                 "title": "Alignements de {{ .username }}",
@@ -220,7 +220,7 @@
         "embed": {
             "craftsmen": {
                 "title": "Liste des {{ .job }}s",
-                "description": "{{ if .craftsmen }}{{ range .craftsmen}}Niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun artisan pour le moment !{{ end }}"
+                "description": "{{ if .craftsmen }}*{{ .total }} résultat{{ if gt .total 1 }}s{{ end }}, page {{ .page }} sur {{ .pages }}*\n\n{{ range .craftsmen}}Niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun artisan pour le moment !{{ end }}"
             },
             "craftsman": {
                 "title": "Métiers de {{ .username }}",

@@ -36,7 +36,7 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 		properties[member.User.ID] = username
 	}
 
-	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID, userIDs, craftsmenListLimit, i.Locale)
+	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID, constants.DefaultPage, userIDs, i.Locale)
 	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.getRespond, properties)
 	if err != nil {
 		panic(err)

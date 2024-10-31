@@ -8,6 +8,7 @@ const (
 	InvisibleCharacter       = "\u200b"
 	MaxButtonPerActionRow    = 5
 	MaxAlmanaxEffectPerEmbed = 5
+	MaxBookRowPerEmbed       = 15
 	MaxCharacterPerField     = 10
 	MaxEquipmentPerField     = 8
 	MaxIngredientsPerField   = 8

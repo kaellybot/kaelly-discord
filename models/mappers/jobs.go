@@ -19,8 +19,8 @@ type i18nJobExperience struct {
 	Level int64
 }
 
-func MapBookJobGetBookRequest(jobID, serverID string, userIDs []string,
-	craftsmenListLimit int64, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapBookJobGetBookRequest(jobID, serverID string, page int,
+	userIDs []string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_GET_BOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
@@ -29,7 +29,8 @@ func MapBookJobGetBookRequest(jobID, serverID string, userIDs []string,
 			UserIds:  userIDs,
 			JobId:    jobID,
 			ServerId: serverID,
-			Limit:    craftsmenListLimit,
+			Offset:   int32(page) * constants.MaxBookRowPerEmbed,
+			Size:     constants.MaxBookRowPerEmbed,
 		},
 	}
 }

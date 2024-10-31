@@ -36,8 +36,10 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 		properties[member.User.ID] = username
 	}
 
-	msg := mappers.MapBookAlignGetBookRequest(city.ID, order.ID, server.ID, userIDs, believerListLimit, i.Locale)
-	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.getRespond, properties)
+	msg := mappers.MapBookAlignGetBookRequest(city.ID, order.ID, server.ID,
+		constants.DefaultPage, userIDs, i.Locale)
+	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg,
+		command.getRespond, properties)
 	if err != nil {
 		panic(err)
 	}
@@ -45,30 +47,36 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 
 func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
-	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-		believers := make([]constants.AlignmentUserLevel, 0)
-		for _, believer := range message.AlignGetBookAnswer.Believers {
-			username, found := properties[believer.UserId]
-			if found {
-				believers = append(believers, constants.AlignmentUserLevel{
-					CityID:   believer.CityId,
-					OrderID:  believer.OrderId,
-					Username: fmt.Sprintf("%v", username),
-					Level:    believer.Level,
-				})
-			} else {
-				log.Warn().Msgf("MemberID not found in property, item ignored...")
-			}
-		}
-
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Embeds: mappers.MapAlignBookToEmbed(believers, message.AlignGetBookAnswer.ServerId,
-				command.bookService, command.serverService, message.Language),
-		})
-		if err != nil {
-			log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
-		}
-	} else {
+	if !isAlignGetBookAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}
+
+	believers := make([]constants.AlignmentUserLevel, 0)
+	for _, believer := range message.AlignGetBookAnswer.Believers {
+		username, found := properties[believer.UserId]
+		if found {
+			believers = append(believers, constants.AlignmentUserLevel{
+				CityID:   believer.CityId,
+				OrderID:  believer.OrderId,
+				Username: fmt.Sprintf("%v", username),
+				Level:    believer.Level,
+			})
+		} else {
+			log.Warn().Msgf("MemberID not found in property, item ignored...")
+		}
+	}
+
+	webhook := mappers.MapAlignBookToWebhook(message.GetAlignGetBookAnswer(), believers,
+		command.bookService, command.serverService, command.emojiService,
+		constants.MapAMQPLocale(message.Language))
+	_, err := s.InteractionResponseEdit(i.Interaction, webhook)
+	if err != nil {
+		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+	}
+}
+
+func isAlignGetBookAnswerValid(message *amqp.RabbitMQMessage) bool {
+	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
+		message.Type == amqp.RabbitMQMessage_ALIGN_GET_BOOK_ANSWER &&
+		message.GetAlignGetBookAnswer() != nil
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) setRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) setBook(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	city, order, level, server, err := getSetOptions(ctx)
 	if err != nil {
@@ -21,13 +21,13 @@ func (command *Command) setRequest(ctx context.Context, s *discordgo.Session,
 	}
 
 	msg := mappers.MapBookAlignSetRequest(i.Interaction.Member.User.ID, city.ID, order.ID, server.ID, level, i.Locale)
-	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.setRespond)
+	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.setBookReply)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *Command) setRespond(_ context.Context, s *discordgo.Session,
+func (command *Command) setBookReply(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
 	if message.Status == amqp.RabbitMQMessage_SUCCESS {
 		content := i18n.Get(constants.MapAMQPLocale(message.Language), "align.success")

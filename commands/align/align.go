@@ -36,17 +36,22 @@ func New(bookService books.Service, guildService guilds.Service,
 
 	subCommandHandlers := cmd.HandleSubCommands(commands.SubCommandHandlers{
 		contract.AlignGetSubCommandName: middlewares.
-			Use(cmd.checkOptionalCity, cmd.checkOptionalOrder, checkServer, cmd.getRequest),
+			Use(cmd.checkOptionalCity, cmd.checkOptionalOrder, checkServer, cmd.getBook),
 		contract.AlignSetSubCommandName: middlewares.
-			Use(cmd.checkMandatoryCity, cmd.checkMandatoryOrder, cmd.checkLevel, checkServer, cmd.setRequest),
+			Use(cmd.checkMandatoryCity, cmd.checkMandatoryOrder, cmd.checkLevel, checkServer, cmd.setBook),
+	})
+
+	interactionHandlers := cmd.HandleInteractionMessages(commands.InteractionMessageHandlers{
+		contract.AlignBookCustomID: cmd.updateBook,
 	})
 
 	cmd.slashHandlers = commands.DiscordHandlers{
 		discordgo.InteractionApplicationCommand:             subCommandHandlers,
 		discordgo.InteractionApplicationCommandAutocomplete: cmd.autocomplete,
+		discordgo.InteractionMessageComponent:               interactionHandlers,
 	}
 	cmd.userHandlers = commands.DiscordHandlers{
-		discordgo.InteractionApplicationCommand: middlewares.Use(checkServer, cmd.userRequest),
+		discordgo.InteractionApplicationCommand: middlewares.Use(checkServer, cmd.userBook),
 	}
 	return &cmd
 }
@@ -73,20 +78,18 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 }
 
 func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
-	if commands.IsApplicationCommand(i) {
-		return len(i.ApplicationCommandData().TargetID) == 0 &&
-			command.GetName() == i.ApplicationCommandData().Name ||
-			contract.AlignUserCommandName == i.ApplicationCommandData().Name
-	}
-
-	return false
+	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if len(i.ApplicationCommandData().TargetID) == 0 {
+	if commands.IsApplicationCommand(i) {
+		if len(i.ApplicationCommandData().TargetID) == 0 {
+			command.CallHandler(s, i, command.slashHandlers)
+		} else {
+			command.CallHandler(s, i, command.userHandlers)
+		}
+	} else if commands.IsMessageCommand(i) {
 		command.CallHandler(s, i, command.slashHandlers)
-	} else {
-		command.CallHandler(s, i, command.userHandlers)
 	}
 }
 
@@ -146,4 +149,18 @@ func getUserOptions(ctx context.Context) (entities.Server, error) {
 	}
 
 	return server, nil
+}
+
+func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
+	if commands.IsApplicationCommand(i) {
+		return len(i.ApplicationCommandData().TargetID) == 0 &&
+			command.GetName() == i.ApplicationCommandData().Name ||
+			contract.AlignUserCommandName == i.ApplicationCommandData().Name
+	}
+	return false
+}
+
+func matchesMessageCommand(i *discordgo.InteractionCreate) bool {
+	return commands.IsMessageCommand(i) &&
+		contract.IsBelongsToAlign(i.MessageComponentData().CustomID)
 }

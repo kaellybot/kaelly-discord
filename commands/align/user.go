@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) userBook(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	server, err := getUserOptions(ctx)
 	if err != nil {

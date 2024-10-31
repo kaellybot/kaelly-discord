@@ -9,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/rs/zerolog/log"
 )
@@ -20,24 +21,20 @@ func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	members, err := s.GuildMembers(i.GuildID, "", memberListLimit)
+	properties, err := discord.GetMemberNickNames(s, i.GuildID)
 	if err != nil {
 		panic(err)
 	}
 
 	var userIDs []string
-	properties := make(map[string]any)
-	for _, member := range members {
-		userIDs = append(userIDs, member.User.ID)
-		username := member.Nick
-		if len(username) == 0 {
-			username = member.User.Username
-		}
-		properties[member.User.ID] = username
+	for userID := range properties {
+		userIDs = append(userIDs, userID)
 	}
 
-	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID, constants.DefaultPage, userIDs, i.Locale)
-	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.getRespond, properties)
+	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID,
+		constants.DefaultPage, userIDs, i.Locale)
+	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg,
+		command.getRespond, properties)
 	if err != nil {
 		panic(err)
 	}

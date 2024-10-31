@@ -11,10 +11,7 @@ import (
 
 const (
 	alignRequestRoutingKey = "requests.books"
-
-	memberListLimit = 1000
-
-	userProperty = "user"
+	userProperty           = "user"
 )
 
 type Command struct {

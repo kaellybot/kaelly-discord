@@ -35,7 +35,12 @@ func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate)
 
 	content := i18n.Get(event.Locale, "panic")
 	_, err := session.InteractionResponseEdit(event.Interaction, &discordgo.WebhookEdit{
-		Content: &content,
+		AllowedMentions: &discordgo.MessageAllowedMentions{},
+		Attachments:     &[]*discordgo.MessageAttachment{},
+		Components:      &[]discordgo.MessageComponent{},
+		Content:         &content,
+		Embeds:          &[]*discordgo.MessageEmbed{},
+		Files:           []*discordgo.File{},
 	})
 	if err != nil {
 		log.Warn().Err(err).Msgf("Could not respond to caller after panicking")

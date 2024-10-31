@@ -6,46 +6,72 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) getRequest(ctx context.Context, s *discordgo.Session,
+func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	city, order, server, err := getGetOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	members, err := s.GuildMembers(i.GuildID, "", memberListLimit)
+	properties, err := discord.GetMemberNickNames(s, i.GuildID)
 	if err != nil {
 		panic(err)
 	}
 
 	var userIDs []string
-	properties := make(map[string]any)
-	for _, member := range members {
-		userIDs = append(userIDs, member.User.ID)
-		username := member.Nick
-		if len(username) == 0 {
-			username = member.User.Username
-		}
-		properties[member.User.ID] = username
+	for userID := range properties {
+		userIDs = append(userIDs, userID)
 	}
 
 	msg := mappers.MapBookAlignGetBookRequest(city.ID, order.ID, server.ID,
 		constants.DefaultPage, userIDs, i.Locale)
 	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg,
-		command.getRespond, properties)
+		command.getBookReply, properties)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
+func (command *Command) updateBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	customID := i.MessageComponentData().CustomID
+	cityID, orderID, serverID, page, ok := contract.ExtractAlignBookCustomID(customID)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	properties, errMembers := discord.GetMemberNickNames(s, i.GuildID)
+	if errMembers != nil {
+		panic(errMembers)
+	}
+
+	var userIDs []string
+	for userID := range properties {
+		userIDs = append(userIDs, userID)
+	}
+
+	msg := mappers.MapBookAlignGetBookRequest(cityID, orderID, serverID,
+		page, userIDs, i.Locale)
+	errReq := command.requestManager.Request(s, i, alignRequestRoutingKey, msg,
+		command.getBookReply, properties)
+	if errReq != nil {
+		panic(errReq)
+	}
+}
+
+func (command *Command) getBookReply(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 	if !isAlignGetBookAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)

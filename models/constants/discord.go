@@ -13,6 +13,8 @@ const (
 	MaxEquipmentPerField     = 8
 	MaxIngredientsPerField   = 8
 
+	MemberListLimit = 1000
+
 	DefaultPage = 0
 )
 

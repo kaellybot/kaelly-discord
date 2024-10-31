@@ -14,7 +14,7 @@ import (
 func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 	lg discordgo.Locale, emojiService emojis.Service) []discordgo.MessageComponent {
 	lastPage := pages - 1
-	if constants.DefaultPage == lastPage {
+	if pages == 0 || constants.DefaultPage == lastPage {
 		return []discordgo.MessageComponent{}
 	}
 
@@ -64,6 +64,24 @@ func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 	}
 
 	return buttons
+}
+
+func GetMemberNickNames(s *discordgo.Session, guildID string) (map[string]any, error) {
+	members, err := s.GuildMembers(guildID, "", constants.MemberListLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	properties := make(map[string]any)
+	for _, member := range members {
+		username := member.Nick
+		if len(username) == 0 {
+			username = member.User.Username
+		}
+		properties[member.User.ID] = username
+	}
+
+	return properties, nil
 }
 
 func SliceFields[T any](items []T, limit int, toField ItemsToField[T]) []*discordgo.MessageEmbedField {

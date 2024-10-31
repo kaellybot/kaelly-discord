@@ -43,8 +43,8 @@
             },
             "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement.",
             "tutorial": {
-                "get": "",
-                "set": ""
+                "get": "https://i.imgur.com/GjNGMtv.gif",
+                "set": "https://i.imgur.com/RFsUjEf.gif"
             }
         },
         "success": "L'annuaire a été mise à jour !",

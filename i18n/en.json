@@ -42,8 +42,8 @@
                 "set": "records your alignment in the book, independently of the Discord server; this recording cannot be done for others.\n   - The `city` field is mandatory and corresponds to the city to which players have pledged allegiance. *__Example__: Bonta*\n - The `order` field is mandatory and corresponds to the order joined by players. *__Example__: Spirit*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__: 200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*"
             },
             "tutorial": {
-                "get": "",
-                "set": ""
+                "get": "https://i.imgur.com/qORz18c.gif",
+                "set": "https://i.imgur.com/sVVCaKX.gif"
             },
             "source": "The collected data is used only for my proper functioning."
         },

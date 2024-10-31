@@ -211,8 +211,8 @@
                 "set": "records your profession in the book, independently of the Discord server; this recording cannot be done for others.\n    - The `job` field is mandatory and corresponds to a profession in the game. *__Example__: Lumberjack*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__: 200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*"
             },
             "tutorial": {
-                "get": "",
-                "set": ""
+                "get": "https://i.imgur.com/ibPmsnr.gif",
+                "set": "https://i.imgur.com/klMbM69.gif"
             },
             "source": "The collected data is used only for my proper functioning."
         },

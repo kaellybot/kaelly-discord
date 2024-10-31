@@ -211,8 +211,8 @@
                 "set": "enregistre ta profession dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n    - Le champ `job` est obligatoire et correspond à un métier du jeu. *__Exemple__ : Bûcheron*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
             },
             "tutorial": {
-                "get": "",
-                "set": ""
+                "get": "https://i.imgur.com/OP9e8FM.gif",
+                "set": "https://i.imgur.com/SI0ybYV.gif"
             },
             "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },

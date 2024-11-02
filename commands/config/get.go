@@ -32,8 +32,8 @@ func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Embeds: &[]*discordgo.MessageEmbed{
 				mappers.MapConfigToEmbed(guild, command.emojiService, command.serverService,
-					command.feedService, command.videastService, command.streamerService,
-					message.Language),
+					command.feedService, command.videastService, command.twitterService,
+					command.streamerService, message.Language),
 			},
 		})
 		if err != nil {
@@ -217,9 +217,8 @@ func getValidTwitterWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGet
 			result = append(result, constants.TwitterWebhook{
 				ChannelWebhook: constants.ChannelWebhook{
 					Channel: channel,
-					Locale:  webhook.Language,
 				},
-				TwitterName: webhook.Name,
+				TwitterID: webhook.TwitterId,
 			})
 		}
 	}

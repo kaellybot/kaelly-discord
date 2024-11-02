@@ -18,5 +18,6 @@ const (
 	ContextKeyQuery
 	ContextKeyServer
 	ContextKeyStreamer
+	ContextKeyTwitter
 	ContextKeyVideast
 )

@@ -11,6 +11,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/streamers"
+	"github.com/kaellybot/kaelly-discord/services/twitters"
 	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
@@ -142,11 +143,7 @@ func MapConfigurationWebhookTwitchRequest(webhook *discordgo.Webhook, guildID, c
 }
 
 func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	if locale == amqp.Language_ANY {
-		locale = constants.MapDiscordLocale(lg)
-	}
-
+	twitterAccount entities.TwitterAccount, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	var webhookID, webhookToken string
 	if webhook != nil {
 		webhookID = webhook.ID
@@ -160,10 +157,10 @@ func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildID, 
 		ConfigurationSetTwitterWebhookRequest: &amqp.ConfigurationSetTwitterWebhookRequest{
 			GuildId:      guildID,
 			ChannelId:    channelID,
+			TwitterId:    twitterAccount.ID,
 			WebhookId:    webhookID,
 			WebhookToken: webhookToken,
 			Enabled:      enabled,
-			Language:     locale,
 		},
 	}
 }
@@ -193,7 +190,7 @@ func MapConfigurationWebhookYoutubeRequest(webhook *discordgo.Webhook, guildID, 
 
 func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 	serverService servers.Service, feedService feeds.Service, videastService videasts.Service,
-	streamerService streamers.Service, locale amqp.Language,
+	twitterService twitters.Service, streamerService streamers.Service, locale amqp.Language,
 ) *discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 
@@ -236,7 +233,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 	channelWebhooks = append(channelWebhooks, mapRssWebhooksToI18n(guild.RssWebhooks,
 		emojiService, feedService, lg)...)
 	channelWebhooks = append(channelWebhooks, mapTwitterWebhooksToI18n(guild.TwitterWebhooks,
-		emojiService, lg)...)
+		emojiService, twitterService, lg)...)
 	channelWebhooks = append(channelWebhooks, mapYoutubeWebhooksToI18n(guild.YoutubeWebhooks,
 		emojiService, videastService, lg)...)
 	channelWebhooks = append(channelWebhooks, mapTwitchWebhooksToI18n(guild.TwitchWebhooks,
@@ -333,16 +330,25 @@ func mapTwitchWebhooksToI18n(webhooks []constants.TwitchWebhook, emojiService em
 }
 
 func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, emojiService emojis.Service,
-	lg discordgo.Locale) []i18nChannelWebhook {
+	twitterService twitters.Service, lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
+		var providerName string
+		twitterAccount := twitterService.GetTwitterAccount(webhook.TwitterID)
+		if twitterAccount != nil {
+			providerName = translators.GetEntityLabel(twitterAccount, lg)
+		} else {
+			log.Warn().Str(constants.LogEntity, webhook.TwitterID).
+				Msgf("Cannot find twitter account based on ID sent internally, ignoring this webhook")
+			continue
+		}
+
 		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
 			Channel: webhook.Channel.Mention(),
 			Provider: i18nProvider{
-				Name:  webhook.TwitterName,
+				Name:  providerName,
 				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDTwitter),
 			},
-			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
 		})
 	}
 	return i18nWebhooks

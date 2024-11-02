@@ -70,6 +70,34 @@ func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
 }
 
 //nolint:dupl // OK for DRY concept but refactor at any cost is not relevant here.
+func (command *Command) checkTwitterAccount(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	data := i.ApplicationCommandData()
+	for _, subCommand := range data.Options {
+		for _, option := range subCommand.Options {
+			if option.Name == contract.ConfigVideastOptionName {
+				twitterAccounts := command.twitterService.FindTwitterAccounts(option.StringValue(), i.Locale)
+				labels := translators.GetTwittersLabels(twitterAccounts, i.Locale)
+				response, checkSuccess := validators.
+					ExpectOnlyOneElement("checks.twitterAccount", option.StringValue(), labels, i.Locale)
+				if checkSuccess {
+					next(context.WithValue(ctx, constants.ContextKeyTwitter, twitterAccounts[0]))
+				} else {
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("Twitter check response ignored")
+					}
+				}
+
+				return
+			}
+		}
+	}
+
+	next(ctx)
+}
+
+//nolint:dupl // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkStreamer(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()

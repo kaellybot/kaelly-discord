@@ -43,7 +43,7 @@ type TwitchWebhook struct {
 
 type TwitterWebhook struct {
 	ChannelWebhook
-	TwitterName string
+	TwitterID string
 }
 
 type YoutubeWebhook struct {

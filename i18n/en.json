@@ -38,8 +38,8 @@
         "help": {
             "overview": "handles the alignment book",
             "detailed": {
-                "get": "displays the book of aligned players on your Discord server\n   - The `city` field is optional and corresponds to the city to which players have pledged allegiance. If not specified, the directory is displayed without considering this filter. *__Example__: Bonta*\n - The `order` field is optional and corresponds to the order joined by players. If not specified, the directory is displayed without considering this filter. *__Example__: Spirit*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
-                "set": "records your alignment in the book, independently of the Discord server; this recording cannot be done for others.\n   - The `city` field is mandatory and corresponds to the city to which players have pledged allegiance. *__Example__: Bonta*\n - The `order` field is mandatory and corresponds to the order joined by players. *__Example__: Spirit*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__: 200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*"
+                "get": "displays the book of aligned players on your Discord server\n   - The `city` field is optional and corresponds to the city to which players have pledged allegiance. If not specified, the directory is displayed without considering this filter. *__Example__:Bonta*\n - The `order` field is optional and corresponds to the order joined by players. If not specified, the directory is displayed without considering this filter. *__Example__:Spirit*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*",
+                "set": "records your alignment in the book, independently of the Discord server; this recording cannot be done for others.\n   - The `city` field is mandatory and corresponds to the city to which players have pledged allegiance. *__Example__:Bonta*\n - The `order` field is mandatory and corresponds to the order joined by players. *__Example__:Spirit*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__:200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*"
             },
             "tutorial": {
                 "get": "https://i.imgur.com/qORz18c.gif",
@@ -63,9 +63,9 @@
         "help": {
             "overview": "provides the almanax",
             "detailed": {
-                "day": "provides the Almanax for a given day\n   - The `date` field is optional and corresponds to the desired Almanax date, in the format DD/MM/YYYY. If not specified, the Almanax for the current day is returned. *__Example__: 01/02/2024*",
-                "effects": "provides the next Almanax day corresponding to the chosen effect\n   - The `effect` field is mandatory and corresponds to the desired Almanax bonus. *__Example__: Plenty of fish*",
-                "resources": "provides the necessary resources for a given period\n   - The `duration` field is optional and corresponds to the desired number of days, ranging from 1 to 30. If not specified, the necessary resources for the next 7 days are returned. *__Example__: 30*"
+                "day": "provides the Almanax for a given day\n   - The `date` field is optional and corresponds to the desired Almanax date, in the format DD/MM/YYYY. If not specified, the Almanax for the current day is returned. *__Example__:01/02/2024*",
+                "effects": "provides the next Almanax day corresponding to the chosen effect\n   - The `effect` field is mandatory and corresponds to the desired Almanax bonus. *__Example__:Plenty of fish*",
+                "resources": "provides the necessary resources for a given period\n   - The `duration` field is optional and corresponds to the desired number of days, ranging from 1 to 30. If not specified, the necessary resources for the next 7 days are returned. *__Example__:30*"
             },
             "tutorial": {
                 "day": "https://i.imgur.com/9Rh42ym.gif",
@@ -121,12 +121,12 @@
             "overview": "permits to configure game server, Almanax, RSS feeds, tweets or Youtube videos automatic sendings",
             "detailed": {
                 "get": "displays my current configuration for this Discord server",
-                "almanax": "enables/disables the automatic sending of Almanax at midnight\n  - The `enabled` field is mandatory and corresponds to the activation or deactivation of this feature. *__Example__: True*\n - The `language` field is optional and corresponds to the desired language. If not specified, the language of the server at the time of registration is used. *__Example__: English*\n - The `channel` field is optional and corresponds to the channel where messages will be posted. If not specified, the current channel is used. *__Example__: #general*",
-                "rss": "enables/disables the automatic sending of [RSS feeds](https://en.wikipedia.org/wiki/RSS)\n  - The `feed` field is mandatory and corresponds to a type of RSS feed. *__Example__: Devblog*\n - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`.",
-                "server": "links the Discord server to a game server\n  - The `server` field is mandatory and corresponds to a game server. Once specified, it will be the default value for certain commands such as `align`, `job`, or `pos`. *__Example__: Imagiro*\n - The `channel` field is optional and is used to link a game server to a specific channel. This link takes priority over the link to the Discord server. *__Example__: #general*",
-                "twitch": "enables/disables the automatic sending of Twitch streamer live starting\n  - The `streamer` field is mandatory and corresponds to a Twitch streamer name. *__Example__: Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`.",
-                "twitter": "enables/disables the automatic sending of tweets from the official Twitter account of the game\n  - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`.",
-                "youtube": "enables/disables the automatic sending of Youtube creators videos\n  - The `videast` field is mandatory and corresponds to a Youtube creator name. *__Example__: Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`."
+                "almanax": "enables/disables the automatic sending of Almanax at midnight\n  - The `enabled` field is mandatory and corresponds to the activation or deactivation of this feature. *__Example__:True*\n - The `language` field is optional and corresponds to the desired language. If not specified, the language of the server at the time of registration is used. *__Example__:English*\n - The `channel` field is optional and corresponds to the channel where messages will be posted. If not specified, the current channel is used. *__Example__:#general*",
+                "rss": "enables/disables the automatic sending of [RSS feeds](https://en.wikipedia.org/wiki/RSS)\n  - The `feed` field is mandatory and corresponds to a type of RSS feed. *__Example__:Devblog*\n - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`.",
+                "server": "links the Discord server to a game server\n  - The `server` field is mandatory and corresponds to a game server. Once specified, it will be the default value for certain commands such as `align`, `job`, or `pos`. *__Example__:Imagiro*\n - The `channel` field is optional and is used to link a game server to a specific channel. This link takes priority over the link to the Discord server. *__Example__:#general*",
+                "twitch": "enables/disables the automatic sending of Twitch streamer live starting\n  - The `streamer` field is mandatory and corresponds to a Twitch streamer name. *__Example__:Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`.",
+                "twitter": "enables/disables the automatic sending of tweets from the official Twitter account of the game\n  - The `twitter` field is mandatory and corresponds to a Twitter creator name. *__Example__:DOFUS_EN*\n  - The `enabled` and `channel` fields are identical to `/config almanax`.",
+                "youtube": "enables/disables the automatic sending of Youtube creators videos\n  - The `videast` field is mandatory and corresponds to a Youtube creator name. *__Example__:Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`."
             },
             "tutorial": {
                 "get": "https://i.imgur.com/Uxx3bvh.gif",
@@ -134,7 +134,7 @@
                 "rss": "https://i.imgur.com/0T0D9rr.gif",
                 "server": "https://i.imgur.com/48xcGdP.gif",
                 "twitch": "https://i.imgur.com/HNUaHAD.gif",
-                "twitter": "https://i.imgur.com/sm6ITnQ.gif",
+                "twitter": "",
                 "youtube": "https://i.imgur.com/OCWsJea.gif"
             },
             "source": "The collected data is used only for my proper functioning."
@@ -157,7 +157,7 @@
             "overview": "provides help for commands",
             "detailed": [
                 "It's a bit strange to consult help about the command you're currently using... it seems like you're already doing quite well! :kissing_smiling_eyes:",
-                "Provides assistance on command usage. *__Example__: :point_right: \\*you using the command\\**",
+                "Provides assistance on command usage. *__Example__::point_right: \\*you using the command\\**",
                 "Even the best need help, but you're pushing it a bit too far!",
                 "Well... between us, you're not going to stoop to that, are you? :rolling_eyes:",
                 "It helps. :nerd:"
@@ -186,7 +186,7 @@
     "item": {
         "help": {
             "overview": "provides items, mounts, pets, resources and consumables",
-            "detailed": "provides information about items, mounts, pets, resources and consumables in the game\n  - The `query` field is mandatory and corresponds to the name of the item you want to look up. *__Example__: Gobball Headgear*",
+            "detailed": "provides information about items, mounts, pets, resources and consumables in the game\n  - The `query` field is mandatory and corresponds to the name of the item you want to look up. *__Example__:Gobball Headgear*",
             "tutorial": "",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
@@ -207,8 +207,8 @@
         "help": {
             "overview": "handles the craftsmen book",
             "detailed": {
-                "get": "displays the craftsmen players on your Discord server\n   - The `job` field is mandatory and corresponds to a profession in the game. *__Example__: Lumberjack*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
-                "set": "records your profession in the book, independently of the Discord server; this recording cannot be done for others.\n    - The `job` field is mandatory and corresponds to a profession in the game. *__Example__: Lumberjack*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__: 200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*"
+                "get": "displays the craftsmen players on your Discord server\n   - The `job` field is mandatory and corresponds to a profession in the game. *__Example__:Lumberjack*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*",
+                "set": "records your profession in the book, independently of the Discord server; this recording cannot be done for others.\n    - The `job` field is mandatory and corresponds to a profession in the game. *__Example__:Lumberjack*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__:200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*"
             },
             "tutorial": {
                 "get": "https://i.imgur.com/ibPmsnr.gif",
@@ -231,7 +231,7 @@
     "map": {
         "help": {
             "overview": "randomly draws a competitive map",
-            "detailed": "randomly draws a competitive map\n   - The `number` field is optional and corresponds to a desired competitive map. If not specified, the map is drawn at random. *__Example__: 42*",
+            "detailed": "randomly draws a competitive map\n   - The `number` field is optional and corresponds to a desired competitive map. If not specified, the map is drawn at random. *__Example__:42*",
             "tutorial": "https://i.imgur.com/zEBSx94.gif",
             "source": "Screenshots come from [Krosmoz Tournaments Arena](https://ktarena.com/)."
         },
@@ -265,7 +265,7 @@
     "pos": {
         "help": {
             "overview": "provides the most recent dimension portal positions",
-            "detailed": "provides the most recent positions of dimensional portals\n   - The `dimension` field is optional and corresponds to a desired dimension. If not specified, the positions of portals for all dimensions are returned. *__Example__: Enurado*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__: Imagiro*",
+            "detailed": "provides the most recent positions of dimensional portals\n   - The `dimension` field is optional and corresponds to a desired dimension. If not specified, the positions of portals for all dimensions are returned. *__Example__:Enurado*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*",
             "tutorial": "https://i.imgur.com/AezytWc.gif",
             "source": "The data comes from [dofus-portals.fr](https://dofus-portals.fr/), which relies on the participation of portal seekers."
         },
@@ -281,7 +281,7 @@
     "set": {
         "help": {
             "overview": "provides sets",
-            "detailed": "provides information about sets in the game\n   - The `query` field is mandatory and corresponds to the name of the set you want to look up. *__Example__: Boon Set*",
+            "detailed": "provides information about sets in the game\n   - The `query` field is mandatory and corresponds to the name of the set you want to look up. *__Example__:Boon Set*",
             "tutorial": "",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
@@ -349,6 +349,10 @@
         "videast": {
             "not_found": "Aie! '*{{ .value }}*' does not correspond to any Youtube creators I know! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' matches too many Youtube creators ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "twitterAccount": {
+            "not_found": "Aie! '*{{ .value }}*' does not correspond to any Twitter accounts I know! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' matches too many Twitter accounts ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }})! :slight_smile:"
         },
         "streamer": {
             "not_found": "Aie! '*{{ .value }}*' does not correspond to any Twitch streamers I know! :pensive:",

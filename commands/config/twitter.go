@@ -14,7 +14,7 @@ import (
 
 func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
-	channelID, enabled, locale, err := getWebhookTwitterOptions(ctx)
+	channelID, twitterAccount, enabled, err := getWebhookTwitterOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session
 		}
 	}
 
-	msg := mappers.MapConfigurationWebhookTwitterRequest(webhook, i.GuildID, channelID, enabled, locale, i.Locale)
+	msg := mappers.MapConfigurationWebhookTwitterRequest(webhook, i.GuildID, channelID, twitterAccount, enabled, i.Locale)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

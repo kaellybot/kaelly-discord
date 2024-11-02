@@ -7,6 +7,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/streamers"
+	"github.com/kaellybot/kaelly-discord/services/twitters"
 	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
@@ -24,6 +25,7 @@ type Command struct {
 	guildService    guilds.Service
 	serverService   servers.Service
 	streamerService streamers.Service
+	twitterService  twitters.Service
 	videastService  videasts.Service
 	requestManager  requests.RequestManager
 	handlers        commands.DiscordHandlers

@@ -27,6 +27,7 @@ import (
 	streamerRepo "github.com/kaellybot/kaelly-discord/repositories/streamers"
 	"github.com/kaellybot/kaelly-discord/repositories/subareas"
 	"github.com/kaellybot/kaelly-discord/repositories/transports"
+	twitterRepo "github.com/kaellybot/kaelly-discord/repositories/twitters"
 	videastRepo "github.com/kaellybot/kaelly-discord/repositories/videasts"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
@@ -37,6 +38,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/streamers"
+	"github.com/kaellybot/kaelly-discord/services/twitters"
 	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
@@ -71,8 +73,9 @@ func New() (*Impl, error) {
 	cityRepo := cities.New(db)
 	orderRepo := orders.New(db)
 	feedRepo := feedRepo.New(db)
-	videastRepo := videastRepo.New(db)
 	streamerRepo := streamerRepo.New(db)
+	twitterRepo := twitterRepo.New(db)
+	videastRepo := videastRepo.New(db)
 	characRepo := characRepo.New(db)
 	emojiRepo := emojiRepo.New(db)
 	guildRepo := guildRepo.New(db)
@@ -98,14 +101,19 @@ func New() (*Impl, error) {
 		log.Fatal().Err(err).Msgf("Feed Service instantiation failed, shutting down.")
 	}
 
-	videastService, err := videasts.New(videastRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Videast Service instantiation failed, shutting down.")
-	}
-
 	streamerService, err := streamers.New(streamerRepo)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Streamer Service instantiation failed, shutting down.")
+	}
+
+	twitterService, err := twitters.New(twitterRepo)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Twitter Service instantiation failed, shutting down.")
+	}
+
+	videastService, err := videasts.New(videastRepo)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Videast Service instantiation failed, shutting down.")
 	}
 
 	characService, err := characteristics.New(characRepo)
@@ -127,7 +135,7 @@ func New() (*Impl, error) {
 		align.New(bookService, guildService, serverService, emojiService, requestsManager),
 		almanax.New(emojiService, requestsManager),
 		config.New(emojiService, feedService, guildService, serverService,
-			streamerService, videastService, requestsManager),
+			streamerService, twitterService, videastService, requestsManager),
 		help.New(broker, &commands),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, emojiService, requestsManager),

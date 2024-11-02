@@ -15,6 +15,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/streamers"
+	"github.com/kaellybot/kaelly-discord/services/twitters"
 	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/checks"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -25,14 +26,15 @@ import (
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(emojiService emojis.Service, feedService feeds.Service,
 	guildService guilds.Service, serverService servers.Service,
-	streamerService streamers.Service, videastService videasts.Service,
-	requestManager requests.RequestManager) *Command {
+	streamerService streamers.Service, twitterService twitters.Service,
+	videastService videasts.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
 		emojiService:    emojiService,
 		feedService:     feedService,
 		guildService:    guildService,
 		serverService:   serverService,
 		streamerService: streamerService,
+		twitterService:  twitterService,
 		videastService:  videastService,
 		requestManager:  requestManager,
 	}
@@ -51,7 +53,7 @@ func New(emojiService emojis.Service, feedService feeds.Service,
 		contract.ConfigTwitchSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkStreamer, cmd.checkChannelID, cmd.twitchRequest),
 		contract.ConfigTwitterSubCommandName: middlewares.
-			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.twitterRequest),
+			Use(cmd.checkEnabled, cmd.checkTwitterAccount, cmd.checkChannelID, cmd.twitterRequest),
 		contract.ConfigYoutubeSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkVideast, cmd.checkChannelID, cmd.youtubeRequest),
 	})
@@ -192,26 +194,26 @@ func getWebhookTwitchOptions(ctx context.Context) (
 	return channelID, streamer, enabled, nil
 }
 
-func getWebhookTwitterOptions(ctx context.Context) (string, bool, amqp.Language, error) {
+func getWebhookTwitterOptions(ctx context.Context) (string, entities.TwitterAccount, bool, error) {
 	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
-		return "", false, amqp.Language_ANY,
+		return "", entities.TwitterAccount{}, false,
 			fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
+	}
+
+	twitterAccount, ok := ctx.Value(constants.ContextKeyTwitter).(entities.TwitterAccount)
+	if !ok {
+		return "", entities.TwitterAccount{}, false,
+			fmt.Errorf("cannot cast %v as entities.TwitterAccount", ctx.Value(constants.ContextKeyTwitter))
 	}
 
 	enabled, ok := ctx.Value(constants.ContextKeyEnabled).(bool)
 	if !ok {
-		return "", false, amqp.Language_ANY,
+		return "", entities.TwitterAccount{}, false,
 			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyEnabled))
 	}
 
-	locale, ok := ctx.Value(constants.ContextKeyLanguage).(amqp.Language)
-	if !ok {
-		return "", false, amqp.Language_ANY,
-			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyLanguage))
-	}
-
-	return channelID, enabled, locale, nil
+	return channelID, twitterAccount, enabled, nil
 }
 
 func getWebhookRssOptions(ctx context.Context) (

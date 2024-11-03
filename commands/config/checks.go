@@ -75,7 +75,7 @@ func (command *Command) checkTwitterAccount(ctx context.Context, s *discordgo.Se
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
-			if option.Name == contract.ConfigVideastOptionName {
+			if option.Name == contract.ConfigTwitterAccountOptionName {
 				twitterAccounts := command.twitterService.FindTwitterAccounts(option.StringValue(), i.Locale)
 				labels := translators.GetTwittersLabels(twitterAccounts, i.Locale)
 				response, checkSuccess := validators.

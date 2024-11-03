@@ -25,6 +25,8 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 					choices = command.findFeedTypes(option.StringValue(), i.Locale)
 				case contract.ConfigVideastOptionName:
 					choices = command.findVideasts(option.StringValue(), i.Locale)
+				case contract.ConfigTwitterAccountOptionName:
+					choices = command.findTwitterAccounts(option.StringValue(), i.Locale)
 				case contract.ConfigStreamerOptionName:
 					choices = command.findStreamers(option.StringValue(), i.Locale)
 				default:
@@ -121,6 +123,30 @@ func (command *Command) findStreamers(streamerName string, lg discordgo.Locale) 
 	streamers := command.streamerService.FindStreamers(streamerName, lg)
 	for _, streamer := range streamers {
 		label := translators.GetEntityLabel(streamer, lg)
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  label,
+			Value: label,
+		})
+	}
+
+	sort.SliceStable(choices, func(i, j int) bool {
+		return choices[i].Name < choices[j].Name
+	})
+
+	return choices
+}
+
+func (command *Command) findTwitterAccounts(twitterAccountName string, lg discordgo.Locale) []*discordgo.
+	ApplicationCommandOptionChoice {
+	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
+
+	if len(strings.TrimSpace(twitterAccountName)) == 0 {
+		return choices
+	}
+
+	twitterAccounts := command.twitterService.FindTwitterAccounts(twitterAccountName, lg)
+	for _, twitterAccount := range twitterAccounts {
+		label := translators.GetEntityLabel(twitterAccount, lg)
 		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 			Name:  label,
 			Value: label,

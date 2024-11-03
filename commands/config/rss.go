@@ -31,9 +31,10 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 
 	var webhook *discordgo.Webhook
 	if enabled {
-		webhook, err = command.createWebhook(s, channelID)
-		if err != nil {
-			panic(err)
+		var created bool
+		webhook, created = command.createWebhook(s, i, channelID)
+		if !created {
+			return
 		}
 	}
 

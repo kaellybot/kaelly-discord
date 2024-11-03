@@ -7,6 +7,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
@@ -20,7 +21,11 @@ func (command *Command) setRespond(_ context.Context, s *discordgo.Session,
 	if message.ConfigurationSetAnswer.RemoveWebhook {
 		err := s.WebhookDelete(message.ConfigurationSetAnswer.WebhookId)
 		if err != nil {
-			log.Warn().Err(err).Msgf("Cannot remove webhook after receiving internal answer, ignoring webhook deletion")
+			apiError, ok := discord.ExtractAPIError(err)
+			if !ok || apiError.Code != constants.DiscordCodeNotFound {
+				log.Warn().Err(err).
+					Msgf("Cannot remove webhook after receiving internal answer, ignoring webhook deletion")
+			}
 		}
 	}
 

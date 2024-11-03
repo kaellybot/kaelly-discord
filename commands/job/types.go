@@ -12,8 +12,6 @@ import (
 const (
 	jobRequestRoutingKey = "requests.books"
 
-	memberListLimit = 1000
-
 	userProperty = "user"
 )
 

@@ -394,6 +394,9 @@
             "emoji": ":flag_de:"
         }
     },
+    "errors": {
+        "too_many_webhooks": "Webhooks maximum number reached on this channel, I can't continue...\n*(Click on the channel icon :gear: then `Integrations` and finally `Webhooks` to handle them)*"
+    },
     "panic": [
         "I have encountered an error :frowning:... This will be processed as soon as possible!",
         "Oops, it seems I've crashed... I'm reporting this event to my creators, sorry!"

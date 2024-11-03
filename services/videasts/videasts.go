@@ -58,7 +58,11 @@ func (service *Impl) FindVideasts(name string, locale discordgo.Locale) []entiti
 	for _, videast := range service.videasts {
 		currentCleanedName, _, errStr := transform.String(service.transformer,
 			strings.ToLower(translators.GetEntityLabel(videast, locale)))
-		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
+			if currentCleanedName == cleanedName {
+				return []entities.Videast{videast}
+			}
+
 			videastsFound = append(videastsFound, videast)
 		}
 	}

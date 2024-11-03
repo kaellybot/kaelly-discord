@@ -58,7 +58,11 @@ func (service *Impl) FindStreamers(name string, locale discordgo.Locale) []entit
 	for _, streamer := range service.streamers {
 		currentCleanedName, _, errStr := transform.String(service.transformer,
 			strings.ToLower(translators.GetEntityLabel(streamer, locale)))
-		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
+			if currentCleanedName == cleanedName {
+				return []entities.Streamer{streamer}
+			}
+
 			streamersFound = append(streamersFound, streamer)
 		}
 	}

@@ -58,7 +58,11 @@ func (service *Impl) FindTwitterAccounts(name string, locale discordgo.Locale) [
 	for _, twitterAccount := range service.twitterAccounts {
 		currentCleanedName, _, errStr := transform.String(service.transformer,
 			strings.ToLower(translators.GetEntityLabel(twitterAccount, locale)))
-		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
+			if currentCleanedName == cleanedName {
+				return []entities.TwitterAccount{twitterAccount}
+			}
+
 			twitterAccountFound = append(twitterAccountFound, twitterAccount)
 		}
 	}

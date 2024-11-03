@@ -348,15 +348,15 @@
         }, 
         "videast": {
             "not_found": "Aie! '*{{ .value }}*' does not correspond to any Youtube creators I know! :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' matches too many Youtube creators ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }})! :slight_smile:"
+            "too_many": "Outch! '*{{ .value }}*' matches too many Youtube creators ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
         },
         "twitterAccount": {
             "not_found": "Aie! '*{{ .value }}*' does not correspond to any Twitter accounts I know! :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' matches too many Twitter accounts ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }})! :slight_smile:"
+            "too_many": "Outch! '*{{ .value }}*' matches too many Twitter accounts ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
         },
         "streamer": {
             "not_found": "Aie! '*{{ .value }}*' does not correspond to any Twitch streamers I know! :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' matches too many Twitch streamers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }})! :slight_smile:"
+            "too_many": "Outch! '*{{ .value }}*' matches too many Twitch streamers ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
         }
     },
     "webhooks": {

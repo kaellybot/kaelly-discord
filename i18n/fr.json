@@ -348,16 +348,16 @@
         },
         "videast": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun créateur Youtube que je connaisse ! :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs créateurs Youtube ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }}) ! :slight_smile:"
+            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs créateurs Youtube ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
         },
         "twitterAccount": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun compte Twitter que je connaisse ! :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs comptes Twitter ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }}) ! :slight_smile:"
+            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs comptes Twitter ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
         
         },
         "streamer": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun streamer Twitch que je connaisse ! :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs streamers Twitch ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ .Name }}{{ end }}{{ end }}) ! :slight_smile:"
+            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs streamers Twitch ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
         }
     },
     "webhooks": {

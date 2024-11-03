@@ -109,7 +109,11 @@ func (service *Impl) FindDimensions(name string, locale discordgo.Locale) []enti
 	for _, dimension := range service.dimensions {
 		currentCleanedName, _, errStr := transform.String(service.transformer,
 			strings.ToLower(translators.GetEntityLabel(dimension, locale)))
-		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
+			if currentCleanedName == cleanedName {
+				return []entities.Dimension{dimension}
+			}
+
 			dimensionsFound = append(dimensionsFound, dimension)
 		}
 	}

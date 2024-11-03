@@ -95,7 +95,11 @@ func (service *Impl) FindJobs(name string, locale discordgo.Locale) []entities.J
 	for _, job := range service.jobs {
 		currentCleanedName, _, errStr := transform.String(service.transformer,
 			strings.ToLower(translators.GetEntityLabel(job, locale)))
-		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
+			if currentCleanedName == cleanedName {
+				return []entities.Job{job}
+			}
+
 			jobsFound = append(jobsFound, job)
 		}
 	}
@@ -123,7 +127,11 @@ func (service *Impl) FindCities(name string, locale discordgo.Locale) []entities
 	for _, city := range service.cities {
 		currentCleanedName, _, errStr := transform.String(service.transformer,
 			strings.ToLower(translators.GetEntityLabel(city, locale)))
-		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
+			if currentCleanedName == cleanedName {
+				return []entities.City{city}
+			}
+
 			citiesFound = append(citiesFound, city)
 		}
 	}
@@ -151,7 +159,11 @@ func (service *Impl) FindOrders(name string, locale discordgo.Locale) []entities
 	for _, order := range service.orders {
 		currentCleanedName, _, errStr := transform.String(service.transformer,
 			strings.ToLower(translators.GetEntityLabel(order, locale)))
-		if errStr == nil && strings.HasPrefix(currentCleanedName, cleanedName) {
+		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
+			if currentCleanedName == cleanedName {
+				return []entities.Order{order}
+			}
+
 			ordersFound = append(ordersFound, order)
 		}
 	}

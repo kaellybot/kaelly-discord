@@ -30,7 +30,7 @@
         },
         "graphist": {
             "title": ":art: Visuels",
-            "desc": "Visuels réalisés par la géniale [{{ .graphist.Name }}]({{ .graphist.URL }})!"
+            "desc": "Visuels réalisés par les géniales [{{ .Elycann.Name }}]({{ .Elycann.URL }}) et [{{ .Colibry.Name }}]({{ .Colibry.URL }}) !"
         },
         "footer": "Certaines illustrations sont la propriété d'Ankama Studio - Tous droits réservés"
     },

@@ -30,7 +30,7 @@
         },
         "graphist": {
             "title": ":art: Visuals",
-            "desc": "Visuals made by the great [{{ .graphist.Name }}]({{ .graphist.URL }})!"
+            "desc": "Visuals made by the great [{{ .Elycann.Name }}]({{ .Elycann.URL }}) and [{{ .Colibry.Name }}]({{ .Colibry.URL }})!"
         },
         "footer": "Some illustrations are the Ankama Studio property - All rights reserved"
     },

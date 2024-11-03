@@ -99,8 +99,11 @@ func (command *Command) getAboutEmbed(locale discordgo.Locale) *discordgo.Messag
 				Inline: false,
 			},
 			{
-				Name:   i18n.Get(locale, "about.graphist.title"),
-				Value:  i18n.Get(locale, "about.graphist.desc", i18n.Vars{"graphist": constants.GetGraphist()}),
+				Name: i18n.Get(locale, "about.graphist.title"),
+				Value: i18n.Get(locale, "about.graphist.desc", i18n.Vars{
+					"Elycann": constants.GetGraphistElycann(),
+					"Colibry": constants.GetGraphistColibry(),
+				}),
 				Inline: false,
 			},
 		},

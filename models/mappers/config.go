@@ -240,10 +240,13 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 		emojiService, streamerService, lg)...)
 
 	return &discordgo.MessageEmbed{
-		Title:       guild.Name,
-		Description: i18n.Get(lg, "config.embed.description", i18n.Vars{"server": guildServer}),
-		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: guild.Icon},
-		Color:       constants.Color,
+		Title: guild.Name,
+		Description: i18n.Get(lg, "config.embed.description", i18n.Vars{
+			"server": guildServer,
+			"game":   constants.GetGame(),
+		}),
+		Thumbnail: &discordgo.MessageEmbedThumbnail{URL: guild.Icon},
+		Color:     constants.Color,
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name: i18n.Get(lg, "config.embed.server.name", i18n.Vars{

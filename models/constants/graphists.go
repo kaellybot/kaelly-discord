@@ -5,9 +5,16 @@ type Graphist struct {
 	URL  string
 }
 
-func GetGraphist() Graphist {
+func GetGraphistElycann() Graphist {
 	return Graphist{
 		Name: "Elycann",
 		URL:  "https://www.facebook.com/Elysdrawings",
+	}
+}
+
+func GetGraphistColibry() Graphist {
+	return Graphist{
+		Name: "Colibry",
+		URL:  "https://x.com/AmelBencivenni",
 	}
 }

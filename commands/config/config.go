@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
@@ -45,11 +44,11 @@ func New(emojiService emojis.Service, feedService feeds.Service,
 
 	subCommandHandlers := cmd.HandleSubCommands(commands.SubCommandHandlers{
 		contract.ConfigAlmanaxSubCommandName: middlewares.
-			Use(cmd.checkEnabled, cmd.checkLanguage, cmd.checkChannelID, cmd.almanaxRequest),
+			Use(cmd.checkEnabled, cmd.checkChannelID, cmd.almanaxRequest),
 		contract.ConfigGetSubCommandName: middlewares.
 			Use(cmd.getRequest),
 		contract.ConfigRSSSubCommandName: middlewares.
-			Use(cmd.checkEnabled, cmd.checkFeedType, cmd.checkLanguage, cmd.checkChannelID, cmd.rssRequest),
+			Use(cmd.checkEnabled, cmd.checkFeedType, cmd.checkChannelID, cmd.rssRequest),
 		contract.ConfigServerSubCommandName: middlewares.
 			Use(checkServer, cmd.checkChannelID, cmd.serverRequest),
 		contract.ConfigTwitchSubCommandName: middlewares.
@@ -169,26 +168,20 @@ func getServerOptions(ctx context.Context) (entities.Server, string, error) {
 	return server, channelID, nil
 }
 
-func getWebhookAlmanaxOptions(ctx context.Context) (string, bool, amqp.Language, error) {
+func getWebhookAlmanaxOptions(ctx context.Context) (string, bool, error) {
 	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
-		return "", false, amqp.Language_ANY,
+		return "", false,
 			fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
 	}
 
 	enabled, ok := ctx.Value(constants.ContextKeyEnabled).(bool)
 	if !ok {
-		return "", false, amqp.Language_ANY,
+		return "", false,
 			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyEnabled))
 	}
 
-	locale, ok := ctx.Value(constants.ContextKeyLanguage).(amqp.Language)
-	if !ok {
-		return "", false, amqp.Language_ANY,
-			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyLanguage))
-	}
-
-	return channelID, enabled, locale, nil
+	return channelID, enabled, nil
 }
 
 func getWebhookTwitchOptions(ctx context.Context) (
@@ -237,32 +230,26 @@ func getWebhookTwitterOptions(ctx context.Context) (string, entities.TwitterAcco
 }
 
 func getWebhookRssOptions(ctx context.Context) (
-	string, entities.FeedType, bool, amqp.Language, error) {
+	string, entities.FeedType, bool, error) {
 	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
-		return "", entities.FeedType{}, false, amqp.Language_ANY,
+		return "", entities.FeedType{}, false,
 			fmt.Errorf("cannot cast %v as string", ctx.Value(constants.ContextKeyChannel))
 	}
 
 	feed, ok := ctx.Value(constants.ContextKeyFeed).(entities.FeedType)
 	if !ok {
-		return "", entities.FeedType{}, false, amqp.Language_ANY,
+		return "", entities.FeedType{}, false,
 			fmt.Errorf("cannot cast %v as entities.FeedType", ctx.Value(constants.ContextKeyFeed))
 	}
 
 	enabled, ok := ctx.Value(constants.ContextKeyEnabled).(bool)
 	if !ok {
-		return "", entities.FeedType{}, false, amqp.Language_ANY,
+		return "", entities.FeedType{}, false,
 			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyEnabled))
 	}
 
-	locale, ok := ctx.Value(constants.ContextKeyLanguage).(amqp.Language)
-	if !ok {
-		return "", entities.FeedType{}, false, amqp.Language_ANY,
-			fmt.Errorf("cannot cast %v as bool", ctx.Value(constants.ContextKeyLanguage))
-	}
-
-	return channelID, feed, enabled, locale, nil
+	return channelID, feed, enabled, nil
 }
 
 func getWebhookYoutubeOptions(ctx context.Context) (

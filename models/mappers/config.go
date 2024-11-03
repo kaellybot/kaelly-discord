@@ -1,8 +1,6 @@
 package mappers
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
@@ -31,7 +29,6 @@ type i18nServer struct {
 
 type i18nChannelWebhook struct {
 	Channel  string
-	Language string
 	Provider i18nProvider
 }
 
@@ -65,11 +62,7 @@ func MapConfigurationServerRequest(guildID, channelID, serverID string, lg disco
 }
 
 func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	if locale == amqp.Language_ANY {
-		locale = constants.MapDiscordLocale(lg)
-	}
-
+	enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	var webhookID, webhookToken string
 	if webhook != nil {
 		webhookID = webhook.ID
@@ -86,17 +79,12 @@ func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildID, 
 			WebhookId:    webhookID,
 			WebhookToken: webhookToken,
 			Enabled:      enabled,
-			Language:     locale,
 		},
 	}
 }
 
 func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	feed entities.FeedType, enabled bool, locale amqp.Language, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	if locale == amqp.Language_ANY {
-		locale = constants.MapDiscordLocale(lg)
-	}
-
+	feed entities.FeedType, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	var webhookID, webhookToken string
 	if webhook != nil {
 		webhookID = webhook.ID
@@ -114,7 +102,6 @@ func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildID, chan
 			WebhookId:    webhookID,
 			WebhookToken: webhookToken,
 			Enabled:      enabled,
-			Language:     locale,
 		},
 	}
 }
@@ -275,7 +262,6 @@ func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, emojiService 
 				Name:  i18n.Get(lg, "webhooks.ALMANAX.name"),
 				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDAlmanax),
 			},
-			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
 		})
 	}
 	return i18nWebhooks
@@ -301,7 +287,6 @@ func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, emojiService emojis.S
 				Name:  providerName,
 				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDRSS),
 			},
-			Language: i18n.Get(lg, fmt.Sprintf("locales.%s.emoji", webhook.Locale)),
 		})
 	}
 	return i18nWebhooks

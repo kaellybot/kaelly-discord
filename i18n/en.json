@@ -121,8 +121,8 @@
             "overview": "permits to configure game server, Almanax, RSS feeds, tweets or Youtube videos automatic sendings",
             "detailed": {
                 "get": "displays my current configuration for this Discord server",
-                "almanax": "enables/disables the automatic sending of Almanax at midnight\n  - The `enabled` field is mandatory and corresponds to the activation or deactivation of this feature. *__Example__:True*\n - The `language` field is optional and corresponds to the desired language. If not specified, the language of the server at the time of registration is used. *__Example__:English*\n - The `channel` field is optional and corresponds to the channel where messages will be posted. If not specified, the current channel is used. *__Example__:#general*",
-                "rss": "enables/disables the automatic sending of [RSS feeds](https://en.wikipedia.org/wiki/RSS)\n  - The `feed` field is mandatory and corresponds to a type of RSS feed. *__Example__:Devblog*\n - The `enabled`, `language`, and `channel` fields are identical to `/config almanax`.",
+                "almanax": "enables/disables the automatic sending of Almanax at midnight\n  - The `enabled` field is mandatory and corresponds to the activation or deactivation of this feature. *__Example__:True*\n - The `channel` field is optional and corresponds to the channel where messages will be posted. If not specified, the current channel is used. *__Example__:#general*",
+                "rss": "enables/disables the automatic sending of [RSS feeds](https://en.wikipedia.org/wiki/RSS)\n  - The `feed` field is mandatory and corresponds to a type of RSS feed. *__Example__:Devblog*\n - The `enabled` and `channel` fields are identical to `/config almanax`.",
                 "server": "links the Discord server to a game server\n  - The `server` field is mandatory and corresponds to a game server. Once specified, it will be the default value for certain commands such as `align`, `job`, or `pos`. *__Example__:Imagiro*\n - The `channel` field is optional and is used to link a game server to a specific channel. This link takes priority over the link to the Discord server. *__Example__:#general*",
                 "twitch": "enables/disables the automatic sending of Twitch streamer live starting\n  - The `streamer` field is mandatory and corresponds to a Twitch streamer name. *__Example__:Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`.",
                 "twitter": "enables/disables the automatic sending of tweets from the official Twitter account of the game\n  - The `twitter` field is mandatory and corresponds to a Twitter creator name. *__Example__:DOFUS_EN*\n  - The `enabled` and `channel` fields are identical to `/config almanax`.",
@@ -130,8 +130,8 @@
             },
             "tutorial": {
                 "get": "https://i.imgur.com/Uxx3bvh.gif",
-                "almanax": "https://i.imgur.com/UoUNhEL.gif",
-                "rss": "https://i.imgur.com/0T0D9rr.gif",
+                "almanax": "",
+                "rss": "",
                 "server": "https://i.imgur.com/48xcGdP.gif",
                 "twitch": "https://i.imgur.com/HNUaHAD.gif",
                 "twitter": "",
@@ -148,7 +148,7 @@
             },
             "webhook": {
                 "name": ":bell: Notified channels",
-                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}**{{ if .Language}} ({{.Language}}){{ end }}\n{{ end }}{{ else }}No configured channels!{{ end }}"
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
             }
         }
     },
@@ -374,24 +374,6 @@
         },
         "YOUTUBE": {
             "name": "Youtube"
-        }
-    },
-    "locales": {
-        "FR": {
-            "name": "French",
-            "emoji": ":flag_fr:"
-        },
-        "EN": {
-            "name": "English",
-            "emoji": ":flag_gb:"
-        },
-        "ES": {
-            "name": "Spanish",
-            "emoji": ":flag_es:"
-        },
-        "DE": {
-            "name": "German",
-            "emoji": ":flag_de:"
         }
     },
     "errors": {

@@ -14,7 +14,7 @@ import (
 
 func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
-	channelID, enabled, locale, err := getWebhookAlmanaxOptions(ctx)
+	channelID, enabled, err := getWebhookAlmanaxOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +39,7 @@ func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session
 		}
 	}
 
-	msg := mappers.MapConfigurationWebhookAlmanaxRequest(webhook, i.GuildID, channelID, enabled, locale, i.Locale)
+	msg := mappers.MapConfigurationWebhookAlmanaxRequest(webhook, i.GuildID, channelID, enabled, i.Locale)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

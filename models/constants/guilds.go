@@ -2,7 +2,6 @@ package constants
 
 import (
 	"github.com/bwmarrin/discordgo"
-	amqp "github.com/kaellybot/kaelly-amqp"
 )
 
 type GuildConfig struct {
@@ -22,31 +21,26 @@ type ChannelServer struct {
 	ServerID string
 }
 
-type ChannelWebhook struct {
-	Channel *discordgo.Channel
-	Locale  amqp.Language
-}
-
 type AlmanaxWebhook struct {
-	ChannelWebhook
+	Channel *discordgo.Channel
 }
 
 type RssWebhook struct {
-	ChannelWebhook
-	FeedID string
+	Channel *discordgo.Channel
+	FeedID  string
 }
 
 type TwitchWebhook struct {
-	ChannelWebhook
+	Channel    *discordgo.Channel
 	StreamerID string
 }
 
 type TwitterWebhook struct {
-	ChannelWebhook
+	Channel   *discordgo.Channel
 	TwitterID string
 }
 
 type YoutubeWebhook struct {
-	ChannelWebhook
+	Channel   *discordgo.Channel
 	VideastID string
 }

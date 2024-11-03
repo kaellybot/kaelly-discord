@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
-	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -123,22 +122,6 @@ func (command *Command) checkStreamer(ctx context.Context, s *discordgo.Session,
 	}
 
 	next(ctx)
-}
-
-func (command *Command) checkLanguage(ctx context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
-	locale := amqp.Language_ANY
-	data := i.ApplicationCommandData()
-	for _, subCommand := range data.Options {
-		for _, option := range subCommand.Options {
-			if option.Name == contract.ConfigLanguageOptionName {
-				locale = amqp.Language(option.IntValue())
-				break
-			}
-		}
-	}
-
-	next(context.WithValue(ctx, constants.ContextKeyLanguage, locale))
 }
 
 func (command *Command) checkChannelID(ctx context.Context, s *discordgo.Session,

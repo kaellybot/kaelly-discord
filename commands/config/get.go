@@ -117,10 +117,7 @@ func getValidAlmanaxWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGet
 
 		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
 			result = append(result, constants.AlmanaxWebhook{
-				ChannelWebhook: constants.ChannelWebhook{
-					Channel: channel,
-					Locale:  webhook.Language,
-				},
+				Channel: channel,
 			})
 		}
 	}
@@ -149,11 +146,8 @@ func getValidRSSWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnsw
 
 		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
 			result = append(result, constants.RssWebhook{
-				ChannelWebhook: constants.ChannelWebhook{
-					Channel: channel,
-					Locale:  webhook.Language,
-				},
-				FeedID: webhook.FeedId,
+				Channel: channel,
+				FeedID:  webhook.FeedId,
 			})
 		}
 	}
@@ -183,9 +177,7 @@ func getValidTwitchWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetA
 
 		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
 			result = append(result, constants.TwitchWebhook{
-				ChannelWebhook: constants.ChannelWebhook{
-					Channel: channel,
-				},
+				Channel:    channel,
 				StreamerID: webhook.StreamerId,
 			})
 		}
@@ -216,9 +208,7 @@ func getValidTwitterWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGet
 
 		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
 			result = append(result, constants.TwitterWebhook{
-				ChannelWebhook: constants.ChannelWebhook{
-					Channel: channel,
-				},
+				Channel:   channel,
 				TwitterID: webhook.TwitterId,
 			})
 		}
@@ -249,9 +239,7 @@ func getValidYoutubeWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGet
 
 		if webhookExists(s, webhook.WebhookId, webhook.ChannelId, answer.GuildId) {
 			result = append(result, constants.YoutubeWebhook{
-				ChannelWebhook: constants.ChannelWebhook{
-					Channel: channel,
-				},
+				Channel:   channel,
 				VideastID: webhook.VideastId,
 			})
 		}

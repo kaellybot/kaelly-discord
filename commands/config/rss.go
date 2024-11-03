@@ -13,7 +13,7 @@ import (
 
 func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
-	channelID, feed, enabled, locale, err := getWebhookRssOptions(ctx)
+	channelID, feed, enabled, err := getWebhookRssOptions(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 		}
 	}
 
-	msg := mappers.MapConfigurationWebhookRssRequest(webhook, i.GuildID, channelID, feed, enabled, locale, i.Locale)
+	msg := mappers.MapConfigurationWebhookRssRequest(webhook, i.GuildID, channelID, feed, enabled, i.Locale)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

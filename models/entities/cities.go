@@ -37,6 +37,6 @@ func (city City) GetLabels() map[amqp.Language]string {
 func GetNeutralCity() City {
 	return City{
 		Color: constants.NeutralCityColor,
-		Icon:  "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/cities/neutral.png",
+		Icon:  "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/cities/neutral.webp",
 	}
 }

@@ -9,13 +9,13 @@ type AnkamaGame struct {
 }
 
 const (
-	AnkamaLogo = "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/logos/ankama.png"
+	AnkamaLogo = "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/logos/ankama.webp"
 )
 
 func GetGame() AnkamaGame {
 	return AnkamaGame{
 		Name:     "DOFUS",
-		Icon:     "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/logos/dofus.png",
+		Icon:     "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/logos/dofus.webp",
 		AMQPGame: amqp.Game_DOFUS_GAME,
 	}
 }

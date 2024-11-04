@@ -39,7 +39,7 @@ func GetUnknownSeason() Season {
 	return Season{
 		Name:        "Unknown",
 		Color:       Color,
-		AlmanaxIcon: "https://i.imgur.com/HuaAgy4.png",
+		AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/unknown.png",
 	}
 }
 
@@ -50,28 +50,28 @@ func getSeasons() []Season {
 			StartDate:   time.Date(0, 3, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 6, 21, 0, 0, 0, 0, time.UTC),
 			Color:       springColor,
-			AlmanaxIcon: "https://i.imgur.com/xVjno4K.png",
+			AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/spring.png",
 		},
 		{
 			Name:        "Summer",
 			StartDate:   time.Date(0, 6, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 9, 21, 0, 0, 0, 0, time.UTC),
 			Color:       summerColor,
-			AlmanaxIcon: "https://i.imgur.com/WALcoBk.png",
+			AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/summer.png",
 		},
 		{
 			Name:        "Autumn",
 			StartDate:   time.Date(0, 9, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 12, 21, 0, 0, 0, 0, time.UTC),
 			Color:       autumnColor,
-			AlmanaxIcon: "https://i.imgur.com/b4GqhjE.png",
+			AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/autumn.png",
 		},
 		{
 			Name:        "Winter",
 			StartDate:   time.Date(0, 12, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(1, 3, 21, 0, 0, 0, 0, time.UTC),
 			Color:       winterColor,
-			AlmanaxIcon: "https://i.imgur.com/TjoR5Ti.png",
+			AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/winter.png",
 		},
 	}
 }

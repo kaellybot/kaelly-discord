@@ -4,7 +4,7 @@
             "overview": "provides information about me and a way to get help",
             "detailed": "provides detailed information about me (invitation link, source code, handling of private data...) and a way to get help if needed (support Discord, Twitter)",
             "source": "",
-            "tutorial": "https://i.imgur.com/6otf3t7.gif"
+            "tutorial": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/about.gif"
         },
         "title": "{{ .name }} version {{ .version }}",
         "desc": "Discord bot dedicated to the {{ .game.Name }} {{ .gameLogo }} game!",
@@ -42,8 +42,8 @@
                 "set": "records your alignment in the book, independently of the Discord server; this recording cannot be done for others.\n   - The `city` field is mandatory and corresponds to the city to which players have pledged allegiance. *__Example__:Bonta*\n - The `order` field is mandatory and corresponds to the order joined by players. *__Example__:Spirit*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__:200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*"
             },
             "tutorial": {
-                "get": "https://i.imgur.com/qORz18c.gif",
-                "set": "https://i.imgur.com/sVVCaKX.gif"
+                "get": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/align_get.gif",
+                "set": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/align_set.gif"
             },
             "source": "The collected data is used only for my proper functioning."
         },
@@ -68,9 +68,9 @@
                 "resources": "provides the necessary resources for a given period\n   - The `duration` field is optional and corresponds to the desired number of days, ranging from 1 to 30. If not specified, the necessary resources for the next 7 days are returned. *__Example__:30*"
             },
             "tutorial": {
-                "day": "https://i.imgur.com/9Rh42ym.gif",
-                "effects": "https://i.imgur.com/gGxD1hV.gif",
-                "resources": "https://i.imgur.com/SQYEZs8.gif"
+                "day": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/almanax_day.gif",
+                "effects": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/almanax_efects.gif",
+                "resources": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/almanax_resource.gif"
             },
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
@@ -129,13 +129,13 @@
                 "youtube": "enables/disables the automatic sending of Youtube creators videos\n  - The `videast` field is mandatory and corresponds to a Youtube creator name. *__Example__:Eslix Gaming*\n - The `enabled` and `channel` fields are identical to `/config almanax`."
             },
             "tutorial": {
-                "get": "https://i.imgur.com/Uxx3bvh.gif",
-                "almanax": "",
-                "rss": "",
-                "server": "https://i.imgur.com/48xcGdP.gif",
-                "twitch": "https://i.imgur.com/HNUaHAD.gif",
-                "twitter": "",
-                "youtube": "https://i.imgur.com/OCWsJea.gif"
+                "get": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/config_get.gif",
+                "almanax": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/config_almanax.gif",
+                "rss": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/config_rss.gif",
+                "server": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/config_server.gif",
+                "twitch": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/config_twitch.gif",
+                "twitter": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/config_twitter.gif",
+                "youtube": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/config_youtube.gif"
             },
             "source": "The collected data is used only for my proper functioning."
         },
@@ -211,8 +211,8 @@
                 "set": "records your profession in the book, independently of the Discord server; this recording cannot be done for others.\n    - The `job` field is mandatory and corresponds to a profession in the game. *__Example__:Lumberjack*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__:200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*"
             },
             "tutorial": {
-                "get": "https://i.imgur.com/ibPmsnr.gif",
-                "set": "https://i.imgur.com/klMbM69.gif"
+                "get": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/job_get.gif",
+                "set": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/job_set.gif"
             },
             "source": "The collected data is used only for my proper functioning."
         },
@@ -232,7 +232,7 @@
         "help": {
             "overview": "randomly draws a competitive map",
             "detailed": "randomly draws a competitive map\n   - The `number` field is optional and corresponds to a desired competitive map. If not specified, the map is drawn at random. *__Example__:42*",
-            "tutorial": "https://i.imgur.com/zEBSx94.gif",
+            "tutorial": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/map.gif",
             "source": "Screenshots come from [Krosmoz Tournaments Arena](https://ktarena.com/)."
         },
         "title": "Map {{ .mapNumber }}",
@@ -266,7 +266,7 @@
         "help": {
             "overview": "provides the most recent dimension portal positions",
             "detailed": "provides the most recent positions of dimensional portals\n   - The `dimension` field is optional and corresponds to a desired dimension. If not specified, the positions of portals for all dimensions are returned. *__Example__:Enurado*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*",
-            "tutorial": "https://i.imgur.com/AezytWc.gif",
+            "tutorial": "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/tutorials/en/pos.gif",
             "source": "The data comes from [dofus-portals.fr](https://dofus-portals.fr/), which relies on the participation of portal seekers."
         },
         "embed": {

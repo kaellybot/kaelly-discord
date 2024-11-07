@@ -10,16 +10,13 @@ import (
 	i18n "github.com/kaysoro/discordgo-i18n"
 )
 
-func MapCompetitionMapRequest(mapNumber int64, lg discordgo.Locale,
+func MapCompetitionMapRequest(mapNumber int64, authorID string, lg discordgo.Locale,
 ) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_COMPETITION_MAP_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		CompetitionMapRequest: &amqp.CompetitionMapRequest{
-			MapNumber: mapNumber,
-		},
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_COMPETITION_MAP_REQUEST, lg)
+	request.CompetitionMapRequest = &amqp.CompetitionMapRequest{
+		MapNumber: mapNumber,
 	}
+	return request
 }
 
 func MapCompetitionMapToWebhookEdit(answer *amqp.CompetitionMapAnswer, mapType constants.MapType,

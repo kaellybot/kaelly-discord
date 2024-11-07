@@ -15,6 +15,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/checks"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -74,7 +75,8 @@ func (command *Command) request(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapPortalPositionRequest(dimension, server, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapPortalPositionRequest(dimension, server, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, portalRequestRoutingKey, msg, command.respond)
 	if err != nil {
 		panic(err)

@@ -8,6 +8,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -20,7 +21,8 @@ func (command *Command) setBook(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapBookAlignSetRequest(i.Interaction.Member.User.ID, city.ID, order.ID, server.ID, level, i.Locale)
+	userID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapBookAlignSetRequest(userID, city.ID, order.ID, server.ID, level, i.Locale)
 	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.setBookReply)
 	if err != nil {
 		panic(err)

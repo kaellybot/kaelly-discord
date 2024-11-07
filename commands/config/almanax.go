@@ -1,4 +1,3 @@
-//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
 package config
 
 import (
@@ -6,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -39,7 +39,8 @@ func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session
 		}
 	}
 
-	msg := mappers.MapConfigurationWebhookAlmanaxRequest(webhook, i.GuildID, channelID, enabled, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapConfigurationWebhookAlmanaxRequest(webhook, i.GuildID, channelID, enabled, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

@@ -1,3 +1,4 @@
+//nolint:lll // Readability cannot be improved
 package constants
 
 const (

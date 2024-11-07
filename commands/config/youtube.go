@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -39,7 +40,9 @@ func (command *Command) youtubeRequest(ctx context.Context, s *discordgo.Session
 		}
 	}
 
-	msg := mappers.MapConfigurationWebhookYoutubeRequest(webhook, i.GuildID, channelID, videast, enabled, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapConfigurationWebhookYoutubeRequest(webhook, i.GuildID, channelID,
+		videast, enabled, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
 	if err != nil {
 		panic(err)

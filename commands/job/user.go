@@ -7,6 +7,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,7 +25,8 @@ func (command *Command) userJobRequest(ctx context.Context, s *discordgo.Session
 	}
 	member.User = user
 
-	msg := mappers.MapBookJobGetUserRequest(member.User.ID, server.ID, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapBookJobGetUserRequest(member.User.ID, server.ID, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.userRespond,
 		map[string]any{userProperty: member})
 	if err != nil {

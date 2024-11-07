@@ -23,7 +23,8 @@ func (command *Command) getAlmanax(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapAlmanaxRequest(date, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapAlmanaxRequest(date, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.almanaxRespond)
 	if err != nil {
 		panic(err)
@@ -41,7 +42,8 @@ func (command *Command) updateAlmanax(s *discordgo.Session, i *discordgo.Interac
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapAlmanaxRequest(date, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapAlmanaxRequest(date, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.almanaxRespond)
 	if err != nil {
 		panic(err)
@@ -60,7 +62,8 @@ func (command *Command) updateAlmanaxByDate(s *discordgo.Session, i *discordgo.I
 	}
 
 	day := time.Unix(seconds, 0).UTC()
-	msg := mappers.MapAlmanaxRequest(&day, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapAlmanaxRequest(&day, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.almanaxRespond)
 	if err != nil {
 		panic(err)

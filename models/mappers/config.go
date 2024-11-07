@@ -37,142 +37,128 @@ type i18nProvider struct {
 	Emoji string
 }
 
-func MapConfigurationGetRequest(guildID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_GET_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		ConfigurationGetRequest: &amqp.ConfigurationGetRequest{
-			GuildId: guildID,
-		},
+func MapConfigurationGetRequest(guildID, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_GET_REQUEST, lg)
+	request.ConfigurationGetRequest = &amqp.ConfigurationGetRequest{
+		GuildId: guildID,
 	}
+	return request
 }
 
-func MapConfigurationServerRequest(guildID, channelID, serverID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_SERVER_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		ConfigurationSetServerRequest: &amqp.ConfigurationSetServerRequest{
-			GuildId:   guildID,
-			ChannelId: channelID,
-			ServerId:  serverID,
-		},
+func MapConfigurationServerRequest(guildID, channelID, serverID, authorID string,
+	lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_SERVER_REQUEST, lg)
+	request.ConfigurationSetServerRequest = &amqp.ConfigurationSetServerRequest{
+		GuildId:   guildID,
+		ChannelId: channelID,
+		ServerId:  serverID,
 	}
+	return request
 }
 
 func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST, lg)
+
 	var webhookID, webhookToken string
 	if webhook != nil {
 		webhookID = webhook.ID
 		webhookToken = webhook.Token
 	}
 
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		ConfigurationSetAlmanaxWebhookRequest: &amqp.ConfigurationSetAlmanaxWebhookRequest{
-			GuildId:      guildID,
-			ChannelId:    channelID,
-			WebhookId:    webhookID,
-			WebhookToken: webhookToken,
-			Enabled:      enabled,
-		},
+	request.ConfigurationSetAlmanaxWebhookRequest = &amqp.ConfigurationSetAlmanaxWebhookRequest{
+		GuildId:      guildID,
+		ChannelId:    channelID,
+		WebhookId:    webhookID,
+		WebhookToken: webhookToken,
+		Enabled:      enabled,
 	}
+	return request
 }
 
 func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	feed entities.FeedType, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	feed entities.FeedType, enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST, lg)
+
 	var webhookID, webhookToken string
 	if webhook != nil {
 		webhookID = webhook.ID
 		webhookToken = webhook.Token
 	}
 
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		ConfigurationSetRssWebhookRequest: &amqp.ConfigurationSetRssWebhookRequest{
-			GuildId:      guildID,
-			ChannelId:    channelID,
-			FeedId:       feed.ID,
-			WebhookId:    webhookID,
-			WebhookToken: webhookToken,
-			Enabled:      enabled,
-		},
+	request.ConfigurationSetRssWebhookRequest = &amqp.ConfigurationSetRssWebhookRequest{
+		GuildId:      guildID,
+		ChannelId:    channelID,
+		FeedId:       feed.ID,
+		WebhookId:    webhookID,
+		WebhookToken: webhookToken,
+		Enabled:      enabled,
 	}
+	return request
 }
 
 func MapConfigurationWebhookTwitchRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	streamer entities.Streamer, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	streamer entities.Streamer, enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_TWITCH_WEBHOOK_REQUEST, lg)
+
 	var webhookID, webhookToken string
 	if webhook != nil {
 		webhookID = webhook.ID
 		webhookToken = webhook.Token
 	}
 
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITCH_WEBHOOK_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		ConfigurationSetTwitchWebhookRequest: &amqp.ConfigurationSetTwitchWebhookRequest{
-			GuildId:      guildID,
-			ChannelId:    channelID,
-			StreamerId:   streamer.ID,
-			WebhookId:    webhookID,
-			WebhookToken: webhookToken,
-			Enabled:      enabled,
-		},
+	request.ConfigurationSetTwitchWebhookRequest = &amqp.ConfigurationSetTwitchWebhookRequest{
+		GuildId:      guildID,
+		ChannelId:    channelID,
+		StreamerId:   streamer.ID,
+		WebhookId:    webhookID,
+		WebhookToken: webhookToken,
+		Enabled:      enabled,
 	}
+	return request
 }
 
 func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	twitterAccount entities.TwitterAccount, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	twitterAccount entities.TwitterAccount, enabled bool, authorID string, lg discordgo.Locale,
+) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST, lg)
+
 	var webhookID, webhookToken string
 	if webhook != nil {
 		webhookID = webhook.ID
 		webhookToken = webhook.Token
 	}
 
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		ConfigurationSetTwitterWebhookRequest: &amqp.ConfigurationSetTwitterWebhookRequest{
-			GuildId:      guildID,
-			ChannelId:    channelID,
-			TwitterId:    twitterAccount.ID,
-			WebhookId:    webhookID,
-			WebhookToken: webhookToken,
-			Enabled:      enabled,
-		},
+	request.ConfigurationSetTwitterWebhookRequest = &amqp.ConfigurationSetTwitterWebhookRequest{
+		GuildId:      guildID,
+		ChannelId:    channelID,
+		TwitterId:    twitterAccount.ID,
+		WebhookId:    webhookID,
+		WebhookToken: webhookToken,
+		Enabled:      enabled,
 	}
+	return request
 }
 
 func MapConfigurationWebhookYoutubeRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	videast entities.Videast, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	videast entities.Videast, enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_YOUTUBE_WEBHOOK_REQUEST, lg)
+
 	var webhookID, webhookToken string
 	if webhook != nil {
 		webhookID = webhook.ID
 		webhookToken = webhook.Token
 	}
 
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_CONFIGURATION_SET_YOUTUBE_WEBHOOK_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		ConfigurationSetYoutubeWebhookRequest: &amqp.ConfigurationSetYoutubeWebhookRequest{
-			GuildId:      guildID,
-			ChannelId:    channelID,
-			VideastId:    videast.ID,
-			WebhookId:    webhookID,
-			WebhookToken: webhookToken,
-			Enabled:      enabled,
-		},
+	request.ConfigurationSetYoutubeWebhookRequest = &amqp.ConfigurationSetYoutubeWebhookRequest{
+		GuildId:      guildID,
+		ChannelId:    channelID,
+		VideastId:    videast.ID,
+		WebhookId:    webhookID,
+		WebhookToken: webhookToken,
+		Enabled:      enabled,
 	}
+	return request
 }
 
 func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,

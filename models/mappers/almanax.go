@@ -16,42 +16,34 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func MapAlmanaxRequest(date *time.Time, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		EncyclopediaAlmanaxRequest: &amqp.EncyclopediaAlmanaxRequest{
-			Date: timestamppb.New(*date),
-		},
+func MapAlmanaxRequest(date *time.Time, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_REQUEST, lg)
+	request.EncyclopediaAlmanaxRequest = &amqp.EncyclopediaAlmanaxRequest{
+		Date: timestamppb.New(*date),
 	}
+	return request
 }
 
-func MapAlmanaxResourceRequest(duration int64, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		EncyclopediaAlmanaxResourceRequest: &amqp.EncyclopediaAlmanaxResourceRequest{
-			Duration: int32(duration),
-		},
+func MapAlmanaxResourceRequest(duration int64, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_REQUEST, lg)
+	request.EncyclopediaAlmanaxResourceRequest = &amqp.EncyclopediaAlmanaxResourceRequest{
+		Duration: int32(duration),
 	}
+	return request
 }
 
-func MapAlmanaxEffectListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
-			Query: query,
-			Type:  amqp.EncyclopediaListRequest_ALMANAX_EFFECT,
-		},
+func MapAlmanaxEffectListRequest(query, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST, lg)
+	request.EncyclopediaListRequest = &amqp.EncyclopediaListRequest{
+		Query: query,
+		Type:  amqp.EncyclopediaListRequest_ALMANAX_EFFECT,
 	}
+	return request
 }
 
-func MapAlmanaxEffectRequest(query *string, date *time.Time, page int,
+func MapAlmanaxEffectRequest(query *string, date *time.Time, page int, authorID string,
 	lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_REQUEST, lg)
 	effectRequest := amqp.EncyclopediaAlmanaxEffectRequest{
 		Offset: int32(page) * constants.MaxAlmanaxEffectPerEmbed,
 		Size:   constants.MaxAlmanaxEffectPerEmbed,
@@ -68,12 +60,8 @@ func MapAlmanaxEffectRequest(query *string, date *time.Time, page int,
 		return nil
 	}
 
-	return &amqp.RabbitMQMessage{
-		Type:                             amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_REQUEST,
-		Language:                         constants.MapDiscordLocale(lg),
-		Game:                             constants.GetGame().AMQPGame,
-		EncyclopediaAlmanaxEffectRequest: &effectRequest,
-	}
+	request.EncyclopediaAlmanaxEffectRequest = &effectRequest
+	return request
 }
 
 func MapAlmanaxToWebhook(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Locale,

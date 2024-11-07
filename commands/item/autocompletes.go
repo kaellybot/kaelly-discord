@@ -10,6 +10,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/rs/zerolog/log"
 )
 
@@ -38,7 +39,8 @@ func (command *Command) requestItemList(s *discordgo.Session,
 		return
 	}
 
-	msg := mappers.MapItemListRequest(query, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapItemListRequest(query, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, itemRequestRoutingKey,
 		msg, command.autocompleteItemList)
 	if err != nil {

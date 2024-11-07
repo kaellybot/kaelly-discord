@@ -8,13 +8,15 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/rs/zerolog/log"
 )
 
 func (command *Command) getRequest(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
-	msg := mappers.MapConfigurationGetRequest(i.Interaction.GuildID, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapConfigurationGetRequest(i.Interaction.GuildID, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.getRespond)
 	if err != nil {
 		panic(err)
@@ -95,7 +97,6 @@ func getValidChannelServers(s *discordgo.Session, answer *amqp.ConfigurationGetA
 	return result
 }
 
-//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
 func getValidAlmanaxWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
 	cache map[string]*discordgo.Channel) []constants.AlmanaxWebhook {
 	result := make([]constants.AlmanaxWebhook, 0)
@@ -155,7 +156,6 @@ func getValidRSSWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnsw
 	return result
 }
 
-//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
 func getValidTwitchWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
 	cache map[string]*discordgo.Channel) []constants.TwitchWebhook {
 	result := make([]constants.TwitchWebhook, 0)
@@ -186,7 +186,6 @@ func getValidTwitchWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetA
 	return result
 }
 
-//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
 func getValidTwitterWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
 	cache map[string]*discordgo.Channel) []constants.TwitterWebhook {
 	result := make([]constants.TwitterWebhook, 0)
@@ -217,7 +216,6 @@ func getValidTwitterWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGet
 	return result
 }
 
-//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
 func getValidYoutubeWebhooks(s *discordgo.Session, answer *amqp.ConfigurationGetAnswer,
 	cache map[string]*discordgo.Channel) []constants.YoutubeWebhook {
 	result := make([]constants.YoutubeWebhook, 0)

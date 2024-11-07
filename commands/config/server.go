@@ -8,6 +8,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
@@ -20,7 +21,8 @@ func (command *Command) serverRequest(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapConfigurationServerRequest(i.Interaction.GuildID, channelID, server.ID, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapConfigurationServerRequest(i.Interaction.GuildID, channelID, server.ID, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.serverRespond)
 	if err != nil {
 		panic(err)

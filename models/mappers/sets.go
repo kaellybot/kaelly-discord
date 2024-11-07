@@ -14,16 +14,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MapSetListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
-			Query: query,
-			Type:  amqp.EncyclopediaListRequest_SET,
-		},
+func MapSetListRequest(query, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST, lg)
+	request.EncyclopediaListRequest = &amqp.EncyclopediaListRequest{
+		Query: query,
+		Type:  amqp.EncyclopediaListRequest_SET,
 	}
+	return request
 }
 
 func MapSetToDefaultWebhookEdit(answer *amqp.EncyclopediaItemAnswer,

@@ -23,7 +23,7 @@ type i18nJobExperience struct {
 }
 
 func MapBookJobGetBookRequest(jobID, serverID string, page int,
-	userIDs []string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	userIDs []string, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_GET_BOOK_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
@@ -38,7 +38,7 @@ func MapBookJobGetBookRequest(jobID, serverID string, page int,
 	}
 }
 
-func MapBookJobGetUserRequest(userID, serverID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+func MapBookJobGetUserRequest(userID, serverID, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_GET_USER_REQUEST,
 		Language: constants.MapDiscordLocale(lg),
@@ -52,17 +52,14 @@ func MapBookJobGetUserRequest(userID, serverID string, lg discordgo.Locale) *amq
 
 func MapBookJobSetRequest(userID, jobID, serverID string, level int64,
 	lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_JOB_SET_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		JobSetRequest: &amqp.JobSetRequest{
-			UserId:   userID,
-			JobId:    jobID,
-			ServerId: serverID,
-			Level:    level,
-		},
+	request := requestBackbone(userID, amqp.RabbitMQMessage_COMPETITION_MAP_REQUEST, lg)
+	request.JobSetRequest = &amqp.JobSetRequest{
+		UserId:   userID,
+		JobId:    jobID,
+		ServerId: serverID,
+		Level:    level,
 	}
+	return request
 }
 
 func MapJobBookToWebhook(answer *amqp.JobGetBookAnswer,

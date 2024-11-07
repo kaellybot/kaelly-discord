@@ -13,6 +13,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -67,7 +68,8 @@ func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapItemRequest(query, false, amqp.ItemType_SET_TYPE, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapItemRequest(query, false, amqp.ItemType_SET_TYPE, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, setRequestRoutingKey, msg, command.getSetReply)
 	if err != nil {
 		panic(err)
@@ -105,7 +107,8 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapItemRequest(query, true, amqp.ItemType_SET_TYPE, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapItemRequest(query, true, amqp.ItemType_SET_TYPE, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, setRequestRoutingKey,
 		msg, callback, properties)
 	if err != nil {

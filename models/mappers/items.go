@@ -17,30 +17,24 @@ var (
 	ErrItemTypeNotHandled = errors.New("item type not handled")
 )
 
-func MapItemListRequest(query string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		EncyclopediaListRequest: &amqp.EncyclopediaListRequest{
-			Query: query,
-			Type:  amqp.EncyclopediaListRequest_ITEM,
-		},
+func MapItemListRequest(query, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST, lg)
+	request.EncyclopediaListRequest = &amqp.EncyclopediaListRequest{
+		Query: query,
+		Type:  amqp.EncyclopediaListRequest_ITEM,
 	}
+	return request
 }
 
 func MapItemRequest(query string, isID bool, itemType amqp.ItemType,
-	lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		EncyclopediaItemRequest: &amqp.EncyclopediaItemRequest{
-			Query: query,
-			IsID:  isID,
-			Type:  itemType,
-		},
+	authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST, lg)
+	request.EncyclopediaItemRequest = &amqp.EncyclopediaItemRequest{
+		Query: query,
+		IsID:  isID,
+		Type:  itemType,
 	}
+	return request
 }
 
 func MapItemToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,

@@ -10,6 +10,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/rs/zerolog/log"
 )
 
@@ -40,7 +41,8 @@ func (command *Command) requestAlmanaxEffectList(s *discordgo.Session,
 		return
 	}
 
-	msg := mappers.MapAlmanaxEffectListRequest(query, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapAlmanaxEffectListRequest(query, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey,
 		msg, command.autocompleteAlmanaxEffectList)
 	if err != nil {

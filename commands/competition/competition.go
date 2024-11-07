@@ -11,6 +11,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -64,7 +65,8 @@ func (command *Command) getMap(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	msg := mappers.MapCompetitionMapRequest(mapNumber, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapCompetitionMapRequest(mapNumber, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, competitionRequestRoutingKey, msg, command.getMapReply)
 	if err != nil {
 		panic(err)
@@ -88,7 +90,8 @@ func (command *Command) updateMap(s *discordgo.Session, i *discordgo.Interaction
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapCompetitionMapRequest(mapNumber, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapCompetitionMapRequest(mapNumber, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, competitionRequestRoutingKey,
 		msg, command.updateMapReply, properties)
 	if err != nil {

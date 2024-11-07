@@ -8,6 +8,22 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 )
 
+func GetUserID(i *discordgo.Interaction) string {
+	if i == nil {
+		return ""
+	}
+
+	if i.Member != nil && i.Member.User != nil {
+		return i.Member.User.ID
+	}
+
+	if i.User != nil {
+		return i.User.ID
+	}
+
+	return ""
+}
+
 func GetMemberNickNames(s *discordgo.Session, guildID string) (map[string]any, error) {
 	members, err := s.GuildMembers(guildID, "", constants.MemberListLimit)
 	if err != nil {

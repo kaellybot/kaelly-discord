@@ -57,7 +57,8 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 
 func (command *Command) trace(ctx context.Context, _ *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
-	message := mappers.MapHelpRequest(i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	message := mappers.MapHelpRequest(authorID, i.Locale)
 	errBroker := command.broker.Publish(message, amqp.ExchangeRequest, routingKey, i.ID)
 	if errBroker != nil {
 		log.Error().Err(errBroker).Msgf("Cannot trace help interaction through AMQP")

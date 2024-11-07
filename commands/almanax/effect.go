@@ -10,6 +10,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/rs/zerolog/log"
 )
@@ -21,7 +22,8 @@ func (command *Command) getAlmanaxesByEffect(ctx context.Context, s *discordgo.S
 		panic(err)
 	}
 
-	msg := mappers.MapAlmanaxEffectRequest(&query, nil, constants.DefaultPage, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapAlmanaxEffectRequest(&query, nil, constants.DefaultPage, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
 		command.effectRespond)
 	if err != nil {
@@ -40,7 +42,8 @@ func (command *Command) updateAlmanaxesByEffect(s *discordgo.Session, i *discord
 		panic(commands.ErrInvalidInteraction)
 	}
 
-	msg := mappers.MapAlmanaxEffectRequest(nil, day, page, i.Locale)
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapAlmanaxEffectRequest(nil, day, page, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey,
 		msg, command.effectRespond)
 	if err != nil {

@@ -13,16 +13,13 @@ import (
 )
 
 func MapPortalPositionRequest(dimension entities.Dimension, server entities.Server,
-	lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_PORTAL_POSITION_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		PortalPositionRequest: &amqp.PortalPositionRequest{
-			DimensionId: dimension.ID,
-			ServerId:    server.ID,
-		},
+	authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_PORTAL_POSITION_REQUEST, lg)
+	request.PortalPositionRequest = &amqp.PortalPositionRequest{
+		DimensionId: dimension.ID,
+		ServerId:    server.ID,
 	}
+	return request
 }
 
 func MapPortalToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.Service,

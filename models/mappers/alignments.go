@@ -25,48 +25,40 @@ type i18nAlignmentExperience struct {
 }
 
 func MapBookAlignGetBookRequest(cityID, orderID, serverID string, page int,
-	userIDs []string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ALIGN_GET_BOOK_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		AlignGetBookRequest: &amqp.AlignGetBookRequest{
-			UserIds:  userIDs,
-			CityId:   cityID,
-			OrderId:  orderID,
-			ServerId: serverID,
-			Offset:   int32(page) * constants.MaxBookRowPerEmbed,
-			Size:     constants.MaxBookRowPerEmbed,
-		},
+	userIDs []string, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ALIGN_GET_BOOK_REQUEST, lg)
+	request.AlignGetBookRequest = &amqp.AlignGetBookRequest{
+		UserIds:  userIDs,
+		CityId:   cityID,
+		OrderId:  orderID,
+		ServerId: serverID,
+		Offset:   int32(page) * constants.MaxBookRowPerEmbed,
+		Size:     constants.MaxBookRowPerEmbed,
 	}
+	return request
 }
 
-func MapBookAlignGetUserRequest(userID, serverID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ALIGN_GET_USER_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		AlignGetUserRequest: &amqp.AlignGetUserRequest{
-			UserId:   userID,
-			ServerId: serverID,
-		},
+func MapBookAlignGetUserRequest(userID, serverID string,
+	authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_ALIGN_GET_USER_REQUEST, lg)
+	request.AlignGetUserRequest = &amqp.AlignGetUserRequest{
+		UserId:   userID,
+		ServerId: serverID,
 	}
+	return request
 }
 
 func MapBookAlignSetRequest(userID, cityID, orderID, serverID string, level int64,
 	lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ALIGN_SET_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		AlignSetRequest: &amqp.AlignSetRequest{
-			UserId:   userID,
-			CityId:   cityID,
-			OrderId:  orderID,
-			ServerId: serverID,
-			Level:    level,
-		},
+	request := requestBackbone(userID, amqp.RabbitMQMessage_ALIGN_SET_REQUEST, lg)
+	request.AlignSetRequest = &amqp.AlignSetRequest{
+		UserId:   userID,
+		CityId:   cityID,
+		OrderId:  orderID,
+		ServerId: serverID,
+		Level:    level,
 	}
+	return request
 }
 
 func MapAlignBookToWebhook(answer *amqp.AlignGetBookAnswer,
@@ -180,9 +172,9 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer,
 	}
 }
 
-func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperience, member *discordgo.Member,
-	serverID string, alignService books.Service, serverService servers.Service,
-	locale amqp.Language) *[]*discordgo.MessageEmbed {
+func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperience,
+	member *discordgo.Member, serverID string, alignService books.Service,
+	serverService servers.Service, locale amqp.Language) *[]*discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 	server, found := serverService.GetServer(serverID)
 	if !found {

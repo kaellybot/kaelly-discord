@@ -194,7 +194,7 @@
         "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
         "characteristics": {
             "title": "Weapon Characteristic",
-            "description": "*Cost* {{ .cost }} {{ .costEmoji }}\n*Range* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Cast per turn* {{ .maxCastPerTurn }}\n*Critical* {{ .criticalRate }}% {{ .criticalEmoji }}\t\t*Critical bonus* +{{ .criticalBonus }}\n"
+            "description": "*Cost* {{ .cost }} {{ .costEmoji }}\n*Range* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Cast per turn* {{ .maxCastPerTurn }}\n{{ if ne .criticalRate 0 }}*Critical* {{ .criticalRate }}% {{ .criticalEmoji }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *Critical bonus* +{{ .criticalBonus }}\n{{ end }}"
         },
         "weaponEffects": {
             "title": "Weapon effects",
@@ -204,6 +204,10 @@
             "title": "Effects",
             "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}No effect!{{ end }}",
             "button": "Effects"
+        },
+        "conditions": {
+            "title": "Conditions",
+            "description": "{{ if .conditions }}{{ range .conditions}}* {{ . }}\n{{ end }}{{ else }}No condition!{{ end }}"
         },
         "recipe": {
             "title": "Recipe",

@@ -1,7 +1,9 @@
 package mappers
 
 import (
+	"fmt"
 	"math"
+	"regexp"
 	"sort"
 
 	"github.com/kaellybot/kaelly-discord/models/entities"
@@ -19,6 +21,10 @@ type i18nCharacteristic struct {
 	SortOrder int
 }
 
+var (
+	effectValue = regexp.MustCompile(`(-?\d+)`)
+)
+
 func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 	characteristicService characteristics.Service) []i18nCharacteristic {
 	characs := make([]i18nCharacteristic, 0)
@@ -31,7 +37,7 @@ func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 		}
 
 		characs = append(characs, i18nCharacteristic{
-			Label:     effect.GetLabel(),
+			Label:     highlightEffectValues(effect.GetLabel()),
 			Emoji:     charac.Emoji,
 			SortOrder: charac.SortOrder,
 		})
@@ -39,6 +45,12 @@ func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 
 	sortCharacteristics(characs)
 	return characs
+}
+
+func highlightEffectValues(label string) string {
+	return effectValue.ReplaceAllStringFunc(label, func(match string) string {
+		return fmt.Sprintf("**%s**", match)
+	})
 }
 
 func sortCharacteristics(characteristics []i18nCharacteristic) {

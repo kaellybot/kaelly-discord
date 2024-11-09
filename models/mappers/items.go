@@ -54,13 +54,47 @@ func mapEquipmentToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe boo
 	}
 }
 
-func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
-	service characteristics.Service, emojiService emojis.Service, lg discordgo.Locale,
+func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isEffectMode bool,
+	characService characteristics.Service, emojiService emojis.Service, lg discordgo.Locale,
 ) *[]*discordgo.MessageEmbed {
 	equipment := answer.GetEquipment()
 	fields := make([]*discordgo.MessageEmbedField, 0)
 
-	if !isRecipe && equipment.GetCharacteristics() != nil {
+	if isEffectMode {
+		fields = append(fields, getEffectFields(equipment, characService, emojiService, lg)...)
+	} else {
+		fields = append(fields, getRecipeFields(equipment, emojiService, lg)...)
+	}
+
+	return &[]*discordgo.MessageEmbed{
+		{
+			Title: equipment.GetName(),
+			Description: i18n.Get(lg, "item.description", i18n.Vars{
+				"level": equipment.GetLevel(),
+				"emoji": emojiService.GetEquipmentStringEmoji(equipment.GetType().GetEquipmentType()),
+				"type":  equipment.GetType().GetEquipmentLabel(),
+			}),
+			Color: constants.Color,
+			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": equipment.GetId()}),
+			Thumbnail: &discordgo.MessageEmbedThumbnail{
+				URL: equipment.GetIcon(),
+			},
+			Fields: fields,
+			Author: &discordgo.MessageEmbedAuthor{
+				Name:    answer.GetSource().GetName(),
+				URL:     answer.GetSource().GetUrl(),
+				IconURL: answer.GetSource().GetIcon(),
+			},
+			Footer: discord.BuildDefaultFooter(lg),
+		},
+	}
+}
+
+func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service characteristics.Service,
+	emojiService emojis.Service, lg discordgo.Locale) []*discordgo.MessageEmbedField {
+	fields := make([]*discordgo.MessageEmbedField, 0)
+
+	if equipment.GetCharacteristics() != nil {
 		characteristics := equipment.GetCharacteristics()
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name: i18n.Get(lg, "item.characteristics.title"),
@@ -80,7 +114,7 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 		})
 	}
 
-	if !isRecipe && (len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0) {
+	if len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0 {
 		i18nWeaponEffects := mapEffects(equipment.GetWeaponEffects(), service)
 		weaponEffectFields := discord.SliceFields(i18nWeaponEffects, constants.MaxCharacterPerField,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
@@ -118,57 +152,40 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 		fields = append(fields, effectFields...)
 	}
 
-	if !isRecipe && len(equipment.Conditions) > 0 {
-		// TODO add field conditions
+	if len(equipment.Conditions) > 0 {
 		fields = append(fields, &discordgo.MessageEmbedField{
-			Name:   "",
-			Value:  "",
+			Name: i18n.Get(lg, "item.conditions.title"),
+			Value: i18n.Get(lg, "item.conditions.description", i18n.Vars{
+				"conditions": equipment.Conditions,
+			}),
 			Inline: false,
 		})
 	}
 
-	if isRecipe && equipment.GetRecipe() != nil {
-		recipeFields := discord.SliceFields(equipment.GetRecipe().GetIngredients(), constants.MaxIngredientsPerField,
-			func(i int, items []*amqp.EncyclopediaItemAnswer_Recipe_Ingredient) *discordgo.MessageEmbedField {
-				name := constants.InvisibleCharacter
-				if i == 0 {
-					name = i18n.Get(lg, "item.recipe.title")
-				}
+	return fields
+}
 
-				return &discordgo.MessageEmbedField{
-					Name: name,
-					Value: i18n.Get(lg, "item.recipe.description", i18n.Vars{
-						"ingredients": mapItemIngredients(items, emojiService, lg),
-					}),
-					Inline: true,
-				}
-			})
-
-		fields = append(fields, recipeFields...)
+func getRecipeFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, emojiService emojis.Service,
+	lg discordgo.Locale) []*discordgo.MessageEmbedField {
+	if equipment.GetRecipe() == nil {
+		return nil
 	}
 
-	return &[]*discordgo.MessageEmbed{
-		{
-			Title: equipment.GetName(),
-			Description: i18n.Get(lg, "item.description", i18n.Vars{
-				"level": equipment.GetLevel(),
-				"emoji": emojiService.GetEquipmentStringEmoji(equipment.GetType().GetEquipmentType()),
-				"type":  equipment.GetType().GetEquipmentLabel(),
-			}),
-			Color: constants.Color,
-			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": equipment.GetId()}),
-			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: equipment.GetIcon(),
-			},
-			Fields: fields,
-			Author: &discordgo.MessageEmbedAuthor{
-				Name:    answer.GetSource().GetName(),
-				URL:     answer.GetSource().GetUrl(),
-				IconURL: answer.GetSource().GetIcon(),
-			},
-			Footer: discord.BuildDefaultFooter(lg),
-		},
-	}
+	return discord.SliceFields(equipment.GetRecipe().GetIngredients(), constants.MaxIngredientsPerField,
+		func(i int, items []*amqp.EncyclopediaItemAnswer_Recipe_Ingredient) *discordgo.MessageEmbedField {
+			name := constants.InvisibleCharacter
+			if i == 0 {
+				name = i18n.Get(lg, "item.recipe.title")
+			}
+
+			return &discordgo.MessageEmbedField{
+				Name: name,
+				Value: i18n.Get(lg, "item.recipe.description", i18n.Vars{
+					"ingredients": mapItemIngredients(items, emojiService, lg),
+				}),
+				Inline: true,
+			}
+		})
 }
 
 func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,

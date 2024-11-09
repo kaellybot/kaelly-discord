@@ -24,30 +24,24 @@ type i18nJobExperience struct {
 
 func MapBookJobGetBookRequest(jobID, serverID string, page int,
 	userIDs []string, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_JOB_GET_BOOK_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		JobGetBookRequest: &amqp.JobGetBookRequest{
-			UserIds:  userIDs,
-			JobId:    jobID,
-			ServerId: serverID,
-			Offset:   int32(page) * constants.MaxBookRowPerEmbed,
-			Size:     constants.MaxBookRowPerEmbed,
-		},
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_JOB_GET_BOOK_REQUEST, lg)
+	request.JobGetBookRequest = &amqp.JobGetBookRequest{
+		UserIds:  userIDs,
+		JobId:    jobID,
+		ServerId: serverID,
+		Offset:   int32(page) * constants.MaxBookRowPerEmbed,
+		Size:     constants.MaxBookRowPerEmbed,
 	}
+	return request
 }
 
 func MapBookJobGetUserRequest(userID, serverID, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	return &amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_JOB_GET_USER_REQUEST,
-		Language: constants.MapDiscordLocale(lg),
-		Game:     constants.GetGame().AMQPGame,
-		JobGetUserRequest: &amqp.JobGetUserRequest{
-			UserId:   userID,
-			ServerId: serverID,
-		},
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_JOB_GET_USER_REQUEST, lg)
+	request.JobGetUserRequest = &amqp.JobGetUserRequest{
+		UserId:   userID,
+		ServerId: serverID,
 	}
+	return request
 }
 
 func MapBookJobSetRequest(userID, jobID, serverID string, level int64,

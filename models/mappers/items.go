@@ -54,16 +54,16 @@ func mapEquipmentToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe boo
 	}
 }
 
-func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isEffectMode bool,
+func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	characService characteristics.Service, emojiService emojis.Service, lg discordgo.Locale,
 ) *[]*discordgo.MessageEmbed {
 	equipment := answer.GetEquipment()
 	fields := make([]*discordgo.MessageEmbedField, 0)
 
-	if isEffectMode {
-		fields = append(fields, getEffectFields(equipment, characService, emojiService, lg)...)
-	} else {
+	if isRecipe {
 		fields = append(fields, getRecipeFields(equipment, emojiService, lg)...)
+	} else {
+		fields = append(fields, getEffectFields(equipment, characService, emojiService, lg)...)
 	}
 
 	return &[]*discordgo.MessageEmbed{

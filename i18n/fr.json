@@ -190,8 +190,16 @@
             "tutorial": "",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
-        "description": "**{{ .type }}**{{ if .level }} de niveau **{{ .level }}**{{ end }}{{ if .description }}\n\n*{{ .description }}*{{ end }}",
+        "description": "Niveau {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
         "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/{{ .id }}",
+        "characteristics": {
+            "title": "Caractéristiques de l'arme",
+            "description": "*Coût* {{ .cost }} {{ .costEmoji }}\n*Portée* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Lancer par tour* {{ .maxCastPerTurn }}\n*Critique* {{ .criticalRate }}% {{ .criticalEmoji }}\t\t*Bonus critiques* +{{ .criticalBonus }}\n"
+        },
+        "weaponEffects": {
+            "title": "Effets de l'arme",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}Aucun effet !{{ end }}"
+        },
         "effects": {
             "title": "Effets",
             "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}Aucun effet !{{ end }}",

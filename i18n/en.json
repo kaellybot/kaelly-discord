@@ -190,8 +190,16 @@
             "tutorial": "",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
-        "description": "**{{ .type }}**{{ if .level }} level **{{ .level }}**{{ end }}{{ if .description }}\n\n*{{ .description }}*{{ end }}",
+        "description": "Level {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
         "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
+        "characteristics": {
+            "title": "Weapon Characteristic",
+            "description": "*Cost* {{ .cost }} {{ .costEmoji }}\n*Range* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Cast per turn* {{ .maxCastPerTurn }}\n*Critical* {{ .criticalRate }}% {{ .criticalEmoji }}\t\t*Critical bonus* +{{ .criticalBonus }}\n"
+        },
+        "weaponEffects": {
+            "title": "Weapon effects",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}Np effect!{{ end }}"
+        },
         "effects": {
             "title": "Effects",
             "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}No effect!{{ end }}",

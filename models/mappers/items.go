@@ -60,7 +60,45 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	equipment := answer.GetEquipment()
 	fields := make([]*discordgo.MessageEmbedField, 0)
 
-	if !isRecipe && len(equipment.GetEffects()) > 0 {
+	if !isRecipe && equipment.GetCharacteristics() != nil {
+		characteristics := equipment.GetCharacteristics()
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name: i18n.Get(lg, "item.characteristics.title"),
+			Value: i18n.Get(lg, "item.characteristics.description", i18n.Vars{
+				"cost":           characteristics.GetCost(),
+				"costEmoji":      emojiService.GetMiscStringEmoji(constants.EmojiIDCost),
+				"minRange":       characteristics.GetMinRange(),
+				"maxRange":       characteristics.GetMaxRange(),
+				"rangeEmoji":     emojiService.GetMiscStringEmoji(constants.EmojiIDRange),
+				"maxCastPerTurn": characteristics.GetMaxCastPerTurn(),
+				"criticalRate":   characteristics.GetCriticalRate(),
+				"criticalBonus":  characteristics.GetCriticalBonus(),
+				"criticalEmoji":  emojiService.GetMiscStringEmoji(constants.EmojiIDCritical),
+				// TODO area + LDV
+			}),
+			Inline: false,
+		})
+	}
+
+	if !isRecipe && (len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0) {
+		i18nWeaponEffects := mapEffects(equipment.GetWeaponEffects(), service)
+		weaponEffectFields := discord.SliceFields(i18nWeaponEffects, constants.MaxCharacterPerField,
+			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
+				name := constants.InvisibleCharacter
+				if i == 0 {
+					name = i18n.Get(lg, "item.weaponEffects.title")
+				}
+
+				return &discordgo.MessageEmbedField{
+					Name: name,
+					Value: i18n.Get(lg, "item.weaponEffects.description", i18n.Vars{
+						"effects": items,
+					}),
+					Inline: false,
+				}
+			})
+		fields = append(fields, weaponEffectFields...)
+
 		i18nEffects := mapEffects(equipment.GetEffects(), service)
 		effectFields := discord.SliceFields(i18nEffects, constants.MaxCharacterPerField,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
@@ -77,11 +115,17 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 					Inline: true,
 				}
 			})
-
 		fields = append(fields, effectFields...)
 	}
 
-	// TODO conditions, weapon details
+	if !isRecipe && len(equipment.Conditions) > 0 {
+		// TODO add field conditions
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:   "",
+			Value:  "",
+			Inline: false,
+		})
+	}
 
 	if isRecipe && equipment.GetRecipe() != nil {
 		recipeFields := discord.SliceFields(equipment.GetRecipe().GetIngredients(), constants.MaxIngredientsPerField,
@@ -107,9 +151,9 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 		{
 			Title: equipment.GetName(),
 			Description: i18n.Get(lg, "item.description", i18n.Vars{
-				"level":       equipment.GetLevel(),
-				"type":        equipment.GetLabelType(),
-				"description": equipment.GetDescription(),
+				"level": equipment.GetLevel(),
+				"emoji": emojiService.GetEquipmentStringEmoji(equipment.GetType().GetEquipmentType()),
+				"type":  equipment.GetType().GetEquipmentLabel(),
 			}),
 			Color: constants.Color,
 			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": equipment.GetId()}),
@@ -141,7 +185,7 @@ func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool
 		})
 	}
 
-	if isRecipe && len(equipment.GetEffects()) > 0 {
+	if isRecipe && (len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0) {
 		components = append(components, discordgo.Button{
 			CustomID: contract.CraftItemEffectsCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT_TYPE.String()),
 			Label:    i18n.Get(lg, "item.effects.button"),

@@ -183,6 +183,6 @@ func (app *Impl) Shutdown() {
 
 func getBindings() []amqp.Binding {
 	return []amqp.Binding{
-		requests.GetBinding(),
+		requests.GetBinding(constants.GetRabbitMQClientID()),
 	}
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
@@ -59,7 +60,7 @@ func (command *Command) trace(ctx context.Context, _ *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	authorID := discord.GetUserID(i.Interaction)
 	message := mappers.MapHelpRequest(authorID, i.Locale)
-	errBroker := command.broker.Publish(message, amqp.ExchangeRequest, routingKey, i.ID)
+	errBroker := command.broker.Request(message, amqp.ExchangeRequest, routingKey, i.ID, requests.AnswersQueueName)
 	if errBroker != nil {
 		log.Error().Err(errBroker).Msgf("Cannot trace help interaction through AMQP")
 	}

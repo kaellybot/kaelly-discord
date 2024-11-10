@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	AnswersRoutingKey = "answers.*"
-	AnswersQueueName  = "answers"
+	AnswersExchange  = "amq.direct"
+	AnswersQueueName = "answers"
 )
 
 type RequestManager interface {

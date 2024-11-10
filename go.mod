@@ -3,11 +3,12 @@ module github.com/kaellybot/kaelly-discord
 go 1.22
 
 // replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
+
 // replace github.com/kaellybot/kaelly-commands => ../Kaelly-commands
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
-	github.com/kaellybot/kaelly-amqp v0.0.7-beta6
+	github.com/kaellybot/kaelly-amqp v0.0.8-beta1
 	github.com/kaellybot/kaelly-commands v0.0.6-beta14
 	github.com/kaysoro/discordgo-i18n v1.0.2
 	github.com/prometheus/client_golang v1.20.4

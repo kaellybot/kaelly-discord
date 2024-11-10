@@ -1,8 +1,6 @@
 package requests
 
 import (
-	"context"
-
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/utils/panics"
@@ -16,10 +14,11 @@ func New(broker amqp.MessageBroker) *RequestManagerImpl {
 	}
 }
 
-func GetBinding() amqp.Binding {
+func GetBinding(clientID string) amqp.Binding {
 	return amqp.Binding{
-		Exchange:   amqp.ExchangeAnswer,
-		RoutingKey: AnswersRoutingKey,
+		Exchange: AnswersExchange,
+		// TODO delay rabbitmq run?
+		RoutingKey: clientID,
 		Queue:      AnswersQueueName,
 	}
 }
@@ -27,7 +26,7 @@ func GetBinding() amqp.Binding {
 func (manager *RequestManagerImpl) Request(s *discordgo.Session, i *discordgo.InteractionCreate,
 	routingKey string, message *amqp.RabbitMQMessage, callback RequestCallback,
 	optionalProperties ...map[string]any) error {
-	err := manager.broker.Publish(message, amqp.ExchangeRequest, routingKey, i.ID)
+	err := manager.broker.Request(message, amqp.ExchangeRequest, routingKey, i.ID, AnswersQueueName)
 	if err != nil {
 		return err
 	}
@@ -51,12 +50,11 @@ func (manager *RequestManagerImpl) Listen() error {
 	return manager.broker.Consume(AnswersQueueName, manager.consume)
 }
 
-func (manager *RequestManagerImpl) consume(ctx context.Context,
-	message *amqp.RabbitMQMessage, correlationID string) {
-	request, found := manager.requests[correlationID]
+func (manager *RequestManagerImpl) consume(ctx amqp.Context, message *amqp.RabbitMQMessage) {
+	request, found := manager.requests[ctx.CorrelationID]
 	if found {
 		defer panics.HandlePanic(request.session, request.interaction)
-		delete(manager.requests, correlationID)
+		delete(manager.requests, ctx.CorrelationID)
 		request.callback(ctx, request.session, request.interaction, message, request.properties)
 	}
 }

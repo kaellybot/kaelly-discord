@@ -2,6 +2,7 @@ package mappers
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -152,17 +153,55 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 		fields = append(fields, effectFields...)
 	}
 
-	if len(equipment.Conditions) > 0 {
+	if equipment.Conditions != nil {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name: i18n.Get(lg, "item.conditions.title"),
 			Value: i18n.Get(lg, "item.conditions.description", i18n.Vars{
-				"conditions": equipment.Conditions,
+				"conditions": getConditions(equipment.Conditions, lg),
 			}),
 			Inline: false,
 		})
 	}
 
 	return fields
+}
+
+func getConditions(conditions *amqp.EncyclopediaItemAnswer_Conditions, lg discordgo.Locale) []string {
+	labels := make([]string, 0)
+
+	if conditions.Condition != nil {
+		labels = append(labels, fmt.Sprintf("%v %v %v",
+			conditions.Condition.Element.Name,
+			conditions.Condition.Operator,
+			conditions.Condition.Value))
+	}
+
+	switch conditions.Relation {
+	case amqp.EncyclopediaItemAnswer_Conditions_AND:
+		for _, child := range conditions.GetChildren() {
+			labels = append(labels, getConditions(child, lg)...)
+		}
+	case amqp.EncyclopediaItemAnswer_Conditions_OR:
+		// Could be messy, to retry with Dofus Unity stuff.
+		// Only supports AND(OR(OR(...))) relations
+		label := ""
+		i18nOr := i18n.Get(lg, "item.conditions.relation.or")
+		for _, child := range conditions.GetChildren() {
+			subConditions := getConditions(child, lg)
+			for _, subCond := range subConditions {
+				if len(label) > 0 {
+					label = fmt.Sprintf("%v %v %v", label, i18nOr, subCond)
+				} else {
+					label = subCond
+				}
+			}
+		}
+		labels = append(labels, label)
+	case amqp.EncyclopediaItemAnswer_Conditions_NONE:
+	default:
+	}
+
+	return labels
 }
 
 func getRecipeFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, emojiService emojis.Service,

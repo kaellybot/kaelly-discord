@@ -207,7 +207,11 @@
         },
         "conditions": {
             "title": "Conditions",
-            "description": "{{ if .conditions }}{{ range .conditions}}* {{ . }}\n{{ end }}{{ else }}No condition!{{ end }}"
+            "description": "{{ if .conditions }}{{ range .conditions}}* {{ . }}\n{{ end }}{{ else }}No condition!{{ end }}",
+            "relation": {
+                "and": "and",
+                "or": "or"
+            }
         },
         "recipe": {
             "title": "Recipe",

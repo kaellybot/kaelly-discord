@@ -14,11 +14,10 @@ func New(broker amqp.MessageBroker) *RequestManagerImpl {
 	}
 }
 
-func GetBinding(clientID string) amqp.Binding {
+func GetBinding(getIdentifiedQueue func(queue string) string) amqp.Binding {
 	return amqp.Binding{
-		Exchange: AnswersExchange,
-		// TODO delay rabbitmq run?
-		RoutingKey: clientID,
+		Exchange:   AnswersExchange,
+		RoutingKey: getIdentifiedQueue(AnswersQueueName),
 		Queue:      AnswersQueueName,
 	}
 }

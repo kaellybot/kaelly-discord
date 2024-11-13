@@ -58,10 +58,7 @@ func New() (*Impl, error) {
 		log.Fatal().Err(err).Msgf("DB instantiation failed, shutting down.")
 	}
 
-	broker, err := amqp.New(constants.GetRabbitMQClientID(), viper.GetString(constants.RabbitMQAddress), getBindings())
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Broker instantiation failed, shutting down.")
-	}
+	broker := amqp.New(constants.GetRabbitMQClientID(), viper.GetString(constants.RabbitMQAddress))
 
 	// Repositories
 	dimensionRepo := dimensions.New(db)
@@ -161,13 +158,15 @@ func New() (*Impl, error) {
 }
 
 func (app *Impl) Run() error {
-	err := app.requestManager.Listen()
-	if err != nil {
+	if err := app.broker.Run(app.getBindings()); err != nil {
 		return err
 	}
 
-	err = app.discordService.Listen()
-	if err != nil {
+	if err := app.requestManager.Listen(); err != nil {
+		return err
+	}
+
+	if err := app.discordService.Listen(); err != nil {
 		return err
 	}
 
@@ -181,8 +180,8 @@ func (app *Impl) Shutdown() {
 	log.Info().Msgf("Application is no longer running")
 }
 
-func getBindings() []amqp.Binding {
+func (app *Impl) getBindings() []amqp.Binding {
 	return []amqp.Binding{
-		requests.GetBinding(constants.GetRabbitMQClientID()),
+		requests.GetBinding(app.broker.GetIdentifiedQueue),
 	}
 }

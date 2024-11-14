@@ -14,10 +14,10 @@ func New(broker amqp.MessageBroker) *RequestManagerImpl {
 	}
 }
 
-func GetBinding(getIdentifiedQueue func(queue string) string) amqp.Binding {
+func GetBinding() amqp.Binding {
 	return amqp.Binding{
 		Exchange:   AnswersExchange,
-		RoutingKey: getIdentifiedQueue(AnswersQueueName),
+		RoutingKey: "",
 		Queue:      AnswersQueueName,
 	}
 }
@@ -44,9 +44,9 @@ func (manager *RequestManagerImpl) Request(s *discordgo.Session, i *discordgo.In
 	return nil
 }
 
-func (manager *RequestManagerImpl) Listen() error {
+func (manager *RequestManagerImpl) Listen() {
 	log.Info().Msgf("Listening request answers...")
-	return manager.broker.Consume(AnswersQueueName, manager.consume)
+	manager.broker.Consume(AnswersQueueName, manager.consume)
 }
 
 func (manager *RequestManagerImpl) consume(ctx amqp.Context, message *amqp.RabbitMQMessage) {

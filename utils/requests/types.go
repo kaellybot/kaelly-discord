@@ -15,7 +15,7 @@ const (
 type RequestManager interface {
 	Request(s *discordgo.Session, i *discordgo.InteractionCreate, routingKey string,
 		message *amqp.RabbitMQMessage, callback RequestCallback, properties ...map[string]any) error
-	Listen() error
+	Listen()
 }
 
 type RequestManagerImpl struct {

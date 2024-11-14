@@ -8,7 +8,7 @@ go 1.22
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
-	github.com/kaellybot/kaelly-amqp v0.0.9-beta1
+	github.com/kaellybot/kaelly-amqp v0.0.9-beta2
 	github.com/kaellybot/kaelly-commands v0.0.6-beta14
 	github.com/kaysoro/discordgo-i18n v1.0.2
 	github.com/prometheus/client_golang v1.20.4
@@ -28,6 +28,7 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

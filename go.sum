@@ -36,8 +36,8 @@ github.com/kaellybot/kaelly-amqp v0.0.9-beta2 h1:7XY6QJdJHDt/slNaSbv7SRB8RTSnM2J
 github.com/kaellybot/kaelly-amqp v0.0.9-beta2/go.mod h1:dyt607MGIsba2es5G0WNAXPSgAS+Az19bF25MubMjAg=
 github.com/kaellybot/kaelly-commands v0.0.6-beta14 h1:1iqTYv216fct0z4v4x3aaxY3BsGvKjltyhWN9ItTxBs=
 github.com/kaellybot/kaelly-commands v0.0.6-beta14/go.mod h1:JPnhSZGL7SlcB9iPprlamuReyWdEgO5H1zNvqbrH410=
-github.com/kaysoro/discordgo-i18n v1.0.2 h1:Qo56wDpyAOF4pnPiqTG5JSsSRn1PajjMmVpCZP6ryqg=
-github.com/kaysoro/discordgo-i18n v1.0.2/go.mod h1:bLGt9tjMm5Y0hUjxyWsNJ02l/ngNqiMIQ+X9zjZC9vw=
+github.com/kaysoro/discordgo-i18n v1.0.3 h1:fD/+zzOLaa+vWUkgLopKwjk+fsOpbs+rkMAEsaWqL00=
+github.com/kaysoro/discordgo-i18n v1.0.3/go.mod h1:xHFX95v0L92qVLuyjNomFB8eLprojRYjoY8Z31a5Ldk=
 github.com/klauspost/compress v1.17.9 h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2qeMA=
 github.com/klauspost/compress v1.17.9/go.mod h1:Di0epgTjJY877eYKx5yC51cX2A2Vl2ibi7bDH9ttBbw=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=

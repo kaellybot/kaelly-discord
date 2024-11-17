@@ -46,7 +46,7 @@ func MapBookJobGetUserRequest(userID, serverID, authorID string, lg discordgo.Lo
 
 func MapBookJobSetRequest(userID, jobID, serverID string, level int64,
 	lg discordgo.Locale) *amqp.RabbitMQMessage {
-	request := requestBackbone(userID, amqp.RabbitMQMessage_COMPETITION_MAP_REQUEST, lg)
+	request := requestBackbone(userID, amqp.RabbitMQMessage_JOB_SET_REQUEST, lg)
 	request.JobSetRequest = &amqp.JobSetRequest{
 		UserId:   userID,
 		JobId:    jobID,

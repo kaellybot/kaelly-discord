@@ -27,7 +27,7 @@ func MapAlmanaxRequest(date *time.Time, authorID string, lg discordgo.Locale) *a
 func MapAlmanaxResourceRequest(duration int64, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_REQUEST, lg)
 	request.EncyclopediaAlmanaxResourceRequest = &amqp.EncyclopediaAlmanaxResourceRequest{
-		Duration: int32(duration),
+		Duration: duration,
 	}
 	return request
 }
@@ -45,7 +45,7 @@ func MapAlmanaxEffectRequest(query *string, date *time.Time, page int, authorID 
 	lg discordgo.Locale) *amqp.RabbitMQMessage {
 	request := requestBackbone(authorID, amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_REQUEST, lg)
 	effectRequest := amqp.EncyclopediaAlmanaxEffectRequest{
-		Offset: int32(page) * constants.MaxAlmanaxEffectPerEmbed,
+		Offset: int64(page) * constants.MaxAlmanaxEffectPerEmbed,
 		Size:   constants.MaxAlmanaxEffectPerEmbed,
 	}
 
@@ -259,7 +259,7 @@ func MapAlmanaxResourceToWebhook(almanaxResources *amqp.EncyclopediaAlmanaxResou
 	return &discordgo.WebhookEdit{
 		Embeds: mapAlmanaxResourceToEmbeds(almanaxResources, startDate, endDate,
 			characterNumber, lg, emojiService),
-		Components: mapAlmanaxResourceToComponents(int64(almanaxResources.Duration), characterNumber, lg),
+		Components: mapAlmanaxResourceToComponents(almanaxResources.Duration, characterNumber, lg),
 	}
 }
 
@@ -287,7 +287,7 @@ func mapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 		i18nTributes = append(i18nTributes, i18nTribute{
 			Name:     tribute.GetItemName(),
 			Emoji:    emojiService.GetItemTypeStringEmoji(tribute.GetItemType()),
-			Quantity: int64(tribute.GetQuantity()) * characterNumber,
+			Quantity: tribute.GetQuantity() * characterNumber,
 		})
 	}
 

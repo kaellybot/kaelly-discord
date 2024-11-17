@@ -32,7 +32,7 @@ func MapBookAlignGetBookRequest(cityID, orderID, serverID string, page int,
 		CityId:   cityID,
 		OrderId:  orderID,
 		ServerId: serverID,
-		Offset:   int32(page) * constants.MaxBookRowPerEmbed,
+		Offset:   int64(page) * constants.MaxBookRowPerEmbed,
 		Size:     constants.MaxBookRowPerEmbed,
 	}
 	return request

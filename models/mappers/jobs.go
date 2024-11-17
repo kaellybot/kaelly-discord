@@ -29,7 +29,7 @@ func MapBookJobGetBookRequest(jobID, serverID string, page int,
 		UserIds:  userIDs,
 		JobId:    jobID,
 		ServerId: serverID,
-		Offset:   int32(page) * constants.MaxBookRowPerEmbed,
+		Offset:   int64(page) * constants.MaxBookRowPerEmbed,
 		Size:     constants.MaxBookRowPerEmbed,
 	}
 	return request

@@ -39,7 +39,7 @@ func GetUnknownSeason() Season {
 	return Season{
 		Name:        "Unknown",
 		Color:       Color,
-		AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/unknown.webp",
+		AlmanaxIcon: "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/common/almanax/unknown.webp",
 	}
 }
 
@@ -50,28 +50,28 @@ func getSeasons() []Season {
 			StartDate:   time.Date(0, 3, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 6, 21, 0, 0, 0, 0, time.UTC),
 			Color:       springColor,
-			AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/spring.webp",
+			AlmanaxIcon: "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/common/almanax/spring.webp",
 		},
 		{
 			Name:        "Summer",
 			StartDate:   time.Date(0, 6, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 9, 21, 0, 0, 0, 0, time.UTC),
 			Color:       summerColor,
-			AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/summer.webp",
+			AlmanaxIcon: "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/common/almanax/summer.webp",
 		},
 		{
 			Name:        "Autumn",
 			StartDate:   time.Date(0, 9, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(0, 12, 21, 0, 0, 0, 0, time.UTC),
 			Color:       autumnColor,
-			AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/autumn.webp",
+			AlmanaxIcon: "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/common/almanax/autumn.webp",
 		},
 		{
 			Name:        "Winter",
 			StartDate:   time.Date(0, 12, 20, 0, 0, 0, 0, time.UTC),
 			EndDate:     time.Date(1, 3, 21, 0, 0, 0, 0, time.UTC),
 			Color:       winterColor,
-			AlmanaxIcon: "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/common/almanax/winter.webp",
+			AlmanaxIcon: "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/common/almanax/winter.webp",
 		},
 	}
 }

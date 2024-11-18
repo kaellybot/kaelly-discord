@@ -39,6 +39,10 @@ func (service *Impl) Listen() error {
 	return nil
 }
 
+func (service *Impl) IsConnected() bool {
+	return service.session != nil && service.session.DataReady
+}
+
 func (service *Impl) Shutdown() {
 	log.Info().Int(constants.LogShard, service.session.ShardID).Msgf("Closing Discord connections...")
 	err := service.session.Close()

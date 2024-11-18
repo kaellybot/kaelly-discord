@@ -41,6 +41,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/twitters"
 	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
+	"github.com/kaellybot/kaelly-discord/utils/insights"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -53,16 +54,15 @@ func New() (*Impl, error) {
 	}
 
 	// Misc
-	db, err := databases.New()
-	if err != nil {
-		log.Fatal().Err(err).Msgf("DB instantiation failed, shutting down.")
-	}
-
 	broker := amqp.New(
 		constants.GetRabbitMQClientID(),
 		viper.GetString(constants.RabbitMQAddress),
 		amqp.WithBindings(requests.GetBinding()),
 	)
+	db := databases.New()
+	if errDBRun := db.Run(); errDBRun != nil {
+		return nil, errDBRun
+	}
 
 	// Repositories
 	dimensionRepo := dimensions.New(db)
@@ -82,49 +82,49 @@ func New() (*Impl, error) {
 	guildRepo := guildRepo.New(db)
 
 	// Services
-	portalService, err := portals.New(dimensionRepo, areaRepo, subAreaRepo, transportTypeRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Dimension Service instantiation failed, shutting down.")
+	portalService, errPos := portals.New(dimensionRepo, areaRepo, subAreaRepo, transportTypeRepo)
+	if errPos != nil {
+		return nil, errPos
 	}
 
-	serverService, err := servers.New(serverRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Server Service instantiation failed, shutting down.")
+	serverService, errServ := servers.New(serverRepo)
+	if errServ != nil {
+		return nil, errServ
 	}
 
-	bookService, err := books.New(jobRepo, cityRepo, orderRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Book Service instantiation failed, shutting down.")
+	bookService, errBook := books.New(jobRepo, cityRepo, orderRepo)
+	if errBook != nil {
+		return nil, errBook
 	}
 
-	feedService, err := feeds.New(feedRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Feed Service instantiation failed, shutting down.")
+	feedService, errFeed := feeds.New(feedRepo)
+	if errFeed != nil {
+		return nil, errFeed
 	}
 
-	streamerService, err := streamers.New(streamerRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Streamer Service instantiation failed, shutting down.")
+	streamerService, errStreamer := streamers.New(streamerRepo)
+	if errStreamer != nil {
+		return nil, errStreamer
 	}
 
-	twitterService, err := twitters.New(twitterRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Twitter Service instantiation failed, shutting down.")
+	twitterService, errTwitter := twitters.New(twitterRepo)
+	if errTwitter != nil {
+		return nil, errTwitter
 	}
 
-	videastService, err := videasts.New(videastRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Videast Service instantiation failed, shutting down.")
+	videastService, errVideast := videasts.New(videastRepo)
+	if errVideast != nil {
+		return nil, errVideast
 	}
 
-	characService, err := characteristics.New(characRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Characteristic Service instantiation failed, shutting down.")
+	characService, errCharac := characteristics.New(characRepo)
+	if errCharac != nil {
+		return nil, errCharac
 	}
 
-	emojiService, err := emojis.New(emojiRepo)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Emoji Service instantiation failed, shutting down.")
+	emojiService, errEmoji := emojis.New(emojiRepo)
+	if errEmoji != nil {
+		return nil, errEmoji
 	}
 
 	guildService := guilds.New(guildRepo)
@@ -145,23 +145,32 @@ func New() (*Impl, error) {
 		set.New(characService, emojiService, requestsManager),
 	)
 
-	discordService, err := discord.New(
+	discordService, errDiscord := discord.New(
 		viper.GetString(constants.Token),
 		viper.GetInt(constants.ShardID),
 		viper.GetInt(constants.ShardCount), commands)
-	if err != nil {
-		return nil, err
+	if errDiscord != nil {
+		return nil, errDiscord
 	}
 
+	// Insights
+	probes := insights.NewProbes(broker.IsConnected, db.IsConnected, discordService.IsConnected)
+	prom := insights.NewPrometheusMetrics()
+
 	return &Impl{
-		db:             db,
 		broker:         broker,
+		db:             db,
+		probes:         probes,
+		prom:           prom,
 		requestManager: requestsManager,
 		discordService: discordService,
 	}, nil
 }
 
 func (app *Impl) Run() error {
+	app.probes.ListenAndServe()
+	app.prom.ListenAndServe()
+
 	if err := app.broker.Run(); err != nil {
 		return err
 	}
@@ -176,8 +185,10 @@ func (app *Impl) Run() error {
 }
 
 func (app *Impl) Shutdown() {
-	app.db.Shutdown()
-	app.broker.Shutdown()
 	app.discordService.Shutdown()
+	app.broker.Shutdown()
+	app.db.Shutdown()
+	app.prom.Shutdown()
+	app.probes.Shutdown()
 	log.Info().Msgf("Application is no longer running")
 }

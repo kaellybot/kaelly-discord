@@ -13,6 +13,7 @@ var (
 
 type Service interface {
 	Listen() error
+	IsConnected() bool
 	Shutdown()
 }
 

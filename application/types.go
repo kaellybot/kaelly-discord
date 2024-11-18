@@ -6,6 +6,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
+	"github.com/kaellybot/kaelly-discord/utils/insights"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
 
@@ -19,8 +20,10 @@ type Application interface {
 }
 
 type Impl struct {
-	db             databases.MySQLConnection
 	broker         amqp.MessageBroker
+	db             databases.MySQLConnection
+	probes         insights.Probes
+	prom           insights.PrometheusMetrics
 	discordService discord.Service
 	requestManager requests.RequestManager
 }

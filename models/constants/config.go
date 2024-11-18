@@ -29,6 +29,9 @@ const (
 	// RabbitMQ address.
 	RabbitMQAddress = "RABBITMQ_ADDRESS"
 
+	// Probe port.
+	ProbePort = "PROBE_PORT"
+
 	// Metric port.
 	MetricPort = "METRIC_PORT"
 
@@ -47,6 +50,7 @@ const (
 	defaultMySQLPassword   = ""
 	defaultMySQLDatabase   = "kaellybot"
 	defaultRabbitMQAddress = "amqp://localhost:5672"
+	defaultProbePort       = 9090
 	defaultMetricPort      = 2112
 	defaultLogLevel        = zerolog.InfoLevel
 	defaultProduction      = false
@@ -62,6 +66,7 @@ func GetDefaultConfigValues() map[string]any {
 		MySQLPassword:   defaultMySQLPassword,
 		MySQLDatabase:   defaultMySQLDatabase,
 		RabbitMQAddress: defaultRabbitMQAddress,
+		ProbePort:       defaultProbePort,
 		MetricPort:      defaultMetricPort,
 		LogLevel:        defaultLogLevel.String(),
 		Production:      defaultProduction,

@@ -137,7 +137,7 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 	}
 	bonuses := make([]discordgo.SelectMenuOption, 0)
 	for _, currentBonus := range set.Bonuses {
-		emoji := service.GetSetBonusEmoji(int(currentBonus.ItemNumber), maxItemNumber)
+		emoji := service.GetSetBonusEmoji(int(currentBonus.ItemNumber))
 		bonuses = append(bonuses, discordgo.SelectMenuOption{
 			Label: i18n.Get(lg, "set.effects.option", i18n.Vars{
 				"itemNumber": currentBonus.ItemNumber,

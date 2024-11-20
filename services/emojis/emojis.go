@@ -165,7 +165,7 @@ func (service *Impl) GetItemTypeEmoji(itemType amqp.ItemType) *discordgo.Compone
 	return mapEmoji(&emoji)
 }
 
-func (service *Impl) GetSetBonusEmoji(equipedItemNumber, lenBonuses int) *discordgo.ComponentEmoji {
+func (service *Impl) GetSetBonusEmoji(equipedItemNumber int) *discordgo.ComponentEmoji {
 	innerStore, found := service.emojiStore[constants.EmojiTypeBonusSet]
 	if !found {
 		log.Warn().
@@ -174,7 +174,7 @@ func (service *Impl) GetSetBonusEmoji(equipedItemNumber, lenBonuses int) *discor
 		return mapEmoji(nil)
 	}
 
-	emojiID := fmt.Sprintf("%v", len(innerStore)-(lenBonuses-equipedItemNumber))
+	emojiID := fmt.Sprintf("%v", equipedItemNumber)
 	emoji, found := innerStore[emojiID]
 	if !found {
 		log.Warn().

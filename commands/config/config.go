@@ -129,7 +129,7 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 
 func (command *Command) createWebhook(s *discordgo.Session, i *discordgo.InteractionCreate,
 	channelID string) (*discordgo.Webhook, bool) {
-	webhook, err := s.WebhookCreate(channelID, constants.Name, constants.AvatarIcon)
+	webhook, err := s.WebhookCreate(channelID, constants.Name, constants.AvatarWebhook)
 	if err != nil {
 		apiError, ok := discord.ExtractAPIError(err)
 		if ok || apiError.Code == constants.DiscordCodeTooManyWebhooks {

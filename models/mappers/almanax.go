@@ -81,12 +81,14 @@ func MapAlmanaxToWebhook(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Lo
 
 func mapAlmanaxToEmbeds(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Locale,
 	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
+	dateTranslator := constants.MapDateTranslator(lg)
 	almanax := answer.GetAlmanax()
 	season := constants.GetSeason(almanax.Date.AsTime())
+	fullDate := dateTranslator.FmtDateFull(almanax.Date.AsTime())
 
 	return &[]*discordgo.MessageEmbed{
 		{
-			Title: i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": almanax.GetDate().Seconds}),
+			Title: i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": fullDate}),
 			URL: i18n.Get(lg, "almanax.day.url", i18n.Vars{
 				"date": almanax.Date.AsTime().Format(constants.KrosmozAlmanaxDateFormat),
 			}),
@@ -221,7 +223,7 @@ func mapAlmanaxEffectsToComponents(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	for _, almanax := range almanaxes {
 		almanaxChoices = append(almanaxChoices, discordgo.SelectMenuOption{
 			Label: i18n.Get(lg, "almanax.effect.choice.value", i18n.Vars{
-				"date": almanax.Date.AsTime().Format(constants.KrosmozAlmanaxDateFormat),
+				"date": almanax.Date.AsTime().Format(constants.DiscordDateOnlyFormat),
 			}),
 			Value: fmt.Sprintf("%v", almanax.Date.Seconds),
 			Emoji: emojiService.GetMiscEmoji(constants.EmojiIDCalendar),

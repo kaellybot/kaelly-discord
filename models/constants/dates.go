@@ -1,5 +1,9 @@
 package constants
 
+const (
+	DiscordDateOnlyFormat = "02/01/2006"
+)
+
 func SupportedDateFormats() []string {
 	return []string{
 		"02-01-2006",

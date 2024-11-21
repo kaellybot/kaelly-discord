@@ -75,7 +75,7 @@
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "day": {
-            "title": "Almanax du <t:{{ .date }}:D>",
+            "title": "Almanax du {{ .date }}",
             "bonus": {
                 "title": ":cyclone: Bonus"
             },

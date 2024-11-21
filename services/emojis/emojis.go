@@ -43,7 +43,7 @@ func (service *Impl) GetMiscStringEmoji(emojiMiscID constants.EmojiMiscID) strin
 	innerStore, found := service.emojiStore[constants.EmojiTypeMisc]
 	if !found {
 		log.Warn().
-			Str(constants.LogEmojiType, string(constants.EmojiTypeEquipment)).
+			Str(constants.LogEmojiType, string(constants.EmojiTypeMisc)).
 			Msgf("No miscellaneous type store found, returning empty emoji")
 		return mapEmojiString(nil)
 	}
@@ -64,7 +64,7 @@ func (service *Impl) GetMiscEmoji(emojiMiscID constants.EmojiMiscID) *discordgo.
 	innerStore, found := service.emojiStore[constants.EmojiTypeMisc]
 	if !found {
 		log.Warn().
-			Str(constants.LogEmojiType, string(constants.EmojiTypeEquipment)).
+			Str(constants.LogEmojiType, string(constants.EmojiTypeMisc)).
 			Msgf("No miscellaneous type store found, returning empty emoji")
 		return mapEmoji(nil)
 	}

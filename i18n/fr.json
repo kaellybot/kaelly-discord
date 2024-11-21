@@ -191,7 +191,6 @@
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
-        "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/equipements/{{ .id }}",
         "characteristics": {
             "title": "Caractéristiques de l'arme",
             "description": "*Coût* {{ .cost }} {{ .costEmoji }}\n*Portée* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Lancer par tour* {{ .maxCastPerTurn }}\n{{ if ne .criticalRate 0 }}*Critique* {{ .criticalRate }}% {{ .criticalEmoji }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *Bonus critiques* +{{ .criticalBonus }}\n{{ end }}"
@@ -215,7 +214,7 @@
         },
         "recipe": {
             "title": "Recette",
-            "description": "{{ if .ingredients }}{{ range .ingredients}}{{ .Emoji }} **{{ .Quantity }}**x [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}Aucun ingrédient !{{ end }}",
+            "description": "{{ if .ingredients }}{{ range .ingredients}}* {{ .Emoji }} **{{ .Quantity }}**x {{ .Name }}\n{{ end }}{{ else }}Aucun ingrédient !{{ end }}",
             "button": "Recette"
         }
     },
@@ -302,10 +301,9 @@
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau **{{ .level }}**",
-        "url": "https://www.dofus.com/fr/mmorpg/encyclopedie/panoplies/{{ .id }}",
         "items": {
             "title": "Objets",
-            "description": "{{ if .items }}{{ range .items}}[{{ .Name }}]({{ .URL }}), niv. {{ .Level }}\n{{ end }}{{ else }}Aucun équipement !{{ end }}",
+            "description": "{{ if .items }}{{ range .items}}* {{ .Name }}, niv. {{ .Level }}\n{{ end }}{{ else }}Aucun équipement !{{ end }}",
             "placeholder": "Objets de la panoplie"
         },
         "effects": {

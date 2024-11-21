@@ -76,7 +76,6 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 				"type":  equipment.GetType().GetEquipmentLabel(),
 			}),
 			Color: constants.Color,
-			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": equipment.GetId()}),
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: equipment.GetIcon(),
 			},
@@ -220,7 +219,7 @@ func getRecipeFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, emojiServ
 			return &discordgo.MessageEmbedField{
 				Name: name,
 				Value: i18n.Get(lg, "item.recipe.description", i18n.Vars{
-					"ingredients": mapItemIngredients(items, emojiService, lg),
+					"ingredients": mapItemIngredients(items, emojiService),
 				}),
 				Inline: true,
 			}
@@ -270,18 +269,16 @@ func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool
 
 type i18nIngredient struct {
 	Name     string
-	URL      string
 	Emoji    string
 	Quantity int64
 }
 
 func mapItemIngredients(ingredients []*amqp.EncyclopediaItemAnswer_Recipe_Ingredient,
-	emojiService emojis.Service, lg discordgo.Locale) []i18nIngredient {
+	emojiService emojis.Service) []i18nIngredient {
 	result := make([]i18nIngredient, 0)
 	for _, ingredient := range ingredients {
 		result = append(result, i18nIngredient{
 			Name:     ingredient.GetName(),
-			URL:      i18n.Get(lg, "item.url", i18n.Vars{"id": ingredient.GetId()}),
 			Emoji:    emojiService.GetItemTypeStringEmoji(ingredient.GetType()),
 			Quantity: ingredient.GetQuantity(),
 		})

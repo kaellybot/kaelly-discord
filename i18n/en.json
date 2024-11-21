@@ -191,7 +191,6 @@
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
         "description": "Level {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
-        "url": "https://www.dofus.com/en/mmorpg/encyclopedia/equipment/{{ .id }}",
         "characteristics": {
             "title": "Weapon Characteristic",
             "description": "*Cost* {{ .cost }} {{ .costEmoji }}\n*Range* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Cast per turn* {{ .maxCastPerTurn }}\n{{ if ne .criticalRate 0 }}*Critical* {{ .criticalRate }}% {{ .criticalEmoji }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *Critical bonus* +{{ .criticalBonus }}\n{{ end }}"
@@ -215,7 +214,7 @@
         },
         "recipe": {
             "title": "Recipe",
-            "description": "{{ if .ingredients }}{{ range .ingredients}}{{ .Emoji }} **{{ .Quantity }}**x [{{ .Name }}]({{ .URL }})\n{{ end }}{{ else }}No ingredient!{{ end }}",
+            "description": "{{ if .ingredients }}{{ range .ingredients}}* {{ .Emoji }} **{{ .Quantity }}**x {{ .Name }}\n{{ end }}{{ else }}No ingredient!{{ end }}",
             "button": "Recipe"
         }
     },
@@ -302,10 +301,9 @@
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
         "description": "Level **{{ .level }}**",
-        "url": "https://www.dofus.com/en/mmorpg/encyclopedia/sets/{{ .id }}",
         "items": {
             "title": "Items",
-            "description": "{{ if .items }}{{ range .items}}{{ .Name }}, lvl {{ .Level }}\n{{ end }}{{ else }}No item!{{ end }}",
+            "description": "{{ if .items }}{{ range .items}}* {{ .Name }}, lvl {{ .Level }}\n{{ end }}{{ else }}No item!{{ end }}",
             "placeholder": "Set items"
         },
         "effects": {

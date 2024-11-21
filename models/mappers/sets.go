@@ -72,7 +72,7 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 			return &discordgo.MessageEmbedField{
 				Name: name,
 				Value: i18n.Get(lg, "set.items.description", i18n.Vars{
-					"items": mapSetItems(items, lg),
+					"items": mapSetItems(items),
 				}),
 				Inline: true,
 			}
@@ -109,7 +109,6 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 			Title:       set.Name,
 			Description: i18n.Get(lg, "set.description", i18n.Vars{"level": set.Level}),
 			Color:       constants.Color,
-			URL:         i18n.Get(lg, "set.url", i18n.Vars{"id": set.Id}),
 			Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: set.GetIcon()},
 			Fields:      fields,
 			Author: &discordgo.MessageEmbedAuthor{
@@ -194,17 +193,14 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 
 type i18nSetItem struct {
 	Name  string
-	URL   string
 	Level int64
 }
 
-func mapSetItems(items []*amqp.EncyclopediaItemAnswer_Set_Equipment,
-	lg discordgo.Locale) []i18nSetItem {
+func mapSetItems(items []*amqp.EncyclopediaItemAnswer_Set_Equipment) []i18nSetItem {
 	result := make([]i18nSetItem, 0)
 	for _, item := range items {
 		result = append(result, i18nSetItem{
 			Name:  item.GetName(),
-			URL:   i18n.Get(lg, "item.url", i18n.Vars{"id": item.GetId()}),
 			Level: item.GetLevel(),
 		})
 	}

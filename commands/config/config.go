@@ -80,9 +80,11 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.get"),
 		},
 		{
-			Name:        "/config almanax",
-			CommandID:   "</config almanax:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.almanax"),
+			Name:      "/config almanax",
+			CommandID: "</config almanax:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.almanax", i18n.Vars{
+				"defaultLocale": constants.DefaultLocale,
+			}),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.almanax"),
 		},
 		{
@@ -98,9 +100,11 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.server"),
 		},
 		{
-			Name:        "/config twitch",
-			CommandID:   "</config twitch:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.twitch"),
+			Name:      "/config twitch",
+			CommandID: "</config twitch:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.twitch", i18n.Vars{
+				"discord": constants.Discord,
+			}),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.twitch"),
 		},
 		{
@@ -110,9 +114,11 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.twitter"),
 		},
 		{
-			Name:        "/config youtube",
-			CommandID:   "</config youtube:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.youtube"),
+			Name:      "/config youtube",
+			CommandID: "</config youtube:1055459522812067840>",
+			Description: i18n.Get(lg, "config.help.detailed.youtube", i18n.Vars{
+				"discord": constants.Discord,
+			}),
 			TutorialURL: i18n.Get(lg, "config.help.tutorial.youtube"),
 		},
 	}

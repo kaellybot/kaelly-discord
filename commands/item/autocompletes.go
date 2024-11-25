@@ -41,7 +41,7 @@ func (command *Command) requestItemList(s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemListRequest(query, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, itemRequestRoutingKey,
+	err := command.requestManager.Request(s, i, constants.ItemRequestRoutingKey,
 		msg, command.autocompleteItemList)
 	if err != nil {
 		log.Error().Err(err).Msg("Autocomplete request ignored")

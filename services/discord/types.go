@@ -4,7 +4,9 @@ import (
 	"errors"
 
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
+	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
 
 var (
@@ -18,6 +20,8 @@ type Service interface {
 }
 
 type Impl struct {
-	session  *discordgo.Session
-	commands []commands.DiscordCommand
+	session        *discordgo.Session
+	commands       []commands.DiscordCommand
+	broker         amqp.MessageBroker
+	requestManager requests.RequestManager
 }

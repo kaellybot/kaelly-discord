@@ -8,8 +8,7 @@ import (
 )
 
 const (
-	setRequestRoutingKey = "requests.encyclopedias"
-	itemNumberProperty   = "itemNumber"
+	itemNumberProperty = "itemNumber"
 )
 
 type Command struct {

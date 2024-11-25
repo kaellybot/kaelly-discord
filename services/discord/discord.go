@@ -1,14 +1,20 @@
 package discord
 
 import (
+	"context"
+
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/panics"
+	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/rs/zerolog/log"
 )
 
-func New(token string, shardID, shardCount int, commands []commands.DiscordCommand) (*Impl, error) {
+func New(token string, shardID, shardCount int, commands []commands.DiscordCommand,
+	broker amqp.MessageBroker, requestManager requests.RequestManager) (*Impl, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Error().Err(err).Msgf("Connecting to Discord gateway failed")
@@ -16,14 +22,18 @@ func New(token string, shardID, shardCount int, commands []commands.DiscordComma
 	}
 
 	service := Impl{
-		session:  dg,
-		commands: commands,
+		session:        dg,
+		commands:       commands,
+		broker:         broker,
+		requestManager: requestManager,
 	}
 
 	dg.Identify.Shard = &[2]int{shardID, shardCount}
 	dg.Identify.Intents = constants.GetIntents()
 	dg.AddHandler(service.ready)
 	dg.AddHandler(service.interactionCreate)
+	dg.AddHandler(service.guildCreate)
+	dg.AddHandler(service.guildDelete)
 
 	return &service, nil
 }
@@ -75,6 +85,78 @@ func (service *Impl) interactionCreate(session *discordgo.Session, event *discor
 		if command.Matches(event) {
 			command.Handle(session, event)
 			return
+		}
+	}
+}
+
+func (service *Impl) guildCreate(session *discordgo.Session, event *discordgo.GuildCreate) {
+	// Ignore outage.
+	if event.Unavailable {
+		return
+	}
+
+	i := discordgo.InteractionCreate{
+		Interaction: &discordgo.Interaction{
+			ID: event.ID,
+		},
+	}
+
+	request := mappers.MapConfigurationGuildCreateRequest(event.Guild, event.MemberCount)
+	errReq := service.requestManager.Request(session, &i, constants.ConfigurationRequestRoutingKey,
+		request, service.guildCreateReply)
+	if errReq != nil {
+		log.Error().Err(errReq).
+			Str(constants.LogGuildID, event.Guild.ID).
+			Msg("Cannot send guild delete event as request, ignoring it...")
+	}
+}
+
+func (service *Impl) guildCreateReply(_ context.Context, _ *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	if message.Status == amqp.RabbitMQMessage_SUCCESS &&
+		message.ConfigurationGuildCreateAnswer != nil &&
+		message.ConfigurationGuildCreateAnswer.Created {
+		errBroker := service.broker.Emit(message, amqp.ExchangeNews, constants.GuildNewsRoutingKey, i.ID)
+		if errBroker != nil {
+			log.Error().Err(errBroker).
+				Msgf("Cannot trace guild create through AMQP")
+		}
+
+		// TODO Send welcome message in the first channel where we have the right to.
+		// In case we don't, try to send message to ownerID
+	}
+}
+
+func (service *Impl) guildDelete(session *discordgo.Session, event *discordgo.GuildDelete) {
+	// Ignore outage.
+	if event.Unavailable {
+		return
+	}
+
+	i := discordgo.InteractionCreate{
+		Interaction: &discordgo.Interaction{
+			ID: event.ID,
+		},
+	}
+
+	request := mappers.MapConfigurationGuildDeleteRequest(event.Guild, event.MemberCount)
+	errReq := service.requestManager.Request(session, &i, constants.ConfigurationRequestRoutingKey,
+		request, service.guildDeleteReply)
+	if errReq != nil {
+		log.Error().Err(errReq).
+			Str(constants.LogGuildID, event.Guild.ID).
+			Msg("Cannot send guild delete event as request, ignoring it...")
+	}
+}
+
+func (service *Impl) guildDeleteReply(_ context.Context, _ *discordgo.Session,
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	if message.Status == amqp.RabbitMQMessage_SUCCESS &&
+		message.ConfigurationGuildDeleteAnswer != nil &&
+		message.ConfigurationGuildDeleteAnswer.Deleted {
+		errBroker := service.broker.Emit(message, amqp.ExchangeNews, constants.GuildNewsRoutingKey, i.ID)
+		if errBroker != nil {
+			log.Error().Err(errBroker).Msgf("Cannot trace guild delete through AMQP")
 		}
 	}
 }

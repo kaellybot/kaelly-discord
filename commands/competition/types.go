@@ -7,8 +7,6 @@ import (
 )
 
 const (
-	competitionRequestRoutingKey = "requests.competitions"
-
 	mapTypeProperty = "mapType"
 )
 

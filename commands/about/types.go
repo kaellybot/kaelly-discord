@@ -6,10 +6,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 )
 
-const (
-	routingKey = "requests.about"
-)
-
 type Command struct {
 	commands.AbstractCommand
 	broker       amqp.MessageBroker

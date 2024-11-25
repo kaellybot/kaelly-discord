@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -42,7 +43,8 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapConfigurationWebhookRssRequest(webhook, i.GuildID, channelID, feed, enabled, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.setRespond)
+	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
+		msg, command.setRespond)
 	if err != nil {
 		panic(err)
 	}

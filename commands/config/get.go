@@ -17,7 +17,8 @@ func (command *Command) getRequest(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapConfigurationGetRequest(i.Interaction.GuildID, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.getRespond)
+	err := command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
+		msg, command.getRespond)
 	if err != nil {
 		panic(err)
 	}

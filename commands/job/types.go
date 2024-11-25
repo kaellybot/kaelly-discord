@@ -10,8 +10,6 @@ import (
 )
 
 const (
-	jobRequestRoutingKey = "requests.books"
-
 	userProperty = "user"
 )
 

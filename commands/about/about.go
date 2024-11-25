@@ -9,7 +9,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
-	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
@@ -44,7 +43,7 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	userID := discord.GetUserID(i.Interaction)
 	message := mappers.MapAboutRequest(userID, i.Locale)
-	errBroker := command.broker.Request(message, amqp.ExchangeRequest, routingKey, i.ID, requests.AnswersQueueName)
+	errBroker := command.broker.Emit(message, amqp.ExchangeRequest, constants.AboutRoutingKey, i.ID)
 	if errBroker != nil {
 		log.Error().Err(errBroker).Msgf("Cannot trace about interaction through AMQP")
 	}

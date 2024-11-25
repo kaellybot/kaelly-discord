@@ -13,8 +13,6 @@ import (
 )
 
 const (
-	configurationRequestRoutingKey = "requests.configs"
-
 	defaultIconSize = "128"
 )
 

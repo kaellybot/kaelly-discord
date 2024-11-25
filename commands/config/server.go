@@ -23,7 +23,8 @@ func (command *Command) serverRequest(ctx context.Context, s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapConfigurationServerRequest(i.Interaction.GuildID, channelID, server.ID, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, configurationRequestRoutingKey, msg, command.serverRespond)
+	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
+		msg, command.serverRespond)
 	if err != nil {
 		panic(err)
 	}

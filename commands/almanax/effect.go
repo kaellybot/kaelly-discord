@@ -24,8 +24,8 @@ func (command *Command) getAlmanaxesByEffect(ctx context.Context, s *discordgo.S
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxEffectRequest(&query, nil, constants.DefaultPage, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
-		command.effectRespond)
+	err = command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+		msg, command.effectRespond)
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +44,7 @@ func (command *Command) updateAlmanaxesByEffect(s *discordgo.Session, i *discord
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxEffectRequest(nil, day, page, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, almanaxRequestRoutingKey,
+	err := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.effectRespond)
 	if err != nil {
 		panic(err)

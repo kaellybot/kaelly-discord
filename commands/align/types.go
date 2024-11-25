@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	alignRequestRoutingKey = "requests.books"
-	userProperty           = "user"
+	userProperty = "user"
 )
 
 type Command struct {

@@ -148,7 +148,7 @@ func New() (*Impl, error) {
 	discordService, errDiscord := discord.New(
 		viper.GetString(constants.Token),
 		viper.GetInt(constants.ShardID),
-		viper.GetInt(constants.ShardCount), commands)
+		viper.GetInt(constants.ShardCount), commands, broker, requestsManager)
 	if errDiscord != nil {
 		return nil, errDiscord
 	}

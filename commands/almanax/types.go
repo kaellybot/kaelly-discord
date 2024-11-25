@@ -7,8 +7,6 @@ import (
 )
 
 const (
-	almanaxRequestRoutingKey = "requests.encyclopedias"
-
 	characterNumberProperty = "characterNumber"
 	dayDurationProperty     = "dayDuration"
 

@@ -69,7 +69,8 @@ func (command *Command) getItem(ctx context.Context, s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemRequest(query, false, amqp.ItemType_ANY_ITEM_TYPE, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, itemRequestRoutingKey, msg, command.getItemReply)
+	err = command.requestManager.Request(s, i, constants.ItemRequestRoutingKey,
+		msg, command.getItemReply)
 	if err != nil {
 		panic(err)
 	}
@@ -115,7 +116,7 @@ func (command *Command) updateItem(s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemRequest(query, true, amqp.ItemType(itemTypeID), authorID, i.Locale)
-	err := command.requestManager.Request(s, i, itemRequestRoutingKey,
+	err := command.requestManager.Request(s, i, constants.ItemRequestRoutingKey,
 		msg, command.updateItemReply, properties)
 	if err != nil {
 		panic(err)

@@ -40,7 +40,7 @@ func (command *Command) requestSetList(s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapSetListRequest(query, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, setRequestRoutingKey,
+	err := command.requestManager.Request(s, i, constants.SetRequestRoutingKey,
 		msg, command.autocompleteSetList)
 	if err != nil {
 		log.Error().Err(err).Msg("Autocomplete request ignored")

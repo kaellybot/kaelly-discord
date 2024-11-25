@@ -23,7 +23,8 @@ func (command *Command) setBook(ctx context.Context, s *discordgo.Session,
 
 	userID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookJobSetRequest(userID, job.ID, server.ID, level, i.Locale)
-	err = command.requestManager.Request(s, i, jobRequestRoutingKey, msg, command.setBookReply)
+	err = command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
+		msg, command.setBookReply)
 	if err != nil {
 		panic(err)
 	}

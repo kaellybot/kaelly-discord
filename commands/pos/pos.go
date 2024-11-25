@@ -77,7 +77,8 @@ func (command *Command) request(ctx context.Context, s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapPortalPositionRequest(dimension, server, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, portalRequestRoutingKey, msg, command.respond)
+	err = command.requestManager.Request(s, i, constants.PortalRequestRoutingKey,
+		msg, command.respond)
 	if err != nil {
 		panic(err)
 	}

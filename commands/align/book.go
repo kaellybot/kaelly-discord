@@ -35,8 +35,8 @@ func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookAlignGetBookRequest(city.ID, order.ID, server.ID,
 		constants.DefaultPage, userIDs, authorID, i.Locale)
-	errReq := command.requestManager.Request(s, i, alignRequestRoutingKey, msg,
-		command.getBookReply, properties)
+	errReq := command.requestManager.Request(s, i, constants.AlignRequestRoutingKey,
+		msg, command.getBookReply, properties)
 	if errReq != nil {
 		panic(errReq)
 	}
@@ -66,8 +66,8 @@ func (command *Command) updateBook(s *discordgo.Session, i *discordgo.Interactio
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookAlignGetBookRequest(cityID, orderID, serverID,
 		page, userIDs, authorID, i.Locale)
-	errReq := command.requestManager.Request(s, i, alignRequestRoutingKey, msg,
-		command.getBookReply, properties)
+	errReq := command.requestManager.Request(s, i, constants.AlignRequestRoutingKey,
+		msg, command.getBookReply, properties)
 	if errReq != nil {
 		panic(errReq)
 	}

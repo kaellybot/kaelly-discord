@@ -70,7 +70,8 @@ func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemRequest(query, false, amqp.ItemType_SET_TYPE, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, setRequestRoutingKey, msg, command.getSetReply)
+	err = command.requestManager.Request(s, i, constants.SetRequestRoutingKey,
+		msg, command.getSetReply)
 	if err != nil {
 		panic(err)
 	}
@@ -109,7 +110,7 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemRequest(query, true, amqp.ItemType_SET_TYPE, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, setRequestRoutingKey,
+	err := command.requestManager.Request(s, i, constants.SetRequestRoutingKey,
 		msg, callback, properties)
 	if err != nil {
 		panic(err)

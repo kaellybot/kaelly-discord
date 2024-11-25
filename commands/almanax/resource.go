@@ -23,7 +23,8 @@ func (command *Command) getResources(ctx context.Context, s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxResourceRequest(duration, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg, command.getResourcesReply)
+	err = command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+		msg, command.getResourcesReply)
 	if err != nil {
 		panic(err)
 	}
@@ -57,8 +58,8 @@ func (command *Command) updateResourceCharacter(s *discordgo.Session, i *discord
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxResourceRequest(dayDuration, authorID, i.Locale)
-	errReq := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
-		command.updateResourcesReply, properties)
+	errReq := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+		msg, command.updateResourcesReply, properties)
 	if errReq != nil {
 		panic(errReq)
 	}
@@ -92,8 +93,8 @@ func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordg
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxResourceRequest(duration, authorID, i.Locale)
-	errReq := command.requestManager.Request(s, i, almanaxRequestRoutingKey, msg,
-		command.updateResourcesReply, properties)
+	errReq := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+		msg, command.updateResourcesReply, properties)
 	if errReq != nil {
 		panic(errReq)
 	}

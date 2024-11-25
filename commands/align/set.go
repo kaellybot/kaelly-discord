@@ -23,7 +23,8 @@ func (command *Command) setBook(ctx context.Context, s *discordgo.Session,
 
 	userID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookAlignSetRequest(userID, city.ID, order.ID, server.ID, level, i.Locale)
-	err = command.requestManager.Request(s, i, alignRequestRoutingKey, msg, command.setBookReply)
+	err = command.requestManager.Request(s, i, constants.AlignRequestRoutingKey,
+		msg, command.setBookReply)
 	if err != nil {
 		panic(err)
 	}

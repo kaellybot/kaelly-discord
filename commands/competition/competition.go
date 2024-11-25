@@ -67,7 +67,8 @@ func (command *Command) getMap(ctx context.Context, s *discordgo.Session,
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapCompetitionMapRequest(mapNumber, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, competitionRequestRoutingKey, msg, command.getMapReply)
+	err = command.requestManager.Request(s, i, constants.CompetitionRequestRoutingKey,
+		msg, command.getMapReply)
 	if err != nil {
 		panic(err)
 	}
@@ -92,7 +93,7 @@ func (command *Command) updateMap(s *discordgo.Session, i *discordgo.Interaction
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapCompetitionMapRequest(mapNumber, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, competitionRequestRoutingKey,
+	err := command.requestManager.Request(s, i, constants.CompetitionRequestRoutingKey,
 		msg, command.updateMapReply, properties)
 	if err != nil {
 		panic(err)

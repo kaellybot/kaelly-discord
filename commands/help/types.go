@@ -6,8 +6,6 @@ import (
 )
 
 const (
-	routingKey = "requests.help"
-
 	menuCommandName = "menu"
 )
 

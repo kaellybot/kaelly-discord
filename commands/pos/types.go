@@ -8,10 +8,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 )
 
-const (
-	portalRequestRoutingKey = "requests.portals"
-)
-
 type Command struct {
 	commands.AbstractCommand
 	guildService   guilds.Service

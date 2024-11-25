@@ -113,17 +113,18 @@ func (service *Impl) guildCreate(session *discordgo.Session, event *discordgo.Gu
 
 func (service *Impl) guildCreateReply(_ context.Context, _ *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	if message.Status == amqp.RabbitMQMessage_SUCCESS &&
-		message.ConfigurationGuildCreateAnswer != nil &&
-		message.ConfigurationGuildCreateAnswer.Created {
-		errBroker := service.broker.Emit(message, amqp.ExchangeNews, constants.GuildNewsRoutingKey, i.ID)
+	answer := message.ConfigurationGuildCreateAnswer
+	if message.Status == amqp.RabbitMQMessage_SUCCESS && answer != nil && answer.Created {
+		newsMessage := mappers.MapGuildCreateNews(answer.GetId(), answer.GetName(), answer.MemberCount)
+		errBroker := service.broker.Emit(newsMessage, amqp.ExchangeNews, constants.GuildNewsRoutingKey, i.ID)
 		if errBroker != nil {
-			log.Error().Err(errBroker).
-				Msgf("Cannot trace guild create through AMQP")
+			log.Warn().Err(errBroker).
+				Msgf("Cannot trace guild create through AMQP, continuing...")
 		}
 
 		// TODO Send welcome message in the first channel where we have the right to.
 		// In case we don't, try to send message to ownerID
+		log.Info().Msg("WELCOME")
 	}
 }
 
@@ -139,24 +140,24 @@ func (service *Impl) guildDelete(session *discordgo.Session, event *discordgo.Gu
 		},
 	}
 
-	request := mappers.MapConfigurationGuildDeleteRequest(event.Guild, event.MemberCount)
+	request := mappers.MapConfigurationGuildDeleteRequest(event.BeforeDelete, event.BeforeDelete.MemberCount)
 	errReq := service.requestManager.Request(session, &i, constants.ConfigurationRequestRoutingKey,
 		request, service.guildDeleteReply)
 	if errReq != nil {
-		log.Error().Err(errReq).
-			Str(constants.LogGuildID, event.Guild.ID).
+		log.Warn().Err(errReq).
+			Str(constants.LogGuildID, event.BeforeDelete.ID).
 			Msg("Cannot send guild delete event as request, ignoring it...")
 	}
 }
 
 func (service *Impl) guildDeleteReply(_ context.Context, _ *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	if message.Status == amqp.RabbitMQMessage_SUCCESS &&
-		message.ConfigurationGuildDeleteAnswer != nil &&
-		message.ConfigurationGuildDeleteAnswer.Deleted {
-		errBroker := service.broker.Emit(message, amqp.ExchangeNews, constants.GuildNewsRoutingKey, i.ID)
+	answer := message.ConfigurationGuildDeleteAnswer
+	if message.Status == amqp.RabbitMQMessage_SUCCESS && answer != nil && answer.Deleted {
+		newsMessage := mappers.MapGuildDeleteNews(answer.GetId(), answer.GetName(), answer.MemberCount)
+		errBroker := service.broker.Emit(newsMessage, amqp.ExchangeNews, constants.GuildNewsRoutingKey, i.ID)
 		if errBroker != nil {
-			log.Error().Err(errBroker).Msgf("Cannot trace guild delete through AMQP")
+			log.Warn().Err(errBroker).Msgf("Cannot trace guild delete through AMQP, continuing...")
 		}
 	}
 }

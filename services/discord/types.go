@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
-	"github.com/kaellybot/kaelly-discord/utils/requests"
+	"github.com/kaellybot/kaelly-discord/services/guilds"
 )
 
 var (
@@ -20,8 +20,8 @@ type Service interface {
 }
 
 type Impl struct {
-	session        *discordgo.Session
-	commands       []commands.DiscordCommand
-	broker         amqp.MessageBroker
-	requestManager requests.RequestManager
+	session      *discordgo.Session
+	commands     []commands.DiscordCommand
+	guildService guilds.Service
+	broker       amqp.MessageBroker
 }

@@ -11,6 +11,10 @@ func New(guildRepo guildRepo.Repository) *Impl {
 	}
 }
 
+func (service *Impl) Exists(guildID string) (bool, error) {
+	return service.guildRepo.Exists(guildID)
+}
+
 func (service *Impl) GetServer(guildID, channelID string) (entities.Server, bool, error) {
 	return service.guildRepo.GetServer(guildID, channelID)
 }

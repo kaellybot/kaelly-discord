@@ -16,7 +16,7 @@ const (
 	PortalRequestRoutingKey        = "requests.portals"
 	SetRequestRoutingKey           = "requests.encyclopedias"
 
-	GuildNewsRoutingKey = "news.guild"
+	GuildNewsRoutingKey = "news.guilds"
 )
 
 func GetRabbitMQClientID() string {

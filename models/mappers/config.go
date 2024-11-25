@@ -45,28 +45,6 @@ func MapConfigurationGetRequest(guildID, authorID string, lg discordgo.Locale) *
 	return request
 }
 
-func MapConfigurationGuildCreateRequest(guild *discordgo.Guild, memberCount int) *amqp.RabbitMQMessage {
-	request := requestBackbone(guild.OwnerID, amqp.RabbitMQMessage_CONFIGURATION_GUILD_CREATE_REQUEST,
-		constants.DefaultLocale)
-	request.ConfigurationGuildCreateRequest = &amqp.ConfigurationGuildCreateRequest{
-		Id:          guild.ID,
-		Name:        guild.Name,
-		MemberCount: int64(memberCount),
-	}
-	return request
-}
-
-func MapConfigurationGuildDeleteRequest(guild *discordgo.Guild, memberCount int) *amqp.RabbitMQMessage {
-	request := requestBackbone(guild.OwnerID, amqp.RabbitMQMessage_CONFIGURATION_GUILD_DELETE_REQUEST,
-		constants.DefaultLocale)
-	request.ConfigurationGuildDeleteRequest = &amqp.ConfigurationGuildDeleteRequest{
-		Id:          guild.ID,
-		Name:        guild.Name,
-		MemberCount: int64(memberCount),
-	}
-	return request
-}
-
 func MapConfigurationServerRequest(guildID, channelID, serverID, authorID string,
 	lg discordgo.Locale) *amqp.RabbitMQMessage {
 	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_SERVER_REQUEST, lg)

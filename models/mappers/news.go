@@ -5,7 +5,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 )
 
-func MapGuildCreateNews(guildID, guildName string, memberCount int64) *amqp.RabbitMQMessage {
+func MapGuildCreateNews(guildID, guildName string, memberCount int) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_NEWS_GUILD,
 		Language: amqp.Language_ANY,
@@ -13,13 +13,13 @@ func MapGuildCreateNews(guildID, guildName string, memberCount int64) *amqp.Rabb
 		NewsGuildMessage: &amqp.NewsGuildMessage{
 			Id:          guildID,
 			Name:        guildName,
-			MemberCount: memberCount,
+			MemberCount: int64(memberCount),
 			Event:       amqp.NewsGuildMessage_CREATE,
 		},
 	}
 }
 
-func MapGuildDeleteNews(guildID, guildName string, memberCount int64) *amqp.RabbitMQMessage {
+func MapGuildDeleteNews(guildID, guildName string, memberCount int) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_NEWS_GUILD,
 		Language: amqp.Language_ANY,
@@ -27,7 +27,7 @@ func MapGuildDeleteNews(guildID, guildName string, memberCount int64) *amqp.Rabb
 		NewsGuildMessage: &amqp.NewsGuildMessage{
 			Id:          guildID,
 			Name:        guildName,
-			MemberCount: memberCount,
+			MemberCount: int64(memberCount),
 			Event:       amqp.NewsGuildMessage_DELETE,
 		},
 	}

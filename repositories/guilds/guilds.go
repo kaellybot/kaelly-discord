@@ -9,6 +9,19 @@ func New(db databases.MySQLConnection) *Impl {
 	return &Impl{db: db}
 }
 
+func (repo *Impl) Exists(guildID string) (bool, error) {
+	guild := entities.Guild{ID: guildID}
+	var count int64
+	err := repo.db.GetDB().
+		Model(&guild).
+		Where(&guild).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (repo *Impl) GetServer(guildID, channelID string) (entities.Server, bool, error) {
 	var serverIDs []string
 	err := repo.db.GetDB().Table("guilds").

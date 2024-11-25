@@ -1,20 +1,18 @@
 package discord
 
 import (
-	"context"
-
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/utils/panics"
-	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/rs/zerolog/log"
 )
 
 func New(token string, shardID, shardCount int, commands []commands.DiscordCommand,
-	broker amqp.MessageBroker, requestManager requests.RequestManager) (*Impl, error) {
+	guildService guilds.Service, broker amqp.MessageBroker) (*Impl, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Error().Err(err).Msgf("Connecting to Discord gateway failed")
@@ -22,10 +20,10 @@ func New(token string, shardID, shardCount int, commands []commands.DiscordComma
 	}
 
 	service := Impl{
-		session:        dg,
-		commands:       commands,
-		broker:         broker,
-		requestManager: requestManager,
+		session:      dg,
+		commands:     commands,
+		guildService: guildService,
+		broker:       broker,
 	}
 
 	dg.Identify.Shard = &[2]int{shardID, shardCount}
@@ -89,76 +87,63 @@ func (service *Impl) interactionCreate(session *discordgo.Session, event *discor
 	}
 }
 
-func (service *Impl) guildCreate(session *discordgo.Session, event *discordgo.GuildCreate) {
+func (service *Impl) guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
 	// Ignore outage.
 	if event.Unavailable {
 		return
 	}
 
-	i := discordgo.InteractionCreate{
-		Interaction: &discordgo.Interaction{
-			ID: event.ID,
-		},
+	guild := event
+	exists, errExist := service.guildService.Exists(guild.ID)
+	if errExist != nil {
+		log.Error().Err(errExist).
+			Str(constants.LogGuildID, guild.ID).
+			Msg("Cannot check guild existence, ignoring create event")
+		return
 	}
 
-	request := mappers.MapConfigurationGuildCreateRequest(event.Guild, event.MemberCount)
-	errReq := service.requestManager.Request(session, &i, constants.ConfigurationRequestRoutingKey,
-		request, service.guildCreateReply)
-	if errReq != nil {
-		log.Error().Err(errReq).
-			Str(constants.LogGuildID, event.Guild.ID).
-			Msg("Cannot send guild delete event as request, ignoring it...")
+	// Ignore already existing guilds
+	if exists {
+		return
 	}
+
+	newsMessage := mappers.MapGuildCreateNews(guild.ID, guild.Name, guild.MemberCount)
+	errEmit := service.broker.Emit(newsMessage, amqp.ExchangeNews, constants.GuildNewsRoutingKey, event.ID)
+	if errEmit != nil {
+		log.Warn().Err(errEmit).
+			Msgf("Cannot emit guild create event through AMQP, continuing...")
+	}
+
+	// TODO Send welcome message in the first channel where we have the right to.
+	// In case we don't, try to send message to ownerID
+	log.Info().Msg("WELCOME")
 }
 
-func (service *Impl) guildCreateReply(_ context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	answer := message.ConfigurationGuildCreateAnswer
-	if message.Status == amqp.RabbitMQMessage_SUCCESS && answer != nil && answer.Created {
-		newsMessage := mappers.MapGuildCreateNews(answer.GetId(), answer.GetName(), answer.MemberCount)
-		errBroker := service.broker.Emit(newsMessage, amqp.ExchangeNews, constants.GuildNewsRoutingKey, i.ID)
-		if errBroker != nil {
-			log.Warn().Err(errBroker).
-				Msgf("Cannot trace guild create through AMQP, continuing...")
-		}
-
-		// TODO Send welcome message in the first channel where we have the right to.
-		// In case we don't, try to send message to ownerID
-		log.Info().Msg("WELCOME")
-	}
-}
-
-func (service *Impl) guildDelete(session *discordgo.Session, event *discordgo.GuildDelete) {
+func (service *Impl) guildDelete(_ *discordgo.Session, event *discordgo.GuildDelete) {
 	// Ignore outage.
 	if event.Unavailable {
 		return
 	}
 
-	i := discordgo.InteractionCreate{
-		Interaction: &discordgo.Interaction{
-			ID: event.ID,
-		},
+	guild := event.BeforeDelete
+	exists, errExist := service.guildService.Exists(guild.ID)
+	if errExist != nil {
+		log.Error().Err(errExist).
+			Str(constants.LogGuildID, guild.ID).
+			Msg("Cannot check guild existence, ignoring delete event")
+		return
 	}
 
-	request := mappers.MapConfigurationGuildDeleteRequest(event.BeforeDelete, event.BeforeDelete.MemberCount)
-	errReq := service.requestManager.Request(session, &i, constants.ConfigurationRequestRoutingKey,
-		request, service.guildDeleteReply)
-	if errReq != nil {
-		log.Warn().Err(errReq).
-			Str(constants.LogGuildID, event.BeforeDelete.ID).
-			Msg("Cannot send guild delete event as request, ignoring it...")
+	// Ignore already deleted guilds
+	if !exists {
+		return
 	}
-}
 
-func (service *Impl) guildDeleteReply(_ context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	answer := message.ConfigurationGuildDeleteAnswer
-	if message.Status == amqp.RabbitMQMessage_SUCCESS && answer != nil && answer.Deleted {
-		newsMessage := mappers.MapGuildDeleteNews(answer.GetId(), answer.GetName(), answer.MemberCount)
-		errBroker := service.broker.Emit(newsMessage, amqp.ExchangeNews, constants.GuildNewsRoutingKey, i.ID)
-		if errBroker != nil {
-			log.Warn().Err(errBroker).Msgf("Cannot trace guild delete through AMQP, continuing...")
-		}
+	newsMessage := mappers.MapGuildDeleteNews(guild.ID, guild.Name, guild.MemberCount)
+	errEmit := service.broker.Emit(newsMessage, amqp.ExchangeNews, constants.GuildNewsRoutingKey, event.ID)
+	if errEmit != nil {
+		log.Warn().Err(errEmit).
+			Msgf("Cannot emit guild delete event through AMQP, continuing...")
 	}
 }
 

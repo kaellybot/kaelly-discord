@@ -6,6 +6,7 @@ import (
 )
 
 type Service interface {
+	Exists(guildID string) (bool, error)
 	GetServer(guildID, channelID string) (entities.Server, bool, error)
 }
 

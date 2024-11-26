@@ -21,7 +21,7 @@ func CheckServer(optionName string, serverService servers.Service) middlewares.M
 		for _, subCommand := range data.Options {
 			for _, option := range subCommand.Options {
 				if option.Name == optionName {
-					servers := serverService.FindServers(option.StringValue(), i.Locale)
+					servers := serverService.FindServers(option.StringValue(), i.Locale, constants.MaxChoices)
 					labels := translators.GetServersLabels(servers, i.Locale)
 					response, checkSuccess := validators.
 						ExpectOnlyOneElement("checks.server", option.StringValue(), labels, i.Locale)
@@ -53,7 +53,7 @@ func CheckServerWithFallback(optionName string, serverService servers.Service,
 		for _, option := range data.Options {
 			serverValue, found := getServerValue(optionName, option)
 			if found {
-				servers := serverService.FindServers(serverValue, i.Locale)
+				servers := serverService.FindServers(serverValue, i.Locale, constants.MaxChoices)
 				labels := translators.GetServersLabels(servers, i.Locale)
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.server", serverValue, labels, i.Locale)

@@ -47,7 +47,7 @@ func (service *Impl) GetVideast(id string) *entities.Videast {
 	return nil
 }
 
-func (service *Impl) FindVideasts(name string, locale discordgo.Locale) []entities.Videast {
+func (service *Impl) FindVideasts(name string, locale discordgo.Locale, limit int) []entities.Videast {
 	videastsFound := make([]entities.Videast, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -65,6 +65,10 @@ func (service *Impl) FindVideasts(name string, locale discordgo.Locale) []entiti
 
 			videastsFound = append(videastsFound, videast)
 		}
+	}
+
+	if len(videastsFound) > limit {
+		return videastsFound[:limit]
 	}
 
 	return videastsFound

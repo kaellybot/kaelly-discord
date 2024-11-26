@@ -10,7 +10,7 @@ import (
 type Service interface {
 	GetStreamers() []entities.Streamer
 	GetStreamer(id string) *entities.Streamer
-	FindStreamers(name string, locale discordgo.Locale) []entities.Streamer
+	FindStreamers(name string, locale discordgo.Locale, limit int) []entities.Streamer
 }
 
 type Impl struct {

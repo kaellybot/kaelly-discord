@@ -12,13 +12,13 @@ import (
 type Service interface {
 	GetJob(id string) (entities.Job, bool)
 	GetJobs() []entities.Job
-	FindJobs(name string, locale discordgo.Locale) []entities.Job
+	FindJobs(name string, locale discordgo.Locale, limit int) []entities.Job
 	GetCity(id string) (entities.City, bool)
 	GetCities() []entities.City
-	FindCities(name string, locale discordgo.Locale) []entities.City
+	FindCities(name string, locale discordgo.Locale, limit int) []entities.City
 	GetOrder(id string) (entities.Order, bool)
 	GetOrders() []entities.Order
-	FindOrders(name string, locale discordgo.Locale) []entities.Order
+	FindOrders(name string, locale discordgo.Locale, limit int) []entities.Order
 }
 
 type Impl struct {

@@ -258,7 +258,7 @@ func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, emojiService emojis.S
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
 		var providerName string
-		feeds := feedService.FindFeedTypes(webhook.FeedID, lg)
+		feeds := feedService.FindFeedTypes(webhook.FeedID, lg, constants.MaxChoices)
 		if len(feeds) == 1 {
 			providerName = translators.GetEntityLabel(feeds[0], lg)
 		} else {

@@ -15,7 +15,7 @@ type Service interface {
 	GetArea(id string) (entities.Area, bool)
 	GetSubArea(id string) (entities.SubArea, bool)
 	GetTransportType(id string) (entities.TransportType, bool)
-	FindDimensions(name string, locale discordgo.Locale) []entities.Dimension
+	FindDimensions(name string, locale discordgo.Locale, limit int) []entities.Dimension
 }
 
 type Impl struct {

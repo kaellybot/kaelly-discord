@@ -19,7 +19,7 @@ func (command *Command) checkDimension(ctx context.Context, s *discordgo.Session
 	// Filled case, expecting [1, 1] dimension
 	for _, option := range data.Options {
 		if option.Name == contract.PosDimensionOptionName {
-			dimensions := command.portalService.FindDimensions(option.StringValue(), i.Locale)
+			dimensions := command.portalService.FindDimensions(option.StringValue(), i.Locale, constants.MaxChoices)
 			labels := translators.GetDimensionsLabels(dimensions, i.Locale)
 			response, checkSuccess := validators.
 				ExpectOnlyOneElement("checks.dimension", option.StringValue(), labels, i.Locale)

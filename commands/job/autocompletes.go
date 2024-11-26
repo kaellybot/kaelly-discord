@@ -42,7 +42,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 func (command *Command) findJobs(jobName string, lg discordgo.Locale) []*discordgo.
 	ApplicationCommandOptionChoice {
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-	jobs := command.bookService.FindJobs(jobName, lg)
+	jobs := command.bookService.FindJobs(jobName, lg, constants.MaxChoices)
 
 	for _, job := range jobs {
 		label := translators.GetEntityLabel(job, lg)
@@ -58,7 +58,7 @@ func (command *Command) findJobs(jobName string, lg discordgo.Locale) []*discord
 func (command *Command) findServers(serverName string, lg discordgo.Locale) []*discordgo.
 	ApplicationCommandOptionChoice {
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-	servers := command.serverService.FindServers(serverName, lg)
+	servers := command.serverService.FindServers(serverName, lg, constants.MaxChoices)
 
 	for _, server := range servers {
 		label := translators.GetEntityLabel(server, lg)

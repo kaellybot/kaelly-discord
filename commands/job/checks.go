@@ -21,7 +21,7 @@ func (command *Command) checkJob(ctx context.Context, s *discordgo.Session,
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.JobJobOptionName {
-				jobs := command.bookService.FindJobs(option.StringValue(), i.Locale)
+				jobs := command.bookService.FindJobs(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetJobsLabels(jobs, i.Locale)
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.job", option.StringValue(), labels, i.Locale)

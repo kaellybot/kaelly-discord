@@ -16,7 +16,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 		if option.Focused {
 			switch option.Name {
 			case contract.PosDimensionOptionName:
-				dimensions := command.portalService.FindDimensions(option.StringValue(), i.Locale)
+				dimensions := command.portalService.FindDimensions(option.StringValue(), i.Locale, constants.MaxChoices)
 
 				for _, dimension := range dimensions {
 					label := translators.GetEntityLabel(dimension, i.Locale)
@@ -26,7 +26,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 					})
 				}
 			case contract.PosServerOptionName:
-				servers := command.serverService.FindServers(option.StringValue(), i.Locale)
+				servers := command.serverService.FindServers(option.StringValue(), i.Locale, constants.MaxChoices)
 
 				for _, server := range servers {
 					label := translators.GetEntityLabel(server, i.Locale)

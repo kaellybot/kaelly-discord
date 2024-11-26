@@ -16,6 +16,8 @@ const (
 	MemberListLimit = 1000
 
 	DefaultPage = 0
+
+	MaxChoices = 25
 )
 
 const (

@@ -87,13 +87,13 @@ func (service *Impl) interactionCreate(session *discordgo.Session, event *discor
 	}
 }
 
-func (service *Impl) guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
+func (service *Impl) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	// Ignore outage.
 	if event.Unavailable {
 		return
 	}
 
-	guild := event
+	guild := event.Guild
 	exists, errExist := service.guildService.Exists(guild.ID)
 	if errExist != nil {
 		log.Error().Err(errExist).
@@ -114,9 +114,7 @@ func (service *Impl) guildCreate(_ *discordgo.Session, event *discordgo.GuildCre
 			Msgf("Cannot emit guild create event through AMQP, continuing...")
 	}
 
-	// TODO Send welcome message in the first channel where we have the right to.
-	// In case we don't, try to send message to ownerID
-	log.Info().Msg("WELCOME")
+	service.welcomeGuild(s, guild)
 }
 
 func (service *Impl) guildDelete(_ *discordgo.Session, event *discordgo.GuildDelete) {
@@ -145,19 +143,4 @@ func (service *Impl) guildDelete(_ *discordgo.Session, event *discordgo.GuildDel
 		log.Warn().Err(errEmit).
 			Msgf("Cannot emit guild delete event through AMQP, continuing...")
 	}
-}
-
-func (service *Impl) deferInteraction(session *discordgo.Session,
-	event *discordgo.InteractionCreate) error {
-	if event.Interaction.Type == discordgo.InteractionApplicationCommand {
-		return session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-		})
-	} else if event.Interaction.Type == discordgo.InteractionMessageComponent {
-		return session.InteractionRespond(event.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseDeferredMessageUpdate,
-		})
-	}
-
-	return nil
 }

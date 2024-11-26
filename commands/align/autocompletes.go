@@ -44,7 +44,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 func (command *Command) findServers(serverName string, lg discordgo.Locale) []*discordgo.
 	ApplicationCommandOptionChoice {
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-	servers := command.serverService.FindServers(serverName, lg)
+	servers := command.serverService.FindServers(serverName, lg, constants.MaxChoices)
 
 	for _, server := range servers {
 		label := translators.GetEntityLabel(server, lg)
@@ -60,7 +60,7 @@ func (command *Command) findServers(serverName string, lg discordgo.Locale) []*d
 func (command *Command) findCities(cityName string, lg discordgo.Locale) []*discordgo.
 	ApplicationCommandOptionChoice {
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-	cities := command.bookService.FindCities(cityName, lg)
+	cities := command.bookService.FindCities(cityName, lg, constants.MaxChoices)
 
 	for _, city := range cities {
 		label := translators.GetEntityLabel(city, lg)
@@ -76,7 +76,7 @@ func (command *Command) findCities(cityName string, lg discordgo.Locale) []*disc
 func (command *Command) findOrders(orderName string, lg discordgo.Locale) []*discordgo.
 	ApplicationCommandOptionChoice {
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-	orders := command.bookService.FindOrders(orderName, lg)
+	orders := command.bookService.FindOrders(orderName, lg, constants.MaxChoices)
 
 	for _, order := range orders {
 		label := translators.GetEntityLabel(order, lg)

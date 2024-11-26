@@ -48,7 +48,7 @@ func (service *Impl) GetServer(id string) (entities.Server, bool) {
 	return server, found
 }
 
-func (service *Impl) FindServers(name string, locale discordgo.Locale) []entities.Server {
+func (service *Impl) FindServers(name string, locale discordgo.Locale, limit int) []entities.Server {
 	serversFound := make([]entities.Server, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -66,6 +66,10 @@ func (service *Impl) FindServers(name string, locale discordgo.Locale) []entitie
 
 			serversFound = append(serversFound, server)
 		}
+	}
+
+	if len(serversFound) > limit {
+		return serversFound[:limit]
 	}
 
 	return serversFound

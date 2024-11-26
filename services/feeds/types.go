@@ -9,7 +9,7 @@ import (
 
 type Service interface {
 	GetFeedTypes() []entities.FeedType
-	FindFeedTypes(name string, locale discordgo.Locale) []entities.FeedType
+	FindFeedTypes(name string, locale discordgo.Locale, limit int) []entities.FeedType
 }
 
 type Impl struct {

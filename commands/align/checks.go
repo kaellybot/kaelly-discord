@@ -22,7 +22,7 @@ func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Ses
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignCityOptionName {
-				cities := command.bookService.FindCities(option.StringValue(), i.Locale)
+				cities := command.bookService.FindCities(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetCitiesLabels(cities, i.Locale)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
@@ -49,7 +49,7 @@ func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Sess
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignCityOptionName {
-				cities := command.bookService.FindCities(option.StringValue(), i.Locale)
+				cities := command.bookService.FindCities(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetCitiesLabels(cities, i.Locale)
 				_, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
@@ -75,7 +75,7 @@ func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Se
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignOrderOptionName {
-				orders := command.bookService.FindOrders(option.StringValue(), i.Locale)
+				orders := command.bookService.FindOrders(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetOrdersLabels(orders, i.Locale)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
@@ -102,7 +102,7 @@ func (command *Command) checkOptionalOrder(ctx context.Context, _ *discordgo.Ses
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlignOrderOptionName {
-				orders := command.bookService.FindOrders(option.StringValue(), i.Locale)
+				orders := command.bookService.FindOrders(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetOrdersLabels(orders, i.Locale)
 				_, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), labels, i.Locale)
 				if checkSuccess {

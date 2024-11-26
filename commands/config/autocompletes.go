@@ -51,7 +51,7 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 func (command *Command) findServers(serverName string, lg discordgo.Locale) []*discordgo.
 	ApplicationCommandOptionChoice {
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-	servers := command.serverService.FindServers(serverName, lg)
+	servers := command.serverService.FindServers(serverName, lg, constants.MaxChoices)
 
 	for _, server := range servers {
 		label := translators.GetEntityLabel(server, lg)
@@ -71,7 +71,7 @@ func (command *Command) findServers(serverName string, lg discordgo.Locale) []*d
 func (command *Command) findFeedTypes(feedTypeName string, lg discordgo.Locale) []*discordgo.
 	ApplicationCommandOptionChoice {
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-	feedTypes := command.feedService.FindFeedTypes(feedTypeName, lg)
+	feedTypes := command.feedService.FindFeedTypes(feedTypeName, lg, constants.MaxChoices)
 
 	for _, feedType := range feedTypes {
 		label := translators.GetEntityLabel(feedType, lg)
@@ -96,7 +96,7 @@ func (command *Command) findVideasts(videastName string, lg discordgo.Locale) []
 		return choices
 	}
 
-	videasts := command.videastService.FindVideasts(videastName, lg)
+	videasts := command.videastService.FindVideasts(videastName, lg, constants.MaxChoices)
 	for _, videast := range videasts {
 		label := translators.GetEntityLabel(videast, lg)
 		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
@@ -120,7 +120,7 @@ func (command *Command) findStreamers(streamerName string, lg discordgo.Locale) 
 		return choices
 	}
 
-	streamers := command.streamerService.FindStreamers(streamerName, lg)
+	streamers := command.streamerService.FindStreamers(streamerName, lg, constants.MaxChoices)
 	for _, streamer := range streamers {
 		label := translators.GetEntityLabel(streamer, lg)
 		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
@@ -144,7 +144,7 @@ func (command *Command) findTwitterAccounts(twitterAccountName string, lg discor
 		return choices
 	}
 
-	twitterAccounts := command.twitterService.FindTwitterAccounts(twitterAccountName, lg)
+	twitterAccounts := command.twitterService.FindTwitterAccounts(twitterAccountName, lg, constants.MaxChoices)
 	for _, twitterAccount := range twitterAccounts {
 		label := translators.GetEntityLabel(twitterAccount, lg)
 		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{

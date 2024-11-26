@@ -47,7 +47,7 @@ func (service *Impl) GetStreamer(id string) *entities.Streamer {
 	return nil
 }
 
-func (service *Impl) FindStreamers(name string, locale discordgo.Locale) []entities.Streamer {
+func (service *Impl) FindStreamers(name string, locale discordgo.Locale, limit int) []entities.Streamer {
 	streamersFound := make([]entities.Streamer, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -65,6 +65,10 @@ func (service *Impl) FindStreamers(name string, locale discordgo.Locale) []entit
 
 			streamersFound = append(streamersFound, streamer)
 		}
+	}
+
+	if len(streamersFound) > limit {
+		return streamersFound[:limit]
 	}
 
 	return streamersFound

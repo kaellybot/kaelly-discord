@@ -9,6 +9,10 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 )
 
+const (
+	welcomeMessagePermissions = discordgo.PermissionSendMessages | discordgo.PermissionEmbedLinks
+)
+
 var (
 	ErrInvalidInteractionType = errors.New("interaction type is not handled")
 )

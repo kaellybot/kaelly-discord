@@ -19,7 +19,7 @@ func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigFeedTypeOptionName {
-				feedTypes := command.feedService.FindFeedTypes(option.StringValue(), i.Locale)
+				feedTypes := command.feedService.FindFeedTypes(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetFeedTypesLabels(feedTypes, i.Locale)
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.feed", option.StringValue(), labels, i.Locale)
@@ -47,7 +47,7 @@ func (command *Command) checkVideast(ctx context.Context, s *discordgo.Session,
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigVideastOptionName {
-				videasts := command.videastService.FindVideasts(option.StringValue(), i.Locale)
+				videasts := command.videastService.FindVideasts(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetVideastsLabels(videasts, i.Locale)
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.videast", option.StringValue(), labels, i.Locale)
@@ -75,7 +75,7 @@ func (command *Command) checkTwitterAccount(ctx context.Context, s *discordgo.Se
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigTwitterAccountOptionName {
-				twitterAccounts := command.twitterService.FindTwitterAccounts(option.StringValue(), i.Locale)
+				twitterAccounts := command.twitterService.FindTwitterAccounts(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetTwittersLabels(twitterAccounts, i.Locale)
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.twitterAccount", option.StringValue(), labels, i.Locale)
@@ -103,7 +103,7 @@ func (command *Command) checkStreamer(ctx context.Context, s *discordgo.Session,
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigStreamerOptionName {
-				streamers := command.streamerService.FindStreamers(option.StringValue(), i.Locale)
+				streamers := command.streamerService.FindStreamers(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetStreamersLabels(streamers, i.Locale)
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.streamer", option.StringValue(), labels, i.Locale)

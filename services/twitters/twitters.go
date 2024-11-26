@@ -47,7 +47,7 @@ func (service *Impl) GetTwitterAccount(id string) *entities.TwitterAccount {
 	return nil
 }
 
-func (service *Impl) FindTwitterAccounts(name string, locale discordgo.Locale) []entities.TwitterAccount {
+func (service *Impl) FindTwitterAccounts(name string, locale discordgo.Locale, limit int) []entities.TwitterAccount {
 	twitterAccountFound := make([]entities.TwitterAccount, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -65,6 +65,10 @@ func (service *Impl) FindTwitterAccounts(name string, locale discordgo.Locale) [
 
 			twitterAccountFound = append(twitterAccountFound, twitterAccount)
 		}
+	}
+
+	if len(twitterAccountFound) > limit {
+		return twitterAccountFound[:limit]
 	}
 
 	return twitterAccountFound

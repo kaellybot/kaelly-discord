@@ -10,7 +10,7 @@ import (
 type Service interface {
 	GetServer(id string) (entities.Server, bool)
 	GetServers() []entities.Server
-	FindServers(name string, locale discordgo.Locale) []entities.Server
+	FindServers(name string, locale discordgo.Locale, limit int) []entities.Server
 }
 
 type Impl struct {

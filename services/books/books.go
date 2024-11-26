@@ -84,7 +84,7 @@ func (service *Impl) GetJob(id string) (entities.Job, bool) {
 	return job, found
 }
 
-func (service *Impl) FindJobs(name string, locale discordgo.Locale) []entities.Job {
+func (service *Impl) FindJobs(name string, locale discordgo.Locale, limit int) []entities.Job {
 	jobsFound := make([]entities.Job, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -104,6 +104,10 @@ func (service *Impl) FindJobs(name string, locale discordgo.Locale) []entities.J
 		}
 	}
 
+	if len(jobsFound) > limit {
+		return jobsFound[:limit]
+	}
+
 	return jobsFound
 }
 
@@ -116,7 +120,7 @@ func (service *Impl) GetCities() []entities.City {
 	return service.cities
 }
 
-func (service *Impl) FindCities(name string, locale discordgo.Locale) []entities.City {
+func (service *Impl) FindCities(name string, locale discordgo.Locale, limit int) []entities.City {
 	citiesFound := make([]entities.City, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -136,6 +140,10 @@ func (service *Impl) FindCities(name string, locale discordgo.Locale) []entities
 		}
 	}
 
+	if len(citiesFound) > limit {
+		return citiesFound[:limit]
+	}
+
 	return citiesFound
 }
 
@@ -148,7 +156,7 @@ func (service *Impl) GetOrders() []entities.Order {
 	return service.orders
 }
 
-func (service *Impl) FindOrders(name string, locale discordgo.Locale) []entities.Order {
+func (service *Impl) FindOrders(name string, locale discordgo.Locale, limit int) []entities.Order {
 	ordersFound := make([]entities.Order, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -166,6 +174,10 @@ func (service *Impl) FindOrders(name string, locale discordgo.Locale) []entities
 
 			ordersFound = append(ordersFound, order)
 		}
+	}
+
+	if len(ordersFound) > limit {
+		return ordersFound[:limit]
 	}
 
 	return ordersFound

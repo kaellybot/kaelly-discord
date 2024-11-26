@@ -98,7 +98,7 @@ func (service *Impl) GetDimension(id string) (entities.Dimension, bool) {
 	return dimension, found
 }
 
-func (service *Impl) FindDimensions(name string, locale discordgo.Locale) []entities.Dimension {
+func (service *Impl) FindDimensions(name string, locale discordgo.Locale, limit int) []entities.Dimension {
 	dimensionsFound := make([]entities.Dimension, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
 	if err != nil {
@@ -116,6 +116,10 @@ func (service *Impl) FindDimensions(name string, locale discordgo.Locale) []enti
 
 			dimensionsFound = append(dimensionsFound, dimension)
 		}
+	}
+
+	if len(dimensionsFound) > limit {
+		return dimensionsFound[:limit]
 	}
 
 	return dimensionsFound

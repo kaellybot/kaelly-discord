@@ -6,13 +6,15 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/utils/panics"
 	"github.com/rs/zerolog/log"
 )
 
 func New(token string, shardID, shardCount int, commands []commands.DiscordCommand,
-	guildService guilds.Service, broker amqp.MessageBroker) (*Impl, error) {
+	guildService guilds.Service, emojiService emojis.Service, broker amqp.MessageBroker,
+) (*Impl, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Error().Err(err).Msgf("Connecting to Discord gateway failed")
@@ -23,6 +25,7 @@ func New(token string, shardID, shardCount int, commands []commands.DiscordComma
 		session:      dg,
 		commands:     commands,
 		guildService: guildService,
+		emojiService: emojiService,
 		broker:       broker,
 	}
 
@@ -87,7 +90,7 @@ func (service *Impl) interactionCreate(session *discordgo.Session, event *discor
 	}
 }
 
-func (service *Impl) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
+func (service *Impl) guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {
 	// Ignore outage.
 	if event.Unavailable {
 		return
@@ -114,7 +117,7 @@ func (service *Impl) guildCreate(s *discordgo.Session, event *discordgo.GuildCre
 			Msgf("Cannot emit guild create event through AMQP, continuing...")
 	}
 
-	service.welcomeGuild(s, guild)
+	service.welcomeGuild(guild)
 }
 
 func (service *Impl) guildDelete(_ *discordgo.Session, event *discordgo.GuildDelete) {

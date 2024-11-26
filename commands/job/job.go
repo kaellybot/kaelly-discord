@@ -63,16 +63,16 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			Name:        "/job get",
-			CommandID:   "</job get:1062090620656681092>",
-			Description: i18n.Get(lg, "job.help.detailed.get"),
-			TutorialURL: i18n.Get(lg, "job.help.tutorial.get"),
+			Name:        fmt.Sprintf("/%v get", contract.JobSlashCommandName),
+			CommandID:   fmt.Sprintf("</%v get:%v>", contract.JobSlashCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.get", contract.JobSlashCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.get", contract.JobSlashCommandName)),
 		},
 		{
-			Name:        "/job set",
-			CommandID:   "</job set:1062090620656681092>",
-			Description: i18n.Get(lg, "job.help.detailed.set"),
-			TutorialURL: i18n.Get(lg, "job.help.tutorial.set"),
+			Name:        fmt.Sprintf("/%v set", contract.JobSlashCommandName),
+			CommandID:   fmt.Sprintf("</%v set:%v>", contract.JobSlashCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.set", contract.JobSlashCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.set", contract.JobSlashCommandName)),
 		},
 	}
 }

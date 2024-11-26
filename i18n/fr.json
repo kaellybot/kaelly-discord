@@ -7,7 +7,7 @@
             "source": ""
         },
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Bot Discord dédié au jeu {{ .game.Name }} {{ .gameLogo }} !",
+        "desc": "Bot Discord dédié au jeu **{{ .game.Name }}** {{ .gameLogo }} !",
         "support": {
             "title": ":bulb: Serveur de support",
             "desc": "Tu rencontres un problème quant à mon utilisation ? Une suggestion ? N'hésite pas à rejoindre le [serveur Discord]({{ .discord }}) de support !"
@@ -313,6 +313,7 @@
             "option": "Effets ({{ .itemNumber }} / {{ .itemCount }} objets)"
         }
     },
+    "welcome": "",
     "default": {
         "page": {
             "first": "Première page",

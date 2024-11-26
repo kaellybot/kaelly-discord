@@ -149,7 +149,7 @@ func New() (*Impl, error) {
 		viper.GetString(constants.Token),
 		viper.GetInt(constants.ShardID),
 		viper.GetInt(constants.ShardCount),
-		commands, guildService, broker)
+		commands, guildService, emojiService, broker)
 	if errDiscord != nil {
 		return nil, errDiscord
 	}

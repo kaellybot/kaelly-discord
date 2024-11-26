@@ -18,12 +18,16 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(characService characteristics.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
+		AbstractCommand: commands.AbstractCommand{
+			DiscordID: viper.GetString(constants.SetID),
+		},
 		characService:  characService,
 		emojiService:   emojiService,
 		requestManager: requestManager,
@@ -45,10 +49,10 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			Name:        "/set",
-			CommandID:   "</set:1117887213481496607>",
-			Description: i18n.Get(lg, "set.help.detailed"),
-			TutorialURL: i18n.Get(lg, "set.help.tutorial"),
+			Name:        fmt.Sprintf("/%v", contract.SetCommandName),
+			CommandID:   fmt.Sprintf("</%v:%v>", contract.SetCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed", contract.SetCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial", contract.SetCommandName)),
 		},
 	}
 }

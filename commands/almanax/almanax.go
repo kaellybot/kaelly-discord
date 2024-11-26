@@ -13,11 +13,15 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
+	"github.com/spf13/viper"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(emojiService emojis.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
+		AbstractCommand: commands.AbstractCommand{
+			DiscordID: viper.GetString(constants.AlmanaxID),
+		},
 		emojiService:   emojiService,
 		requestManager: requestManager,
 	}
@@ -55,22 +59,22 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			Name:        "/almanax day",
-			CommandID:   "</almanax day:1177674483876761610>",
-			Description: i18n.Get(lg, "almanax.help.detailed.day"),
-			TutorialURL: i18n.Get(lg, "almanax.help.tutorial.day"),
+			Name:        fmt.Sprintf("/%v day", contract.AlmanaxCommandName),
+			CommandID:   fmt.Sprintf("</%v day:%v>", contract.AlmanaxCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.day", contract.AlmanaxCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.day", contract.AlmanaxCommandName)),
 		},
 		{
-			Name:        "/almanax effects",
-			CommandID:   "</almanax effects:1177674483876761610>",
-			Description: i18n.Get(lg, "almanax.help.detailed.effects"),
-			TutorialURL: i18n.Get(lg, "almanax.help.tutorial.effects"),
+			Name:        fmt.Sprintf("/%v effects", contract.AlmanaxCommandName),
+			CommandID:   fmt.Sprintf("</%v effects:%v>", contract.AlmanaxCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.effects", contract.AlmanaxCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.effects", contract.AlmanaxCommandName)),
 		},
 		{
-			Name:        "/almanax resources",
-			CommandID:   "</almanax resources:1177674483876761610>",
-			Description: i18n.Get(lg, "almanax.help.detailed.resources"),
-			TutorialURL: i18n.Get(lg, "almanax.help.tutorial.resources"),
+			Name:        fmt.Sprintf("/%v resources", contract.AlmanaxCommandName),
+			CommandID:   fmt.Sprintf("</%v resources:%v>", contract.AlmanaxCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.resources", contract.AlmanaxCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.resources", contract.AlmanaxCommandName)),
 		},
 	}
 }

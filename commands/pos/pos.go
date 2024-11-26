@@ -20,12 +20,16 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(guildService guilds.Service, portalService portals.Service,
 	serverService servers.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
+		AbstractCommand: commands.AbstractCommand{
+			DiscordID: viper.GetString(constants.PosID),
+		},
 		guildService:   guildService,
 		portalService:  portalService,
 		serverService:  serverService,
@@ -51,10 +55,10 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			Name:        "/pos",
-			CommandID:   "</pos:1020995396648054804>",
-			Description: i18n.Get(lg, "pos.help.detailed"),
-			TutorialURL: i18n.Get(lg, "pos.help.tutorial"),
+			Name:        fmt.Sprintf("/%v", contract.PosCommandName),
+			CommandID:   fmt.Sprintf("</%v:%v>", contract.PosCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed", contract.PosCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial", contract.PosCommandName)),
 		},
 	}
 }

@@ -29,6 +29,35 @@ const (
 	// RabbitMQ address.
 	RabbitMQAddress = "RABBITMQ_ADDRESS"
 
+	// About command ID.
+	AboutID = "ABOUT_ID"
+
+	// Align command ID.
+	AlignID = "ALIGN_ID"
+
+	// Almanax command ID.
+	AlmanaxID = "ALMANAX_ID"
+
+	// Config command ID.
+	ConfigID = "CONFIG_ID"
+	// Help command ID.
+	HelpID = "HELP_ID"
+
+	// Item command ID.
+	ItemID = "ITEM_ID"
+
+	// Job command ID.
+	JobID = "JOB_ID"
+
+	// Map command ID.
+	MapID = "MAP_ID"
+
+	// Pos command ID.
+	PosID = "POS_ID"
+
+	// Set command ID.
+	SetID = "SET_ID"
+
 	// Probe port.
 	ProbePort = "PROBE_PORT"
 
@@ -50,6 +79,16 @@ const (
 	defaultMySQLPassword   = ""
 	defaultMySQLDatabase   = "kaellybot"
 	defaultRabbitMQAddress = "amqp://localhost:5672"
+	defaultAboutID         = "1014249375154835557"
+	defaultAlignID         = "1069057760269963295"
+	defaultAlmanaxID       = "1177674483876761610"
+	defaultConfigID        = "1055459522812067840"
+	defaultHelpID          = "1190612462194663555"
+	defaultItemID          = "1116290248587100251"
+	defaultJobID           = "1062090620656681092"
+	defaultMapID           = "1291722831767404667"
+	defaultPosID           = "1020995396648054804"
+	defaultSetID           = "1117887213481496607"
 	defaultProbePort       = 9090
 	defaultMetricPort      = 2112
 	defaultLogLevel        = zerolog.InfoLevel
@@ -66,6 +105,16 @@ func GetDefaultConfigValues() map[string]any {
 		MySQLPassword:   defaultMySQLPassword,
 		MySQLDatabase:   defaultMySQLDatabase,
 		RabbitMQAddress: defaultRabbitMQAddress,
+		AboutID:         defaultAboutID,
+		AlignID:         defaultAlignID,
+		AlmanaxID:       defaultAlmanaxID,
+		ConfigID:        defaultConfigID,
+		HelpID:          defaultHelpID,
+		ItemID:          defaultItemID,
+		JobID:           defaultJobID,
+		MapID:           defaultMapID,
+		PosID:           defaultPosID,
+		SetID:           defaultSetID,
 		ProbePort:       defaultProbePort,
 		MetricPort:      defaultMetricPort,
 		LogLevel:        defaultLogLevel.String(),

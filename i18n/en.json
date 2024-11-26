@@ -7,7 +7,7 @@
             "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/en/about.gif"
         },
         "title": "{{ .name }} version {{ .version }}",
-        "desc": "Discord bot dedicated to the {{ .game.Name }} {{ .gameLogo }} game!",
+        "desc": "Discord bot dedicated to the **{{ .game.Name }}** {{ .gameLogo }} game!",
         "support": {
             "title": ":bulb: Support server",
             "desc": "You have a problem with its use? A suggestion? Feel free to join the support [Discord server]({{ .discord }})!"
@@ -313,6 +313,7 @@
             "option": "Effects ({{ .itemNumber }} / {{ .itemCount }} items)"
         }
     },
+    "welcome": "Salut et merci pour l'invitation ! :tada:\n\nMoi c'est **{{ .name }}**, ton nouvel assistant Discord dédié au jeu **{{ .game.Name }}** {{ .gameLogo }} !\nMon but ? T'offrir des outils pratiques et funs pour pimenter ton expérience de jeu. 🔥\nVoici quelques-uns de mes super-pouvoirs : \n✨ Consulter l'almanax, les équipements et panoplies du jeu\n✨ Découvrir les positions de portails partagées par la communauté\n✨ Gérer l'annuaire des artisans et alignés de ta guilde\n✨ Tirer aléatoirement des cartes compétitives pour défier tes amis\n\nCurieux de voir tout ce dont je suis capable ? Tape {{ .help }} et explore toutes mes commandes ! 😏\n\n<@{{ .owner }}>, en tant qu'administrateur de **{{ .guild }}**, tu peux accéder à des fonctionnalités avancées pour configurer mes services.\nAvec {{ .config }}, définis :\n* :globe_with_meridians: Le serveur de jeu principal de ta guilde\n* {{ .almanax }} L'envoi quotidien de l'almanax\n* :bell: Les notifications des tweets, flux RSS du jeu *(et bientôt celles de tes vidéastes et streamers préférés)*\n\nÇa promet d'être épique, non ? Hâte de collaborer avec vous pour rendre ce serveur encore plus fun et utile ! 😄",
     "default": {
         "page": {
             "first": "First page",

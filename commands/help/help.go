@@ -16,10 +16,14 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 func New(broker amqp.MessageBroker, cmds *[]commands.DiscordCommand) *Command {
 	cmd := &Command{
+		AbstractCommand: commands.AbstractCommand{
+			DiscordID: viper.GetString(constants.HelpID),
+		},
 		broker:   broker,
 		commands: cmds,
 	}
@@ -39,10 +43,10 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			Name:        "/help",
-			CommandID:   "</help:1190612462194663555>",
-			Description: i18n.Get(lg, "help.help.detailed"),
-			TutorialURL: i18n.Get(lg, "help.help.tutorial"),
+			Name:        fmt.Sprintf("/%v", contract.HelpCommandName),
+			CommandID:   fmt.Sprintf("</%v:%v>", contract.HelpCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed", contract.HelpCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial", contract.HelpCommandName)),
 		},
 	}
 }

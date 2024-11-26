@@ -21,7 +21,9 @@ type DiscordCommand interface {
 	Handle(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-type AbstractCommand struct{}
+type AbstractCommand struct {
+	DiscordID string
+}
 
 type Description struct {
 	Name        string

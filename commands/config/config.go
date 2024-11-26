@@ -22,6 +22,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
@@ -30,6 +31,9 @@ func New(emojiService emojis.Service, feedService feeds.Service,
 	streamerService streamers.Service, twitterService twitters.Service,
 	videastService videasts.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
+		AbstractCommand: commands.AbstractCommand{
+			DiscordID: viper.GetString(constants.ConfigID),
+		},
 		emojiService:    emojiService,
 		feedService:     feedService,
 		guildService:    guildService,
@@ -74,52 +78,55 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			Name:        "/config get",
-			CommandID:   "</config get:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.get"),
-			TutorialURL: i18n.Get(lg, "config.help.tutorial.get"),
+			Name:        fmt.Sprintf("/%v get", contract.ConfigCommandName),
+			CommandID:   fmt.Sprintf("</%v get:%v>", contract.ConfigCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.get", contract.ConfigCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.get", contract.ConfigCommandName)),
 		},
 		{
-			Name:      "/config almanax",
-			CommandID: "</config almanax:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.almanax", i18n.Vars{
-				"defaultLocale": constants.DefaultLocale,
-			}),
-			TutorialURL: i18n.Get(lg, "config.help.tutorial.almanax"),
+			Name:      fmt.Sprintf("/%v almanax", contract.ConfigCommandName),
+			CommandID: fmt.Sprintf("</%v almanax:%v>", contract.ConfigCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.almanax", contract.ConfigCommandName),
+				i18n.Vars{
+					"defaultLocale": constants.DefaultLocale,
+				}),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.almanax", contract.ConfigCommandName)),
 		},
 		{
-			Name:        "/config rss",
-			CommandID:   "</config rss:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.rss"),
-			TutorialURL: i18n.Get(lg, "config.help.tutorial.rss"),
+			Name:        fmt.Sprintf("/%v rss", contract.ConfigCommandName),
+			CommandID:   fmt.Sprintf("</%v rss:%v>", contract.ConfigCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.rss", contract.ConfigCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.rss", contract.ConfigCommandName)),
 		},
 		{
-			Name:        "/config server",
-			CommandID:   "</config server:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.server"),
-			TutorialURL: i18n.Get(lg, "config.help.tutorial.server"),
+			Name:        fmt.Sprintf("/%v server", contract.ConfigCommandName),
+			CommandID:   fmt.Sprintf("</%v server:%v>", contract.ConfigCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.server", contract.ConfigCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.server", contract.ConfigCommandName)),
 		},
 		{
-			Name:      "/config twitch",
-			CommandID: "</config twitch:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.twitch", i18n.Vars{
-				"discord": constants.Discord,
-			}),
-			TutorialURL: i18n.Get(lg, "config.help.tutorial.twitch"),
+			Name:      fmt.Sprintf("/%v twitch", contract.ConfigCommandName),
+			CommandID: fmt.Sprintf("</%v twitch:%v>", contract.ConfigCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.twitch", contract.ConfigCommandName),
+				i18n.Vars{
+					"discord": constants.Discord,
+				}),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.twitch", contract.ConfigCommandName)),
 		},
 		{
-			Name:        "/config twitter",
-			CommandID:   "</config twitter:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.twitter"),
-			TutorialURL: i18n.Get(lg, "config.help.tutorial.twitter"),
+			Name:        fmt.Sprintf("/%v twitter", contract.ConfigCommandName),
+			CommandID:   fmt.Sprintf("</%v twitter:%v>", contract.ConfigCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.twitter", contract.ConfigCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.twitter", contract.ConfigCommandName)),
 		},
 		{
-			Name:      "/config youtube",
-			CommandID: "</config youtube:1055459522812067840>",
-			Description: i18n.Get(lg, "config.help.detailed.youtube", i18n.Vars{
-				"discord": constants.Discord,
-			}),
-			TutorialURL: i18n.Get(lg, "config.help.tutorial.youtube"),
+			Name:      fmt.Sprintf("/%v youtube", contract.ConfigCommandName),
+			CommandID: fmt.Sprintf("</%v youtube:%v>", contract.ConfigCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.youtube", contract.ConfigCommandName),
+				i18n.Vars{
+					"discord": constants.Discord,
+				}),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.youtube", contract.ConfigCommandName)),
 		},
 	}
 }

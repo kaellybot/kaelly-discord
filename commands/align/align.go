@@ -17,6 +17,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
+	"github.com/spf13/viper"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
@@ -24,6 +25,9 @@ func New(bookService books.Service, guildService guilds.Service,
 	serverService servers.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
+		AbstractCommand: commands.AbstractCommand{
+			DiscordID: viper.GetString(constants.AlignID),
+		},
 		bookService:    bookService,
 		emojiService:   emojiService,
 		guildService:   guildService,
@@ -63,16 +67,16 @@ func (command *Command) GetName() string {
 func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Description {
 	return []commands.Description{
 		{
-			Name:        "/align get",
-			CommandID:   "</align get:1069057760269963295>",
-			Description: i18n.Get(lg, "align.help.detailed.get"),
-			TutorialURL: i18n.Get(lg, "align.help.tutorial.get"),
+			Name:        fmt.Sprintf("/%v get", contract.AlignSlashCommandName),
+			CommandID:   fmt.Sprintf("</%v get:%v>", contract.AlignSlashCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.get", contract.AlignSlashCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.get", contract.AlignSlashCommandName)),
 		},
 		{
-			Name:        "/align set",
-			CommandID:   "</align set:1069057760269963295>",
-			Description: i18n.Get(lg, "align.help.detailed.set"),
-			TutorialURL: i18n.Get(lg, "align.help.tutorial.set"),
+			Name:        fmt.Sprintf("/%v set", contract.AlignSlashCommandName),
+			CommandID:   fmt.Sprintf("</%v set:%v>", contract.AlignSlashCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.set", contract.AlignSlashCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.set", contract.AlignSlashCommandName)),
 		},
 	}
 }

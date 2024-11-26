@@ -8,32 +8,33 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (service *Impl) welcomeGuild(s *discordgo.Session, guild *discordgo.Guild) {
+func (service *Impl) welcomeGuild(guild *discordgo.Guild) {
 	// Check if the system channel exists and has the required permissions
 	if guild.SystemChannelID != "" &&
-		discord.HasPermissions(s, guild.SystemChannelID, welcomeMessagePermissions) {
-		sendWelcomeMessage(s, guild, guild.SystemChannelID)
+		discord.HasPermissions(service.session, guild.SystemChannelID, welcomeMessagePermissions) {
+		service.sendWelcomeMessage(guild, guild.SystemChannelID)
 		return
 	}
 
 	// Check other channels in the guild
 	for _, channel := range guild.Channels {
 		if channel.Type == discordgo.ChannelTypeGuildText &&
-			discord.HasPermissions(s, channel.ID, welcomeMessagePermissions) {
-			sendWelcomeMessage(s, guild, channel.ID)
+			discord.HasPermissions(service.session, channel.ID, welcomeMessagePermissions) {
+			service.sendWelcomeMessage(guild, channel.ID)
 			return
 		}
 	}
 
 	// If no suitable channel is found, try to DM the guild owner
 	if guild.OwnerID != "" {
-		sendWelcomeMessageToOwner(s, guild)
+		service.sendWelcomeMessageToOwner(guild)
 	}
 }
 
-func sendWelcomeMessage(s *discordgo.Session, guild *discordgo.Guild, channelID string) {
-	message := mappers.MapWelcome(guild.Name, discordgo.Locale(guild.PreferredLocale))
-	_, errSend := s.ChannelMessageSendEmbed(channelID, message)
+func (service *Impl) sendWelcomeMessage(guild *discordgo.Guild, channelID string) {
+	lg := discordgo.Locale(guild.PreferredLocale)
+	message := mappers.MapWelcomeToEmbed(guild.Name, guild.OwnerID, lg, service.emojiService)
+	_, errSend := service.session.ChannelMessageSendEmbed(channelID, message)
 	if errSend != nil {
 		log.Warn().Err(errSend).
 			Str(constants.LogGuildID, guild.ID).
@@ -41,8 +42,8 @@ func sendWelcomeMessage(s *discordgo.Session, guild *discordgo.Guild, channelID 
 	}
 }
 
-func sendWelcomeMessageToOwner(s *discordgo.Session, guild *discordgo.Guild) {
-	channel, errCreate := s.UserChannelCreate(guild.OwnerID)
+func (service *Impl) sendWelcomeMessageToOwner(guild *discordgo.Guild) {
+	channel, errCreate := service.session.UserChannelCreate(guild.OwnerID)
 	if errCreate != nil {
 		log.Warn().Err(errCreate).
 			Str(constants.LogGuildID, guild.ID).
@@ -51,12 +52,12 @@ func sendWelcomeMessageToOwner(s *discordgo.Session, guild *discordgo.Guild) {
 	}
 
 	lg := constants.DefaultLocale
-	if user, errUser := s.User(guild.OwnerID); errUser == nil {
+	if user, errUser := service.session.User(guild.OwnerID); errUser == nil {
 		lg = discordgo.Locale(user.Locale)
 	}
 
-	message := mappers.MapWelcome(guild.Name, lg)
-	_, errSend := s.ChannelMessageSendEmbed(channel.ID, message)
+	message := mappers.MapWelcomeToEmbed(guild.Name, guild.OwnerID, lg, service.emojiService)
+	_, errSend := service.session.ChannelMessageSendEmbed(channel.ID, message)
 	if errSend != nil {
 		log.Warn().Err(errSend).
 			Str(constants.LogGuildID, guild.ID).

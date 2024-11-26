@@ -1,4 +1,5 @@
 {
+    "welcome": "Salut et merci pour l'invitation ! :tada:\n\nMoi c'est **{{ .name }}**, ton nouvel assistant Discord dédié au jeu **{{ .game.Name }}** {{ .gameLogo }} !\nMon but ? T'offrir des outils pratiques et funs pour pimenter ton expérience de jeu. :fire:\nVoici quelques-uns de mes super-pouvoirs : \n* :sparkles: Consulter l'almanax, les équipements et panoplies du jeu\n* :sparkles: Découvrir les positions de portails partagées par la communauté\n* :sparkles: Gérer l'annuaire des artisans et alignés de ta guilde\n* :sparkles: Tirer aléatoirement des cartes compétitives pour défier tes amis\n\nCurieux de voir tout ce dont je suis capable ? Tape {{ .help }} et explore toutes mes commandes ! :smirk:\n\n<@{{ .owner }}>, en tant qu'administrateur de **{{ .guild }}**, tu peux accéder à des fonctionnalités avancées pour configurer mes services.\nAvec `/{{ .config }}`, définis :\n* :globe_with_meridians: Le serveur de jeu principal de ta guilde\n* {{ .almanax }} L'envoi quotidien de l'almanax\n* :bell: Les notifications des tweets, flux RSS du jeu *(et bientôt celles de tes vidéastes et streamers préférés)*\n\nÇa promet d'être épique, non ? Hâte de collaborer avec vous pour rendre ce serveur encore plus fun et utile ! :smile:",
     "about": {
         "help": {
             "overview": "donne des informations à mon propos et un moyen d'obtenir de l'aide si besoin",
@@ -313,7 +314,6 @@
             "option": "Effets ({{ .itemNumber }} / {{ .itemCount }} objets)"
         }
     },
-    "welcome": "",
     "default": {
         "page": {
             "first": "Première page",

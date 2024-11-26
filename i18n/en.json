@@ -1,4 +1,5 @@
 {
+    "welcome": "Hello and thanks for the invitation! :tada:\n\nI’m **{{ .name }}**, your new Discord assistant dedicated to the game **{{ .game.Name }}** {{ .gameLogo }}!\nMy goal? To offer you practical and fun tools to spice up your gaming experience. :fire:\nHere are some of my superpowers: \n* :sparkles: Browse the almanax, items, and sets from the game\n* :sparkles: Discover portal positions shared by the community\n* :sparkles: Manage the directory of artisans and aligned members in your guild\n* :sparkles: Randomly draw competitive maps to challenge your friends\n\nCurious to see everything I can do? Type {{ .help }} and explore all my commands! :smirk:\n\n<@{{ .owner }}>, as the administrator of **{{ .guild }}**, you can access advanced features to configure my services.\nWith `/{{ .config }}`, set up:\n* :globe_with_meridians: The main game server for your guild\n* {{ .almanax }} Daily almanax delivery\n* :bell: Notifications for tweets, RSS feeds from the game *(and soon for your favorite video creators and streamers)*\n\nSounds epic, right? Can’t wait to team up with you to make this server even more fun and useful! :smile:",
     "about": {
         "help": {
             "overview": "provides information about me and a way to get help",
@@ -313,7 +314,6 @@
             "option": "Effects ({{ .itemNumber }} / {{ .itemCount }} items)"
         }
     },
-    "welcome": "Salut et merci pour l'invitation ! :tada:\n\nMoi c'est **{{ .name }}**, ton nouvel assistant Discord dédié au jeu **{{ .game.Name }}** {{ .gameLogo }} !\nMon but ? T'offrir des outils pratiques et funs pour pimenter ton expérience de jeu. 🔥\nVoici quelques-uns de mes super-pouvoirs : \n✨ Consulter l'almanax, les équipements et panoplies du jeu\n✨ Découvrir les positions de portails partagées par la communauté\n✨ Gérer l'annuaire des artisans et alignés de ta guilde\n✨ Tirer aléatoirement des cartes compétitives pour défier tes amis\n\nCurieux de voir tout ce dont je suis capable ? Tape {{ .help }} et explore toutes mes commandes ! 😏\n\n<@{{ .owner }}>, en tant qu'administrateur de **{{ .guild }}**, tu peux accéder à des fonctionnalités avancées pour configurer mes services.\nAvec {{ .config }}, définis :\n* :globe_with_meridians: Le serveur de jeu principal de ta guilde\n* {{ .almanax }} L'envoi quotidien de l'almanax\n* :bell: Les notifications des tweets, flux RSS du jeu *(et bientôt celles de tes vidéastes et streamers préférés)*\n\nÇa promet d'être épique, non ? Hâte de collaborer avec vous pour rendre ce serveur encore plus fun et utile ! 😄",
     "default": {
         "page": {
             "first": "First page",

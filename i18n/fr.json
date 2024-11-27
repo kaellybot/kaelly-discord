@@ -188,7 +188,7 @@
         "help": {
             "overview": "donne les items, montures, familiers, ressources et consommables du jeu",
             "detailed": "donne les items, montures, familiers, ressources et consommables du jeu\n  - Le champ `query` est obligatoire et correspond au nom de l'objet que tu souhaites consulter. *__Exemple__ : Coiffe du bouftou*",
-            "tutorial": "",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/item.gif",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
@@ -298,7 +298,7 @@
         "help": {
             "overview": "donne les panoplies du jeu",
             "detailed": "donne les panoplies du jeu\n   - Le champ `query` est obligatoire et correspond au nom de la panoplie que tu souhaites consulter. *__Exemple__ : Panoplie du Boune*",
-            "tutorial": "",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/set.gif",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau **{{ .level }}**",
@@ -368,7 +368,6 @@
         "twitterAccount": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun compte Twitter que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs comptes Twitter ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
-        
         },
         "streamer": {
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun streamer Twitch que je connaisse ! :pensive:",

@@ -1,3 +1,401 @@
 {
-    "welcome": "Hallo und vielen Dank für die Einladung! :tada:\n\nIch bin **{{ .name }}**, dein neuer Discord-Assistent für das Spiel **{{ .game.Name }}** {{ .gameLogo }}!\nMein Ziel? Dir praktische und unterhaltsame Tools anzubieten, um dein Spielerlebnis aufzupeppen. :fire:\nHier sind einige meiner Superkräfte:\n* :sparkles: Den Almanax, Gegenstände und Sets des Spiels durchsuchen\n* :sparkles: Portalpositionen entdecken, die von der Community geteilt wurden\n* :sparkles: Das Verzeichnis von Handwerkern und ausgerichteten Mitgliedern deiner Gilde verwalten\n* :sparkles: Zufällige Wettbewerbs-Karten ziehen, um deine Freunde herauszufordern\n\nNeugierig, was ich alles kann? Gib {{ .help }} ein und entdecke alle meine Befehle! :smirk:\n\n<@{{ .owner }}>, als Administrator von **{{ .guild }}** kannst du auf erweiterte Funktionen zugreifen, um meine Dienste zu konfigurieren.\nMit `/{{ .config }}` kannst du folgendes einrichten:\n* :globe_with_meridians: Den Hauptspielserver deiner Gilde\n* {{ .almanax }} Die tägliche Almanax-Zustellung\n* :bell: Benachrichtigungen für Tweets, RSS-Feeds des Spiels *(und bald auch von deinen Lieblingsvideokünstlern und Streamern)*\n\nKlingt episch, oder? Ich freue mich darauf, mit dir zusammenzuarbeiten, um diesen Server noch unterhaltsamer und nützlicher zu machen! :smile:"
+    "welcome": "Hallo und vielen Dank für die Einladung! :tada:\n\nIch bin **{{ .name }}**, dein neuer Discord-Assistent für das Spiel **{{ .game.Name }}** {{ .gameLogo }}!\nMein Ziel? Dir praktische und unterhaltsame Tools anzubieten, um dein Spielerlebnis aufzupeppen. :fire:\nHier sind einige meiner Superkräfte:\n* :sparkles: Den Almanax, Gegenstände und Sets des Spiels durchsuchen\n* :sparkles: Portalpositionen entdecken, die von der Community geteilt wurden\n* :sparkles: Das Verzeichnis von Handwerkern und ausgerichteten Mitgliedern deiner Gilde verwalten\n* :sparkles: Zufällige Wettbewerbs-Karten ziehen, um deine Freunde herauszufordern\n\nNeugierig, was ich alles kann? Gib {{ .help }} ein und entdecke alle meine Befehle! :smirk:\n\n<@{{ .owner }}>, als Administrator von **{{ .guild }}** kannst du auf erweiterte Funktionen zugreifen, um meine Dienste zu konfigurieren.\nMit `/{{ .config }}` kannst du folgendes einrichten:\n* :globe_with_meridians: Den Hauptspielserver deiner Gilde\n* {{ .almanax }} Die tägliche Almanax-Zustellung\n* :bell: Benachrichtigungen für Tweets, RSS-Feeds des Spiels *(und bald auch von deinen Lieblingsvideokünstlern und Streamern)*\n\nKlingt episch, oder? Ich freue mich darauf, mit dir zusammenzuarbeiten, um diesen Server noch unterhaltsamer und nützlicher zu machen! :smile:",
+    "about": {
+        "help": {
+            "overview": "bietet Informationen über mich und eine Möglichkeit, Hilfe zu erhalten",
+            "detailed": "bietet detaillierte Informationen über mich (Einladungslink, Quellcode, Umgang mit privaten Daten...) und eine Möglichkeit, bei Bedarf Hilfe zu erhalten (Support-Discord, Twitter)",
+            "source": "",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/about.gif"
+        },
+        "title": "{{ .name }} Version {{ .version }}",
+        "desc": "Discord-Bot, der dem Spiel **{{ .game.Name }}** {{ .gameLogo }} gewidmet ist!",
+        "support": {
+            "title": ":bulb: Support-Server",
+            "desc": "Hast du ein Problem mit der Nutzung? Einen Vorschlag? Trete dem [Support-Discord]({{ .discord }}) bei!"
+        },
+        "twitter": {
+            "title": "{{ .twitterLogo }} Twitter",
+            "desc": "Ich bin auch auf [Twitter]({{ .twitter }}): Dort findest du die neuesten Nachrichten!"
+        },
+        "opensource": {
+            "title": "{{ .githubLogo }} Open Source",
+            "desc": "Mein gesamter Quellcode ist unter der GPL-3.0-Lizenz verfügbar und auf [Github]({{ .github }}) zugänglich"
+        },
+        "free": {
+            "title": ":money_with_wings: Kostenlos",
+            "desc": "Alle meine Funktionen sind kostenlos. Du kannst finanziell beitragen, aber bitte nicht über deine Verhältnisse! [Paypal]({{ .paypal }})"
+        },
+        "privacy": {
+            "title": ":shield: Datenschutz",
+            "desc": "Ich achte darauf, nur die minimal notwendigen Daten zu sammeln. Weitere Informationen findest du auf dem Support-Server!"
+        },
+        "graphist": {
+            "title": ":art: Grafiken",
+            "desc": "Grafiken erstellt von den großartigen [{{ .Elycann.Name }}]({{ .Elycann.URL }}) und [{{ .Colibry.Name }}]({{ .Colibry.URL }})!"
+        },
+        "footer": "Einige Illustrationen sind Eigentum von Ankama Studio - Alle Rechte vorbehalten"
+    },
+    "align": {
+        "help": {
+            "overview": "verwaltet das Buch der Ausgerichteten",
+            "detailed": {
+                "get": "zeigt das Buch der ausgerichteten Spieler auf deinem Discord-Server an\n   - Das Feld `city` ist optional und entspricht der Stadt, der die Spieler ihre Treue geschworen haben. Wenn nicht angegeben, wird das Verzeichnis ohne Berücksichtigung dieses Filters angezeigt. *__Beispiel__:Bonta*\n - Das Feld `order` ist optional und entspricht der Ordnung, der die Spieler beigetreten sind. Wenn nicht angegeben, wird das Verzeichnis ohne Berücksichtigung dieses Filters angezeigt. *__Beispiel__:Geist*\n - Das Feld `server` ist optional und entspricht dem gewünschten Spielserver. Wenn nicht angegeben, wird der für die Discord-Gilde definierte Spielserver verwendet (siehe `config`). *__Beispiel__:Imagiro*",
+                "set": "trägt deine Ausrichtung ins Buch ein, unabhängig vom Discord-Server; dieser Eintrag kann nicht für andere vorgenommen werden.\n   - Das Feld `city` ist erforderlich und entspricht der Stadt, der die Spieler ihre Treue geschworen haben. *__Beispiel__:Bonta*\n - Das Feld `order` ist erforderlich und entspricht der Ordnung, der die Spieler beigetreten sind. *__Beispiel__:Geist*\n - Das Feld `level` ist erforderlich und entspricht dem Ausrichtungslevel zwischen 0 und 200, wobei 0 die Entfernung aus dem Verzeichnis bedeutet. *__Beispiel__:200*\n - Das Feld `server` ist optional und entspricht dem gewünschten Spielserver. Wenn nicht angegeben, wird der für die Discord-Gilde definierte Spielserver verwendet (siehe `config`). *__Beispiel__:Imagiro*"
+            },
+            "source": "Die gesammelten Daten werden nur für meine ordnungsgemäße Funktion verwendet.",
+            "tutorial": {
+                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/align_get.gif",
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/align_set.gif"
+            }
+        },
+        "success": "Das Buch der Ausgerichteten wurde aktualisiert!",
+        "embed": {
+            "believers": {
+                "title": "Liste der Ausgerichteten",
+                "description": "{{ if .believers }}*{{ .total }} Ergebnis{{ if gt .total 1 }}se{{ end }}, Seite {{ .page }} von {{ .pages }}*\n\n{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}Derzeit keine Ausgerichteten gefunden!{{ end }}"
+            },
+            "beliefs": {
+                "title": "{{ .username }} Ausrichtungen",
+                "description": "{{ if .beliefs }}{{ range .beliefs}}{{ .City }} {{ .Order }} lvl. {{ .Level }}\n{{ end }}{{ else }}Derzeit keine Ausrichtungen!{{ end }}"
+            }
+        }
+    },
+    "almanax": {
+        "help": {
+            "overview": "liefert den Almanax",
+            "detailed": {
+                "day": "liefert den Almanax für einen bestimmten Tag\n   - Das Feld `date` ist optional und entspricht dem gewünschten Datum des Almanax im Format TT/MM/JJJJ. Wenn nicht angegeben, wird der Almanax des aktuellen Tages zurückgegeben. *__Beispiel__:01/02/2024*",
+                "effects": "liefert den nächsten Tag des Almanax mit dem gewünschten Effekt\n   - Das Feld `effect` ist erforderlich und entspricht dem gewünschten Bonus des Almanax. *__Beispiel__:Reiche Fischgründe*",
+                "resources": "liefert die benötigten Ressourcen für einen angegebenen Zeitraum\n   - Das Feld `duration` ist optional und entspricht der gewünschten Anzahl von Tagen (zwischen 1 und 30). Wenn nicht angegeben, werden die benötigten Ressourcen für die nächsten 7 Tage zurückgegeben. *__Beispiel__:30*"
+            },
+            "tutorial": {
+                "day": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/almanax_day.gif",
+                "effects": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/almanax_efects.gif",
+                "resources": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/almanax_resource.gif"
+            },
+            "source": "Die Daten stammen von [dofusdu.de](http://dofusdu.de), einer unglaublichen Technologie aus Deutschland, die sie sammelt und bereitstellt."
+        },
+        "day": {
+            "title": "Almanax vom {{ .date }}",
+            "bonus": {
+                "title": ":cyclone: Bonus"
+            },
+            "url": "https://www.krosmoz.com/de/almanax/{{ .date }}",
+            "tribute": {
+                "title": ":bouquet: Opfergabe",
+                "description": "{{ .emoji }} **{{ .quantity }}**x {{ .item }}"
+            },
+            "reward": {
+                "title": ":moneybag: Belohnungen",
+                "description": "**{{ .reward }}** {{ .kamaIcon }}"
+            },
+            "missing": "Ups! Ich habe den Almanax dieses Tages nicht in meinem Wissen, ich werde dieses Problem an meine Entwickler weiterleiten!",
+            "next": "Nächster Tag",
+            "previous": "Vorheriger Tag",
+            "effect": "Ähnliche Effekte"
+        },
+        "effect": {
+            "title": "{{ .query }}",
+            "description": "*{{ .total }} Ergebnis{{ if gt .total 1 }}se{{ end }}, Seite {{ .page }} von {{ .pages }}*",
+            "day": "{{ .emoji }} <t:{{ .date }}:D>",
+            "missing": "Meine Kristallkugel sagt mir, dass der gewünschte Bonus in den nächsten dreißig Tagen nicht auftreten wird. Leider weiß ich nicht mehr :persevere:",
+            "choice": {
+                "placeholder": "Einen Almanax ansehen",
+                "value": "Almanax vom {{ .date }}"
+            }
+        },
+        "resource": {
+            "title": "Almanax vom <t:{{ .startDate }}:D> bis <t:{{ .endDate }}:D>",
+            "description": "{{ if .tributes }}{{ range .tributes}}- {{ .Emoji }} **{{ .Quantity }}**x {{ .Name }}\n{{ end }}{{ else }}Keine benötigten Ressourcen!{{ end }}",
+            "duration": {
+                "label": "{{ .number }} Tag{{ if gt .number 1 }}e{{ end }} Zeitraum",
+                "placeholder": "{{ .number }}-Tage-Zeitraum"
+            },
+            "character": {
+                "label": "Opfergaben für {{ .number }} Charakter{{ if gt .number 1 }}e{{ end }}",
+                "placeholder": "Opfergaben für {{ .number }} Charaktere"
+            }
+        }
+    },
+    "config": {
+        "help": {
+            "overview": "ermöglicht die Konfiguration des Spielservers, des automatischen Versands von Almanax, RSS-Feeds, Tweets oder YouTube-Videos",
+            "detailed": {
+                "get": "zeigt meine aktuelle Konfiguration für diesen Discord-Server an",
+                "almanax": "aktiviert/deaktiviert den automatischen Versand des Almanax um Mitternacht\n  - Das Feld `enabled` ist erforderlich und gibt an, ob diese Funktion aktiviert oder deaktiviert wird. *__Beispiel__:Wahr*\n  - Das Feld `channel` ist optional und gibt den Kanal an, in dem die Nachrichten gepostet werden. Wenn nicht angegeben, wird der aktuelle Kanal verwendet. *__Beispiel__:#allgemein*\n  - Die verwendete Sprache ist die des Benutzers. Wenn diese nicht unterstützt wird, wird die Standardsprache *{{ .defaultLocale }}* verwendet.",
+                "rss": "aktiviert/deaktiviert den automatischen Versand von [RSS-Feeds](https://de.wikipedia.org/wiki/RSS)\n  - Das Feld `feed` ist erforderlich und entspricht einem RSS-Feed-Typ. *__Beispiel__:Devblog*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.",
+                "server": "verknüpft den Discord-Server mit einem Spielserver\n  - Das Feld `server` ist erforderlich und entspricht einem Spielserver. Nach der Angabe wird er der Standardwert für bestimmte Befehle wie `align`, `job` oder `pos`. *__Beispiel__:Imagiro*\n  - Das Feld `channel` ist optional und dient dazu, einen Spielserver mit einem bestimmten Kanal zu verknüpfen. Diese Verknüpfung hat Vorrang vor der Verknüpfung mit dem Discord-Server. *__Beispiel__:#allgemein*",
+                "twitch": "aktiviert/deaktiviert den automatischen Versand von Twitch-Streamer-Livestream-Benachrichtigungen\n  - Das Feld `streamer` ist erforderlich und entspricht dem Namen eines Twitch-Streamers. *__Beispiel__:Humility*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.\n\nMöchtest du in die Liste aufgenommen werden? Melde dich [hier]({{ .discord }}).\n\n🚧 Noch in Entwicklung!",
+                "twitter": "aktiviert/deaktiviert den automatischen Versand von Tweets vom offiziellen Twitter-Konto des Spiels\n  - Das Feld `twitter` ist erforderlich und entspricht einem Twitter-Kontonamen. *__Beispiel__:DOFUS_EN*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.",
+                "youtube": "aktiviert/deaktiviert den automatischen Versand von Videos von YouTube-Erstellern\n  - Das Feld `videast` ist erforderlich und entspricht dem Namen eines YouTube-Erstellers. *__Beispiel__:Humility*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.\n\nMöchtest du in die Liste aufgenommen werden? Melde dich [hier]({{ .discord }}).\n\n🚧 Noch in Entwicklung!"
+            },
+            "tutorial": {
+                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_get.gif",
+                "almanax": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_almanax.gif",
+                "rss": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_rss.gif",
+                "server": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_server.gif",
+                "twitch": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_twitch.gif",
+                "twitter": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_twitter.gif",
+                "youtube": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_youtube.gif"
+            },
+            "source": "Die gesammelten Daten werden nur für meine ordnungsgemäße Funktion verwendet."
+        },
+        "success": "Änderung übernommen!",
+        "embed": {
+            "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** ist der aktuelle Server der Gilde!{{ else }}Kein {{ .game.Name }}-Server ist mit der Gilde verknüpft!{{ end }}",
+            "server": {
+                "name": "{{ .gameLogo }} Kanäle mit Servern verknüpft",
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}Keine konfigurierten Kanäle!{{ end }}"
+            },
+            "webhook": {
+                "name": ":bell: Benachrichtigte Kanäle",
+                "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}**\n{{ end }}{{ else }}Keine konfigurierten Kanäle!{{ end }}"
+            }
+        }
+    },
+    "help": {
+        "help": {
+            "overview": "bietet Hilfe zu den Befehlen",
+            "detailed": [
+                "Es ist ein wenig seltsam, Hilfe zu dem Befehl zu konsultieren, den du gerade benutzt... scheint, als würdest du schon ganz gut zurechtkommen! :kissing_smiling_eyes:",
+                "Bietet Unterstützung bei der Nutzung von Befehlen. *__Beispiel__::point_right: \\*du benutzt den Befehl\\**",
+                "Auch die Besten brauchen Hilfe, aber das ist schon ein bisschen übertrieben!",
+                "Nun... unter uns, du wirst dich doch nicht so weit herablassen, oder? :rolling_eyes:",
+                "Es hilft. :nerd:"
+            ],
+            "tutorial": "https://media1.tenor.com/m/D2oqW_eeFNgAAAAd/dofus-book1julith-dofus.gif",
+            "source": ""
+        },
+        "command": {
+            "title": "Befehl **{{ .command }}**{{ if .commandID }}: {{ .commandID }}{{ end }}",
+            "description": "{{ if .detail }}- {{ .detail.CommandID }}: {{ .detail.Description }}\n{{ else }}Keine detaillierte Beschreibung verfügbar!{{ end }}{{ if .source}}\n\n*{{ .source }}*{{ end }}"
+        },
+        "commands": {
+            "title": "Befehlsliste",
+            "description": "{{ if .commands}}{{ range .commands }}- **{{ .Name }}**: {{ .Description }}\n{{ end }}{{ else }}Keine Befehle verfügbar!{{ end }}",
+            "choices": {
+                "menu": "Befehlsliste",
+                "command": "{{ .command }}",
+                "placeholder": "Detaillierte Hilfe zu einem bestimmten Befehl"
+            },
+            "pages": {
+                "page": "{{ .page }}",
+                "placeholder": "Detaillierte Hilfe zu einem Unterbefehl"
+            }
+        }
+    },
+    "item": {
+        "help": {
+            "overview": "liefert Gegenstände, Reittiere, Begleiter, Ressourcen und Verbrauchsgüter",
+            "detailed": "liefert Informationen zu Gegenständen, Reittieren, Begleitern, Ressourcen und Verbrauchsgütern im Spiel\n  - Das Feld `query` ist erforderlich und entspricht dem Namen des Gegenstands, den du suchen möchtest. *__Beispiel__: Fresssackkapp*",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/item.gif",
+            "source": "Die Daten stammen von [dofusdu.de](http://dofusdu.de), einer unglaublichen Technologie aus Deutschland, die sie sammelt und bereitstellt."
+        },
+        "description": "Level {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
+        "characteristics": {
+            "title": "Waffeneigenschaften",
+            "description": "*Kosten* {{ .cost }} {{ .costEmoji }}\n*Reichweite* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Einsatz pro Runde* {{ .maxCastPerTurn }}\n{{ if ne .criticalRate 0 }}*Kritisch* {{ .criticalRate }}% {{ .criticalEmoji }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *Kritischer Bonus* +{{ .criticalBonus }}\n{{ end }}"
+        },
+        "weaponEffects": {
+            "title": "Waffeneffekte",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}Keine Effekte!{{ end }}"
+        },
+        "effects": {
+            "title": "Effekte",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}Keine Effekte!{{ end }}",
+            "button": "Effekte"
+        },
+        "conditions": {
+            "title": "Bedingungen",
+            "description": "{{ if .conditions }}{{ range .conditions}}* {{ . }}\n{{ end }}{{ else }}Keine Bedingungen!{{ end }}",
+            "relation": {
+                "and": "und",
+                "or": "oder"
+            }
+        },
+        "recipe": {
+            "title": "Rezept",
+            "description": "{{ if .ingredients }}{{ range .ingredients}}* {{ .Emoji }} **{{ .Quantity }}**x {{ .Name }}\n{{ end }}{{ else }}Keine Zutaten!{{ end }}",
+            "button": "Rezept"
+        }
+    },
+    "job": {
+        "help": {
+            "overview": "verwaltet das Handwerkerverzeichnis",
+            "detailed": {
+                "get": "zeigt das Verzeichnis der Handwerker-Spieler auf deinem Discord-Server an\n   - Das Feld `job` ist erforderlich und entspricht einem Beruf im Spiel. *__Beispiel__: Holzfäller*\n - Das Feld `server` ist optional und entspricht dem gewünschten Spielserver. Wenn nicht angegeben, wird der für die Discord-Gilde definierte Spielserver verwendet (siehe `config`). *__Beispiel__: Imagiro*",
+                "set": "trägt deinen Beruf ins Verzeichnis ein, unabhängig vom Discord-Server; dieser Eintrag kann nicht für andere vorgenommen werden.\n    - Das Feld `job` ist erforderlich und entspricht einem Beruf im Spiel. *__Beispiel__: Holzfäller*\n - Das Feld `level` ist erforderlich und entspricht dem Ausrichtungslevel zwischen 0 und 200, wobei 0 die Entfernung aus dem Verzeichnis bedeutet. *__Beispiel__: 200*\n - Das Feld `server` ist optional und entspricht dem gewünschten Spielserver. Wenn nicht angegeben, wird der für die Discord-Gilde definierte Spielserver verwendet (siehe `config`). *__Beispiel__: Imagiro*"
+            },
+            "tutorial": {
+                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/job_get.gif",
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/job_set.gif"
+            },
+            "source": "Die gesammelten Daten werden nur für meine ordnungsgemäße Funktion verwendet."
+        },
+        "success": "Das Handwerkerverzeichnis wurde aktualisiert!",
+        "embed": {
+            "craftsmen": {
+                "title": "{{ .job }}-Liste",
+                "description": "{{ if .craftsmen }}*{{ .total }} Ergebnis{{ if gt .total 1 }}se{{ end }}, Seite {{ .page }} von {{ .pages }}*\n\n{{ range .craftsmen}}Lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}Derzeit keine Handwerker gefunden!{{ end }}"
+            },
+            "craftsman": {
+                "title": "Berufe von {{ .username }}",
+                "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Lvl. {{ .Level }}\n{{ end }}{{ else }}Derzeit keine Berufe!{{ end }}"
+            }
+        }
+    },
+    "map": {
+        "help": {
+            "overview": "zieht zufällig eine kompetitive Karte",
+            "detailed": "zieht zufällig eine kompetitive Karte\n   - Das Feld `number` ist optional und entspricht der gewünschten kompetitiven Karte. Wenn nicht angegeben, wird die Karte zufällig ausgewählt. *__Beispiel__:42*",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/map.gif",
+            "source": "Die Screenshots stammen von [Krosmoz Tournaments Arena](https://ktarena.com/)."
+        },
+        "title": "Karte {{ .mapNumber }}",
+        "taunt": [
+            "Ah! Schade :smirk:",
+            "Oh! Das wird spannend :joy:",
+            "CHAMPAGNER! :champagne:",
+            "Hihi :relaxed:",
+            "Das wird heftig. :sunglasses:",
+            "Viel Glück. BIIIIIIIIIP BIIIIIIIP :telephone_receiver:",
+            "Ouuuuh! Das rote Team wird leiden! :open_mouth:",
+            "Das ist einfach eine kollektive Halluzination! :dizzy_face:",
+            "Nach dieser Ziehung, stottert nicht, blaues Team! :kissing:",
+            "Dieser Kampf wird richtig schmutzig! :underage:",
+            "Kritisiert meine Ziehung nicht zu sehr, sonst ziehe ich die Karte IX immer wieder.",
+            "Bin ich es oder riecht es hier nach Melone? :melon:",
+            "Oh nein... Das wird wieder über eine Stunde dauern... :weary:",
+            "Challenge: Statue. Was heißt hier *neeein*? Ach komm schon, für das schöne Spiel! :relieved:",
+            "Ich wollte eine coole Karte ziehen, dann fiel mir ein, dass die Teilnehmer das nicht verdienen. :rolling_eyes:",
+            "Mmmmmmh, das ist der Geruch eines Massakers! :horse:",
+            "Willkommen in der Hölle :smiling_imp:",
+            "Tode in Aussicht! :skull:",
+            ":puissance: Es ist Zeit für das Du-du-du-duell! :puissance:"
+        ],
+        "button": {
+            "normal": "Normalmodus",
+            "tactical": "Taktikmodus"
+        }
+    },
+    "pos": {
+        "help": {
+            "overview": "liefert die neuesten Positionen der Dimensionstore",
+            "detailed": "liefert die neuesten Positionen der Dimensionstore\n   - Das Feld `dimension` ist optional und entspricht einer gewünschten Dimension. Wenn nicht angegeben, werden die Positionen der Tore aller Dimensionen zurückgegeben. *__Beispiel__:Enutrosor*\n - Das Feld `server` ist optional und entspricht dem gewünschten Spielserver. Wenn nicht angegeben, wird der für die Discord-Gilde definierte Spielserver verwendet (siehe `config`). *__Beispiel__:Imagiro*",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/pos.gif",
+            "source": "Die Daten stammen von [dofus-portals.fr](https://dofus-portals.fr/), die auf die Teilnahme der Portalsucher angewiesen sind."
+        },
+        "embed": {
+            "unknown": "Keine aktuellen Positionen gefunden :frowning:",
+            "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} Nutzungen\n\n*Hinzugefügt von **{{ .createdBy }}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nBearbeitet von **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
+            "transport": {
+                "name": "{{ .emoji }} {{ .type }} in der Nähe",
+                "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
+            }
+        }
+    },
+    "set": {
+        "help": {
+            "overview": "liefert Sets",
+            "detailed": "liefert Informationen über Sets im Spiel\n   - Das Feld `query` ist erforderlich und entspricht dem Namen des Sets, das du suchen möchtest. *__Beispiel__:Buhn-Set*",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/set.gif",
+            "source": "Die Daten stammen von [dofusdu.de](http://dofusdu.de), einer unglaublichen Technologie aus Deutschland, die sie sammelt und bereitstellt."
+        },
+        "description": "Level **{{ .level }}**",
+        "items": {
+            "title": "Gegenstände",
+            "description": "{{ if .items }}{{ range .items}}* {{ .Name }}, lvl {{ .Level }}\n{{ end }}{{ else }}Keine Gegenstände!{{ end }}",
+            "placeholder": "Gegenstände des Sets"
+        },
+        "effects": {
+            "title": "Effekte ({{ .itemNumber }} Gegenstände)",
+            "description": "{{ if .effects }}{{ range .effects}}{{ if .Emoji }}{{ .Emoji }} {{ end }}{{ .Label }}\n{{ end }}{{ else }}Keine Effekte!{{ end }}",
+            "placeholder": "Set-Boni",
+            "option": "Effekte ({{ .itemNumber }} / {{ .itemCount }} Gegenstände)"
+        }
+    },
+    "default": {
+        "page": {
+            "first": "Erste Seite",
+            "previous": "Vorherige Seite",
+            "next": "Nächste Seite",
+            "last": "Letzte Seite"
+        },
+        "changelog": "Slash-Befehle verfügbar!",
+        "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
+    },
+    "checks": {
+        "date": {
+            "constraints": "Das Datum muss im folgenden Format vorliegen: TT/MM/JJJJ :)",
+            "outOfBounds": "Dieses Datum liegt außerhalb meines Wissens! Ich weiß, dass ich großartig bin, aber dennoch bin ich nicht der Gott Xelor! :face_with_peeking_eye:"
+        },
+        "dimension": {
+            "not_found": "Aie! '*{{ .value }}*' entspricht keiner Dimension, die ich kenne. :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Dimensionen ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Wenn du alle sehen möchtest, lass diese Option leer. :slight_smile:"
+        },
+        "duration": {
+            "constraints": "Die Dauer muss zwischen {{ .min }} und {{ .max }} Tagen liegen. :)"
+        },
+        "feed": {
+            "not_found": "Aie! '*{{ .value }}*' entspricht keinem RSS-Feed, den ich kenne. :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen RSS-Feeds ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "job": {
+            "not_found": "Aie! '*{{ .value }}*' entspricht keinem Beruf, den ich kenne. :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Berufen ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "level": {
+            "constraints": "Das Level muss zwischen {{ .min }} und {{ .max }} liegen. :grin:"
+        },
+        "map": {
+            "constraints": "Die Kartennummer muss zwischen {{ .min }} und {{ .max }} liegen. :grin:"
+        },
+        "query": {
+            "constraints": "Das Feld darf nicht leer sein! :grin:"
+        },
+        "server": {
+            "required": "Oops! Es scheint, dass kein {{ .game.Name }}-Server mit deiner Gilde (oder deinem Kanal) verknüpft ist. Nutze die Server-Option wie `/pos server Djaul`, oder verknüpfe deine Gilde mit einem Server über den Befehl `/config server`. :grin:",
+            "not_found": "Aie! '*{{ .value }}*' entspricht keinem Server, den ich kenne. :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Servern ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Versuche es erneut, indem du einen existierenden aus der Liste auswählst. :slight_smile:"
+        },
+        "permission": {
+            "webhook": "Ich habe keine Berechtigung, Webhooks zu verwalten! Es tut mir leid, ich kann ohne diese Berechtigung nichts weiter tun. :("
+        },
+        "videast": {
+            "not_found": "Aie! '*{{ .value }}*' entspricht keinem Youtube-Kanal, den ich kenne. :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Youtube-Kanälen ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "twitterAccount": {
+            "not_found": "Aie! '*{{ .value }}*' entspricht keinem Twitter-Konto, das ich kenne. :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Twitter-Konten ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "streamer": {
+            "not_found": "Aie! '*{{ .value }}*' entspricht keinem Twitch-Streamer, den ich kenne. :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Twitch-Streamern ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        }
+    },
+    "webhooks": {
+        "ALMANAX": {
+            "name": "Almanax"
+        },
+        "RSS": {
+            "name": "RSS"
+        },
+        "TWITCH": {
+            "name": "Twitch"
+        },
+        "TWITTER": {
+            "name": "Twitter"
+        },
+        "YOUTUBE": {
+            "name": "Youtube"
+        }
+    },
+    "errors": {
+        "too_many_webhooks": "Die maximale Anzahl an Webhooks wurde für diesen Kanal erreicht, ich kann nicht fortfahren...\n*(Klicke auf das Kanal-Icon :gear:, dann `Integrationen` und schließlich `Webhooks`, um sie zu verwalten)*"
+    },
+    "panic": [
+        "Ich habe einen Fehler festgestellt :frowning:... Dies wird so schnell wie möglich behoben!",
+        "Oops, es sieht aus, als wäre ich abgestürzt... Ich melde dieses Ereignis meinen Entwicklern, Entschuldigung!"
+    ]   
 }

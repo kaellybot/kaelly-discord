@@ -188,7 +188,7 @@
         "help": {
             "overview": "provides items, mounts, pets, resources and consumables",
             "detailed": "provides information about items, mounts, pets, resources and consumables in the game\n  - The `query` field is mandatory and corresponds to the name of the item you want to look up. *__Example__:Gobball Headgear*",
-            "tutorial": "",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/en/item.gif",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
         "description": "Level {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
@@ -298,7 +298,7 @@
         "help": {
             "overview": "provides sets",
             "detailed": "provides information about sets in the game\n   - The `query` field is mandatory and corresponds to the name of the set you want to look up. *__Example__:Boon Set*",
-            "tutorial": "",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/en/set.gif",
             "source": "The data comes from [dofusdu.de](http://dofusdu.de), an incredible tech made in Germany which collects and exposes them."
         },
         "description": "Level **{{ .level }}**",

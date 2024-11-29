@@ -15,11 +15,12 @@ func (repo *Impl) GetOrders() ([]entities.Order, error) {
 	var orders []entities.Order
 	response := repo.db.GetDB().
 		Model(&entities.Order{}).
+		Where("game = ?", constants.GetGame().AMQPGame).
 		Preload("Labels")
 
 	if !viper.GetBool(constants.Production) {
 		response = response.
-			Select("id, emoji_dark_dev AS emoji_dark, emoji_light_dev AS emoji_light")
+			Select("id, emoji_dark_dev AS emoji_dark, emoji_light_dev AS emoji_light, game")
 	}
 
 	response = response.Find(&orders)

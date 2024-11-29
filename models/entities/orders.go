@@ -2,16 +2,19 @@ package entities
 
 import amqp "github.com/kaellybot/kaelly-amqp"
 
+//nolint:lll // Lisibility cannot be improved on GORM declarations.
 type Order struct {
 	ID         string `gorm:"primaryKey"`
 	EmojiDark  string
 	EmojiLight string
-	Labels     []OrderLabel `gorm:"foreignKey:OrderID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Game       amqp.Game    `gorm:"primaryKey"`
+	Labels     []OrderLabel `gorm:"foreignKey:OrderID,Game;references:ID,Game;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type OrderLabel struct {
-	Locale  amqp.Language `gorm:"primaryKey"`
 	OrderID string        `gorm:"primaryKey"`
+	Game    amqp.Game     `gorm:"primaryKey"`
+	Locale  amqp.Language `gorm:"primaryKey"`
 	Label   string
 }
 

@@ -11,12 +11,14 @@ type City struct {
 	Emoji  string
 	Type   constants.CityType
 	Color  int
-	Labels []CityLabel `gorm:"foreignKey:CityID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Game   amqp.Game   `gorm:"primaryKey"`
+	Labels []CityLabel `gorm:"foreignKey:CityID,Game;references:ID,Game;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type CityLabel struct {
-	Locale amqp.Language `gorm:"primaryKey"`
 	CityID string        `gorm:"primaryKey"`
+	Game   amqp.Game     `gorm:"primaryKey"`
+	Locale amqp.Language `gorm:"primaryKey"`
 	Label  string
 }
 

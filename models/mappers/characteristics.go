@@ -5,6 +5,7 @@ import (
 	"math"
 	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
@@ -36,8 +37,13 @@ func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 			}
 		}
 
+		label := highlightEffectValues(effect.GetLabel())
+		for _, regex := range charac.Regexes {
+			label = strings.ReplaceAll(label, regex.Expression, regex.Emoji)
+		}
+
 		characs = append(characs, i18nCharacteristic{
-			Label:     highlightEffectValues(effect.GetLabel()),
+			Label:     label,
 			Emoji:     charac.Emoji,
 			SortOrder: charac.SortOrder,
 		})

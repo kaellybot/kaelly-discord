@@ -1,4 +1,4 @@
-package cities
+package characteristics
 
 import (
 	"github.com/kaellybot/kaelly-discord/models/entities"

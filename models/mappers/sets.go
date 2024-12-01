@@ -11,7 +11,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	i18n "github.com/kaysoro/discordgo-i18n"
-	"github.com/rs/zerolog/log"
 )
 
 func MapSetListRequest(query, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
@@ -43,13 +42,6 @@ func MapSetToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, itemNumber int,
 		} else if bonus.ItemNumber < currentBonus.ItemNumber {
 			bonus = currentBonus
 		}
-	}
-
-	if bonus != nil && bonus.ItemNumber != int64(itemNumber) {
-		log.Warn().
-			Str(constants.LogAnkamaID, set.Id).
-			Int(constants.LogItemNumber, itemNumber).
-			Msgf("Set bonus with specific item numbers was not found, returning the highest one...")
 	}
 
 	return &discordgo.WebhookEdit{

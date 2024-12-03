@@ -20,5 +20,5 @@ const (
 )
 
 func GetRabbitMQClientID() string {
-	return Name + "-" + viper.GetString(ShardID)
+	return Name + "-" + viper.GetString(DiscordShardID)
 }

@@ -23,12 +23,8 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 					choices = command.findServers(option.StringValue(), i.Locale)
 				case contract.ConfigFeedTypeOptionName:
 					choices = command.findFeedTypes(option.StringValue(), i.Locale)
-				case contract.ConfigVideastOptionName:
-					choices = command.findVideasts(option.StringValue(), i.Locale)
 				case contract.ConfigTwitterAccountOptionName:
 					choices = command.findTwitterAccounts(option.StringValue(), i.Locale)
-				case contract.ConfigStreamerOptionName:
-					choices = command.findStreamers(option.StringValue(), i.Locale)
 				default:
 					log.Error().Str(constants.LogCommandOption, option.Name).Msgf("Option name not handled, ignoring it")
 				}
@@ -75,54 +71,6 @@ func (command *Command) findFeedTypes(feedTypeName string, lg discordgo.Locale) 
 
 	for _, feedType := range feedTypes {
 		label := translators.GetEntityLabel(feedType, lg)
-		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-			Name:  label,
-			Value: label,
-		})
-	}
-
-	sort.SliceStable(choices, func(i, j int) bool {
-		return choices[i].Name < choices[j].Name
-	})
-
-	return choices
-}
-
-func (command *Command) findVideasts(videastName string, lg discordgo.Locale) []*discordgo.
-	ApplicationCommandOptionChoice {
-	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-
-	if len(strings.TrimSpace(videastName)) == 0 {
-		return choices
-	}
-
-	videasts := command.videastService.FindVideasts(videastName, lg, constants.MaxChoices)
-	for _, videast := range videasts {
-		label := translators.GetEntityLabel(videast, lg)
-		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-			Name:  label,
-			Value: label,
-		})
-	}
-
-	sort.SliceStable(choices, func(i, j int) bool {
-		return choices[i].Name < choices[j].Name
-	})
-
-	return choices
-}
-
-func (command *Command) findStreamers(streamerName string, lg discordgo.Locale) []*discordgo.
-	ApplicationCommandOptionChoice {
-	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
-
-	if len(strings.TrimSpace(streamerName)) == 0 {
-		return choices
-	}
-
-	streamers := command.streamerService.FindStreamers(streamerName, lg, constants.MaxChoices)
-	for _, streamer := range streamers {
-		label := translators.GetEntityLabel(streamer, lg)
 		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
 			Name:  label,
 			Value: label,

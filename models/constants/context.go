@@ -17,7 +17,5 @@ const (
 	ContextKeyOrder
 	ContextKeyQuery
 	ContextKeyServer
-	ContextKeyStreamer
 	ContextKeyTwitter
-	ContextKeyVideast
 )

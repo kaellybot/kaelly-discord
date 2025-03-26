@@ -21,6 +21,7 @@ func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session
 		panic(err)
 	}
 
+	// TODO
 	if !validators.HasWebhookPermission(s, channelID) {
 		content := i18n.Get(i.Locale, "checks.permission.webhook")
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
@@ -32,17 +33,8 @@ func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session
 		return
 	}
 
-	var webhook *discordgo.Webhook
-	if enabled {
-		var created bool
-		webhook, created = command.createWebhook(s, i, channelID)
-		if !created {
-			return
-		}
-	}
-
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapConfigurationWebhookTwitterRequest(webhook, i.GuildID, channelID,
+	msg := mappers.MapConfigurationTwitterRequest(i.GuildID, channelID,
 		twitterAccount, enabled, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.setRespond)

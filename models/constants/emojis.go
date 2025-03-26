@@ -18,9 +18,7 @@ const (
 	EmojiIDRecipe      EmojiMiscID = "recipe"
 	EmojiIDRSS         EmojiMiscID = "rss"
 	EmojiIDTacticalMap EmojiMiscID = "tacticalMap"
-	EmojiIDTwitch      EmojiMiscID = "twitch"
 	EmojiIDTwitter     EmojiMiscID = "twitter"
-	EmojiIDYoutube     EmojiMiscID = "youtube"
 
 	EmojiTypeEquipment EmojiType = "Equipment"
 	EmojiTypeItem      EmojiType = "Item"

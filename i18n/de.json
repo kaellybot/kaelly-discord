@@ -1,5 +1,5 @@
 {
-    "welcome": "Hallo und vielen Dank für die Einladung! :tada:\n\nIch bin **{{ .name }}**, dein neuer Discord-Assistent für das Spiel **{{ .game.Name }}** {{ .gameLogo }}!\nMein Ziel? Dir praktische und unterhaltsame Tools anzubieten, um dein Spielerlebnis aufzupeppen. :fire:\nHier sind einige meiner Superkräfte:\n* :sparkles: Den Almanax, Gegenstände und Sets des Spiels durchsuchen\n* :sparkles: Portalpositionen entdecken, die von der Community geteilt wurden\n* :sparkles: Das Verzeichnis von Handwerkern und ausgerichteten Mitgliedern deiner Gilde verwalten\n* :sparkles: Zufällige Wettbewerbs-Karten ziehen, um deine Freunde herauszufordern\n\nNeugierig, was ich alles kann? Gib {{ .help }} ein und entdecke alle meine Befehle! :smirk:\n\n<@{{ .owner }}>, als Administrator von **{{ .guild }}** kannst du auf erweiterte Funktionen zugreifen, um meine Dienste zu konfigurieren.\nMit `/{{ .config }}` kannst du folgendes einrichten:\n* :globe_with_meridians: Den Hauptspielserver deiner Gilde\n* {{ .almanax }} Die tägliche Almanax-Zustellung\n* :bell: Benachrichtigungen für Tweets, RSS-Feeds des Spiels *(und bald auch von deinen Lieblingsvideokünstlern und Streamern)*\n\nKlingt episch, oder? Ich freue mich darauf, mit dir zusammenzuarbeiten, um diesen Server noch unterhaltsamer und nützlicher zu machen! :smile:",
+    "welcome": "Hallo und vielen Dank für die Einladung! :tada:\n\nIch bin **{{ .name }}**, dein neuer Discord-Assistent für das Spiel **{{ .game.Name }}** {{ .gameLogo }}!\nMein Ziel? Dir praktische und unterhaltsame Tools anzubieten, um dein Spielerlebnis aufzupeppen. :fire:\nHier sind einige meiner Superkräfte:\n* :sparkles: Den Almanax, Gegenstände und Sets des Spiels durchsuchen\n* :sparkles: Portalpositionen entdecken, die von der Community geteilt wurden\n* :sparkles: Das Verzeichnis von Handwerkern und ausgerichteten Mitgliedern deiner Gilde verwalten\n* :sparkles: Zufällige Wettbewerbs-Karten ziehen, um deine Freunde herauszufordern\n\nNeugierig, was ich alles kann? Gib {{ .help }} ein und entdecke alle meine Befehle! :smirk:\n\n<@{{ .owner }}>, als Administrator von **{{ .guild }}** kannst du auf erweiterte Funktionen zugreifen, um meine Dienste zu konfigurieren.\nMit `/{{ .config }}` kannst du folgendes einrichten:\n* :globe_with_meridians: Den Hauptspielserver deiner Gilde\n* {{ .almanax }} Die tägliche Almanax-Zustellung\n* :bell: Benachrichtigungen für Tweets, RSS-Feeds des Spiels\n\nKlingt episch, oder? Ich freue mich darauf, mit dir zusammenzuarbeiten, um diesen Server noch unterhaltsamer und nützlicher zu machen! :smile:",
     "about": {
         "help": {
             "overview": "bietet Informationen über mich und eine Möglichkeit, Hilfe zu erhalten",
@@ -119,24 +119,20 @@
     },
     "config": {
         "help": {
-            "overview": "ermöglicht die Konfiguration des Spielservers, des automatischen Versands von Almanax, RSS-Feeds, Tweets oder YouTube-Videos",
+            "overview": "ermöglicht die Konfiguration des Spielservers, des automatischen Versands von Almanax, RSS-Feeds oder Tweets",
             "detailed": {
                 "get": "zeigt meine aktuelle Konfiguration für diesen Discord-Server an",
                 "almanax": "aktiviert/deaktiviert den automatischen Versand des Almanax um Mitternacht\n  - Das Feld `enabled` ist erforderlich und gibt an, ob diese Funktion aktiviert oder deaktiviert wird. *__Beispiel__:Wahr*\n  - Das Feld `channel` ist optional und gibt den Kanal an, in dem die Nachrichten gepostet werden. Wenn nicht angegeben, wird der aktuelle Kanal verwendet. *__Beispiel__:#allgemein*\n  - Die verwendete Sprache ist die des Benutzers. Wenn diese nicht unterstützt wird, wird die Standardsprache *{{ .defaultLocale }}* verwendet.",
                 "rss": "aktiviert/deaktiviert den automatischen Versand von [RSS-Feeds](https://de.wikipedia.org/wiki/RSS)\n  - Das Feld `feed` ist erforderlich und entspricht einem RSS-Feed-Typ. *__Beispiel__:Devblog*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.",
                 "server": "verknüpft den Discord-Server mit einem Spielserver\n  - Das Feld `server` ist erforderlich und entspricht einem Spielserver. Nach der Angabe wird er der Standardwert für bestimmte Befehle wie `align`, `job` oder `pos`. *__Beispiel__:Imagiro*\n  - Das Feld `channel` ist optional und dient dazu, einen Spielserver mit einem bestimmten Kanal zu verknüpfen. Diese Verknüpfung hat Vorrang vor der Verknüpfung mit dem Discord-Server. *__Beispiel__:#allgemein*",
-                "twitch": "aktiviert/deaktiviert den automatischen Versand von Twitch-Streamer-Livestream-Benachrichtigungen\n  - Das Feld `streamer` ist erforderlich und entspricht dem Namen eines Twitch-Streamers. *__Beispiel__:Humility*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.\n\nMöchtest du in die Liste aufgenommen werden? Melde dich [hier]({{ .discord }}).\n\n🚧 Noch in Entwicklung!",
-                "twitter": "aktiviert/deaktiviert den automatischen Versand von Tweets vom offiziellen Twitter-Konto des Spiels\n  - Das Feld `twitter` ist erforderlich und entspricht einem Twitter-Kontonamen. *__Beispiel__:DOFUS_EN*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.",
-                "youtube": "aktiviert/deaktiviert den automatischen Versand von Videos von YouTube-Erstellern\n  - Das Feld `videast` ist erforderlich und entspricht dem Namen eines YouTube-Erstellers. *__Beispiel__:Humility*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.\n\nMöchtest du in die Liste aufgenommen werden? Melde dich [hier]({{ .discord }}).\n\n🚧 Noch in Entwicklung!"
+                "twitter": "aktiviert/deaktiviert den automatischen Versand von Tweets vom offiziellen Twitter-Konto des Spiels\n  - Das Feld `twitter` ist erforderlich und entspricht einem Twitter-Kontonamen. *__Beispiel__:DOFUS_EN*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`."
             },
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_get.gif",
                 "almanax": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_almanax.gif",
                 "rss": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_rss.gif",
                 "server": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_server.gif",
-                "twitch": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_twitch.gif",
-                "twitter": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_twitter.gif",
-                "youtube": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_youtube.gif"
+                "twitter": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/de/config_twitter.gif"
             },
             "source": "Die gesammelten Daten werden nur für meine ordnungsgemäße Funktion verwendet."
         },
@@ -361,38 +357,10 @@
         "permission": {
             "webhook": "Ich habe keine Berechtigung, Webhooks zu verwalten! Es tut mir leid, ich kann ohne diese Berechtigung nichts weiter tun. :("
         },
-        "videast": {
-            "not_found": "Aie! '*{{ .value }}*' entspricht keinem Youtube-Kanal, den ich kenne. :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Youtube-Kanälen ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
-        },
         "twitterAccount": {
             "not_found": "Aie! '*{{ .value }}*' entspricht keinem Twitter-Konto, das ich kenne. :pensive:",
             "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Twitter-Konten ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
-        },
-        "streamer": {
-            "not_found": "Aie! '*{{ .value }}*' entspricht keinem Twitch-Streamer, den ich kenne. :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Twitch-Streamern ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
         }
-    },
-    "webhooks": {
-        "ALMANAX": {
-            "name": "Almanax"
-        },
-        "RSS": {
-            "name": "RSS"
-        },
-        "TWITCH": {
-            "name": "Twitch"
-        },
-        "TWITTER": {
-            "name": "Twitter"
-        },
-        "YOUTUBE": {
-            "name": "Youtube"
-        }
-    },
-    "errors": {
-        "too_many_webhooks": "Die maximale Anzahl an Webhooks wurde für diesen Kanal erreicht, ich kann nicht fortfahren...\n*(Klicke auf das Kanal-Icon :gear:, dann `Integrationen` und schließlich `Webhooks`, um sie zu verwalten)*"
     },
     "panic": [
         "Ich habe einen Fehler festgestellt :frowning:... Dies wird so schnell wie möglich behoben!",

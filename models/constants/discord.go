@@ -22,7 +22,6 @@ const (
 
 const (
 	DiscordCodeNotFound        = 0     // 404: Not Found.
-	DiscordCodeTooManyWebhooks = 30007 // Maximum number of webhooks reached (15).
 )
 
 func GetIntents() discordgo.Intent {
@@ -32,4 +31,5 @@ func GetIntents() discordgo.Intent {
 		discordgo.IntentGuildMessages |
 		discordgo.IntentGuildMessageReactions |
 		discordgo.IntentGuildWebhooks
+		// TODO
 }

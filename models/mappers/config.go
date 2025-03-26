@@ -8,9 +8,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
-	"github.com/kaellybot/kaelly-discord/services/streamers"
 	"github.com/kaellybot/kaelly-discord/services/twitters"
-	"github.com/kaellybot/kaelly-discord/services/videasts"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -56,114 +54,48 @@ func MapConfigurationServerRequest(guildID, channelID, serverID, authorID string
 	return request
 }
 
-func MapConfigurationWebhookAlmanaxRequest(webhook *discordgo.Webhook, guildID, channelID string,
+func MapConfigurationAlmanaxRequest(guildID, channelID string,
 	enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST, lg)
-
-	var webhookID, webhookToken string
-	if webhook != nil {
-		webhookID = webhook.ID
-		webhookToken = webhook.Token
-	}
 
 	request.ConfigurationSetAlmanaxWebhookRequest = &amqp.ConfigurationSetAlmanaxWebhookRequest{
 		GuildId:      guildID,
 		ChannelId:    channelID,
-		WebhookId:    webhookID,
-		WebhookToken: webhookToken,
 		Enabled:      enabled,
 	}
 	return request
 }
 
-func MapConfigurationWebhookRssRequest(webhook *discordgo.Webhook, guildID, channelID string,
+func MapConfigurationRssRequest(guildID, channelID string,
 	feed entities.FeedType, enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
 	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST, lg)
-
-	var webhookID, webhookToken string
-	if webhook != nil {
-		webhookID = webhook.ID
-		webhookToken = webhook.Token
-	}
 
 	request.ConfigurationSetRssWebhookRequest = &amqp.ConfigurationSetRssWebhookRequest{
 		GuildId:      guildID,
 		ChannelId:    channelID,
 		FeedId:       feed.ID,
-		WebhookId:    webhookID,
-		WebhookToken: webhookToken,
 		Enabled:      enabled,
 	}
 	return request
 }
 
-func MapConfigurationWebhookTwitchRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	streamer entities.Streamer, enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_TWITCH_WEBHOOK_REQUEST, lg)
-
-	var webhookID, webhookToken string
-	if webhook != nil {
-		webhookID = webhook.ID
-		webhookToken = webhook.Token
-	}
-
-	request.ConfigurationSetTwitchWebhookRequest = &amqp.ConfigurationSetTwitchWebhookRequest{
-		GuildId:      guildID,
-		ChannelId:    channelID,
-		StreamerId:   streamer.ID,
-		WebhookId:    webhookID,
-		WebhookToken: webhookToken,
-		Enabled:      enabled,
-	}
-	return request
-}
-
-func MapConfigurationWebhookTwitterRequest(webhook *discordgo.Webhook, guildID, channelID string,
+func MapConfigurationTwitterRequest(guildID, channelID string,
 	twitterAccount entities.TwitterAccount, enabled bool, authorID string, lg discordgo.Locale,
 ) *amqp.RabbitMQMessage {
 	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST, lg)
-
-	var webhookID, webhookToken string
-	if webhook != nil {
-		webhookID = webhook.ID
-		webhookToken = webhook.Token
-	}
 
 	request.ConfigurationSetTwitterWebhookRequest = &amqp.ConfigurationSetTwitterWebhookRequest{
 		GuildId:      guildID,
 		ChannelId:    channelID,
 		TwitterId:    twitterAccount.ID,
-		WebhookId:    webhookID,
-		WebhookToken: webhookToken,
-		Enabled:      enabled,
-	}
-	return request
-}
-
-func MapConfigurationWebhookYoutubeRequest(webhook *discordgo.Webhook, guildID, channelID string,
-	videast entities.Videast, enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_YOUTUBE_WEBHOOK_REQUEST, lg)
-
-	var webhookID, webhookToken string
-	if webhook != nil {
-		webhookID = webhook.ID
-		webhookToken = webhook.Token
-	}
-
-	request.ConfigurationSetYoutubeWebhookRequest = &amqp.ConfigurationSetYoutubeWebhookRequest{
-		GuildId:      guildID,
-		ChannelId:    channelID,
-		VideastId:    videast.ID,
-		WebhookId:    webhookID,
-		WebhookToken: webhookToken,
 		Enabled:      enabled,
 	}
 	return request
 }
 
 func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
-	serverService servers.Service, feedService feeds.Service, videastService videasts.Service,
-	twitterService twitters.Service, streamerService streamers.Service, locale amqp.Language,
+	serverService servers.Service, feedService feeds.Service,
+	twitterService twitters.Service, locale amqp.Language,
 ) *discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 
@@ -207,10 +139,6 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 		emojiService, feedService, lg)...)
 	channelWebhooks = append(channelWebhooks, mapTwitterWebhooksToI18n(guild.TwitterWebhooks,
 		emojiService, twitterService, lg)...)
-	channelWebhooks = append(channelWebhooks, mapYoutubeWebhooksToI18n(guild.YoutubeWebhooks,
-		emojiService, videastService, lg)...)
-	channelWebhooks = append(channelWebhooks, mapTwitchWebhooksToI18n(guild.TwitchWebhooks,
-		emojiService, streamerService, lg)...)
 
 	return &discordgo.MessageEmbed{
 		Title: guild.Name,
@@ -238,6 +166,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 	}
 }
 
+// TODO
 func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, emojiService emojis.Service,
 	lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
@@ -278,31 +207,6 @@ func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, emojiService emojis.S
 	return i18nWebhooks
 }
 
-func mapTwitchWebhooksToI18n(webhooks []constants.TwitchWebhook, emojiService emojis.Service,
-	streamerService streamers.Service, lg discordgo.Locale) []i18nChannelWebhook {
-	i18nWebhooks := make([]i18nChannelWebhook, 0)
-	for _, webhook := range webhooks {
-		var providerName string
-		streamer := streamerService.GetStreamer(webhook.StreamerID)
-		if streamer != nil {
-			providerName = translators.GetEntityLabel(streamer, lg)
-		} else {
-			log.Warn().Str(constants.LogEntity, webhook.StreamerID).
-				Msgf("Cannot find streamer based on ID sent internally, ignoring this webhook")
-			continue
-		}
-
-		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
-			Channel: webhook.Channel.Mention(),
-			Provider: i18nProvider{
-				Name:  providerName,
-				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDTwitch),
-			},
-		})
-	}
-	return i18nWebhooks
-}
-
 func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, emojiService emojis.Service,
 	twitterService twitters.Service, lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
@@ -322,31 +226,6 @@ func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, emojiService 
 			Provider: i18nProvider{
 				Name:  providerName,
 				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDTwitter),
-			},
-		})
-	}
-	return i18nWebhooks
-}
-
-func mapYoutubeWebhooksToI18n(webhooks []constants.YoutubeWebhook, emojiService emojis.Service,
-	videastService videasts.Service, lg discordgo.Locale) []i18nChannelWebhook {
-	i18nWebhooks := make([]i18nChannelWebhook, 0)
-	for _, webhook := range webhooks {
-		var providerName string
-		videast := videastService.GetVideast(webhook.VideastID)
-		if videast != nil {
-			providerName = translators.GetEntityLabel(videast, lg)
-		} else {
-			log.Warn().Str(constants.LogEntity, webhook.VideastID).
-				Msgf("Cannot find videast based on ID sent internally, ignoring this webhook")
-			continue
-		}
-
-		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
-			Channel: webhook.Channel.Mention(),
-			Provider: i18nProvider{
-				Name:  providerName,
-				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDYoutube),
 			},
 		})
 	}

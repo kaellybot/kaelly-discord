@@ -31,17 +31,8 @@ func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session
 		return
 	}
 
-	var webhook *discordgo.Webhook
-	if enabled {
-		var created bool
-		webhook, created = command.createWebhook(s, i, channelID)
-		if !created {
-			return
-		}
-	}
-
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapConfigurationWebhookAlmanaxRequest(webhook, i.GuildID, channelID, enabled, authorID, i.Locale)
+	msg := mappers.MapConfigurationAlmanaxRequest(i.GuildID, channelID, enabled, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.setRespond)
 	if err != nil {

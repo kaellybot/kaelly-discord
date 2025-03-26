@@ -32,17 +32,8 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 		return
 	}
 
-	var webhook *discordgo.Webhook
-	if enabled {
-		var created bool
-		webhook, created = command.createWebhook(s, i, channelID)
-		if !created {
-			return
-		}
-	}
-
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapConfigurationWebhookRssRequest(webhook, i.GuildID, channelID, feed, enabled, authorID, i.Locale)
+	msg := mappers.MapConfigurationRssRequest(i.GuildID, channelID, feed, enabled, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.setRespond)
 	if err != nil {

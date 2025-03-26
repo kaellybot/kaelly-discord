@@ -86,28 +86,10 @@ func GetServersLabels(servers []entities.Server, locale discordgo.Locale) []stri
 	return labels
 }
 
-func GetStreamersLabels(streamers []entities.Streamer, locale discordgo.Locale) []string {
-	labels := make([]string, 0)
-	for _, streamer := range streamers {
-		labels = append(labels, GetEntityLabel(streamer, locale))
-	}
-
-	return labels
-}
-
 func GetTwittersLabels(twitterAccounts []entities.TwitterAccount, locale discordgo.Locale) []string {
 	labels := make([]string, 0)
 	for _, twitterAccount := range twitterAccounts {
 		labels = append(labels, GetEntityLabel(twitterAccount, locale))
-	}
-
-	return labels
-}
-
-func GetVideastsLabels(videasts []entities.Videast, locale discordgo.Locale) []string {
-	labels := make([]string, 0)
-	for _, videast := range videasts {
-		labels = append(labels, GetEntityLabel(videast, locale))
 	}
 
 	return labels

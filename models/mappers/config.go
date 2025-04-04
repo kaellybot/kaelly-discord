@@ -54,41 +54,17 @@ func MapConfigurationServerRequest(guildID, channelID, serverID, authorID string
 	return request
 }
 
-func MapConfigurationAlmanaxRequest(guildID, channelID, webhookID, authorID string,
-	enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_REQUEST, lg)
-
-	request.ConfigurationSetAlmanaxRequest = &amqp.ConfigurationSetAlmanaxRequest{
-		GuildId:   guildID,
-		ChannelId: channelID,
-		Enabled:   enabled,
-	}
-	return request
-}
-
-func MapConfigurationRssRequest(guildID, channelID, webhookID, authorID string,
-	feed entities.FeedType, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_REQUEST, lg)
-
-	request.ConfigurationSetRssRequest = &amqp.ConfigurationSetRssRequest{
-		GuildId:   guildID,
-		ChannelId: channelID,
-		FeedId:    feed.ID,
-		Enabled:   enabled,
-	}
-	return request
-}
-
-func MapConfigurationTwitterRequest(guildID, channelID, webhookID, authorID string,
-	twitterAccount entities.TwitterAccount, enabled bool, lg discordgo.Locale,
+func MapConfigurationNotificationRequest(guildID, channelID, webhookID, authorID, labelID string,
+	notificationType amqp.NotificationType, enabled bool, lg discordgo.Locale,
 ) *amqp.RabbitMQMessage {
-	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_REQUEST, lg)
-
-	request.ConfigurationSetTwitterRequest = &amqp.ConfigurationSetTwitterRequest{
-		GuildId:   guildID,
-		ChannelId: channelID,
-		TwitterId: twitterAccount.ID,
-		Enabled:   enabled,
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_NOTIFICATION_REQUEST, lg)
+	request.ConfigurationSetNotificationRequest = &amqp.ConfigurationSetNotificationRequest{
+		GuildId:          guildID,
+		ChannelId:        channelID,
+		WebhookId:        webhookID,
+		Label:            labelID,
+		NotificationType: notificationType,
+		Enabled:          enabled,
 	}
 	return request
 }
@@ -161,68 +137,53 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 	}
 }
 
-/** TODO integrate feed / twitter icons/title
-func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, emojiService emojis.Service,
-	feedService feeds.Service, lg discordgo.Locale) []i18nChannelWebhook {
-	i18nWebhooks := make([]i18nChannelWebhook, 0)
-	for _, webhook := range webhooks {
-		var providerName string
-		feeds := feedService.FindFeedTypes(webhook.FeedID, lg, constants.MaxChoices)
-		if len(feeds) == 1 {
-			providerName = translators.GetEntityLabel(feeds[0], lg)
-		} else {
-			log.Warn().Str(constants.LogEntity, webhook.FeedID).
-				Msgf("Cannot find feed type based on ID sent internally, continuing with default feed label")
-			providerName = i18n.Get(lg, "webhooks.RSS.name")
-		}
-
-		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
-			Channel: webhook.Channel.Mention(),
-			Provider: i18nProvider{
-				Name:  providerName,
-				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDRSS),
-			},
-		})
-	}
-	return i18nWebhooks
-}
-
-func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, emojiService emojis.Service,
-	twitterService twitters.Service, lg discordgo.Locale) []i18nChannelWebhook {
-	i18nWebhooks := make([]i18nChannelWebhook, 0)
-	for _, webhook := range webhooks {
-		var providerName string
-		twitterAccount := twitterService.GetTwitterAccount(webhook.TwitterID)
-		if twitterAccount != nil {
-			providerName = translators.GetEntityLabel(twitterAccount, lg)
-		} else {
-			log.Warn().Str(constants.LogEntity, webhook.TwitterID).
-				Msgf("Cannot find twitter account based on ID sent internally, ignoring this webhook")
-			continue
-		}
-
-		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
-			Channel: webhook.Channel.Mention(),
-			Provider: i18nProvider{
-				Name:  providerName,
-				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDTwitter),
-			},
-		})
-	}
-	return i18nWebhooks
-}
-**/
-
 func mapNotifiedChannelsToI18n(webhooks []constants.NotifiedChannel, emojiService emojis.Service,
 	feedService feeds.Service, twitterService twitters.Service, lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
 	for _, webhook := range webhooks {
-		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
-			Channel: webhook.Channel.Mention(),
-			Provider: i18nProvider{
-				Name:  i18n.Get(lg, "webhooks.ALMANAX.name"),
+		var provider i18nProvider
+		switch webhook.NotificationType {
+		case amqp.NotificationType_ALMANAX:
+			provider = i18nProvider{
+				Name:  i18n.Get(lg, "config.embed.webhook.almanax"),
 				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDAlmanax),
-			},
+			}
+
+		case amqp.NotificationType_RSS:
+			feedType := feedService.GetFeedType(webhook.Label)
+			if feedType == nil {
+				log.Warn().Str(constants.LogEntity, webhook.Label).
+					Msgf("Cannot find feed type based on ID sent internally, ignoring this webhook")
+				continue
+			}
+
+			provider = i18nProvider{
+				Name:  translators.GetEntityLabel(feedType, lg),
+				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDRSS),
+			}
+
+		case amqp.NotificationType_TWITTER:
+			twitterAccount := twitterService.GetTwitterAccount(webhook.Label)
+			if twitterAccount == nil {
+				log.Warn().Str(constants.LogEntity, webhook.Label).
+					Msgf("Cannot find twitter account based on ID sent internally, ignoring this webhook")
+				continue
+			}
+
+			provider = i18nProvider{
+				Name:  translators.GetEntityLabel(twitterAccount, lg),
+				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDTwitter),
+			}
+
+		case amqp.NotificationType_UNKNOWN:
+			fallthrough
+		default:
+			continue
+		}
+
+		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
+			Channel:  webhook.Channel.Mention(),
+			Provider: provider,
 		})
 	}
 	return i18nWebhooks

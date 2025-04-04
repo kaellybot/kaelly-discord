@@ -113,7 +113,6 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 	command.CallHandler(s, i, command.handlers)
 }
 
-// TODO check if webhooks error is rejected
 func (command *Command) followAnnouncement(s *discordgo.Session, i *discordgo.InteractionCreate,
 	newsChannelID, targetChannelID string) (string, bool) {
 	chanFollow, err := s.ChannelNewsFollow(newsChannelID, targetChannelID)

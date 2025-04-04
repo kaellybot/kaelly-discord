@@ -2,6 +2,7 @@ package constants
 
 import (
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 )
 
 type GuildConfig struct {
@@ -18,6 +19,7 @@ type ServerChannel struct {
 }
 
 type NotifiedChannel struct {
-	Channel *discordgo.Channel
-	//  TODO
+	Channel          *discordgo.Channel
+	Label            string
+	NotificationType amqp.NotificationType
 }

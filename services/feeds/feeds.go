@@ -37,6 +37,16 @@ func (service *Impl) GetFeedTypes() []entities.FeedType {
 	return service.feedTypes
 }
 
+func (service *Impl) GetFeedType(id string) *entities.FeedType {
+	for _, feedType := range service.feedTypes {
+		if feedType.ID == id {
+			return &feedType
+		}
+	}
+
+	return nil
+}
+
 func (service *Impl) FindFeedTypes(name string, locale discordgo.Locale, limit int) []entities.FeedType {
 	feedTypesFound := make([]entities.FeedType, 0)
 	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))

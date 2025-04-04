@@ -16,7 +16,7 @@ import (
 func (command *Command) getRequest(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapConfigurationGetRequest(i.Interaction.GuildID, authorID, i.Locale)
+	msg := mappers.MapConfigurationGetRequest(i.GuildID, authorID, i.Locale)
 	err := command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.getRespond)
 	if err != nil {
@@ -112,11 +112,11 @@ func getValidNotifiedChannels(s *discordgo.Session, answer *amqp.ConfigurationGe
 			channel = discordChannel
 		}
 
-		// TODO News followed?
-		if webhookExists(s, "", "", answer.GuildId) {
+		if webhookExists(s, notifiedChan.WebhookId, notifiedChan.ChannelId, answer.GuildId) {
 			result = append(result, constants.NotifiedChannel{
-				Channel: channel,
-				// TODO
+				Channel:          channel,
+				Label:            notifiedChan.Label,
+				NotificationType: notifiedChan.NotificationType,
 			})
 		}
 	}

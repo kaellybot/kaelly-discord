@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
@@ -43,10 +44,10 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapConfigurationRssRequest(i.GuildID, channelID, webhookID,
-		authorID, feed, enabled, i.Locale)
+	msg := mappers.MapConfigurationNotificationRequest(i.GuildID, channelID, webhookID,
+		authorID, feed.ID, amqp.NotificationType_RSS, enabled, i.Locale)
 	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
-		msg, command.setRespond)
+		msg, command.setNotificationRespond)
 	if err != nil {
 		panic(err)
 	}

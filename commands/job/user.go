@@ -21,7 +21,7 @@ func (command *Command) userJobRequest(ctx context.Context, s *discordgo.Session
 
 	member, memberFound := i.ApplicationCommandData().Resolved.Members[i.ApplicationCommandData().TargetID]
 	user, userFound := i.ApplicationCommandData().Resolved.Users[i.ApplicationCommandData().TargetID]
-	if !(memberFound && userFound) {
+	if !memberFound || !userFound {
 		panic("Cannot retrieve member and user from interaction, panicking")
 	}
 	member.User = user

@@ -144,6 +144,7 @@
                 "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Server.Emoji }} **{{ .Server.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
             },
             "webhook": {
+                "almanax": "Almanax",
                 "name": ":bell: Notified channels",
                 "value": "{{ if .channels}}{{ range .channels }}{{ .Channel }} {{ .Provider.Emoji }} **{{ .Provider.Name }}**\n{{ end }}{{ else }}No configured channels!{{ end }}"
             }

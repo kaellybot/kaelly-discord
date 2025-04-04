@@ -26,7 +26,7 @@ func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate)
 		log.Warn().
 			Uint32(constants.LogInteractionType, uint32(event.Interaction.Type)).
 			Msgf("Cannot handle interaction type, continue recovering with this value as command Name")
-		commandName = fmt.Sprintf("%v", event.Interaction.Type)
+		commandName = fmt.Sprintf("%v", event.Type)
 	}
 
 	log.Error().Str(constants.LogCommand, commandName).

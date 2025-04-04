@@ -8,7 +8,7 @@ go 1.24
 require (
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/go-playground/locales v0.14.1
-	github.com/kaellybot/kaelly-amqp v0.0.10-beta1
+	github.com/kaellybot/kaelly-amqp v0.0.10-beta4
 	github.com/kaellybot/kaelly-commands v0.0.7-beta1
 	github.com/kaysoro/discordgo-i18n v1.0.4
 	github.com/prometheus/client_golang v1.20.4

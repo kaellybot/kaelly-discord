@@ -22,7 +22,7 @@ func (command *Command) serverRequest(ctx context.Context, s *discordgo.Session,
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapConfigurationServerRequest(i.Interaction.GuildID, channelID, server.ID, authorID, i.Locale)
+	msg := mappers.MapConfigurationServerRequest(i.GuildID, channelID, server.ID, authorID, i.Locale)
 	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.serverRespond)
 	if err != nil {
@@ -32,15 +32,21 @@ func (command *Command) serverRequest(ctx context.Context, s *discordgo.Session,
 
 func (command *Command) serverRespond(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-		content := i18n.Get(constants.MapAMQPLocale(message.Language), "config.success")
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Content: &content,
-		})
-		if err != nil {
-			log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
-		}
-	} else {
+	if !isConfigSetServerAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
 	}
+
+	content := i18n.Get(constants.MapAMQPLocale(message.Language), "config.success")
+	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Content: &content,
+	})
+	if err != nil {
+		log.Warn().Err(err).
+			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+	}
+}
+
+func isConfigSetServerAnswerValid(message *amqp.RabbitMQMessage) bool {
+	return message.Type == amqp.RabbitMQMessage_CONFIGURATION_SET_SERVER_ANSWER &&
+		message.ConfigurationSetServerAnswer != nil && message.Status == amqp.RabbitMQMessage_SUCCESS
 }

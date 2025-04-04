@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/bwmarrin/discordgo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
@@ -42,10 +43,10 @@ func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapConfigurationAlmanaxRequest(i.GuildID, channelID, webhookID,
-		authorID, enabled, i.Locale)
+	msg := mappers.MapConfigurationNotificationRequest(i.GuildID, channelID, webhookID,
+		authorID, "", amqp.NotificationType_ALMANAX, enabled, i.Locale)
 	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
-		msg, command.setRespond)
+		msg, command.setNotificationRespond)
 	if err != nil {
 		panic(err)
 	}

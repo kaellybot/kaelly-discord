@@ -362,6 +362,9 @@
             "too_many": "Outch! '*{{ .value }}*' corresponde a muitas contas do Twitter ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
         }
     },
+    "errors": {
+        "too_many_webhooks": "O número máximo de webhooks foi alcançado neste canal, não posso continuar...\n*(Clique no ícone do canal :gear:, depois em `Integrações` e finalmente em `Webhooks` para gerenciá-los)*"
+    },
     "panic": [
         "Encontrei um erro :frowning:... Isso será resolvido o mais rápido possível!",
         "Oops, parece que falhei... Estou relatando este evento aos meus criadores, desculpe!"

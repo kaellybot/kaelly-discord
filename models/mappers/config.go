@@ -54,41 +54,41 @@ func MapConfigurationServerRequest(guildID, channelID, serverID, authorID string
 	return request
 }
 
-func MapConfigurationAlmanaxRequest(guildID, channelID string,
-	enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_WEBHOOK_REQUEST, lg)
+func MapConfigurationAlmanaxRequest(guildID, channelID, webhookID, authorID string,
+	enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_ALMANAX_REQUEST, lg)
 
-	request.ConfigurationSetAlmanaxWebhookRequest = &amqp.ConfigurationSetAlmanaxWebhookRequest{
-		GuildId:      guildID,
-		ChannelId:    channelID,
-		Enabled:      enabled,
+	request.ConfigurationSetAlmanaxRequest = &amqp.ConfigurationSetAlmanaxRequest{
+		GuildId:   guildID,
+		ChannelId: channelID,
+		Enabled:   enabled,
 	}
 	return request
 }
 
-func MapConfigurationRssRequest(guildID, channelID string,
-	feed entities.FeedType, enabled bool, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
-	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_WEBHOOK_REQUEST, lg)
+func MapConfigurationRssRequest(guildID, channelID, webhookID, authorID string,
+	feed entities.FeedType, enabled bool, lg discordgo.Locale) *amqp.RabbitMQMessage {
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_RSS_REQUEST, lg)
 
-	request.ConfigurationSetRssWebhookRequest = &amqp.ConfigurationSetRssWebhookRequest{
-		GuildId:      guildID,
-		ChannelId:    channelID,
-		FeedId:       feed.ID,
-		Enabled:      enabled,
+	request.ConfigurationSetRssRequest = &amqp.ConfigurationSetRssRequest{
+		GuildId:   guildID,
+		ChannelId: channelID,
+		FeedId:    feed.ID,
+		Enabled:   enabled,
 	}
 	return request
 }
 
-func MapConfigurationTwitterRequest(guildID, channelID string,
-	twitterAccount entities.TwitterAccount, enabled bool, authorID string, lg discordgo.Locale,
+func MapConfigurationTwitterRequest(guildID, channelID, webhookID, authorID string,
+	twitterAccount entities.TwitterAccount, enabled bool, lg discordgo.Locale,
 ) *amqp.RabbitMQMessage {
-	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_WEBHOOK_REQUEST, lg)
+	request := requestBackbone(authorID, amqp.RabbitMQMessage_CONFIGURATION_SET_TWITTER_REQUEST, lg)
 
-	request.ConfigurationSetTwitterWebhookRequest = &amqp.ConfigurationSetTwitterWebhookRequest{
-		GuildId:      guildID,
-		ChannelId:    channelID,
-		TwitterId:    twitterAccount.ID,
-		Enabled:      enabled,
+	request.ConfigurationSetTwitterRequest = &amqp.ConfigurationSetTwitterRequest{
+		GuildId:   guildID,
+		ChannelId: channelID,
+		TwitterId: twitterAccount.ID,
+		Enabled:   enabled,
 	}
 	return request
 }
@@ -114,17 +114,17 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 		}
 	}
 
-	channelServers := make([]i18nChannelServer, 0)
-	for _, channelServer := range guild.ChannelServers {
-		server, found := serverService.GetServer(channelServer.ServerID)
+	serverChannels := make([]i18nChannelServer, 0)
+	for _, serverChannel := range guild.ServerChannels {
+		server, found := serverService.GetServer(serverChannel.ServerID)
 		if !found {
-			log.Warn().Str(constants.LogEntity, channelServer.ServerID).
+			log.Warn().Str(constants.LogEntity, serverChannel.ServerID).
 				Msgf("Cannot find server based on ID sent internally, continuing with empty server")
-			server = entities.Server{ID: channelServer.ServerID}
+			server = entities.Server{ID: serverChannel.ServerID}
 		}
 
-		channelServers = append(channelServers, i18nChannelServer{
-			Channel: channelServer.Channel.Mention(),
+		serverChannels = append(serverChannels, i18nChannelServer{
+			Channel: serverChannel.Channel.Mention(),
 			Server: i18nServer{
 				Name:  translators.GetEntityLabel(server, lg),
 				Emoji: server.Emoji,
@@ -132,13 +132,8 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 		})
 	}
 
-	channelWebhooks := make([]i18nChannelWebhook, 0)
-	channelWebhooks = append(channelWebhooks, mapAlmanaxWebhooksToI18n(guild.AlmanaxWebhooks,
-		emojiService, lg)...)
-	channelWebhooks = append(channelWebhooks, mapRssWebhooksToI18n(guild.RssWebhooks,
-		emojiService, feedService, lg)...)
-	channelWebhooks = append(channelWebhooks, mapTwitterWebhooksToI18n(guild.TwitterWebhooks,
-		emojiService, twitterService, lg)...)
+	notifiedChannels := mapNotifiedChannelsToI18n(guild.NotifiedChannels,
+		emojiService, feedService, twitterService, lg)
 
 	return &discordgo.MessageEmbed{
 		Title: guild.Name,
@@ -153,12 +148,12 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 				Name: i18n.Get(lg, "config.embed.server.name", i18n.Vars{
 					"gameLogo": emojiService.GetMiscStringEmoji(constants.EmojiIDGame),
 				}),
-				Value:  i18n.Get(lg, "config.embed.server.value", i18n.Vars{"channels": channelServers}),
+				Value:  i18n.Get(lg, "config.embed.server.value", i18n.Vars{"channels": serverChannels}),
 				Inline: false,
 			},
 			{
 				Name:   i18n.Get(lg, "config.embed.webhook.name"),
-				Value:  i18n.Get(lg, "config.embed.webhook.value", i18n.Vars{"channels": channelWebhooks}),
+				Value:  i18n.Get(lg, "config.embed.webhook.value", i18n.Vars{"channels": notifiedChannels}),
 				Inline: false,
 			},
 		},
@@ -166,22 +161,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 	}
 }
 
-// TODO
-func mapAlmanaxWebhooksToI18n(webhooks []constants.AlmanaxWebhook, emojiService emojis.Service,
-	lg discordgo.Locale) []i18nChannelWebhook {
-	i18nWebhooks := make([]i18nChannelWebhook, 0)
-	for _, webhook := range webhooks {
-		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
-			Channel: webhook.Channel.Mention(),
-			Provider: i18nProvider{
-				Name:  i18n.Get(lg, "webhooks.ALMANAX.name"),
-				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDAlmanax),
-			},
-		})
-	}
-	return i18nWebhooks
-}
-
+/** TODO integrate feed / twitter icons/title
 func mapRssWebhooksToI18n(webhooks []constants.RssWebhook, emojiService emojis.Service,
 	feedService feeds.Service, lg discordgo.Locale) []i18nChannelWebhook {
 	i18nWebhooks := make([]i18nChannelWebhook, 0)
@@ -226,6 +206,22 @@ func mapTwitterWebhooksToI18n(webhooks []constants.TwitterWebhook, emojiService 
 			Provider: i18nProvider{
 				Name:  providerName,
 				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDTwitter),
+			},
+		})
+	}
+	return i18nWebhooks
+}
+**/
+
+func mapNotifiedChannelsToI18n(webhooks []constants.NotifiedChannel, emojiService emojis.Service,
+	feedService feeds.Service, twitterService twitters.Service, lg discordgo.Locale) []i18nChannelWebhook {
+	i18nWebhooks := make([]i18nChannelWebhook, 0)
+	for _, webhook := range webhooks {
+		i18nWebhooks = append(i18nWebhooks, i18nChannelWebhook{
+			Channel: webhook.Channel.Mention(),
+			Provider: i18nProvider{
+				Name:  i18n.Get(lg, "webhooks.ALMANAX.name"),
+				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDAlmanax),
 			},
 		})
 	}

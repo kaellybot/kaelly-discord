@@ -5,31 +5,19 @@ import (
 )
 
 type GuildConfig struct {
-	Name            string
-	Icon            string
-	ServerID        string
-	ChannelServers  []ChannelServer
-	AlmanaxWebhooks []AlmanaxWebhook
-	RssWebhooks     []RssWebhook
-	TwitterWebhooks []TwitterWebhook
+	Name             string
+	Icon             string
+	ServerID         string
+	ServerChannels   []ServerChannel
+	NotifiedChannels []NotifiedChannel
 }
 
-type ChannelServer struct {
+type ServerChannel struct {
 	Channel  *discordgo.Channel
 	ServerID string
 }
 
-type AlmanaxWebhook struct {
+type NotifiedChannel struct {
 	Channel *discordgo.Channel
+	//  TODO
 }
-
-type RssWebhook struct {
-	Channel *discordgo.Channel
-	FeedID  string
-}
-
-type TwitterWebhook struct {
-	Channel   *discordgo.Channel
-	TwitterID string
-}
-

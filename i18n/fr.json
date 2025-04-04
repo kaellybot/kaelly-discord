@@ -362,6 +362,9 @@
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs comptes Twitter ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
         }
     },
+    "errors": {
+        "too_many_webhooks": "Le nombre maximum de webhooks est atteint sur ce salon, je ne peux pas continuer...\n*(Clique sur l'icône :gear: du salon puis `Intégrations` et enfin `Webhooks` pour les gérer)*"
+    },
     "panic": [
         "J'ai rencontré une erreur :frowning:... Cela sera étudiée et corrigée le plus tôt possible !",
         "Oops, il semble que j'ai crashé... Je reporte cet évènement à mes créateurs, désolée !"

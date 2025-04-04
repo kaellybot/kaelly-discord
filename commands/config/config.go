@@ -15,9 +15,11 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/twitters"
 	"github.com/kaellybot/kaelly-discord/utils/checks"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
@@ -109,6 +111,29 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 
 func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	command.CallHandler(s, i, command.handlers)
+}
+
+// TODO check if webhooks error is rejected
+func (command *Command) followAnnouncement(s *discordgo.Session, i *discordgo.InteractionCreate,
+	newsChannelID, targetChannelID string) (string, bool) {
+	chanFollow, err := s.ChannelNewsFollow(newsChannelID, targetChannelID)
+	if err != nil {
+		apiError, ok := discord.ExtractAPIError(err)
+		if ok || apiError.Code == constants.DiscordCodeTooManyWebhooks {
+			content := i18n.Get(i.Locale, "errors.too_many_webhooks")
+			_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+				Content: &content,
+			})
+			if err != nil {
+				log.Error().Err(err).Msg("Too many webhooks error response ignored")
+			}
+			return "", false
+		}
+
+		panic(err)
+	}
+
+	return chanFollow.WebhookID, true
 }
 
 func getServerOptions(ctx context.Context) (entities.Server, string, error) {

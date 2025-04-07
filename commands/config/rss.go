@@ -1,8 +1,8 @@
-//nolint:dupl // the code is duplicate but quite difficult to refactor: the needs behind are not the same
 package config
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -33,11 +33,22 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 		return
 	}
 
-	// TODO FOLLOW
+	var newsChannelID string
+	for _, source := range feed.Sources {
+		if source.Locale == constants.MapDiscordLocale(i.Locale) {
+			newsChannelID = source.NewsChannelID
+			break
+		}
+	}
+
+	if newsChannelID == "" {
+		panic(fmt.Errorf("cannot find feed source for '%v' in %v", feed.ID, i.Locale))
+	}
+
 	var webhookID string
 	if enabled {
 		var created bool
-		webhookID, created = command.followAnnouncement(s, i, "1351966859779641406", channelID)
+		webhookID, created = command.followAnnouncement(s, i, newsChannelID, channelID)
 		if !created {
 			return
 		}

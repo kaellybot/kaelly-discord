@@ -14,6 +14,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/commands/set"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	almanaxRepo "github.com/kaellybot/kaelly-discord/repositories/almanaxes"
 	"github.com/kaellybot/kaelly-discord/repositories/areas"
 	characRepo "github.com/kaellybot/kaelly-discord/repositories/characteristics"
 	"github.com/kaellybot/kaelly-discord/repositories/cities"
@@ -27,6 +28,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/repositories/subareas"
 	"github.com/kaellybot/kaelly-discord/repositories/transports"
 	twitterRepo "github.com/kaellybot/kaelly-discord/repositories/twitters"
+	"github.com/kaellybot/kaelly-discord/services/almanaxes"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/discord"
@@ -61,21 +63,27 @@ func New() (*Impl, error) {
 	}
 
 	// Repositories
-	dimensionRepo := dimensions.New(db)
+	almanaxRepo := almanaxRepo.New(db)
 	areaRepo := areas.New(db)
+	characRepo := characRepo.New(db)
+	cityRepo := cities.New(db)
+	dimensionRepo := dimensions.New(db)
+	emojiRepo := emojiRepo.New(db)
+	feedRepo := feedRepo.New(db)
+	guildRepo := guildRepo.New(db)
+	jobRepo := jobs.New(db)
+	orderRepo := orders.New(db)
+	serverRepo := serverRepo.New(db)
 	subAreaRepo := subareas.New(db)
 	transportTypeRepo := transports.New(db)
-	serverRepo := serverRepo.New(db)
-	jobRepo := jobs.New(db)
-	cityRepo := cities.New(db)
-	orderRepo := orders.New(db)
-	feedRepo := feedRepo.New(db)
 	twitterRepo := twitterRepo.New(db)
-	characRepo := characRepo.New(db)
-	emojiRepo := emojiRepo.New(db)
-	guildRepo := guildRepo.New(db)
 
 	// Services
+	almanaxService, errAlm := almanaxes.New(almanaxRepo)
+	if errAlm != nil {
+		return nil, errAlm
+	}
+
 	portalService, errPos := portals.New(dimensionRepo, areaRepo, subAreaRepo, transportTypeRepo)
 	if errPos != nil {
 		return nil, errPos
@@ -119,8 +127,8 @@ func New() (*Impl, error) {
 		about.New(broker, emojiService),
 		align.New(bookService, guildService, serverService, emojiService, requestsManager),
 		almanax.New(emojiService, requestsManager),
-		config.New(emojiService, feedService, guildService, serverService,
-			twitterService, requestsManager),
+		config.New(almanaxService, emojiService, feedService, guildService,
+			serverService, twitterService, requestsManager),
 		help.New(broker, &commands),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, emojiService, requestsManager),

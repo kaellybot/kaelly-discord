@@ -9,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/services/almanaxes"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
@@ -24,13 +25,14 @@ import (
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
-func New(emojiService emojis.Service, feedService feeds.Service,
-	guildService guilds.Service, serverService servers.Service,
-	twitterService twitters.Service, requestManager requests.RequestManager) *Command {
+func New(almanaxService almanaxes.Service, emojiService emojis.Service, feedService feeds.Service,
+	guildService guilds.Service, serverService servers.Service, twitterService twitters.Service,
+	requestManager requests.RequestManager) *Command {
 	cmd := Command{
 		AbstractCommand: commands.AbstractCommand{
 			DiscordID: viper.GetString(constants.ConfigID),
 		},
+		almanaxService: almanaxService,
 		emojiService:   emojiService,
 		feedService:    feedService,
 		guildService:   guildService,
@@ -118,7 +120,7 @@ func (command *Command) followAnnouncement(s *discordgo.Session, i *discordgo.In
 	chanFollow, err := s.ChannelNewsFollow(newsChannelID, targetChannelID)
 	if err != nil {
 		apiError, ok := discord.ExtractAPIError(err)
-		if ok || apiError.Code == constants.DiscordCodeTooManyWebhooks {
+		if ok && apiError.Code == constants.DiscordCodeTooManyWebhooks {
 			content := i18n.Get(i.Locale, "errors.too_many_webhooks")
 			_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 				Content: &content,

@@ -33,11 +33,10 @@ func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session
 		return
 	}
 
-	// TODO FOLLOW
 	var webhookID string
 	if enabled {
 		var created bool
-		webhookID, created = command.followAnnouncement(s, i, "1351966859779641406", channelID)
+		webhookID, created = command.followAnnouncement(s, i, twitterAccount.NewsChannelID, channelID)
 		if !created {
 			return
 		}

@@ -6,9 +6,10 @@ import (
 )
 
 type TwitterAccount struct {
-	ID   string `gorm:"primaryKey"`
-	Name string
-	Game amqp.Game
+	ID            string `gorm:"primaryKey"`
+	Name          string
+	NewsChannelID string
+	Game          amqp.Game
 }
 
 func (twittterAccount TwitterAccount) GetID() string {

@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -32,11 +33,15 @@ func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session
 		return
 	}
 
-	// TODO FOLLOW
+	almanaxNews := command.almanaxService.GetAlmanaxNews(i.Locale)
+	if almanaxNews == nil {
+		panic(fmt.Errorf("cannot find almanax news for locale %v", i.Locale))
+	}
+
 	var webhookID string
 	if enabled {
 		var created bool
-		webhookID, created = command.followAnnouncement(s, i, "1351966859779641406", channelID)
+		webhookID, created = command.followAnnouncement(s, i, almanaxNews.NewsChannelID, channelID)
 		if !created {
 			return
 		}

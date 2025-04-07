@@ -1,4 +1,4 @@
-package feeds
+package almanaxes
 
 import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
@@ -10,12 +10,11 @@ func New(db databases.MySQLConnection) *Impl {
 	return &Impl{db: db}
 }
 
-func (repo *Impl) GetFeedTypes() ([]entities.FeedType, error) {
-	var feedTypes []entities.FeedType
+func (repo *Impl) GetAlmanaxNews() ([]entities.AlmanaxNews, error) {
+	var almanaxNews []entities.AlmanaxNews
 	response := repo.db.GetDB().
-		Model(&entities.FeedType{}).
-		Preload("Labels").
-		Preload("Sources", "game = ?", constants.GetGame().AMQPGame).
-		Find(&feedTypes)
-	return feedTypes, response.Error
+		Model(&entities.AlmanaxNews{}).
+		Where("game = ?", constants.GetGame().AMQPGame).
+		Find(&almanaxNews)
+	return almanaxNews, response.Error
 }

@@ -42,8 +42,8 @@ func New(bookService books.Service, guildService guilds.Service,
 	})
 
 	interactionHandlers := cmd.HandleInteractionMessages(commands.InteractionMessageHandlers{
-		contract.JobBookPageCustomID:   cmd.updatePageBook,
-		contract.JobBookSelectCustomID: cmd.updateSelectBook,
+		contract.JobBookPageCustomID:   cmd.updateBookPage,
+		contract.JobBookSelectCustomID: cmd.updateJobBook,
 	})
 
 	cmd.slashHandlers = commands.DiscordHandlers{

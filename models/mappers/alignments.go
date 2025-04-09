@@ -67,7 +67,7 @@ func MapAlignBookToWebhook(answer *amqp.AlignGetBookAnswer,
 	lg discordgo.Locale) *discordgo.WebhookEdit {
 	return &discordgo.WebhookEdit{
 		Embeds:     mapAlignBookToEmbeds(answer, believers, alignService, serverService, lg),
-		Components: mapAlignBookToComponents(answer, lg, emojiService),
+		Components: mapAlignBookToComponents(answer, lg, alignService, emojiService),
 	}
 }
 
@@ -150,26 +150,96 @@ func mapAlignBookToEmbeds(answer *amqp.AlignGetBookAnswer,
 	return &[]*discordgo.MessageEmbed{&embed}
 }
 
-func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer,
-	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
+func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Locale,
+	alignService books.Service, emojiService emojis.Service) *[]discordgo.MessageComponent {
+	components := make([]discordgo.MessageComponent, 0)
 	cityID := answer.GetCityId()
 	orderID := answer.GetOrderId()
 	serverID := answer.GetServerId()
 	crafter := func(page int) string {
-		return contract.CraftAlignBookCustomID(cityID, orderID, serverID, page)
+		return contract.CraftAlignBookPageCustomID(cityID, orderID, serverID, page)
 	}
 
 	paginations := discord.GetPaginationButtons(int(answer.GetPage()), int(answer.GetPages()),
 		crafter, lg, emojiService)
-	if len(paginations) == 0 {
-		return &paginations
+
+	if len(paginations) != 0 {
+		components = append(components,
+			discordgo.ActionsRow{
+				Components: paginations,
+			},
+		)
 	}
 
-	return &[]discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: paginations,
-		},
+	cityChoices := make([]discordgo.SelectMenuOption, 0)
+	cityChoices = append(cityChoices, discordgo.SelectMenuOption{
+		Label:   i18n.Get(lg, "align.embed.believers.placeholders.cities"),
+		Value:   contract.AlignAllValues,
+		Default: len(cityID) == 0,
+		Emoji:   emojiService.GetMiscEmoji(constants.EmojiIDGlobal),
+	})
+	for _, city := range alignService.GetCities() {
+		cityChoices = append(cityChoices, discordgo.SelectMenuOption{
+			Label:   translators.GetEntityLabel(city, lg),
+			Value:   city.ID,
+			Default: city.ID == cityID,
+			// TODO
+			/**
+			Emoji: &discordgo.ComponentEmoji{
+				ID: "1300889614541914112",
+			},
+			**/
+		})
 	}
+
+	components = append(components,
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.SelectMenu{
+					CustomID:    contract.CraftAlignBookCityCustomID(orderID, serverID),
+					MenuType:    discordgo.StringSelectMenu,
+					Placeholder: i18n.Get(lg, "align.embed.believers.placeholders.city"),
+					Options:     cityChoices,
+				},
+			},
+		},
+	)
+
+	orderChoices := make([]discordgo.SelectMenuOption, 0)
+	orderChoices = append(orderChoices, discordgo.SelectMenuOption{
+		Label:   i18n.Get(lg, "align.embed.believers.placeholders.orders"),
+		Value:   contract.AlignAllValues,
+		Default: len(orderID) == 0,
+		Emoji:   emojiService.GetMiscEmoji(constants.EmojiIDGlobal),
+	})
+	for _, order := range alignService.GetOrders() {
+		orderChoices = append(orderChoices, discordgo.SelectMenuOption{
+			Label:   translators.GetEntityLabel(order, lg),
+			Value:   order.ID,
+			Default: order.ID == orderID,
+			// TODO
+			/**
+			Emoji: &discordgo.ComponentEmoji{
+				ID: "1300889614541914112",
+			},
+			**/
+		})
+	}
+
+	components = append(components,
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.SelectMenu{
+					CustomID:    contract.CraftAlignBookOrderCustomID(cityID, serverID),
+					MenuType:    discordgo.StringSelectMenu,
+					Placeholder: i18n.Get(lg, "align.embed.believers.placeholders.order"),
+					Options:     orderChoices,
+				},
+			},
+		},
+	)
+
+	return &components
 }
 
 func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperience,

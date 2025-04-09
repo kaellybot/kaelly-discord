@@ -42,9 +42,9 @@ func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 	}
 }
 
-func (command *Command) updateBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateBookPage(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	customID := i.MessageComponentData().CustomID
-	cityID, orderID, serverID, page, ok := contract.ExtractAlignBookCustomID(customID)
+	cityID, orderID, serverID, page, ok := contract.ExtractAlignBookPageCustomID(customID)
 	if !ok {
 		log.Error().
 			Str(constants.LogCommand, command.GetName()).
@@ -66,6 +66,98 @@ func (command *Command) updateBook(s *discordgo.Session, i *discordgo.Interactio
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookAlignGetBookRequest(cityID, orderID, serverID,
 		page, userIDs, authorID, i.Locale)
+	errReq := command.requestManager.Request(s, i, constants.AlignRequestRoutingKey,
+		msg, command.getBookReply, properties)
+	if errReq != nil {
+		panic(errReq)
+	}
+}
+
+// nolint:dupl,nolintlint // Simpler to handles these separately.
+func (command *Command) updateCityBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	customID := i.MessageComponentData().CustomID
+	values := i.MessageComponentData().Values
+	if len(values) != 1 {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, i.MessageComponentData().CustomID).
+			Msgf("Cannot retrieve city name from value, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	var cityID string
+	if values[0] != contract.AlignAllValues {
+		cityID = values[0]
+	}
+
+	orderID, serverID, ok := contract.ExtractAlignBookCityCustomID(customID)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	properties, errMembers := discord.GetMemberNickNames(s, i.GuildID)
+	if errMembers != nil {
+		panic(errMembers)
+	}
+
+	var userIDs []string
+	for userID := range properties {
+		userIDs = append(userIDs, userID)
+	}
+
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapBookAlignGetBookRequest(cityID, orderID, serverID,
+		constants.DefaultPage, userIDs, authorID, i.Locale)
+	errReq := command.requestManager.Request(s, i, constants.AlignRequestRoutingKey,
+		msg, command.getBookReply, properties)
+	if errReq != nil {
+		panic(errReq)
+	}
+}
+
+// nolint:dupl,nolintlint // Simpler to handles these separately.
+func (command *Command) updateOrderBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	customID := i.MessageComponentData().CustomID
+	values := i.MessageComponentData().Values
+	if len(values) != 1 {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, i.MessageComponentData().CustomID).
+			Msgf("Cannot retrieve order name from value, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	var orderID string
+	if values[0] != contract.AlignAllValues {
+		orderID = values[0]
+	}
+
+	cityID, serverID, ok := contract.ExtractAlignBookOrderCustomID(customID)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	properties, errMembers := discord.GetMemberNickNames(s, i.GuildID)
+	if errMembers != nil {
+		panic(errMembers)
+	}
+
+	var userIDs []string
+	for userID := range properties {
+		userIDs = append(userIDs, userID)
+	}
+
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapBookAlignGetBookRequest(cityID, orderID, serverID,
+		constants.DefaultPage, userIDs, authorID, i.Locale)
 	errReq := command.requestManager.Request(s, i, constants.AlignRequestRoutingKey,
 		msg, command.getBookReply, properties)
 	if errReq != nil {

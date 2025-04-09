@@ -52,7 +52,13 @@
         "embed": {
             "believers": {
                 "title": "Liste des alignés",
-                "description": "{{ if .believers }}*{{ .total }} résultat{{ if gt .total 1 }}s{{ end }}, page {{ .page }} sur {{ .pages }}*\n\n{{ range .believers}}{{ .City }} {{ .Order }} niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun aligné pour le moment !{{ end }}"
+                "description": "{{ if .believers }}*{{ .total }} résultat{{ if gt .total 1 }}s{{ end }}, page {{ .page }} sur {{ .pages }}*\n\n{{ range .believers}}{{ .City }} {{ .Order }} niv. {{ .Level }} : **{{ .Username }}**\n{{ end }}{{ else }}Aucun aligné pour le moment !{{ end }}",
+                "placeholders": {
+                    "cities": "Toutes les cités",
+                    "city": "Choisissez une cité",
+                    "orders": "Tous les ordres",
+                    "order": "Choisissez un ordre"
+                }            
             },
             "beliefs": {
                 "title": "Alignements de {{ .username }}",

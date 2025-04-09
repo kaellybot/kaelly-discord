@@ -9,6 +9,7 @@ const (
 	EmojiIDFirst       EmojiMiscID = "first"
 	EmojiIDGame        EmojiMiscID = "dofusGame"
 	EmojiIDGithub      EmojiMiscID = "github"
+	EmojiIDGlobal      EmojiMiscID = "global"
 	EmojiIDKama        EmojiMiscID = "kama"
 	EmojiIDLast        EmojiMiscID = "last"
 	EmojiIDNext        EmojiMiscID = "next"
@@ -17,6 +18,7 @@ const (
 	EmojiIDRange       EmojiMiscID = "range"
 	EmojiIDRecipe      EmojiMiscID = "recipe"
 	EmojiIDRSS         EmojiMiscID = "rss"
+	EmojiIDScroll      EmojiMiscID = "scroll"
 	EmojiIDTacticalMap EmojiMiscID = "tacticalMap"
 	EmojiIDTwitter     EmojiMiscID = "twitter"
 

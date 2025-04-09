@@ -42,7 +42,7 @@ func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 	}
 }
 
-func (command *Command) updatePageBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateBookPage(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	customID := i.MessageComponentData().CustomID
 	jobID, serverID, page, ok := contract.ExtractJobBookPageCustomID(customID)
 	if !ok {
@@ -73,7 +73,7 @@ func (command *Command) updatePageBook(s *discordgo.Session, i *discordgo.Intera
 	}
 }
 
-func (command *Command) updateSelectBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateJobBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	customID := i.MessageComponentData().CustomID
 	values := i.MessageComponentData().Values
 	if len(values) != 1 {

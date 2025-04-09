@@ -52,7 +52,13 @@
         "embed": {
             "believers": {
                 "title": "Liste der Ausgerichteten",
-                "description": "{{ if .believers }}*{{ .total }} Ergebnis{{ if gt .total 1 }}se{{ end }}, Seite {{ .page }} von {{ .pages }}*\n\n{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}Derzeit keine Ausgerichteten gefunden!{{ end }}"
+                "description": "{{ if .believers }}*{{ .total }} Ergebnis{{ if gt .total 1 }}se{{ end }}, Seite {{ .page }} von {{ .pages }}*\n\n{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}Derzeit keine Ausgerichteten gefunden!{{ end }}",
+                "placeholders": {
+                    "cities": "Alle Städte",
+                    "city": "Wähle eine Stadt",
+                    "orders": "Alle Orden",
+                    "order": "Wähle einen Orden"
+                }
             },
             "beliefs": {
                 "title": "{{ .username }} Ausrichtungen",

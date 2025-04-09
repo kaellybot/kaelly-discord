@@ -12,6 +12,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	i18n "github.com/kaysoro/discordgo-i18n"
@@ -19,13 +20,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-func New(broker amqp.MessageBroker, cmds *[]commands.DiscordCommand) *Command {
+func New(broker amqp.MessageBroker, cmds *[]commands.DiscordCommand,
+	emojiService emojis.Service) *Command {
 	cmd := &Command{
 		AbstractCommand: commands.AbstractCommand{
 			DiscordID: viper.GetString(constants.HelpID),
 		},
-		broker:   broker,
-		commands: cmds,
+		broker:       broker,
+		commands:     cmds,
+		emojiService: emojiService,
 	}
 
 	//nolint:exhaustive // no need to implement everything, only that matters
@@ -214,9 +217,7 @@ func (command *Command) getHelpComponents(selectedCommandName string, page int,
 		Label:   i18n.Get(lg, "help.commands.choices.menu"),
 		Value:   menuCommandName,
 		Default: selectedCommandName == menuCommandName,
-		Emoji: &discordgo.ComponentEmoji{
-			Name: "📜",
-		},
+		Emoji:   command.emojiService.GetMiscEmoji(constants.EmojiIDScroll),
 	})
 
 	for _, command := range *command.commands {

@@ -52,7 +52,13 @@
         "embed": {
             "believers": {
                 "title": "Aligned list",
-                "description": "{{ if .believers }}*{{ .total }} result{{ if gt .total 1 }}s{{ end }}, page {{ .page }} on {{ .pages }}*\n\n{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}"
+                "description": "{{ if .believers }}*{{ .total }} result{{ if gt .total 1 }}s{{ end }}, page {{ .page }} on {{ .pages }}*\n\n{{ range .believers}}{{ .City }} {{ .Order }} lvl. {{ .Level }}: **{{ .Username }}**\n{{ end }}{{ else }}No aligned found at this moment!{{ end }}",
+                "placeholders": {
+                    "cities": "All cities",
+                    "city": "Choose a city",
+                    "orders":"All orders",
+                    "order": "Choose an order"
+                }  
             },
             "beliefs": {
                 "title": "{{ .username }} alignments",

@@ -129,7 +129,7 @@ func New() (*Impl, error) {
 		almanax.New(emojiService, requestsManager),
 		config.New(almanaxService, emojiService, feedService, guildService,
 			serverService, twitterService, requestsManager),
-		help.New(broker, &commands),
+		help.New(broker, &commands, emojiService),
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, emojiService, requestsManager),
 		competition.New(emojiService, requestsManager),

@@ -238,6 +238,9 @@
             "craftsman": {
                 "title": "Métiers de {{ .username }}",
                 "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Niv. {{ .Level }}\n{{ end }}{{ else }}Aucun métier pour le moment !{{ end }}"
+            },
+            "choices": {
+                "placeholder": "Métier"
             }
         }
     },
@@ -351,7 +354,7 @@
             "constraints": "Le champs ne doit pas être vide ! :grin:"
         },
         "server": {
-            "required": "Oops! Il semble qu'il n'y a pas de serveur {{ .game.Name }} lié à ta guilde (ou au salon), utilise l'option *server* (exemple: `/pos server Djaul`) ou lie ta guilde à un serveur avec la commande `/config server` :grin:",
+            "required": "Oups! Il semble qu'il n'y a pas de serveur {{ .game.Name }} lié à ta guilde (ou au salon), utilise l'option *server* (exemple: `/pos server Djaul`) ou lie ta guilde à un serveur avec la commande `/config server` :grin:",
             "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun serveur que je connaisse ! :pensive:",
             "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs serveurs ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Réessaie en sélectionnant un serveur de la liste :slight_smile:"
         },

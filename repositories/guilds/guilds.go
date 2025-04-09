@@ -25,7 +25,7 @@ func (repo *Impl) Exists(guildID string) (bool, error) {
 func (repo *Impl) GetServer(guildID, channelID string) (entities.Server, bool, error) {
 	var serverIDs []string
 	err := repo.db.GetDB().Table("guilds").
-		Select("COALESCE(channel_servers.server_id, guilds.server_id) as server").
+		Select("COALESCE(channel_servers.server_id, guilds.server_id, '') as server").
 		Joins("LEFT JOIN channel_servers ON guilds.id = channel_servers.guild_id "+
 			"AND channel_servers.channel_id = ?", channelID).
 		Where("guilds.id = ?", guildID).
@@ -33,7 +33,7 @@ func (repo *Impl) GetServer(guildID, channelID string) (entities.Server, bool, e
 	if err != nil {
 		return entities.Server{}, false, err
 	}
-	if len(serverIDs) == 0 {
+	if len(serverIDs) == 0 || serverIDs[0] == "" {
 		return entities.Server{}, false, nil
 	}
 

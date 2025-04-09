@@ -238,6 +238,9 @@
             "craftsman": {
                 "title": "{{ .username }} jobs",
                 "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Lvl. {{ .Level }}\n{{ end }}{{ else }}No job for the moment!{{ end }}"
+            },
+            "choices": {
+                "placeholder": "Job"
             }
         }
     },

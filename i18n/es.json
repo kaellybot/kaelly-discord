@@ -238,6 +238,9 @@
             "craftsman": {
                 "title": "Profesiones de {{ .username }}",
                 "description": "{{ if .jobs }}{{ range .jobs}}{{ .Job }} Niv. {{ .Level }}\n{{ end }}{{ else }}¡No hay profesiones por el momento!{{ end }}"
+            },
+            "choices": {
+                "placeholder": "Profesion"
             }
         }
     },

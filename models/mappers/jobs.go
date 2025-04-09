@@ -62,29 +62,53 @@ func MapJobBookToWebhook(answer *amqp.JobGetBookAnswer,
 	lg discordgo.Locale) *discordgo.WebhookEdit {
 	return &discordgo.WebhookEdit{
 		Embeds:     mapJobBookToEmbeds(answer, craftsmen, jobService, serverService, lg),
-		Components: mapJobBookToComponents(answer, lg, emojiService),
+		Components: mapJobBookToComponents(answer, lg, jobService, emojiService),
 	}
 }
 
-func mapJobBookToComponents(answer *amqp.JobGetBookAnswer,
-	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
+func mapJobBookToComponents(answer *amqp.JobGetBookAnswer, lg discordgo.Locale,
+	jobService books.Service, emojiService emojis.Service) *[]discordgo.MessageComponent {
+	components := make([]discordgo.MessageComponent, 0)
 	jobID := answer.GetJobId()
 	serverID := answer.GetServerId()
 	crafter := func(page int) string {
-		return contract.CraftJobBookCustomID(jobID, serverID, page)
+		return contract.CraftJobBookPageCustomID(jobID, serverID, page)
 	}
 
 	paginations := discord.GetPaginationButtons(int(answer.GetPage()), int(answer.GetPages()),
 		crafter, lg, emojiService)
-	if len(paginations) == 0 {
-		return &paginations
+
+	if len(paginations) != 0 {
+		components = append(components,
+			discordgo.ActionsRow{
+				Components: paginations,
+			},
+		)
 	}
 
-	return &[]discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: paginations,
-		},
+	jobChoices := make([]discordgo.SelectMenuOption, 0)
+	for _, job := range jobService.GetJobs() {
+		jobChoices = append(jobChoices, discordgo.SelectMenuOption{
+			Label:   translators.GetEntityLabel(job, lg),
+			Value:   job.ID,
+			Default: job.ID == jobID,
+		})
 	}
+
+	components = append(components,
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.SelectMenu{
+					CustomID:    contract.CraftJobBookSelectCustomID(serverID),
+					MenuType:    discordgo.StringSelectMenu,
+					Placeholder: i18n.Get(lg, "job.embed.choices.placeholder"),
+					Options:     jobChoices,
+				},
+			},
+		},
+	)
+
+	return &components
 }
 
 func mapJobBookToEmbeds(answer *amqp.JobGetBookAnswer, craftsmen []constants.JobUserLevel, jobService books.Service,

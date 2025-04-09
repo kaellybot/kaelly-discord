@@ -42,9 +42,9 @@ func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 	}
 }
 
-func (command *Command) updateBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updatePageBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	customID := i.MessageComponentData().CustomID
-	jobID, serverID, page, ok := contract.ExtractJobBookCustomID(customID)
+	jobID, serverID, page, ok := contract.ExtractJobBookPageCustomID(customID)
 	if !ok {
 		log.Error().
 			Str(constants.LogCommand, command.GetName()).
@@ -66,6 +66,46 @@ func (command *Command) updateBook(s *discordgo.Session, i *discordgo.Interactio
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookJobGetBookRequest(jobID, serverID,
 		page, userIDs, authorID, i.Locale)
+	errReq := command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
+		msg, command.getBookReply, properties)
+	if errReq != nil {
+		panic(errReq)
+	}
+}
+
+func (command *Command) updateSelectBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	customID := i.MessageComponentData().CustomID
+	values := i.MessageComponentData().Values
+	if len(values) != 1 {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, i.MessageComponentData().CustomID).
+			Msgf("Cannot retrieve job name from value, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	serverID, ok := contract.ExtractJobBookSelectCustomID(customID)
+	if !ok {
+		log.Error().
+			Str(constants.LogCommand, command.GetName()).
+			Str(constants.LogCustomID, customID).
+			Msgf("Cannot handle custom ID, panicking...")
+		panic(commands.ErrInvalidInteraction)
+	}
+
+	properties, errMembers := discord.GetMemberNickNames(s, i.GuildID)
+	if errMembers != nil {
+		panic(errMembers)
+	}
+
+	var userIDs []string
+	for userID := range properties {
+		userIDs = append(userIDs, userID)
+	}
+
+	authorID := discord.GetUserID(i.Interaction)
+	msg := mappers.MapBookJobGetBookRequest(values[0], serverID,
+		constants.DefaultPage, userIDs, authorID, i.Locale)
 	errReq := command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
 		msg, command.getBookReply, properties)
 	if errReq != nil {

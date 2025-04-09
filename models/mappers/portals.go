@@ -5,6 +5,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
@@ -23,7 +24,8 @@ func MapPortalPositionRequest(dimension entities.Dimension, server entities.Serv
 }
 
 func MapPortalToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.Service,
-	serverService servers.Service, locale amqp.Language) *discordgo.MessageEmbed {
+	serverService servers.Service, emojiService emojis.Service, locale amqp.Language,
+) *discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 	dimension, found := portalService.GetDimension(portal.DimensionId)
 	if !found {
@@ -64,11 +66,11 @@ func MapPortalToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalSe
 
 		if portal.Position.ConditionalTransport != nil {
 			embed.Fields = append(embed.Fields,
-				mapTransportToEmbed(portal.Position.ConditionalTransport, portalService, lg))
+				mapTransportToEmbed(portal.Position.ConditionalTransport, portalService, emojiService, lg))
 		}
 
 		embed.Fields = append(embed.Fields,
-			mapTransportToEmbed(portal.Position.Transport, portalService, lg))
+			mapTransportToEmbed(portal.Position.Transport, portalService, emojiService, lg))
 	} else {
 		embed.Description = i18n.Get(lg, "pos.embed.unknown")
 	}
@@ -77,7 +79,8 @@ func MapPortalToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalSe
 }
 
 func mapTransportToEmbed(transport *amqp.PortalPositionAnswer_PortalPosition_Position_Transport,
-	portalService portals.Service, lg discordgo.Locale) *discordgo.MessageEmbedField {
+	portalService portals.Service, emojiService emojis.Service, lg discordgo.Locale,
+) *discordgo.MessageEmbedField {
 	transportType, found := portalService.GetTransportType(transport.TypeId)
 	if !found {
 		log.Warn().
@@ -105,7 +108,7 @@ func mapTransportToEmbed(transport *amqp.PortalPositionAnswer_PortalPosition_Pos
 	return &discordgo.MessageEmbedField{
 		Name: i18n.Get(lg, "pos.embed.transport.name", i18n.Vars{
 			"type":  translators.GetEntityLabel(transportType, lg),
-			"emoji": transportType.Emoji,
+			"emoji": emojiService.GetEntityStringEmoji(transportType.ID, constants.EmojiTypeTransportType),
 		}),
 		Value: i18n.Get(lg, "pos.embed.transport.value", i18n.Vars{
 			"area":    translators.GetEntityLabel(area, lg),

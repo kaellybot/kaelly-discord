@@ -6,8 +6,7 @@ import (
 
 //nolint:lll
 type TransportType struct {
-	ID     string `gorm:"primaryKey"`
-	Emoji  string
+	ID     string               `gorm:"primaryKey"`
 	Labels []TransportTypeLabel `gorm:"foreignKey:TransportTypeID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 

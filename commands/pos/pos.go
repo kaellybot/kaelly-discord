@@ -11,6 +11,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -25,7 +26,8 @@ import (
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(guildService guilds.Service, portalService portals.Service,
-	serverService servers.Service, requestManager requests.RequestManager) *Command {
+	serverService servers.Service, emojiService emojis.Service,
+	requestManager requests.RequestManager) *Command {
 	cmd := Command{
 		AbstractCommand: commands.AbstractCommand{
 			DiscordID: viper.GetString(constants.PosID),
@@ -33,6 +35,7 @@ func New(guildService guilds.Service, portalService portals.Service,
 		guildService:   guildService,
 		portalService:  portalService,
 		serverService:  serverService,
+		emojiService:   emojiService,
 		requestManager: requestManager,
 	}
 
@@ -97,7 +100,7 @@ func (command *Command) respond(_ context.Context, s *discordgo.Session,
 	embeds := make([]*discordgo.MessageEmbed, 0)
 	for _, position := range message.GetPortalPositionAnswer().GetPositions() {
 		embeds = append(embeds, mappers.MapPortalToEmbed(position, command.portalService,
-			command.serverService, message.Language))
+			command.serverService, command.emojiService, message.Language))
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &embeds})

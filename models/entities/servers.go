@@ -5,7 +5,7 @@ import amqp "github.com/kaellybot/kaelly-amqp"
 type Server struct {
 	ID     string `gorm:"primaryKey"`
 	Icon   string
-	Emoji  string
+	Image  string
 	Game   amqp.Game
 	Labels []ServerLabel `gorm:"foreignKey:ServerID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

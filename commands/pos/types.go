@@ -2,6 +2,7 @@ package pos
 
 import (
 	"github.com/kaellybot/kaelly-discord/commands"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -13,6 +14,7 @@ type Command struct {
 	guildService   guilds.Service
 	portalService  portals.Service
 	serverService  servers.Service
+	emojiService   emojis.Service
 	requestManager requests.RequestManager
 	handlers       commands.DiscordHandlers
 }

@@ -86,7 +86,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 
 		guildServer = &i18nServer{
 			Name:  translators.GetEntityLabel(server, lg),
-			Emoji: server.Emoji,
+			Emoji: emojiService.GetEntityStringEmoji(server.ID, constants.EmojiTypeServer),
 		}
 	}
 
@@ -103,7 +103,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 			Channel: serverChannel.Channel.Mention(),
 			Server: i18nServer{
 				Name:  translators.GetEntityLabel(server, lg),
-				Emoji: server.Emoji,
+				Emoji: emojiService.GetEntityStringEmoji(server.ID, constants.EmojiTypeServer),
 			},
 		})
 	}

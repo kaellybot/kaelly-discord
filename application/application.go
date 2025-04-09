@@ -133,7 +133,7 @@ func New() (*Impl, error) {
 		item.New(characService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, emojiService, requestsManager),
 		competition.New(emojiService, requestsManager),
-		pos.New(guildService, portalService, serverService, requestsManager),
+		pos.New(guildService, portalService, serverService, emojiService, requestsManager),
 		set.New(characService, emojiService, requestsManager),
 	)
 

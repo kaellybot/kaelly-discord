@@ -92,6 +92,7 @@ func mapJobBookToComponents(answer *amqp.JobGetBookAnswer, lg discordgo.Locale,
 			Label:   translators.GetEntityLabel(job, lg),
 			Value:   job.ID,
 			Default: job.ID == jobID,
+			Emoji:   emojiService.GetEntityEmoji(job.ID, constants.EmojiTypeJob),
 		})
 	}
 

@@ -66,14 +66,15 @@ func MapAlignBookToWebhook(answer *amqp.AlignGetBookAnswer,
 	serverService servers.Service, emojiService emojis.Service,
 	lg discordgo.Locale) *discordgo.WebhookEdit {
 	return &discordgo.WebhookEdit{
-		Embeds:     mapAlignBookToEmbeds(answer, believers, alignService, serverService, lg),
+		Embeds:     mapAlignBookToEmbeds(answer, believers, alignService, emojiService, serverService, lg),
 		Components: mapAlignBookToComponents(answer, lg, alignService, emojiService),
 	}
 }
 
 func mapAlignBookToEmbeds(answer *amqp.AlignGetBookAnswer,
 	believers []constants.AlignmentUserLevel, alignService books.Service,
-	serverService servers.Service, lg discordgo.Locale) *[]*discordgo.MessageEmbed {
+	emojiService emojis.Service, serverService servers.Service, lg discordgo.Locale,
+) *[]*discordgo.MessageEmbed {
 	server, found := serverService.GetServer(answer.GetServerId())
 	if !found {
 		log.Warn().Str(constants.LogEntity, answer.GetServerId()).
@@ -114,7 +115,7 @@ func mapAlignBookToEmbeds(answer *amqp.AlignGetBookAnswer,
 
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
 			Username: alignXp.Username,
-			City:     city.Emoji,
+			City:     emojiService.GetEntityStringEmoji(city.ID, constants.EmojiTypeCity),
 			Order:    orderEmoji,
 			Level:    alignXp.Level,
 		})
@@ -183,12 +184,7 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 			Label:   translators.GetEntityLabel(city, lg),
 			Value:   city.ID,
 			Default: city.ID == cityID,
-			// TODO
-			/**
-			Emoji: &discordgo.ComponentEmoji{
-				ID: "1300889614541914112",
-			},
-			**/
+			Emoji:   emojiService.GetEntityEmoji(city.ID, constants.EmojiTypeCity),
 		})
 	}
 
@@ -217,12 +213,7 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 			Label:   translators.GetEntityLabel(order, lg),
 			Value:   order.ID,
 			Default: order.ID == orderID,
-			// TODO
-			/**
-			Emoji: &discordgo.ComponentEmoji{
-				ID: "1300889614541914112",
-			},
-			**/
+			Emoji:   emojiService.GetEntityEmoji(order.ID, constants.EmojiTypeOrder),
 		})
 	}
 
@@ -244,7 +235,8 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 
 func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperience,
 	member *discordgo.Member, serverID string, alignService books.Service,
-	serverService servers.Service, locale amqp.Language) *[]*discordgo.MessageEmbed {
+	emojiService emojis.Service, serverService servers.Service, locale amqp.Language,
+) *[]*discordgo.MessageEmbed {
 	lg := constants.MapAMQPLocale(locale)
 	server, found := serverService.GetServer(serverID)
 	if !found {
@@ -285,7 +277,7 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 		}
 
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
-			City:  city.Emoji,
+			City:  emojiService.GetEntityStringEmoji(city.ID, constants.EmojiTypeCity),
 			Order: orderEmoji,
 			Level: alignXp.Level,
 		})

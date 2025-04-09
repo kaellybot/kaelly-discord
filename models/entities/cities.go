@@ -8,7 +8,6 @@ import (
 type City struct {
 	ID     string `gorm:"primaryKey"`
 	Icon   string
-	Emoji  string
 	Type   constants.CityType
 	Color  int
 	Game   amqp.Game   `gorm:"primaryKey"`

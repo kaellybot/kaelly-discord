@@ -50,7 +50,7 @@ func (command *Command) userRespond(_ context.Context, s *discordgo.Session,
 
 		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Embeds: mappers.MapAlignUserToEmbed(message.AlignGetUserAnswer.Beliefs, member, message.AlignGetUserAnswer.ServerId,
-				command.bookService, command.serverService, message.Language),
+				command.bookService, command.emojiService, command.serverService, message.Language),
 		})
 		if err != nil {
 			log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")

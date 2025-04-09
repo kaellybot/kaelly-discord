@@ -22,11 +22,18 @@ const (
 	EmojiIDTacticalMap EmojiMiscID = "tacticalMap"
 	EmojiIDTwitter     EmojiMiscID = "twitter"
 
+	EmojiTypeBonusSet  EmojiType = "BonusSet"
 	EmojiTypeEquipment EmojiType = "Equipment"
 	EmojiTypeItem      EmojiType = "Item"
-	EmojiTypeBonusSet  EmojiType = "BonusSet"
 	EmojiTypeMisc      EmojiType = "Miscellaneous"
+
+	EmojiTypeCity          EmojiEntity = "City"
+	EmojiTypeJob           EmojiEntity = "Job"
+	EmojiTypeOrder         EmojiEntity = "Order"
+	EmojiTypeServer        EmojiEntity = "Server"
+	EmojiTypeTransportType EmojiEntity = "TransportType"
 )
 
 type EmojiMiscID string
 type EmojiType string
+type EmojiEntity EmojiType

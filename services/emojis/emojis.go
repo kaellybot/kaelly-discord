@@ -81,6 +81,46 @@ func (service *Impl) GetMiscEmoji(emojiMiscID constants.EmojiMiscID) *discordgo.
 	return mapEmoji(&emoji)
 }
 
+func (service *Impl) GetEntityStringEmoji(entityID string, entityType constants.EmojiEntity) string {
+	innerStore, found := service.emojiStore[constants.EmojiType(entityType)]
+	if !found {
+		log.Warn().
+			Str(constants.LogEmojiType, string(entityType)).
+			Msgf("No entity emoji type store found, returning empty emoji")
+		return mapEmojiString(nil)
+	}
+
+	emoji, found := innerStore[entityID]
+	if !found {
+		log.Warn().
+			Str(constants.LogEntity, entityID).
+			Msgf("No entity emoji found, returning empty emoji")
+		return mapEmojiString(nil)
+	}
+
+	return mapEmojiString(&emoji)
+}
+
+func (service *Impl) GetEntityEmoji(entityID string, entityType constants.EmojiEntity) *discordgo.ComponentEmoji {
+	innerStore, found := service.emojiStore[constants.EmojiType(entityType)]
+	if !found {
+		log.Warn().
+			Str(constants.LogEmojiType, string(entityType)).
+			Msgf("No entity emoji type store found, returning empty emoji")
+		return mapEmoji(nil)
+	}
+
+	emoji, found := innerStore[entityID]
+	if !found {
+		log.Warn().
+			Str(constants.LogEntity, entityID).
+			Msgf("No entity emoji found, returning empty emoji")
+		return mapEmoji(nil)
+	}
+
+	return mapEmoji(&emoji)
+}
+
 func (service *Impl) GetEquipmentStringEmoji(equipmentType amqp.EquipmentType) string {
 	innerStore, found := service.emojiStore[constants.EmojiTypeEquipment]
 	if !found {

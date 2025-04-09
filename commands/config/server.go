@@ -48,5 +48,5 @@ func (command *Command) serverRespond(_ context.Context, s *discordgo.Session,
 
 func isConfigSetServerAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Type == amqp.RabbitMQMessage_CONFIGURATION_SET_SERVER_ANSWER &&
-		message.ConfigurationSetServerAnswer != nil && message.Status == amqp.RabbitMQMessage_SUCCESS
+		message.Status == amqp.RabbitMQMessage_SUCCESS
 }

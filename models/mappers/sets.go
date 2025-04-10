@@ -45,14 +45,14 @@ func MapSetToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, itemNumber int,
 	}
 
 	return &discordgo.WebhookEdit{
-		Embeds:     mapSetToEmbeds(answer, bonus, characService, lg),
+		Embeds:     mapSetToEmbeds(answer, bonus, characService, emojiService, lg),
 		Components: mapSetToComponents(answer, bonus, emojiService, lg),
 	}
 }
 
 func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 	bonus *amqp.EncyclopediaItemAnswer_Set_Bonus, service characteristics.Service,
-	lg discordgo.Locale) *[]*discordgo.MessageEmbed {
+	emojiService emojis.Service, lg discordgo.Locale) *[]*discordgo.MessageEmbed {
 	set := answer.GetSet()
 	fields := discord.SliceFields(set.GetEquipments(), constants.MaxEquipmentPerField,
 		func(i int, items []*amqp.EncyclopediaItemAnswer_Set_Equipment) *discordgo.MessageEmbedField {
@@ -71,7 +71,7 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 		})
 
 	if bonus != nil {
-		i18nEffects := mapEffects(bonus.GetEffects(), service)
+		i18nEffects := mapEffects(bonus.GetEffects(), service, emojiService)
 		bonusFields := discord.SliceFields(i18nEffects, constants.MaxCharacterPerField,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter

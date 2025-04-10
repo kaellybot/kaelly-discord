@@ -115,7 +115,7 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 	}
 
 	if len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0 {
-		i18nWeaponEffects := mapEffects(equipment.GetWeaponEffects(), service)
+		i18nWeaponEffects := mapEffects(equipment.GetWeaponEffects(), service, emojiService)
 		weaponEffectFields := discord.SliceFields(i18nWeaponEffects, constants.MaxCharacterPerField,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
@@ -133,7 +133,7 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 			})
 		fields = append(fields, weaponEffectFields...)
 
-		i18nEffects := mapEffects(equipment.GetEffects(), service)
+		i18nEffects := mapEffects(equipment.GetEffects(), service, emojiService)
 		effectFields := discord.SliceFields(i18nEffects, constants.MaxCharacterPerField,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter

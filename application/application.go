@@ -48,7 +48,7 @@ import (
 //nolint:funlen,nolintlint // Yup, but much clearer like that.
 func New() (*Impl, error) {
 	if !viper.GetBool(constants.Production) {
-		log.Info().Msgf("Development mode enabled, retrieving specific values (eg. emoji_dev)")
+		log.Info().Msgf("Development mode enabled")
 	}
 
 	// Misc

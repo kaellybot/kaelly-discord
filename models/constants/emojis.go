@@ -27,11 +27,12 @@ const (
 	EmojiTypeItem      EmojiType = "Item"
 	EmojiTypeMisc      EmojiType = "Miscellaneous"
 
-	EmojiTypeCity          EmojiEntity = "City"
-	EmojiTypeJob           EmojiEntity = "Job"
-	EmojiTypeOrder         EmojiEntity = "Order"
-	EmojiTypeServer        EmojiEntity = "Server"
-	EmojiTypeTransportType EmojiEntity = "TransportType"
+	EmojiTypeCharacteristic EmojiEntity = "Characteristic"
+	EmojiTypeCity           EmojiEntity = "City"
+	EmojiTypeJob            EmojiEntity = "Job"
+	EmojiTypeOrder          EmojiEntity = "Order"
+	EmojiTypeServer         EmojiEntity = "Server"
+	EmojiTypeTransportType  EmojiEntity = "TransportType"
 )
 
 type EmojiMiscID string

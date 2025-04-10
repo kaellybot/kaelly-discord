@@ -7,8 +7,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
+	"github.com/kaellybot/kaelly-discord/services/emojis"
 )
 
 type AMQPCharacteristic interface {
@@ -27,7 +29,8 @@ var (
 )
 
 func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
-	characteristicService characteristics.Service) []i18nCharacteristic {
+	characteristicService characteristics.Service, emojiService emojis.Service,
+) []i18nCharacteristic {
 	characs := make([]i18nCharacteristic, 0)
 	for _, effect := range effects {
 		charac, found := characteristicService.GetCharacteristic(effect.GetId())
@@ -37,14 +40,18 @@ func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 			}
 		}
 
+		characEmoji := emojiService.
+			GetEntityStringEmoji(charac.ID, constants.EmojiTypeCharacteristic)
 		label := highlightEffectValues(effect.GetLabel())
 		for _, regex := range charac.Regexes {
-			label = strings.ReplaceAll(label, regex.Expression, regex.Emoji)
+			regexEmoji := emojiService.
+				GetEntityStringEmoji(regex.RelativeCharacteristicID, constants.EmojiTypeCharacteristic)
+			label = strings.ReplaceAll(label, regex.Expression, regexEmoji)
 		}
 
 		characs = append(characs, i18nCharacteristic{
 			Label:     label,
-			Emoji:     charac.Emoji,
+			Emoji:     characEmoji,
 			SortOrder: charac.SortOrder,
 		})
 	}

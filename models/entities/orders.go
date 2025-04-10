@@ -2,7 +2,6 @@ package entities
 
 import amqp "github.com/kaellybot/kaelly-amqp"
 
-//nolint:lll // Lisibility cannot be improved on GORM declarations.
 type Order struct {
 	ID     string       `gorm:"primaryKey"`
 	Game   amqp.Game    `gorm:"primaryKey"`

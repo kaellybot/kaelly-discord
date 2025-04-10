@@ -34,10 +34,10 @@ github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.5 h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
 github.com/jinzhu/now v1.1.5/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
-github.com/kaellybot/kaelly-amqp v0.0.10-beta4 h1:InB5EBWhxYmy1ip3JBhfO37bYAs0+2OKMEAWGB6YNaQ=
-github.com/kaellybot/kaelly-amqp v0.0.10-beta4/go.mod h1:SO8dV5G+7oAAnVghb/OvIBFMfW6ONg0MvoJWwIAI0CQ=
-github.com/kaellybot/kaelly-commands v0.0.7-beta3 h1:aNYXMaokMHP96hc2GUwl9Stqh4CNBLS5YkNNIVss+Eo=
-github.com/kaellybot/kaelly-commands v0.0.7-beta3/go.mod h1:HX11Kyv2m1q5A/DIjhMZ7h0M2k6ZJjw6e1g+eGwjXKs=
+github.com/kaellybot/kaelly-amqp v1.0.0 h1:VtbbF41IlNdH6/BKUfE/ZElOLUJT2r51fW7o0QG16Mc=
+github.com/kaellybot/kaelly-amqp v1.0.0/go.mod h1:SO8dV5G+7oAAnVghb/OvIBFMfW6ONg0MvoJWwIAI0CQ=
+github.com/kaellybot/kaelly-commands v1.0.0 h1:XxgGx/Bnvp7shFwMlDK1VP7355FFbBWK5RQFkkz/8Ck=
+github.com/kaellybot/kaelly-commands v1.0.0/go.mod h1:HX11Kyv2m1q5A/DIjhMZ7h0M2k6ZJjw6e1g+eGwjXKs=
 github.com/kaysoro/discordgo-i18n v1.0.4 h1:DMv+9IyVjWCym11vKFSkbSt4ry/CKurPHSLREs/qVv8=
 github.com/kaysoro/discordgo-i18n v1.0.4/go.mod h1:xHFX95v0L92qVLuyjNomFB8eLprojRYjoY8Z31a5Ldk=
 github.com/klauspost/compress v1.17.9 h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2qeMA=

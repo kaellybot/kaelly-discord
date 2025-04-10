@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/bwmarrin/discordgo"
@@ -106,17 +107,11 @@ func mapAlignBookToEmbeds(answer *amqp.AlignGetBookAnswer,
 			order = entities.Order{}
 		}
 
-		var orderEmoji string
-		if city.Type == constants.CityTypeLight {
-			orderEmoji = order.EmojiLight
-		} else {
-			orderEmoji = order.EmojiDark
-		}
-
+		orderEmojiID := buildEmojiOrderID(&city, order.ID)
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
 			Username: alignXp.Username,
 			City:     emojiService.GetEntityStringEmoji(city.ID, constants.EmojiTypeCity),
-			Order:    orderEmoji,
+			Order:    emojiService.GetEntityStringEmoji(orderEmojiID, constants.EmojiTypeOrder),
 			Level:    alignXp.Level,
 		})
 	}
@@ -172,6 +167,7 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 		)
 	}
 
+	var chosenCity *entities.City
 	cityChoices := make([]discordgo.SelectMenuOption, 0)
 	cityChoices = append(cityChoices, discordgo.SelectMenuOption{
 		Label:   i18n.Get(lg, "align.embed.believers.placeholders.cities"),
@@ -186,6 +182,10 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 			Default: city.ID == cityID,
 			Emoji:   emojiService.GetEntityEmoji(city.ID, constants.EmojiTypeCity),
 		})
+
+		if city.ID == cityID {
+			chosenCity = &city
+		}
 	}
 
 	components = append(components,
@@ -208,12 +208,14 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 		Default: len(orderID) == 0,
 		Emoji:   emojiService.GetMiscEmoji(constants.EmojiIDGlobal),
 	})
+
 	for _, order := range alignService.GetOrders() {
+		emojiOrderID := buildEmojiOrderID(chosenCity, order.ID)
 		orderChoices = append(orderChoices, discordgo.SelectMenuOption{
 			Label:   translators.GetEntityLabel(order, lg),
 			Value:   order.ID,
 			Default: order.ID == orderID,
-			Emoji:   emojiService.GetEntityEmoji(order.ID, constants.EmojiTypeOrder),
+			Emoji:   emojiService.GetEntityEmoji(emojiOrderID, constants.EmojiTypeOrder),
 		})
 	}
 
@@ -269,16 +271,10 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 			order = entities.Order{}
 		}
 
-		var orderEmoji string
-		if city.Type == constants.CityTypeLight {
-			orderEmoji = order.EmojiLight
-		} else {
-			orderEmoji = order.EmojiDark
-		}
-
+		orderEmojiID := buildEmojiOrderID(&city, order.ID)
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
 			City:  emojiService.GetEntityStringEmoji(city.ID, constants.EmojiTypeCity),
-			Order: orderEmoji,
+			Order: emojiService.GetEntityStringEmoji(orderEmojiID, constants.EmojiTypeOrder),
 			Level: alignXp.Level,
 		})
 	}
@@ -338,4 +334,20 @@ func mapWinningCity(cityValues map[string]int64, alignService books.Service) ent
 	}
 
 	return winningCity
+}
+
+func buildEmojiOrderID(city *entities.City, orderID string) string {
+	if city == nil {
+		return orderID
+	}
+
+	if city.Type == constants.CityTypeLight {
+		return fmt.Sprintf("%v%v", constants.CityTypeLight, orderID)
+	}
+
+	if city.Type == constants.CityTypeDark {
+		return fmt.Sprintf("%v%v", constants.CityTypeDark, orderID)
+	}
+
+	return orderID
 }

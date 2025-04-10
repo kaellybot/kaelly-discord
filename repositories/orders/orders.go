@@ -4,7 +4,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
-	"github.com/spf13/viper"
 )
 
 func New(db databases.MySQLConnection) *Impl {
@@ -16,13 +15,7 @@ func (repo *Impl) GetOrders() ([]entities.Order, error) {
 	response := repo.db.GetDB().
 		Model(&entities.Order{}).
 		Where("game = ?", constants.GetGame().AMQPGame).
-		Preload("Labels")
-
-	if !viper.GetBool(constants.Production) {
-		response = response.
-			Select("id, emoji_dark_dev AS emoji_dark, emoji_light_dev AS emoji_light, game")
-	}
-
-	response = response.Find(&orders)
+		Preload("Labels").
+		Find(&orders)
 	return orders, response.Error
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/almanaxes"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
@@ -19,7 +20,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -73,35 +74,35 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			Name:        fmt.Sprintf("/%v get", contract.ConfigCommandName),
 			CommandID:   fmt.Sprintf("</%v get:%v>", contract.ConfigCommandName, command.DiscordID),
-			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.get", contract.ConfigCommandName)),
-			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.get", contract.ConfigCommandName)),
+			Description: di18n.Get(lg, fmt.Sprintf("%v.help.detailed.get", contract.ConfigCommandName)),
+			TutorialURL: di18n.Get(lg, fmt.Sprintf("%v.help.tutorial.get", contract.ConfigCommandName)),
 		},
 		{
 			Name:      fmt.Sprintf("/%v almanax", contract.ConfigCommandName),
 			CommandID: fmt.Sprintf("</%v almanax:%v>", contract.ConfigCommandName, command.DiscordID),
-			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.almanax", contract.ConfigCommandName),
-				i18n.Vars{
-					"defaultLocale": constants.DefaultLocale,
+			Description: di18n.Get(lg, fmt.Sprintf("%v.help.detailed.almanax", contract.ConfigCommandName),
+				di18n.Vars{
+					"defaultLocale": i18n.DefaultLocale,
 				}),
-			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.almanax", contract.ConfigCommandName)),
+			TutorialURL: di18n.Get(lg, fmt.Sprintf("%v.help.tutorial.almanax", contract.ConfigCommandName)),
 		},
 		{
 			Name:        fmt.Sprintf("/%v rss", contract.ConfigCommandName),
 			CommandID:   fmt.Sprintf("</%v rss:%v>", contract.ConfigCommandName, command.DiscordID),
-			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.rss", contract.ConfigCommandName)),
-			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.rss", contract.ConfigCommandName)),
+			Description: di18n.Get(lg, fmt.Sprintf("%v.help.detailed.rss", contract.ConfigCommandName)),
+			TutorialURL: di18n.Get(lg, fmt.Sprintf("%v.help.tutorial.rss", contract.ConfigCommandName)),
 		},
 		{
 			Name:        fmt.Sprintf("/%v server", contract.ConfigCommandName),
 			CommandID:   fmt.Sprintf("</%v server:%v>", contract.ConfigCommandName, command.DiscordID),
-			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.server", contract.ConfigCommandName)),
-			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.server", contract.ConfigCommandName)),
+			Description: di18n.Get(lg, fmt.Sprintf("%v.help.detailed.server", contract.ConfigCommandName)),
+			TutorialURL: di18n.Get(lg, fmt.Sprintf("%v.help.tutorial.server", contract.ConfigCommandName)),
 		},
 		{
 			Name:        fmt.Sprintf("/%v twitter", contract.ConfigCommandName),
 			CommandID:   fmt.Sprintf("</%v twitter:%v>", contract.ConfigCommandName, command.DiscordID),
-			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.twitter", contract.ConfigCommandName)),
-			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.twitter", contract.ConfigCommandName)),
+			Description: di18n.Get(lg, fmt.Sprintf("%v.help.detailed.twitter", contract.ConfigCommandName)),
+			TutorialURL: di18n.Get(lg, fmt.Sprintf("%v.help.tutorial.twitter", contract.ConfigCommandName)),
 		},
 	}
 }
@@ -121,7 +122,7 @@ func (command *Command) followAnnouncement(s *discordgo.Session, i *discordgo.In
 	if err != nil {
 		apiError, ok := discord.ExtractAPIError(err)
 		if ok && apiError.Code == constants.DiscordCodeTooManyWebhooks {
-			content := i18n.Get(i.Locale, "errors.too_many_webhooks")
+			content := di18n.Get(i.Locale, "errors.too_many_webhooks")
 			_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 				Content: &content,
 			})

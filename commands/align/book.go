@@ -9,6 +9,7 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -188,7 +189,7 @@ func (command *Command) getBookReply(_ context.Context, s *discordgo.Session,
 
 	webhook := mappers.MapAlignBookToWebhook(message.GetAlignGetBookAnswer(), believers,
 		command.bookService, command.serverService, command.emojiService,
-		constants.MapAMQPLocale(message.Language))
+		i18n.MapAMQPLocale(message.Language))
 	_, err := s.InteractionResponseEdit(i.Interaction, webhook)
 	if err != nil {
 		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")

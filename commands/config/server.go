@@ -7,10 +7,11 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -36,7 +37,7 @@ func (command *Command) serverRespond(_ context.Context, s *discordgo.Session,
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
-	content := i18n.Get(constants.MapAMQPLocale(message.Language), "config.success")
+	content := di18n.Get(i18n.MapAMQPLocale(message.Language), "config.success")
 	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Content: &content,
 	})

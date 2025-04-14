@@ -3,6 +3,7 @@ package discord
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/rs/zerolog/log"
@@ -51,7 +52,7 @@ func (service *Impl) sendWelcomeMessageToOwner(guild *discordgo.Guild) {
 		return
 	}
 
-	lg := constants.DefaultLocale
+	lg := i18n.DefaultLocale
 	if user, errUser := service.session.User(guild.OwnerID); errUser == nil {
 		lg = discordgo.Locale(user.Locale)
 	}

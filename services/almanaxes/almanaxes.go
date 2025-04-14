@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	repository "github.com/kaellybot/kaelly-discord/repositories/almanaxes"
 
 	"github.com/rs/zerolog/log"
@@ -26,7 +27,7 @@ func New(repository repository.Repository) (*Impl, error) {
 }
 
 func (service *Impl) GetAlmanaxNews(locale discordgo.Locale) *entities.AlmanaxNews {
-	lg := constants.MapDiscordLocale(locale)
+	lg := i18n.MapDiscordLocale(locale)
 
 	for _, news := range service.almanaxNews {
 		if news.Locale == lg {

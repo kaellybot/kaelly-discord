@@ -5,11 +5,12 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -26,7 +27,7 @@ func MapPortalPositionRequest(dimension entities.Dimension, server entities.Serv
 func MapPortalToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalService portals.Service,
 	serverService servers.Service, emojiService emojis.Service, locale amqp.Language,
 ) *discordgo.MessageEmbed {
-	lg := constants.MapAMQPLocale(locale)
+	lg := i18n.MapAMQPLocale(locale)
 	dimension, found := portalService.GetDimension(portal.DimensionId)
 	if !found {
 		log.Warn().Str(constants.LogEntity, portal.DimensionId).
@@ -57,7 +58,7 @@ func MapPortalToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalSe
 	}
 
 	if portal.Position != nil {
-		embed.Description = i18n.Get(lg, "pos.embed.known", i18n.Vars{
+		embed.Description = di18n.Get(lg, "pos.embed.known", di18n.Vars{
 			"position":  portal.Position,
 			"uses":      portal.RemainingUses,
 			"createdBy": portal.CreatedBy, "createdAt": portal.CreatedAt,
@@ -72,7 +73,7 @@ func MapPortalToEmbed(portal *amqp.PortalPositionAnswer_PortalPosition, portalSe
 		embed.Fields = append(embed.Fields,
 			mapTransportToEmbed(portal.Position.Transport, portalService, emojiService, lg))
 	} else {
-		embed.Description = i18n.Get(lg, "pos.embed.unknown")
+		embed.Description = di18n.Get(lg, "pos.embed.unknown")
 	}
 
 	return &embed
@@ -106,11 +107,11 @@ func mapTransportToEmbed(transport *amqp.PortalPositionAnswer_PortalPosition_Pos
 	}
 
 	return &discordgo.MessageEmbedField{
-		Name: i18n.Get(lg, "pos.embed.transport.name", i18n.Vars{
+		Name: di18n.Get(lg, "pos.embed.transport.name", di18n.Vars{
 			"type":  translators.GetEntityLabel(transportType, lg),
 			"emoji": emojiService.GetEntityStringEmoji(transportType.ID, constants.EmojiTypeTransportType),
 		}),
-		Value: i18n.Get(lg, "pos.embed.transport.value", i18n.Vars{
+		Value: di18n.Get(lg, "pos.embed.transport.value", di18n.Vars{
 			"area":    translators.GetEntityLabel(area, lg),
 			"subArea": translators.GetEntityLabel(subArea, lg),
 			"x":       transport.X,

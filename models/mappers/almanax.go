@@ -9,10 +9,11 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -67,7 +68,7 @@ func MapAlmanaxEffectRequest(query *string, date *time.Time, page int, authorID 
 func MapAlmanaxToWebhook(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Locale,
 	emojiService emojis.Service) *discordgo.WebhookEdit {
 	if answer.GetAlmanax() == nil {
-		content := i18n.Get(lg, "almanax.day.missing")
+		content := di18n.Get(lg, "almanax.day.missing")
 		return &discordgo.WebhookEdit{
 			Content: &content,
 		}
@@ -81,15 +82,15 @@ func MapAlmanaxToWebhook(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Lo
 
 func mapAlmanaxToEmbeds(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Locale,
 	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
-	dateTranslator := constants.MapDateTranslator(lg)
+	dateTranslator := i18n.MapDateTranslator(lg)
 	almanax := answer.GetAlmanax()
 	season := constants.GetSeason(almanax.Date.AsTime())
 	fullDate := dateTranslator.FmtDateFull(almanax.Date.AsTime())
 
 	return &[]*discordgo.MessageEmbed{
 		{
-			Title: i18n.Get(lg, "almanax.day.title", i18n.Vars{"date": fullDate}),
-			URL: i18n.Get(lg, "almanax.day.url", i18n.Vars{
+			Title: di18n.Get(lg, "almanax.day.title", di18n.Vars{"date": fullDate}),
+			URL: di18n.Get(lg, "almanax.day.url", di18n.Vars{
 				"date": almanax.Date.AsTime().Format(constants.KrosmozAlmanaxDateFormat),
 			}),
 			Color:     season.Color,
@@ -103,20 +104,20 @@ func mapAlmanaxToEmbeds(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Loc
 			Footer: discord.BuildDefaultFooter(lg),
 			Fields: []*discordgo.MessageEmbedField{
 				{
-					Name:  i18n.Get(lg, "almanax.day.bonus.title"),
+					Name:  di18n.Get(lg, "almanax.day.bonus.title"),
 					Value: almanax.Bonus,
 				},
 				{
-					Name: i18n.Get(lg, "almanax.day.tribute.title"),
-					Value: i18n.Get(lg, "almanax.day.tribute.description", i18n.Vars{
+					Name: di18n.Get(lg, "almanax.day.tribute.title"),
+					Value: di18n.Get(lg, "almanax.day.tribute.description", di18n.Vars{
 						"item":     almanax.Tribute.Item.Name,
 						"emoji":    emojiService.GetItemTypeStringEmoji(almanax.GetTribute().Item.GetType()),
 						"quantity": almanax.Tribute.Quantity,
 					}),
 				},
 				{
-					Name: i18n.Get(lg, "almanax.day.reward.title"),
-					Value: i18n.Get(lg, "almanax.day.reward.description", i18n.Vars{
+					Name: di18n.Get(lg, "almanax.day.reward.title"),
+					Value: di18n.Get(lg, "almanax.day.reward.description", di18n.Vars{
 						"reward":   translators.FormatNumber(almanax.Reward, lg),
 						"kamaIcon": emojiService.GetMiscStringEmoji(constants.EmojiIDKama),
 					}),
@@ -135,19 +136,19 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 			Components: []discordgo.MessageComponent{
 				discordgo.Button{
 					CustomID: contract.CraftAlmanaxDayCustomID(previousDate),
-					Label:    i18n.Get(lg, "almanax.day.previous"),
+					Label:    di18n.Get(lg, "almanax.day.previous"),
 					Style:    discordgo.SecondaryButton,
 					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDPrevious),
 				},
 				discordgo.Button{
 					CustomID: contract.CraftAlmanaxDayCustomID(nextDate),
-					Label:    i18n.Get(lg, "almanax.day.next"),
+					Label:    di18n.Get(lg, "almanax.day.next"),
 					Style:    discordgo.SecondaryButton,
 					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDNext),
 				},
 				discordgo.Button{
 					CustomID: contract.CraftAlmanaxEffectCustomID(almanax.Date.AsTime(), constants.DefaultPage),
-					Label:    i18n.Get(lg, "almanax.day.effect"),
+					Label:    di18n.Get(lg, "almanax.day.effect"),
 					Style:    discordgo.PrimaryButton,
 					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDEffect),
 				},
@@ -159,7 +160,7 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 func MapAlmanaxEffectsToWebhook(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	lg discordgo.Locale, emojiService emojis.Service) *discordgo.WebhookEdit {
 	if len(answer.GetAlmanaxes()) == 0 {
-		content := i18n.Get(lg, "almanax.effect.missing")
+		content := di18n.Get(lg, "almanax.effect.missing")
 		return &discordgo.WebhookEdit{
 			Content: &content,
 		}
@@ -176,7 +177,7 @@ func mapAlmanaxEffectsToEmbeds(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	almanaxFields := make([]*discordgo.MessageEmbedField, 0)
 	for _, almanax := range answer.GetAlmanaxes() {
 		almanaxFields = append(almanaxFields, &discordgo.MessageEmbedField{
-			Name: i18n.Get(lg, "almanax.effect.day", i18n.Vars{
+			Name: di18n.Get(lg, "almanax.effect.day", di18n.Vars{
 				"emoji": emojiService.GetMiscStringEmoji(constants.EmojiIDCalendar),
 				"date":  almanax.GetDate().Seconds,
 			}),
@@ -187,10 +188,10 @@ func mapAlmanaxEffectsToEmbeds(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 
 	return &[]*discordgo.MessageEmbed{
 		{
-			Title: i18n.Get(lg, "almanax.effect.title", i18n.Vars{
+			Title: di18n.Get(lg, "almanax.effect.title", di18n.Vars{
 				"query": answer.GetQuery(),
 			}),
-			Description: i18n.Get(lg, "almanax.effect.description", i18n.Vars{
+			Description: di18n.Get(lg, "almanax.effect.description", di18n.Vars{
 				"total": answer.GetTotal(),
 				"page":  answer.GetPage() + 1,
 				"pages": answer.GetPages(),
@@ -222,7 +223,7 @@ func mapAlmanaxEffectsToComponents(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	almanaxChoices := make([]discordgo.SelectMenuOption, 0)
 	for _, almanax := range almanaxes {
 		almanaxChoices = append(almanaxChoices, discordgo.SelectMenuOption{
-			Label: i18n.Get(lg, "almanax.effect.choice.value", i18n.Vars{
+			Label: di18n.Get(lg, "almanax.effect.choice.value", di18n.Vars{
 				"date": almanax.Date.AsTime().Format(constants.DiscordDateOnlyFormat),
 			}),
 			Value: fmt.Sprintf("%v", almanax.Date.Seconds),
@@ -244,7 +245,7 @@ func mapAlmanaxEffectsToComponents(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 			discordgo.SelectMenu{
 				CustomID:    contract.CraftAlmanaxDayChoiceCustomID(),
 				MenuType:    discordgo.StringSelectMenu,
-				Placeholder: i18n.Get(lg, "almanax.effect.choice.placeholder"),
+				Placeholder: di18n.Get(lg, "almanax.effect.choice.placeholder"),
 				Options:     almanaxChoices,
 			},
 		},
@@ -268,7 +269,7 @@ func MapAlmanaxResourceToWebhook(almanaxResources *amqp.EncyclopediaAlmanaxResou
 func mapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResourceAnswer,
 	startDate, endDate time.Time, characterNumber int64, lg discordgo.Locale,
 	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
-	collator := constants.MapCollator(lg)
+	collator := i18n.MapCollator(lg)
 	sort.SliceStable(almanaxResources.Tributes, func(i, j int) bool {
 		if almanaxResources.Tributes[i].ItemType == almanaxResources.Tributes[j].ItemType {
 			return collator.CompareString(almanaxResources.Tributes[i].ItemName,
@@ -295,11 +296,11 @@ func mapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 
 	return &[]*discordgo.MessageEmbed{
 		{
-			Title: i18n.Get(lg, "almanax.resource.title", i18n.Vars{
+			Title: di18n.Get(lg, "almanax.resource.title", di18n.Vars{
 				"startDate": startDate.Unix(),
 				"endDate":   endDate.Unix(),
 			}),
-			Description: i18n.Get(lg, "almanax.resource.description", i18n.Vars{
+			Description: di18n.Get(lg, "almanax.resource.description", di18n.Vars{
 				"number":   characterNumber,
 				"tributes": i18nTributes,
 			}),
@@ -321,7 +322,7 @@ func mapAlmanaxResourceToComponents(duration, characterNumber int64,
 	durationValues := make([]discordgo.SelectMenuOption, 0)
 	for _, number := range constants.GetAlmanaxDayDuration() {
 		durationValues = append(durationValues, discordgo.SelectMenuOption{
-			Label: i18n.Get(lg, "almanax.resource.duration.label", i18n.Vars{
+			Label: di18n.Get(lg, "almanax.resource.duration.label", di18n.Vars{
 				"number": number,
 			}),
 			Value:   fmt.Sprintf("%v", number),
@@ -333,7 +334,7 @@ func mapAlmanaxResourceToComponents(duration, characterNumber int64,
 	characterNumbers := make([]discordgo.SelectMenuOption, 0)
 	for _, number := range constants.GetCharacterNumbers() {
 		characterNumbers = append(characterNumbers, discordgo.SelectMenuOption{
-			Label: i18n.Get(lg, "almanax.resource.character.label", i18n.Vars{
+			Label: di18n.Get(lg, "almanax.resource.character.label", di18n.Vars{
 				"number": number,
 			}),
 			Value:   fmt.Sprintf("%v", number),
@@ -347,7 +348,7 @@ func mapAlmanaxResourceToComponents(duration, characterNumber int64,
 				discordgo.SelectMenu{
 					CustomID:    durationCustomID,
 					MenuType:    discordgo.StringSelectMenu,
-					Placeholder: i18n.Get(lg, "almanax.resource.duration.placeholder"),
+					Placeholder: di18n.Get(lg, "almanax.resource.duration.placeholder"),
 					Options:     durationValues,
 				},
 			},
@@ -357,7 +358,7 @@ func mapAlmanaxResourceToComponents(duration, characterNumber int64,
 				discordgo.SelectMenu{
 					CustomID:    characterCustomID,
 					MenuType:    discordgo.StringSelectMenu,
-					Placeholder: i18n.Get(lg, "almanax.resource.character.placeholder"),
+					Placeholder: di18n.Get(lg, "almanax.resource.character.placeholder"),
 					Options:     characterNumbers,
 				},
 			},

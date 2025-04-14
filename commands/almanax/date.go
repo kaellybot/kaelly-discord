@@ -10,6 +10,7 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -80,7 +81,7 @@ func (command *Command) almanaxRespond(_ context.Context, s *discordgo.Session,
 	}
 
 	webhookEdit := mappers.MapAlmanaxToWebhook(message.GetEncyclopediaAlmanaxAnswer(),
-		constants.MapAMQPLocale(message.Language), command.emojiService)
+		i18n.MapAMQPLocale(message.Language), command.emojiService)
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
 	if err != nil {
 		log.Warn().Err(err).

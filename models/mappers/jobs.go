@@ -8,12 +8,13 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -102,7 +103,7 @@ func mapJobBookToComponents(answer *amqp.JobGetBookAnswer, lg discordgo.Locale,
 				discordgo.SelectMenu{
 					CustomID:    contract.CraftJobBookSelectCustomID(serverID),
 					MenuType:    discordgo.StringSelectMenu,
-					Placeholder: i18n.Get(lg, "job.embed.choices.placeholder"),
+					Placeholder: di18n.Get(lg, "job.embed.choices.placeholder"),
 					Options:     jobChoices,
 				},
 			},
@@ -136,8 +137,8 @@ func mapJobBookToEmbeds(answer *amqp.JobGetBookAnswer, craftsmen []constants.Job
 	})
 
 	embed := discordgo.MessageEmbed{
-		Title: i18n.Get(lg, "job.embed.craftsmen.title", i18n.Vars{"job": translators.GetEntityLabel(job, lg)}),
-		Description: i18n.Get(lg, "job.embed.craftsmen.description", i18n.Vars{
+		Title: di18n.Get(lg, "job.embed.craftsmen.title", di18n.Vars{"job": translators.GetEntityLabel(job, lg)}),
+		Description: di18n.Get(lg, "job.embed.craftsmen.description", di18n.Vars{
 			"craftsmen": craftsmen,
 			"total":     answer.GetTotal(),
 			"page":      answer.GetPage() + 1,
@@ -157,7 +158,7 @@ func mapJobBookToEmbeds(answer *amqp.JobGetBookAnswer, craftsmen []constants.Job
 func MapJobUserToEmbed(jobExperiences []*amqp.JobGetUserAnswer_JobExperience, member *discordgo.Member,
 	serverID string, jobService books.Service, serverService servers.Service,
 	locale amqp.Language) *[]*discordgo.MessageEmbed {
-	lg := constants.MapAMQPLocale(locale)
+	lg := i18n.MapAMQPLocale(locale)
 	server, found := serverService.GetServer(serverID)
 	if !found {
 		log.Warn().Str(constants.LogEntity, serverID).
@@ -198,8 +199,8 @@ func MapJobUserToEmbed(jobExperiences []*amqp.JobGetUserAnswer_JobExperience, me
 	}
 
 	embed := discordgo.MessageEmbed{
-		Title:       i18n.Get(lg, "job.embed.craftsman.title", i18n.Vars{"username": userName}),
-		Description: i18n.Get(lg, "job.embed.craftsman.description", i18n.Vars{"jobs": i18nJobXp}),
+		Title:       di18n.Get(lg, "job.embed.craftsman.title", di18n.Vars{"username": userName}),
+		Description: di18n.Get(lg, "job.embed.craftsman.description", di18n.Vars{"jobs": i18nJobXp}),
 		Color:       constants.Color,
 		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: userIcon},
 		Footer: &discordgo.MessageEmbedFooter{

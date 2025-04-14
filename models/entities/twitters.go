@@ -2,7 +2,7 @@ package entities
 
 import (
 	amqp "github.com/kaellybot/kaelly-amqp"
-	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 )
 
 type TwitterAccount struct {
@@ -19,7 +19,7 @@ func (twittterAccount TwitterAccount) GetID() string {
 func (twittterAccount TwitterAccount) GetLabels() map[amqp.Language]string {
 	labels := make(map[amqp.Language]string)
 
-	for _, language := range constants.GetLanguages() {
+	for _, language := range i18n.GetLanguages() {
 		labels[language.AMQPLocale] = twittterAccount.Name
 	}
 

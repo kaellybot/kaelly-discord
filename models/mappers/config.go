@@ -5,13 +5,14 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/twitters"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -73,7 +74,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 	serverService servers.Service, feedService feeds.Service,
 	twitterService twitters.Service, locale amqp.Language,
 ) *discordgo.MessageEmbed {
-	lg := constants.MapAMQPLocale(locale)
+	lg := i18n.MapAMQPLocale(locale)
 
 	var guildServer *i18nServer
 	if len(guild.ServerID) > 0 {
@@ -113,7 +114,7 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 
 	return &discordgo.MessageEmbed{
 		Title: guild.Name,
-		Description: i18n.Get(lg, "config.embed.description", i18n.Vars{
+		Description: di18n.Get(lg, "config.embed.description", di18n.Vars{
 			"server": guildServer,
 			"game":   constants.GetGame(),
 		}),
@@ -121,15 +122,15 @@ func MapConfigToEmbed(guild constants.GuildConfig, emojiService emojis.Service,
 		Color:     constants.Color,
 		Fields: []*discordgo.MessageEmbedField{
 			{
-				Name: i18n.Get(lg, "config.embed.server.name", i18n.Vars{
+				Name: di18n.Get(lg, "config.embed.server.name", di18n.Vars{
 					"gameLogo": emojiService.GetMiscStringEmoji(constants.EmojiIDGame),
 				}),
-				Value:  i18n.Get(lg, "config.embed.server.value", i18n.Vars{"channels": serverChannels}),
+				Value:  di18n.Get(lg, "config.embed.server.value", di18n.Vars{"channels": serverChannels}),
 				Inline: false,
 			},
 			{
-				Name:   i18n.Get(lg, "config.embed.webhook.name"),
-				Value:  i18n.Get(lg, "config.embed.webhook.value", i18n.Vars{"channels": notifiedChannels}),
+				Name:   di18n.Get(lg, "config.embed.webhook.name"),
+				Value:  di18n.Get(lg, "config.embed.webhook.value", di18n.Vars{"channels": notifiedChannels}),
 				Inline: false,
 			},
 		},
@@ -145,7 +146,7 @@ func mapNotifiedChannelsToI18n(webhooks []constants.NotifiedChannel, emojiServic
 		switch webhook.NotificationType {
 		case amqp.NotificationType_ALMANAX:
 			provider = i18nProvider{
-				Name:  i18n.Get(lg, "config.embed.webhook.almanax"),
+				Name:  di18n.Get(lg, "config.embed.webhook.almanax"),
 				Emoji: emojiService.GetMiscStringEmoji(constants.EmojiIDAlmanax),
 			}
 

@@ -7,11 +7,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -23,7 +24,7 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 	}
 
 	if !validators.HasWebhookPermission(s, channelID) {
-		content := i18n.Get(i.Locale, "checks.permission.webhook")
+		content := di18n.Get(i.Locale, "checks.permission.webhook")
 		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 			Content: &content,
 		})
@@ -35,7 +36,7 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 
 	var newsChannelID string
 	for _, source := range feed.Sources {
-		if source.Locale == constants.MapDiscordLocale(i.Locale) {
+		if source.Locale == i18n.MapDiscordLocale(i.Locale) {
 			newsChannelID = source.NewsChannelID
 			break
 		}

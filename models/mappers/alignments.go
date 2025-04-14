@@ -9,12 +9,13 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 )
 
@@ -128,8 +129,8 @@ func mapAlignBookToEmbeds(answer *amqp.AlignGetBookAnswer,
 
 	winningCity := mapWinningCity(cityValues, alignService)
 	embed := discordgo.MessageEmbed{
-		Title: i18n.Get(lg, "align.embed.believers.title"),
-		Description: i18n.Get(lg, "align.embed.believers.description", i18n.Vars{
+		Title: di18n.Get(lg, "align.embed.believers.title"),
+		Description: di18n.Get(lg, "align.embed.believers.description", di18n.Vars{
 			"believers": i18nAlignXp,
 			"total":     answer.GetTotal(),
 			"page":      answer.GetPage() + 1,
@@ -170,7 +171,7 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 	var chosenCity *entities.City
 	cityChoices := make([]discordgo.SelectMenuOption, 0)
 	cityChoices = append(cityChoices, discordgo.SelectMenuOption{
-		Label:   i18n.Get(lg, "align.embed.believers.placeholders.cities"),
+		Label:   di18n.Get(lg, "align.embed.believers.placeholders.cities"),
 		Value:   contract.AlignAllValues,
 		Default: len(cityID) == 0,
 		Emoji:   emojiService.GetMiscEmoji(constants.EmojiIDGlobal),
@@ -194,7 +195,7 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 				discordgo.SelectMenu{
 					CustomID:    contract.CraftAlignBookCityCustomID(orderID, serverID),
 					MenuType:    discordgo.StringSelectMenu,
-					Placeholder: i18n.Get(lg, "align.embed.believers.placeholders.city"),
+					Placeholder: di18n.Get(lg, "align.embed.believers.placeholders.city"),
 					Options:     cityChoices,
 				},
 			},
@@ -203,7 +204,7 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 
 	orderChoices := make([]discordgo.SelectMenuOption, 0)
 	orderChoices = append(orderChoices, discordgo.SelectMenuOption{
-		Label:   i18n.Get(lg, "align.embed.believers.placeholders.orders"),
+		Label:   di18n.Get(lg, "align.embed.believers.placeholders.orders"),
 		Value:   contract.AlignAllValues,
 		Default: len(orderID) == 0,
 		Emoji:   emojiService.GetMiscEmoji(constants.EmojiIDGlobal),
@@ -225,7 +226,7 @@ func mapAlignBookToComponents(answer *amqp.AlignGetBookAnswer, lg discordgo.Loca
 				discordgo.SelectMenu{
 					CustomID:    contract.CraftAlignBookOrderCustomID(cityID, serverID),
 					MenuType:    discordgo.StringSelectMenu,
-					Placeholder: i18n.Get(lg, "align.embed.believers.placeholders.order"),
+					Placeholder: di18n.Get(lg, "align.embed.believers.placeholders.order"),
 					Options:     orderChoices,
 				},
 			},
@@ -239,7 +240,7 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 	member *discordgo.Member, serverID string, alignService books.Service,
 	emojiService emojis.Service, serverService servers.Service, locale amqp.Language,
 ) *[]*discordgo.MessageEmbed {
-	lg := constants.MapAMQPLocale(locale)
+	lg := i18n.MapAMQPLocale(locale)
 	server, found := serverService.GetServer(serverID)
 	if !found {
 		log.Warn().Str(constants.LogEntity, serverID).
@@ -301,8 +302,8 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 
 	winningCity := mapWinningCity(cityValues, alignService)
 	embed := discordgo.MessageEmbed{
-		Title:       i18n.Get(lg, "align.embed.beliefs.title", i18n.Vars{"username": userName}),
-		Description: i18n.Get(lg, "align.embed.beliefs.description", i18n.Vars{"beliefs": i18nAlignXp}),
+		Title:       di18n.Get(lg, "align.embed.beliefs.title", di18n.Vars{"username": userName}),
+		Description: di18n.Get(lg, "align.embed.beliefs.description", di18n.Vars{"beliefs": i18nAlignXp}),
 		Color:       winningCity.Color,
 		Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: userIcon},
 		Footer: &discordgo.MessageEmbedFooter{

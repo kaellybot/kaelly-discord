@@ -4,13 +4,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/rs/zerolog/log"
 )
 
 func GetEntityLabel(entity entities.LabelledEntity, locale discordgo.Locale) string {
 	labels := entity.GetLabels()
 
-	label, found := labels[constants.MapDiscordLocale(locale)]
+	label, found := labels[i18n.MapDiscordLocale(locale)]
 	if found {
 		return label
 	}
@@ -20,14 +21,14 @@ func GetEntityLabel(entity entities.LabelledEntity, locale discordgo.Locale) str
 		Str(constants.LogLocale, string(locale)).
 		Msgf("Entity i18n value is empty, returning value based on default locale")
 
-	defaultLabel, found := labels[constants.MapDiscordLocale(constants.DefaultLocale)]
+	defaultLabel, found := labels[i18n.MapDiscordLocale(i18n.DefaultLocale)]
 	if found {
 		return defaultLabel
 	}
 
 	log.Warn().
 		Str(constants.LogEntity, entity.GetID()).
-		Str(constants.LogLocale, string(constants.DefaultLocale)).
+		Str(constants.LogLocale, string(i18n.DefaultLocale)).
 		Msgf("Entity i18n default value is empty, returning id")
 	return entity.GetID()
 }

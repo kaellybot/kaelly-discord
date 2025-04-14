@@ -8,6 +8,7 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -131,7 +132,7 @@ func (command *Command) updateResourcesReply(_ context.Context, s *discordgo.Ses
 	}
 
 	webhookEdit := mappers.MapAlmanaxResourceToWebhook(message.GetEncyclopediaAlmanaxResourceAnswer(),
-		characterNumber, constants.MapAMQPLocale(message.Language), command.emojiService)
+		characterNumber, i18n.MapAMQPLocale(message.Language), command.emojiService)
 
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
 	if err != nil {

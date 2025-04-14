@@ -8,10 +8,12 @@ import (
 
 	"github.com/kaellybot/kaelly-discord/application"
 	"github.com/kaellybot/kaelly-discord/models/constants"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	_ "golang.org/x/crypto/x509roots/fallback"
 )
 
 func init() {
@@ -59,9 +61,9 @@ func initLog() {
 }
 
 func initI18n() {
-	i18n.SetDefault(constants.DefaultLocale)
-	for _, language := range constants.GetLanguages() {
-		if err := i18n.LoadBundle(language.Locale, language.TranslationFile); err != nil {
+	di18n.SetDefault(i18n.DefaultLocale)
+	for _, language := range i18n.GetLanguages() {
+		if err := di18n.LoadBundleFS(language.Locale, i18n.Folder, language.TranslationFile); err != nil {
 			log.Warn().Err(err).
 				Str(constants.LogLocale, language.Locale.String()).
 				Str(constants.LogFileName, language.TranslationFile).

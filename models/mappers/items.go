@@ -8,10 +8,11 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 )
 
 var (
@@ -48,7 +49,7 @@ func MapItemToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 func mapEquipmentToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	characService characteristics.Service, emojiService emojis.Service,
 	locale amqp.Language) *discordgo.WebhookEdit {
-	lg := constants.MapAMQPLocale(locale)
+	lg := i18n.MapAMQPLocale(locale)
 	return &discordgo.WebhookEdit{
 		Embeds:     mapEquipmentToEmbeds(answer, isRecipe, characService, emojiService, lg),
 		Components: mapEquipmentToComponents(answer, isRecipe, emojiService, lg),
@@ -70,7 +71,7 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	return &[]*discordgo.MessageEmbed{
 		{
 			Title: equipment.GetName(),
-			Description: i18n.Get(lg, "item.description", i18n.Vars{
+			Description: di18n.Get(lg, "item.description", di18n.Vars{
 				"level": equipment.GetLevel(),
 				"emoji": emojiService.GetEquipmentStringEmoji(equipment.GetType().GetEquipmentType()),
 				"type":  equipment.GetType().GetEquipmentLabel(),
@@ -97,8 +98,8 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 	if equipment.GetCharacteristics() != nil {
 		characteristics := equipment.GetCharacteristics()
 		fields = append(fields, &discordgo.MessageEmbedField{
-			Name: i18n.Get(lg, "item.characteristics.title"),
-			Value: i18n.Get(lg, "item.characteristics.description", i18n.Vars{
+			Name: di18n.Get(lg, "item.characteristics.title"),
+			Value: di18n.Get(lg, "item.characteristics.description", di18n.Vars{
 				"cost":           characteristics.GetCost(),
 				"costEmoji":      emojiService.GetMiscStringEmoji(constants.EmojiIDCost),
 				"minRange":       characteristics.GetMinRange(),
@@ -120,12 +121,12 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
 				if i == 0 {
-					name = i18n.Get(lg, "item.weaponEffects.title")
+					name = di18n.Get(lg, "item.weaponEffects.title")
 				}
 
 				return &discordgo.MessageEmbedField{
 					Name: name,
-					Value: i18n.Get(lg, "item.weaponEffects.description", i18n.Vars{
+					Value: di18n.Get(lg, "item.weaponEffects.description", di18n.Vars{
 						"effects": items,
 					}),
 					Inline: false,
@@ -138,12 +139,12 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
 				if i == 0 {
-					name = i18n.Get(lg, "item.effects.title")
+					name = di18n.Get(lg, "item.effects.title")
 				}
 
 				return &discordgo.MessageEmbedField{
 					Name: name,
-					Value: i18n.Get(lg, "item.effects.description", i18n.Vars{
+					Value: di18n.Get(lg, "item.effects.description", di18n.Vars{
 						"effects": items,
 					}),
 					Inline: true,
@@ -154,8 +155,8 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 
 	if equipment.Conditions != nil {
 		fields = append(fields, &discordgo.MessageEmbedField{
-			Name: i18n.Get(lg, "item.conditions.title"),
-			Value: i18n.Get(lg, "item.conditions.description", i18n.Vars{
+			Name: di18n.Get(lg, "item.conditions.title"),
+			Value: di18n.Get(lg, "item.conditions.description", di18n.Vars{
 				"conditions": getConditions(equipment.Conditions, lg),
 			}),
 			Inline: false,
@@ -184,7 +185,7 @@ func getConditions(conditions *amqp.EncyclopediaItemAnswer_Conditions, lg discor
 		// Could be messy, to retry with Dofus Unity stuff.
 		// Only supports AND(OR(OR(...))) relations
 		label := ""
-		i18nOr := i18n.Get(lg, "item.conditions.relation.or")
+		i18nOr := di18n.Get(lg, "item.conditions.relation.or")
 		for _, child := range conditions.GetChildren() {
 			subConditions := getConditions(child, lg)
 			for _, subCond := range subConditions {
@@ -213,12 +214,12 @@ func getRecipeFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, emojiServ
 		func(i int, items []*amqp.EncyclopediaItemAnswer_Recipe_Ingredient) *discordgo.MessageEmbedField {
 			name := constants.InvisibleCharacter
 			if i == 0 {
-				name = i18n.Get(lg, "item.recipe.title")
+				name = di18n.Get(lg, "item.recipe.title")
 			}
 
 			return &discordgo.MessageEmbedField{
 				Name: name,
-				Value: i18n.Get(lg, "item.recipe.description", i18n.Vars{
+				Value: di18n.Get(lg, "item.recipe.description", di18n.Vars{
 					"ingredients": mapItemIngredients(items, emojiService),
 				}),
 				Inline: true,
@@ -243,14 +244,14 @@ func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool
 	if isRecipe && (len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0) {
 		components = append(components, discordgo.Button{
 			CustomID: contract.CraftItemEffectsCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT_TYPE.String()),
-			Label:    i18n.Get(lg, "item.effects.button"),
+			Label:    di18n.Get(lg, "item.effects.button"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDEffect),
 		})
 	} else if equipment.GetRecipe() != nil {
 		components = append(components, discordgo.Button{
 			CustomID: contract.CraftItemRecipeCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT_TYPE.String()),
-			Label:    i18n.Get(lg, "item.recipe.button"),
+			Label:    di18n.Get(lg, "item.recipe.button"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDRecipe),
 		})

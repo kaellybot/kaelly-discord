@@ -5,9 +5,10 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 )
 
 func MapCompetitionMapRequest(mapNumber int64, authorID string, lg discordgo.Locale,
@@ -21,7 +22,7 @@ func MapCompetitionMapRequest(mapNumber int64, authorID string, lg discordgo.Loc
 
 func MapCompetitionMapToWebhookEdit(answer *amqp.CompetitionMapAnswer, mapType constants.MapType,
 	service emojis.Service, locale amqp.Language) *discordgo.WebhookEdit {
-	lg := constants.MapAMQPLocale(locale)
+	lg := i18n.MapAMQPLocale(locale)
 	return &discordgo.WebhookEdit{
 		Embeds:     mapCompetitionMapToEmbed(answer, mapType, lg),
 		Components: mapCompetitionMapToComponents(answer, mapType, service, lg),
@@ -41,10 +42,10 @@ func mapCompetitionMapToEmbed(competitiveMap *amqp.CompetitionMapAnswer,
 	}
 
 	embed := discordgo.MessageEmbed{
-		Title: i18n.Get(lg, "map.title", i18n.Vars{
+		Title: di18n.Get(lg, "map.title", di18n.Vars{
 			"mapNumber": competitiveMap.MapNumber,
 		}),
-		Description: i18n.Get(lg, "map.taunt"),
+		Description: di18n.Get(lg, "map.taunt"),
 		Color:       constants.Color,
 		Image:       &discordgo.MessageEmbedImage{URL: imageURL},
 		Author: &discordgo.MessageEmbedAuthor{
@@ -65,14 +66,14 @@ func mapCompetitionMapToComponents(competitiveMap *amqp.CompetitionMapAnswer, ma
 	case constants.MapTypeNormal:
 		components = append(components, discordgo.Button{
 			CustomID: contract.CraftMapTacticalCustomID(competitiveMap.GetMapNumber()),
-			Label:    i18n.Get(lg, "map.button.tactical"),
+			Label:    di18n.Get(lg, "map.button.tactical"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDTacticalMap),
 		})
 	case constants.MapTypeTactical:
 		components = append(components, discordgo.Button{
 			CustomID: contract.CraftMapNormalCustomID(competitiveMap.GetMapNumber()),
-			Label:    i18n.Get(lg, "map.button.normal"),
+			Label:    di18n.Get(lg, "map.button.normal"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDNormalMap),
 		})

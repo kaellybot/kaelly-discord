@@ -7,10 +7,11 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 )
 
 func MapSetListRequest(query, authorID string, lg discordgo.Locale) *amqp.RabbitMQMessage {
@@ -33,7 +34,7 @@ func MapSetToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, itemNumber int,
 	characService characteristics.Service, emojiService emojis.Service,
 	locale amqp.Language) *discordgo.WebhookEdit {
 	set := answer.GetSet()
-	lg := constants.MapAMQPLocale(locale)
+	lg := i18n.MapAMQPLocale(locale)
 	bonus := &amqp.EncyclopediaItemAnswer_Set_Bonus{ItemNumber: 0}
 	for _, currentBonus := range set.Bonuses {
 		if currentBonus.ItemNumber == int64(itemNumber) {
@@ -58,12 +59,12 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 		func(i int, items []*amqp.EncyclopediaItemAnswer_Set_Equipment) *discordgo.MessageEmbedField {
 			name := constants.InvisibleCharacter
 			if i == 0 {
-				name = i18n.Get(lg, "set.items.title")
+				name = di18n.Get(lg, "set.items.title")
 			}
 
 			return &discordgo.MessageEmbedField{
 				Name: name,
-				Value: i18n.Get(lg, "set.items.description", i18n.Vars{
+				Value: di18n.Get(lg, "set.items.description", di18n.Vars{
 					"items": mapSetItems(items),
 				}),
 				Inline: true,
@@ -76,14 +77,14 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
 				if i == 0 {
-					name = i18n.Get(lg, "set.effects.title", i18n.Vars{
+					name = di18n.Get(lg, "set.effects.title", di18n.Vars{
 						"itemNumber": bonus.GetItemNumber(),
 					})
 				}
 
 				return &discordgo.MessageEmbedField{
 					Name: name,
-					Value: i18n.Get(lg, "set.effects.description", i18n.Vars{
+					Value: di18n.Get(lg, "set.effects.description", di18n.Vars{
 						"effects": items,
 					}),
 					Inline: true,
@@ -99,7 +100,7 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 	return &[]*discordgo.MessageEmbed{
 		{
 			Title:       set.Name,
-			Description: i18n.Get(lg, "set.description", i18n.Vars{"level": set.Level}),
+			Description: di18n.Get(lg, "set.description", di18n.Vars{"level": set.Level}),
 			Color:       constants.Color,
 			Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: set.GetIcon()},
 			Fields:      fields,
@@ -130,7 +131,7 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 	for _, currentBonus := range set.Bonuses {
 		emoji := service.GetSetBonusEmoji(int(currentBonus.ItemNumber))
 		bonuses = append(bonuses, discordgo.SelectMenuOption{
-			Label: i18n.Get(lg, "set.effects.option", i18n.Vars{
+			Label: di18n.Get(lg, "set.effects.option", di18n.Vars{
 				"itemNumber": currentBonus.ItemNumber,
 				"itemCount":  maxItemNumber,
 			}),
@@ -146,7 +147,7 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 				discordgo.SelectMenu{
 					CustomID:    contract.CraftSetBonusCustomID(set.Id),
 					MenuType:    discordgo.StringSelectMenu,
-					Placeholder: i18n.Get(lg, "set.effects.placeholder"),
+					Placeholder: di18n.Get(lg, "set.effects.placeholder"),
 					Options:     bonuses,
 				},
 			},
@@ -174,7 +175,7 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 			discordgo.SelectMenu{
 				CustomID:    contract.CraftItemCustomID(itemType.String()),
 				MenuType:    discordgo.StringSelectMenu,
-				Placeholder: i18n.Get(lg, "set.items.placeholder"),
+				Placeholder: di18n.Get(lg, "set.items.placeholder"),
 				Options:     items,
 			},
 		},

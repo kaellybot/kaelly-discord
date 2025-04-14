@@ -1,7 +1,7 @@
-package constants
+package i18n
 
 import (
-	"fmt"
+	"embed"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-playground/locales"
@@ -26,8 +26,6 @@ type Language struct {
 }
 
 const (
-	i18nFolder = "i18n"
-
 	frenchFile     = "fr.json"
 	englishFile    = "en.json"
 	spanishFile    = "es.json"
@@ -37,13 +35,16 @@ const (
 	DefaultLocale = discordgo.EnglishGB
 )
 
+//go:embed *.json
+var Folder embed.FS
+
 func GetLanguages() []Language {
 	return []Language{
 		{
 			Locale:          discordgo.French,
 			Tag:             language.French,
 			DateTranslator:  fr.New(),
-			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, frenchFile),
+			TranslationFile: frenchFile,
 			Collator:        collate.New(language.French),
 			AMQPLocale:      amqp.Language_FR,
 		},
@@ -51,7 +52,7 @@ func GetLanguages() []Language {
 			Locale:          discordgo.EnglishGB,
 			Tag:             language.English,
 			DateTranslator:  en.New(),
-			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, englishFile),
+			TranslationFile: englishFile,
 			Collator:        collate.New(language.English),
 			AMQPLocale:      amqp.Language_EN,
 		},
@@ -59,7 +60,7 @@ func GetLanguages() []Language {
 			Locale:          discordgo.EnglishUS,
 			Tag:             language.English,
 			DateTranslator:  en_US.New(),
-			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, englishFile),
+			TranslationFile: englishFile,
 			Collator:        collate.New(language.English),
 			AMQPLocale:      amqp.Language_EN,
 		},
@@ -67,7 +68,7 @@ func GetLanguages() []Language {
 			Locale:          discordgo.SpanishES,
 			Tag:             language.Spanish,
 			DateTranslator:  es.New(),
-			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, spanishFile),
+			TranslationFile: spanishFile,
 			Collator:        collate.New(language.Spanish),
 			AMQPLocale:      amqp.Language_ES,
 		},
@@ -75,7 +76,7 @@ func GetLanguages() []Language {
 			Locale:          discordgo.German,
 			Tag:             language.German,
 			DateTranslator:  de.New(),
-			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, germanFile),
+			TranslationFile: germanFile,
 			Collator:        collate.New(language.German),
 			AMQPLocale:      amqp.Language_DE,
 		},
@@ -83,7 +84,7 @@ func GetLanguages() []Language {
 			Locale:          discordgo.PortugueseBR,
 			Tag:             language.Portuguese,
 			DateTranslator:  pt.New(),
-			TranslationFile: fmt.Sprintf("%s/%s", i18nFolder, portugueseFile),
+			TranslationFile: portugueseFile,
 			Collator:        collate.New(language.Portuguese),
 			AMQPLocale:      amqp.Language_PT,
 		},

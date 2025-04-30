@@ -10,8 +10,8 @@ require (
 	github.com/go-playground/locales v0.14.1
 	github.com/kaellybot/kaelly-amqp v1.0.0
 	github.com/kaellybot/kaelly-commands v1.0.0
-	github.com/kaysoro/discordgo-i18n v1.0.5-0.20250414204350-ec428c4cdbb7
-	github.com/prometheus/client_golang v1.20.4 
+	github.com/kaysoro/discordgo-i18n v1.0.5
+	github.com/prometheus/client_golang v1.20.4
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0

@@ -331,6 +331,10 @@
         "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
     },
     "checks": {
+        "city": {
+            "not_found": "Aie! '*{{ .value }}*' ne correspond à aucune cité que je connaisse ! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs cités ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
+        },
         "date": {
             "constraints": "La date doit respecter le format suivant : JJ/MM/AAAA :)",
             "outOfBounds": "Cette date est en-dehors de mes connaissances ! Je sais que je suis incroyable mais quand même, je ne suis pas le dieu Xélor ! :face_with_peeking_eye:"
@@ -355,6 +359,10 @@
         },
         "map": {
             "constraints": "Le numéro de carte doit être compris entre {{ .min }} et {{ .max }} ! :grin:"
+        },
+        "order": {
+            "not_found": "Aie! '*{{ .value }}*' ne correspond à aucun ordre que je connaisse ! :pensive:",
+            "too_many": "Outch! '*{{ .value }}*' correspond à plusieurs ordres ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ! :slight_smile:"
         },
         "query": {
             "constraints": "Le champs ne doit pas être vide ! :grin:"

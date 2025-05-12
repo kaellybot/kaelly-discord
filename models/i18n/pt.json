@@ -331,6 +331,10 @@
         "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
     },
     "checks": {
+        "city": {
+            "not_found": "Eita! '*{{ .value }}*' não corresponde a nenhuma cidade que eu conheça! :pensive:",
+            "too_many": "Uau! '*{{ .value }}*' corresponde a várias cidades ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
         "date": {
             "constraints": "A data deve estar no seguinte formato: DD/MM/AAAA :)",
             "outOfBounds": "Esta data está fora do meu conhecimento! Sei que sou incrível, mas ainda assim, não sou o deus Xelor! :face_with_peeking_eye:"
@@ -355,6 +359,10 @@
         },
         "map": {
             "constraints": "O número do mapa deve estar entre {{ .min }} e {{ .max }}. :grin:"
+        },
+        "order": {
+            "not_found": "Eita! '*{{ .value }}*' não corresponde a nenhuma ordem que eu conheça! :pensive:",
+            "too_many": "Uau! '*{{ .value }}*' corresponde a várias ordens ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
         },
         "query": {
             "constraints": "O campo deve ser preenchido! :grin:"

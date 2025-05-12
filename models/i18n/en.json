@@ -331,6 +331,10 @@
         "footer": "{{ .name }} v{{ .version }} • {{ .changelog }}"
     },
     "checks": {
+        "city": {
+            "not_found": "Oops! '*{{ .value }}*' doesn't match any city I know! :pensive:",
+            "too_many": "Yikes! '*{{ .value }}*' matches several cities ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
         "date": {
             "constraints": "The date must respect the following format: DD/MM/YYYY :)",
             "outOfBounds": "This date is out of my knowledge! I know I'm amazing but still, I'm not Xelor god! :face_with_peeking_eye:"
@@ -355,6 +359,10 @@
         },
         "map": {
             "constraints": "The map number must be between {{ .min }} and {{ .max }}! :grin:"
+        },
+        "order": {
+            "not_found": "Oops! '*{{ .value }}*' doesn't match any order I know! :pensive:",
+            "too_many": "Yikes! '*{{ .value }}*' matches several orders ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
         },
         "query": {
             "constraints": "The field must be filled! :grin:"

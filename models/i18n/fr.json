@@ -4,8 +4,8 @@
         "help": {
             "overview": "donne des informations à mon propos et un moyen d'obtenir de l'aide si besoin",
             "detailed": "donne des informations à mon propos (lien d'invitation, code source, gestion des données privées...) et un moyen d'obtenir de l'aide si besoin (discord de support, twitter)",
-            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/about.gif",
-            "source": ""
+            "source": "",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/about_FR.webp"
         },
         "title": "{{ .name }} version {{ .version }}",
         "desc": "Bot Discord dédié au jeu **{{ .game.Name }}** {{ .gameLogo }} !",
@@ -42,11 +42,11 @@
                 "get": "affiche l'annuaire des joueurs alignés de ton serveur Discord\n   - Le champ `city` est optionnel et correspond à la cité auquel les joueurs ont fait allégeance. Si non renseigné, l'annuaire est affiché en ne prenant pas compte de ce filtre *__Exemple__ : Bonta*\n - Le champ `order` est optionnel et correspond à l'ordre rejoint par les joueurs. Si non renseigné, l'annuaire est affiché en ne prenant pas compte de ce filtre *__Exemple__ : Esprit*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
                 "set": "enregistre ton alignement dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n   - Le champ `city` est obligatoire et correspond à la cité auquel les joueurs ont fait allégeance. *__Exemple__ : Bonta*\n - Le champ `order` est obligatoire et correspond à l'ordre rejoint par les joueurs. *__Exemple__ : Esprit*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
             },
-            "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement.",
             "tutorial": {
-                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/align_get.gif",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/align_set.gif"
-            }
+                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_get_FR.webp",
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_FR.webp"
+            },
+            "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },
         "success": "L'annuaire a été mise à jour !",
         "embed": {
@@ -75,9 +75,9 @@
                 "resources": "donne les ressources nécessaires pour une période donnée\n   - Le champ `duration` est optionnel et correspond au nombre de jours souhaité, allant de 1 à 30. Si non renseigné, les ressources nécessaires pour les 7 prochains jours sont remontées. *__Exemple__ : 30*"
             },
             "tutorial": {
-                "day": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/almanax_day.gif",
-                "effects": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/almanax_efects.gif",
-                "resources": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/almanax_resource.gif"
+                "day": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/almanax_day_FR.webp",
+                "effects": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/almanax_effects_FR.webp",
+                "resources": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/almanax_resources_FR.webp"
             },
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
@@ -134,11 +134,11 @@
                 "twitter": "(dés)active l'envoi automatique de tweets du compte Twitter officiel du jeu\n  - Le champ `twitter` est obligatoire et correspond à un nom de compte Twitter. *__Exemple__ : DOFUSfr*\n  - Les champs `enabled` et `channel` ainsi que le choix de la langue sont identiques à `/config almanax`."
             },
             "tutorial": {
-                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/config_get.gif",
-                "almanax": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/config_almanax.gif",
-                "rss": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/config_rss.gif",
-                "server": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/config_server.gif",
-                "twitter": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/config_twitter.gif"
+                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/config_get_FR.webp",
+                "almanax": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/config_almanax_FR.webp",
+                "rss": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/config_rss_FR.webp",
+                "server": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/config_server_FR.webp",
+                "twitter": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/config_twitter_FR.webp"
             },
             "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },
@@ -191,7 +191,7 @@
         "help": {
             "overview": "donne les items, montures, familiers, ressources et consommables du jeu",
             "detailed": "donne les items, montures, familiers, ressources et consommables du jeu\n  - Le champ `query` est obligatoire et correspond au nom de l'objet que tu souhaites consulter. *__Exemple__ : Coiffe du bouftou*",
-            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/item.gif",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/item_FR.webp",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
@@ -230,8 +230,8 @@
                 "set": "enregistre ta profession dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n    - Le champ `job` est obligatoire et correspond à un métier du jeu. *__Exemple__ : Bûcheron*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
             },
             "tutorial": {
-                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/job_get.gif",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/job_set.gif"
+                "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_get_FR.webp",
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_FR.webp"
             },
             "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },
@@ -254,7 +254,7 @@
         "help": {
             "overview": "tire au hasard une carte compétitive",
             "detailed": "tire au hasard une carte compétitive\n   - Le champ `number` est optionnel et correspond au numéro de carte compétitive souhaité. Si non renseigné, la carte est tirée aléatoirement. *__Exemple__ : 42*",
-            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/map.gif",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/map_FR.webp",
             "source": "Les captures d'écran proviennent de [Krosmoz Tournaments Arena](https://ktarena.com/)."
         },
         "title": "Carte {{ .mapNumber }}",
@@ -288,7 +288,7 @@
         "help": {
             "overview": "donne les positions de portail de dimension les plus récentes",
             "detailed": "donne les positions de portail de dimension les plus récentes\n   - Le champ `dimension` est optionnel et correspond à une dimension souhaitée. Si non renseigné, la position des portails de l'ensemble des dimensions est renvoyée. *__Exemple__ : Enutrosor*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
-            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/pos.gif",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/pos_FR.webp",
             "source": "Les données proviennent de [dofus-portals.fr](https://dofus-portals.fr/) qui mise sur la participation des chercheurs de portails."
         },
         "embed": {
@@ -304,7 +304,7 @@
         "help": {
             "overview": "donne les panoplies du jeu",
             "detailed": "donne les panoplies du jeu\n   - Le champ `query` est obligatoire et correspond au nom de la panoplie que tu souhaites consulter. *__Exemple__ : Panoplie du Boune*",
-            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/fr/set.gif",
+            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/set_FR.webp",
             "source": "Les données proviennent de [dofusdu.de](http://dofusdu.de), une incroyable technologie faite en Allemagne qui se charge de les récolter et de les exposer."
         },
         "description": "Niveau **{{ .level }}**",

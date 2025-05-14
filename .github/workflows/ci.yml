@@ -101,29 +101,33 @@ jobs:
 
         - name: Deploy Helm Chart
           run: |
-            helm upgrade --install ${{ github.event.repository.name }} charts/${{ github.event.repository.name }} \
-              --namespace kaellybot \
-              --create-namespace \
-              --set image.tag="${{ env.image_tag_name }}" \
-              --set secrets.DISCORD_TOKEN="${{ secrets.DISCORD_TOKEN }}" \
-              --set-string secrets.DISCORD_SHARD_ID="${{ secrets.DISCORD_SHARD_ID }}" \
-              --set-string secrets.DISCORD_SHARD_COUNT="${{ secrets.DISCORD_SHARD_COUNT }}" \
-              --set secrets.MYSQL_URL="${{ secrets.MYSQL_URL }}" \
-              --set secrets.MYSQL_USER="${{ secrets.MYSQL_USER }}" \
-              --set secrets.MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}" \
-              --set secrets.MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}" \
-              --set secrets.RABBITMQ_ADDRESS="${{ secrets.RABBITMQ_ADDRESS }}" \
-              --set-string secrets.ABOUT_ID="${{ secrets.ABOUT_ID }}" \
-              --set-string secrets.ALIGN_ID="${{ secrets.ALIGN_ID }}" \
-              --set-string secrets.ALMANAX_ID="${{ secrets.ALMANAX_ID }}" \
-              --set-string secrets.CONFIG_ID="${{ secrets.CONFIG_ID }}" \
-              --set-string secrets.HELP_ID="${{ secrets.HELP_ID }}" \
-              --set-string secrets.ITEM_ID="${{ secrets.ITEM_ID }}" \
-              --set-string secrets.JOB_ID="${{ secrets.JOB_ID }}" \
-              --set-string secrets.MAP_ID="${{ secrets.MAP_ID }}" \
-              --set-string secrets.POS_ID="${{ secrets.POS_ID }}" \
-              --set-string secrets.SET_ID="${{ secrets.SET_ID }}" \
-              --set configMap.PROBE_PORT="${{ secrets.PROBE_PORT }}" \
-              --set configMap.METRIC_PORT="${{ secrets.METRIC_PORT }}" \
-              --set configMap.LOG_LEVEL="${{ secrets.LOG_LEVEL }}" \
-              --set-string configMap.PRODUCTION="${{ secrets.PRODUCTION }}"
+            for i in $(seq 0 $(( ${{ secrets.DISCORD_SHARD_COUNT }} - 1))); do
+              helm upgrade --install ${{ github.event.repository.name }}-$i charts/${{ github.event.repository.name }} \
+                --atomic \
+                --force \
+                --namespace kaellybot \
+                --create-namespace \
+                --set image.tag="${{ env.image_tag_name }}" \
+                --set secrets.DISCORD_TOKEN="${{ secrets.DISCORD_TOKEN }}" \
+                --set-string secrets.DISCORD_SHARD_ID="$i" \
+                --set-string secrets.DISCORD_SHARD_COUNT="${{ secrets.DISCORD_SHARD_COUNT }}" \
+                --set secrets.MYSQL_URL="${{ secrets.MYSQL_URL }}" \
+                --set secrets.MYSQL_USER="${{ secrets.MYSQL_USER }}" \
+                --set secrets.MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}" \
+                --set secrets.MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}" \
+                --set secrets.RABBITMQ_ADDRESS="${{ secrets.RABBITMQ_ADDRESS }}" \
+                --set-string secrets.ABOUT_ID="${{ secrets.ABOUT_ID }}" \
+                --set-string secrets.ALIGN_ID="${{ secrets.ALIGN_ID }}" \
+                --set-string secrets.ALMANAX_ID="${{ secrets.ALMANAX_ID }}" \
+                --set-string secrets.CONFIG_ID="${{ secrets.CONFIG_ID }}" \
+                --set-string secrets.HELP_ID="${{ secrets.HELP_ID }}" \
+                --set-string secrets.ITEM_ID="${{ secrets.ITEM_ID }}" \
+                --set-string secrets.JOB_ID="${{ secrets.JOB_ID }}" \
+                --set-string secrets.MAP_ID="${{ secrets.MAP_ID }}" \
+                --set-string secrets.POS_ID="${{ secrets.POS_ID }}" \
+                --set-string secrets.SET_ID="${{ secrets.SET_ID }}" \
+                --set configMap.PROBE_PORT="${{ secrets.PROBE_PORT }}" \
+                --set configMap.METRIC_PORT="${{ secrets.METRIC_PORT }}" \
+                --set configMap.LOG_LEVEL="${{ secrets.LOG_LEVEL }}" \
+                --set-string configMap.PRODUCTION="${{ secrets.PRODUCTION }}"
+            done

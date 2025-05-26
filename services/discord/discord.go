@@ -22,6 +22,7 @@ func New(token string, shardID, shardCount int, commands []commands.DiscordComma
 	}
 
 	service := Impl{
+		shardID:      shardID,
 		session:      dg,
 		commands:     commands,
 		guildService: guildService,
@@ -42,11 +43,11 @@ func New(token string, shardID, shardCount int, commands []commands.DiscordComma
 func (service *Impl) Listen() error {
 	err := service.session.Open()
 	if err != nil {
-		log.Error().Int(constants.LogShard, service.session.ShardID).Err(err).Msgf("Impossible to listen events")
+		log.Error().Int(constants.LogShard, service.shardID).Err(err).Msgf("Impossible to listen events")
 		return err
 	}
 
-	log.Info().Int(constants.LogShard, service.session.ShardID).Msgf("Discord service is listening events...")
+	log.Info().Int(constants.LogShard, service.shardID).Msgf("Discord service is listening events...")
 	return nil
 }
 
@@ -55,7 +56,7 @@ func (service *Impl) IsConnected() bool {
 }
 
 func (service *Impl) Shutdown() {
-	log.Info().Int(constants.LogShard, service.session.ShardID).Msgf("Closing Discord connections...")
+	log.Info().Int(constants.LogShard, service.shardID).Msgf("Closing Discord connections...")
 	err := service.session.Close()
 	if err != nil {
 		log.Warn().Err(err).Msgf("Cannot close session and shutdown correctly")

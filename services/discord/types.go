@@ -25,6 +25,7 @@ type Service interface {
 }
 
 type Impl struct {
+	shardID      int
 	session      *discordgo.Session
 	commands     []commands.DiscordCommand
 	guildService guilds.Service

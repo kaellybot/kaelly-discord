@@ -159,6 +159,12 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 
 func MapAlmanaxEffectsToWebhook(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	lg discordgo.Locale, emojiService emojis.Service) *discordgo.WebhookEdit {
+	// Effect name was not even found
+	if answer.EffectName == "" {
+		return MapQueryMismatch(answer.Query, lg)
+	}
+
+	// Effect found but no attached almanax days
 	if len(answer.GetAlmanaxes()) == 0 {
 		content := di18n.Get(lg, "almanax.effect.missing")
 		return &discordgo.WebhookEdit{

@@ -10,13 +10,14 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -51,8 +52,8 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			Name:        fmt.Sprintf("/%v", contract.SetCommandName),
 			CommandID:   fmt.Sprintf("</%v:%v>", contract.SetCommandName, command.DiscordID),
-			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed", contract.SetCommandName)),
-			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial", contract.SetCommandName)),
+			Description: di18n.Get(lg, fmt.Sprintf("%v.help.detailed", contract.SetCommandName)),
+			TutorialURL: di18n.Get(lg, fmt.Sprintf("%v.help.tutorial", contract.SetCommandName)),
 		},
 	}
 }
@@ -127,6 +128,18 @@ func (command *Command) getSetReply(_ context.Context, s *discordgo.Session,
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
+	if message.GetEncyclopediaItemAnswer().GetSet() == nil {
+		query := message.GetEncyclopediaItemAnswer().Query
+		lg := i18n.MapAMQPLocale(message.Language)
+		reply := mappers.MapQueryMismatch(query, lg)
+		_, err := s.InteractionResponseEdit(i.Interaction, reply)
+		if err != nil {
+			log.Warn().Err(err).
+				Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+		}
+		return
+	}
+
 	reply := mappers.MapSetToDefaultWebhookEdit(message.EncyclopediaItemAnswer,
 		command.characService, command.emojiService, message.Language)
 	_, err := s.InteractionResponseEdit(i.Interaction, reply)
@@ -172,8 +185,7 @@ func isAnswerValid(message *amqp.RabbitMQMessage) bool {
 	return message.Status == amqp.RabbitMQMessage_SUCCESS &&
 		message.Type == amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER &&
 		message.EncyclopediaItemAnswer != nil &&
-		message.EncyclopediaItemAnswer.GetType() == amqp.ItemType_SET_TYPE &&
-		message.EncyclopediaItemAnswer.GetSet() != nil
+		message.EncyclopediaItemAnswer.GetType() == amqp.ItemType_SET_TYPE
 }
 
 func getQueryOption(ctx context.Context) (string, error) {

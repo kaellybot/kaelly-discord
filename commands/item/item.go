@@ -9,13 +9,14 @@ import (
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
-	i18n "github.com/kaysoro/discordgo-i18n"
+	di18n "github.com/kaysoro/discordgo-i18n"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -50,8 +51,8 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 		{
 			Name:        fmt.Sprintf("/%v", contract.ItemCommandName),
 			CommandID:   fmt.Sprintf("</%v:%v>", contract.ItemCommandName, command.DiscordID),
-			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed", contract.ItemCommandName)),
-			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial", contract.ItemCommandName)),
+			Description: di18n.Get(lg, fmt.Sprintf("%v.help.detailed", contract.ItemCommandName)),
+			TutorialURL: di18n.Get(lg, fmt.Sprintf("%v.help.tutorial", contract.ItemCommandName)),
 		},
 	}
 }
@@ -136,6 +137,18 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
 	if !isAnswerValid(message) {
 		panic(commands.ErrInvalidAnswerMessage)
+	}
+
+	if message.GetEncyclopediaItemAnswer().GetEquipment() == nil {
+		query := message.GetEncyclopediaItemAnswer().Query
+		lg := i18n.MapAMQPLocale(message.Language)
+		reply := mappers.MapQueryMismatch(query, lg)
+		_, err := s.InteractionResponseEdit(i.Interaction, reply)
+		if err != nil {
+			log.Warn().Err(err).
+				Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+		}
+		return
 	}
 
 	isRecipeValue, found := properties[isRecipeProperty]

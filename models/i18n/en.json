@@ -381,7 +381,14 @@
         }
     },
     "errors": {
-        "too_many_webhooks": "Webhooks maximum number reached on this channel, I can't continue...\n*(Click on the channel icon :gear: then `Integrations` and finally `Webhooks` to handle them)*"
+        "too_many_webhooks": "Webhooks maximum number reached on this channel, I can't continue...\n*(Click on the channel icon :gear: then `Integrations` and finally `Webhooks` to handle them)*",
+        "query_mismatch": [
+            "Oops! I didn’t find any result for \"*{{ .value }}*\". :confused:",
+            "Hmm... \"*{{ .value }}*\" doesn’t ring a bell. :thinking:",
+            "\"*{{ .value }}*\" doesn’t match anything in this list. :pensive:",
+            "I couldn’t find anything for \"*{{ .value }}*\"... Want to try again? 🔍",
+            "Nothing found for \"*{{ .value }}*\". Maybe a typo? ✍️"
+        ]
     },
     "panic": [
         "I have encountered an error :frowning:... This will be processed as soon as possible!",

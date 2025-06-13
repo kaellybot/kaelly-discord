@@ -381,7 +381,14 @@
         }
     },
     "errors": {
-        "too_many_webhooks": "Le nombre maximum de webhooks est atteint sur ce salon, je ne peux pas continuer...\n*(Clique sur l'icône :gear: du salon puis `Intégrations` et enfin `Webhooks` pour les gérer)*"
+        "too_many_webhooks": "Le nombre maximum de webhooks est atteint sur ce salon, je ne peux pas continuer...\n*(Clique sur l'icône :gear: du salon puis `Intégrations` et enfin `Webhooks` pour les gérer)*",
+        "query_mismatch": [
+            "Oups ! Je n’ai trouvé aucun résultat pour \"*{{ .value }}*\". :confused:",
+            "Hmm... \"*{{ .value }}*\", ça ne me dit rien du tout. :thinking:",
+            "\"*{{ .value }}*\" ne correspond à rien dans cette liste. :pensive:",
+            "Je n’ai rien trouvé pour \"*{{ .value }}*\"... Tu veux réessayer ? 🔍",
+            "Rien vu passer avec \"*{{ .value }}*\". Peut-être une faute de frappe ? ✍️"
+        ]
     },
     "panic": [
         "J'ai rencontré une erreur :frowning:... Cela sera étudiée et corrigée le plus tôt possible !",

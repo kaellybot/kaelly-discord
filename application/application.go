@@ -28,11 +28,13 @@ import (
 	"github.com/kaellybot/kaelly-discord/repositories/subareas"
 	"github.com/kaellybot/kaelly-discord/repositories/transports"
 	twitterRepo "github.com/kaellybot/kaelly-discord/repositories/twitters"
+	"github.com/kaellybot/kaelly-discord/repositories/weapons"
 	"github.com/kaellybot/kaelly-discord/services/almanaxes"
 	"github.com/kaellybot/kaelly-discord/services/books"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/discord"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
+	"github.com/kaellybot/kaelly-discord/services/equipments"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/portals"
@@ -77,6 +79,7 @@ func New() (*Impl, error) {
 	subAreaRepo := subareas.New(db)
 	transportTypeRepo := transports.New(db)
 	twitterRepo := twitterRepo.New(db)
+	weaponRepo := weapons.New(db)
 
 	// Services
 	almanaxService, errAlm := almanaxes.New(almanaxRepo)
@@ -114,6 +117,11 @@ func New() (*Impl, error) {
 		return nil, errCharac
 	}
 
+	equipmentService, errEquip := equipments.New(weaponRepo)
+	if errEquip != nil {
+		return nil, errEquip
+	}
+
 	emojiService, errEmoji := emojis.New(emojiRepo)
 	if errEmoji != nil {
 		return nil, errEmoji
@@ -130,7 +138,7 @@ func New() (*Impl, error) {
 		config.New(almanaxService, emojiService, feedService, guildService,
 			serverService, twitterService, requestsManager),
 		help.New(broker, &commands, emojiService),
-		item.New(characService, emojiService, requestsManager),
+		item.New(characService, equipmentService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, emojiService, requestsManager),
 		competition.New(emojiService, requestsManager),
 		pos.New(guildService, portalService, serverService, emojiService, requestsManager),

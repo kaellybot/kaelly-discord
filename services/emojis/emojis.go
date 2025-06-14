@@ -239,7 +239,9 @@ func mapEmoji(emoji *entities.Emoji) *discordgo.ComponentEmoji {
 
 func mapEmojiString(emoji *entities.Emoji) string {
 	if emoji != nil {
-		if len(strings.TrimSpace(emoji.ID)) > 0 {
+		if len(strings.TrimSpace(emoji.ID)) > 0 &&
+			len(emoji.DiscordName) > 0 &&
+			len(emoji.Snowflake) > 0 {
 			return fmt.Sprintf("<:%v:%v>", emoji.DiscordName, emoji.Snowflake)
 		}
 

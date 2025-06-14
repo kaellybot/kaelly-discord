@@ -13,6 +13,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
+	"github.com/kaellybot/kaelly-discord/services/equipments"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
@@ -22,15 +23,16 @@ import (
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
-func New(characService characteristics.Service, emojiService emojis.Service,
-	requestManager requests.RequestManager) *Command {
+func New(characService characteristics.Service, equipmentService equipments.Service,
+	emojiService emojis.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
 		AbstractCommand: commands.AbstractCommand{
 			DiscordID: viper.GetString(constants.ItemID),
 		},
-		characService:  characService,
-		emojiService:   emojiService,
-		requestManager: requestManager,
+		characService:    characService,
+		equipmentService: equipmentService,
+		emojiService:     emojiService,
+		requestManager:   requestManager,
 	}
 
 	cmd.handlers = commands.DiscordHandlers{
@@ -169,7 +171,7 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 	}
 
 	reply := mappers.MapItemToWebhookEdit(message.GetEncyclopediaItemAnswer(), isRecipe,
-		command.characService, command.emojiService, message.Language)
+		command.characService, command.equipmentService, command.emojiService, message.Language)
 
 	_, err := s.InteractionResponseEdit(i.Interaction, reply)
 	if err != nil {

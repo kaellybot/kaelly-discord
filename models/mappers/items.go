@@ -3,16 +3,21 @@ package mappers
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/services/characteristics"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
+	"github.com/kaellybot/kaelly-discord/services/equipments"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
+	"github.com/kaellybot/kaelly-discord/utils/translators"
 	di18n "github.com/kaysoro/discordgo-i18n"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -40,24 +45,25 @@ func MapItemRequest(query string, isID bool, itemType amqp.ItemType,
 }
 
 func MapItemToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
-	characService characteristics.Service, emojiService emojis.Service,
-	locale amqp.Language) *discordgo.WebhookEdit {
+	characService characteristics.Service, equipService equipments.Service,
+	emojiService emojis.Service, locale amqp.Language) *discordgo.WebhookEdit {
 	return mapEquipmentToWebhookEdit(answer, isRecipe, characService,
-		emojiService, locale)
+		equipService, emojiService, locale)
 }
 
 func mapEquipmentToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
-	characService characteristics.Service, emojiService emojis.Service,
-	locale amqp.Language) *discordgo.WebhookEdit {
+	characService characteristics.Service, equipService equipments.Service,
+	emojiService emojis.Service, locale amqp.Language) *discordgo.WebhookEdit {
 	lg := i18n.MapAMQPLocale(locale)
 	return &discordgo.WebhookEdit{
-		Embeds:     mapEquipmentToEmbeds(answer, isRecipe, characService, emojiService, lg),
+		Embeds:     mapEquipmentToEmbeds(answer, isRecipe, characService, equipService, emojiService, lg),
 		Components: mapEquipmentToComponents(answer, isRecipe, emojiService, lg),
 	}
 }
 
 func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
-	characService characteristics.Service, emojiService emojis.Service, lg discordgo.Locale,
+	characService characteristics.Service, equipService equipments.Service,
+	emojiService emojis.Service, lg discordgo.Locale,
 ) *[]*discordgo.MessageEmbed {
 	equipment := answer.GetEquipment()
 	fields := make([]*discordgo.MessageEmbedField, 0)
@@ -65,7 +71,7 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	if isRecipe {
 		fields = append(fields, getRecipeFields(equipment, emojiService, lg)...)
 	} else {
-		fields = append(fields, getEffectFields(equipment, characService, emojiService, lg)...)
+		fields = append(fields, getEffectFields(equipment, characService, equipService, emojiService, lg)...)
 	}
 
 	return &[]*discordgo.MessageEmbed{
@@ -91,8 +97,8 @@ func mapEquipmentToEmbeds(answer *amqp.EncyclopediaItemAnswer, isRecipe bool,
 	}
 }
 
-func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service characteristics.Service,
-	emojiService emojis.Service, lg discordgo.Locale) []*discordgo.MessageEmbedField {
+func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, characService characteristics.Service,
+	equipService equipments.Service, emojiService emojis.Service, lg discordgo.Locale) []*discordgo.MessageEmbedField {
 	fields := make([]*discordgo.MessageEmbedField, 0)
 
 	if equipment.GetCharacteristics() != nil {
@@ -109,14 +115,14 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 				"criticalRate":   characteristics.GetCriticalRate(),
 				"criticalBonus":  characteristics.GetCriticalBonus(),
 				"criticalEmoji":  emojiService.GetMiscStringEmoji(constants.EmojiIDCritical),
-				// TODO area + LDV
+				"areaEffects":    mapWeaponAreaEffect(characteristics.GetAreaEffectIds(), equipService, emojiService, lg),
 			}),
 			Inline: false,
 		})
 	}
 
 	if len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0 {
-		i18nWeaponEffects := mapEffects(equipment.GetWeaponEffects(), service, emojiService)
+		i18nWeaponEffects := mapEffects(equipment.GetWeaponEffects(), characService, emojiService)
 		weaponEffectFields := discord.SliceFields(i18nWeaponEffects, constants.MaxCharacterPerField,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
@@ -134,7 +140,7 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, service c
 			})
 		fields = append(fields, weaponEffectFields...)
 
-		i18nEffects := mapEffects(equipment.GetEffects(), service, emojiService)
+		i18nEffects := mapEffects(equipment.GetEffects(), characService, emojiService)
 		effectFields := discord.SliceFields(i18nEffects, constants.MaxCharacterPerField,
 			func(i int, items []i18nCharacteristic) *discordgo.MessageEmbedField {
 				name := constants.InvisibleCharacter
@@ -286,4 +292,67 @@ func mapItemIngredients(ingredients []*amqp.EncyclopediaItemAnswer_Recipe_Ingred
 	}
 
 	return result
+}
+
+func mapWeaponAreaEffect(effectIDs []string, equipService equipments.Service,
+	emojiService emojis.Service, lg discordgo.Locale) []string {
+	labels := make([]string, 0)
+	castings := make([]entities.WeaponAreaEffect, 0)
+	areas := make([]entities.WeaponAreaEffect, 0)
+
+	for _, effectID := range effectIDs {
+		effect, found := equipService.GetWeaponAreaEffect(effectID)
+		if !found {
+			log.Warn().
+				Str(constants.LogEntity, effectID).
+				Msgf("Cannot find weapon area effect based on ID sent internally, ignoring it")
+			continue
+		}
+
+		switch effect.Type {
+		case constants.Area:
+			areas = append(areas, effect)
+		case constants.Casting:
+			castings = append(castings, effect)
+		default:
+			log.Warn().
+				Str(constants.LogWeaponAreaEffectType, string(effect.Type)).
+				Msg("Weapon area effect type not handled, ignoring it")
+		}
+	}
+
+	slices.SortFunc(castings, func(a, b entities.WeaponAreaEffect) int {
+		return a.Order - b.Order
+	})
+	slices.SortFunc(areas, func(a, b entities.WeaponAreaEffect) int {
+		return a.Order - b.Order
+	})
+
+	var leftLabel string
+	for _, launch := range castings {
+		if len(leftLabel) == 0 {
+			leftLabel = translators.GetEntityLabel(launch, lg)
+		} else {
+			labels = append(labels, di18n.Get(lg, "item.characteristics.casting", di18n.Vars{
+				"left":  leftLabel,
+				"right": translators.GetEntityLabel(launch, lg),
+			}))
+			leftLabel = ""
+		}
+	}
+	if len(leftLabel) > 0 {
+		labels = append(labels, di18n.Get(lg, "item.characteristics.casting", di18n.Vars{
+			"left":  leftLabel,
+			"right": "",
+		}))
+	}
+
+	for _, area := range areas {
+		labels = append(labels, di18n.Get(lg, "item.characteristics.area", di18n.Vars{
+			"area":  translators.GetEntityLabel(area, lg),
+			"emoji": emojiService.GetEntityStringEmoji(area.ID, constants.EmojiWeaponAreaEffect),
+		}))
+	}
+
+	return labels
 }

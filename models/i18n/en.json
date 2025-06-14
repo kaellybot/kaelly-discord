@@ -197,7 +197,9 @@
         "description": "Level {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
         "characteristics": {
             "title": "Weapon Characteristic",
-            "description": "*Cost* {{ .cost }} {{ .costEmoji }}\n*Range* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Cast per turn* {{ .maxCastPerTurn }}\n{{ if ne .criticalRate 0 }}*Critical* {{ .criticalRate }}% {{ .criticalEmoji }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *Critical bonus* +{{ .criticalBonus }}\n{{ end }}"
+            "description": "*Cost* {{ .cost }} {{ .costEmoji }}\n*Range* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Cast per turn* {{ .maxCastPerTurn }}\n{{ if ne .criticalRate 0 }}*Critical* {{ .criticalRate }}% {{ .criticalEmoji }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *Critical bonus* +{{ .criticalBonus }}\n{{ end }}{{ if .areaEffects }}{{ range .areaEffects}}{{ . }}\n{{ end }}{{ end }}",
+            "casting": "*{{ .left }}*{{ if .right }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *{{ .right }}*{{ end }}",
+            "area": "*Area* {{ .area }} {{ .emoji }}"
         },
         "weaponEffects": {
             "title": "Weapon effects",

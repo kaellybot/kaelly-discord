@@ -33,6 +33,7 @@ const (
 	EmojiTypeOrder          EmojiEntity = "Order"
 	EmojiTypeServer         EmojiEntity = "Server"
 	EmojiTypeTransportType  EmojiEntity = "TransportType"
+	EmojiWeaponAreaEffect   EmojiEntity = "WeaponAreaEffect"
 )
 
 type EmojiMiscID string

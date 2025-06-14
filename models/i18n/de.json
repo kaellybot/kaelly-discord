@@ -197,7 +197,9 @@
         "description": "Level {{ .level }} ⬩ {{ if .emoji }}{{ .emoji }} {{ end }}{{ .type }}",
         "characteristics": {
             "title": "Waffeneigenschaften",
-            "description": "*Kosten* {{ .cost }} {{ .costEmoji }}\n*Reichweite* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Einsatz pro Runde* {{ .maxCastPerTurn }}\n{{ if ne .criticalRate 0 }}*Kritisch* {{ .criticalRate }}% {{ .criticalEmoji }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *Kritischer Bonus* +{{ .criticalBonus }}\n{{ end }}"
+            "description": "*Kosten* {{ .cost }} {{ .costEmoji }}\n*Reichweite* {{ .minRange }}{{ if ne .minRange .maxRange }} - {{ .maxRange }}{{ end }} {{ .rangeEmoji }}\n*Einsatz pro Runde* {{ .maxCastPerTurn }}\n{{ if ne .criticalRate 0 }}*Kritisch* {{ .criticalRate }}% {{ .criticalEmoji }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *Kritischer Bonus* +{{ .criticalBonus }}\n{{ end }}{{ if .areaEffects }}{{ range .areaEffects}}{{ . }}\n{{ end }}{{ end }}",
+            "casting": "*{{ .left }}*{{ if .right }}\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b *{{ .right }}*{{ end }}",
+            "area": "*Welt* {{ .area }} {{ .emoji }}"
         },
         "weaponEffects": {
             "title": "Waffeneffekte",

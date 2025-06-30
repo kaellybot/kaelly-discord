@@ -97,13 +97,9 @@ func (command *Command) respond(_ context.Context, s *discordgo.Session,
 		panic(commands.ErrInvalidAnswerMessage)
 	}
 
-	embeds := make([]*discordgo.MessageEmbed, 0)
-	for _, position := range message.GetPortalPositionAnswer().GetPositions() {
-		embeds = append(embeds, mappers.MapPortalToEmbed(position, command.portalService,
-			command.serverService, command.emojiService, message.Language))
-	}
-
-	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Embeds: &embeds})
+	resp := mappers.MapPortalToComponentV2(message.GetPortalPositionAnswer().GetPositions(),
+		command.portalService, command.serverService, command.emojiService, message.Language)
+	_, err := s.FollowupMessageCreate(i.Interaction, false, resp)
 	if err != nil {
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")

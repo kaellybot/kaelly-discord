@@ -52,9 +52,6 @@ const (
 	// Map command ID.
 	MapID = "MAP_ID"
 
-	// Pos command ID.
-	PosID = "POS_ID"
-
 	// Set command ID.
 	SetID = "SET_ID"
 
@@ -87,7 +84,6 @@ const (
 	defaultItemID            = "1116290248587100251"
 	defaultJobID             = "1062090620656681092"
 	defaultMapID             = "1291722831767404667"
-	defaultPosID             = "1020995396648054804"
 	defaultSetID             = "1117887213481496607"
 	defaultProbePort         = 9090
 	defaultMetricPort        = 2112
@@ -113,7 +109,6 @@ func GetDefaultConfigValues() map[string]any {
 		ItemID:            defaultItemID,
 		JobID:             defaultJobID,
 		MapID:             defaultMapID,
-		PosID:             defaultPosID,
 		SetID:             defaultSetID,
 		ProbePort:         defaultProbePort,
 		MetricPort:        defaultMetricPort,

@@ -1,5 +1,5 @@
 {
-    "welcome": "Hallo und vielen Dank für die Einladung! :tada:\n\nIch bin **{{ .name }}**, dein neuer Discord-Assistent für das Spiel **{{ .game.Name }}** {{ .gameLogo }}!\nMein Ziel? Dir praktische und unterhaltsame Tools anzubieten, um dein Spielerlebnis aufzupeppen. :fire:\nHier sind einige meiner Superkräfte:\n* :sparkles: Den Almanax, Gegenstände und Sets des Spiels durchsuchen\n* :sparkles: Portalpositionen entdecken, die von der Community geteilt wurden\n* :sparkles: Das Verzeichnis von Handwerkern und ausgerichteten Mitgliedern deiner Gilde verwalten\n* :sparkles: Zufällige Wettbewerbs-Karten ziehen, um deine Freunde herauszufordern\n\nNeugierig, was ich alles kann? Gib {{ .help }} ein und entdecke alle meine Befehle! :smirk:\n\n<@{{ .owner }}>, als Administrator von **{{ .guild }}** kannst du auf erweiterte Funktionen zugreifen, um meine Dienste zu konfigurieren.\nMit `/{{ .config }}` kannst du folgendes einrichten:\n* :globe_with_meridians: Den Hauptspielserver deiner Gilde\n* {{ .almanax }} Die tägliche Almanax-Zustellung\n* :bell: Benachrichtigungen für Tweets, RSS-Feeds des Spiels\n\nKlingt episch, oder? Ich freue mich darauf, mit dir zusammenzuarbeiten, um diesen Server noch unterhaltsamer und nützlicher zu machen! :smile:",
+    "welcome": "Hallo und vielen Dank für die Einladung! :tada:\n\nIch bin **{{ .name }}**, dein neuer Discord-Assistent für das Spiel **{{ .game.Name }}** {{ .gameLogo }}!\nMein Ziel? Dir praktische und unterhaltsame Tools anzubieten, um dein Spielerlebnis aufzupeppen. :fire:\nHier sind einige meiner Superkräfte:\n* :sparkles: Den Almanax, Gegenstände und Sets des Spiels durchsuchen\n* :sparkles: Das Verzeichnis von Handwerkern und ausgerichteten Mitgliedern deiner Gilde verwalten\n* :sparkles: Zufällige Wettbewerbs-Karten ziehen, um deine Freunde herauszufordern\n\nNeugierig, was ich alles kann? Gib {{ .help }} ein und entdecke alle meine Befehle! :smirk:\n\n<@{{ .owner }}>, als Administrator von **{{ .guild }}** kannst du auf erweiterte Funktionen zugreifen, um meine Dienste zu konfigurieren.\nMit `/{{ .config }}` kannst du folgendes einrichten:\n* :globe_with_meridians: Den Hauptspielserver deiner Gilde\n* {{ .almanax }} Die tägliche Almanax-Zustellung\n* :bell: Benachrichtigungen für Tweets, RSS-Feeds des Spiels\n\nKlingt episch, oder? Ich freue mich darauf, mit dir zusammenzuarbeiten, um diesen Server noch unterhaltsamer und nützlicher zu machen! :smile:",
     "about": {
         "help": {
             "overview": "bietet Informationen über mich und eine Möglichkeit, Hilfe zu erhalten",
@@ -130,7 +130,7 @@
                 "get": "zeigt meine aktuelle Konfiguration für diesen Discord-Server an",
                 "almanax": "aktiviert/deaktiviert den automatischen Versand des Almanax um Mitternacht\n  - Das Feld `enabled` ist erforderlich und gibt an, ob diese Funktion aktiviert oder deaktiviert wird. *__Beispiel__:Wahr*\n  - Das Feld `channel` ist optional und gibt den Kanal an, in dem die Nachrichten gepostet werden. Wenn nicht angegeben, wird der aktuelle Kanal verwendet. *__Beispiel__:#allgemein*\n  - Die verwendete Sprache ist die des Benutzers. Wenn diese nicht unterstützt wird, wird die Standardsprache *{{ .defaultLocale }}* verwendet.",
                 "rss": "aktiviert/deaktiviert den automatischen Versand von [RSS-Feeds](https://de.wikipedia.org/wiki/RSS)\n  - Das Feld `feed` ist erforderlich und entspricht einem RSS-Feed-Typ. *__Beispiel__:Devblog*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`.",
-                "server": "verknüpft den Discord-Server mit einem Spielserver\n  - Das Feld `server` ist erforderlich und entspricht einem Spielserver. Nach der Angabe wird er der Standardwert für bestimmte Befehle wie `align`, `job` oder `pos`. *__Beispiel__:Imagiro*\n  - Das Feld `channel` ist optional und dient dazu, einen Spielserver mit einem bestimmten Kanal zu verknüpfen. Diese Verknüpfung hat Vorrang vor der Verknüpfung mit dem Discord-Server. *__Beispiel__:#allgemein*",
+                "server": "verknüpft den Discord-Server mit einem Spielserver\n  - Das Feld `server` ist erforderlich und entspricht einem Spielserver. Nach der Angabe wird er der Standardwert für bestimmte Befehle wie `align` oder `job`. *__Beispiel__:Imagiro*\n  - Das Feld `channel` ist optional und dient dazu, einen Spielserver mit einem bestimmten Kanal zu verknüpfen. Diese Verknüpfung hat Vorrang vor der Verknüpfung mit dem Discord-Server. *__Beispiel__:#allgemein*",
                 "twitter": "aktiviert/deaktiviert den automatischen Versand von Tweets vom offiziellen Twitter-Konto des Spiels\n  - Das Feld `twitter` ist erforderlich und entspricht einem Twitter-Kontonamen. *__Beispiel__:DOFUS_EN*\n  - Die Felder `enabled` und `channel` sowie die Sprachauswahl sind identisch mit `/config almanax`."
             },
             "tutorial": {
@@ -286,22 +286,6 @@
             "tactical": "Taktikmodus"
         }
     },
-    "pos": {
-        "help": {
-            "overview": "liefert die neuesten Positionen der Dimensionstore",
-            "detailed": "liefert die neuesten Positionen der Dimensionstore\n   - Das Feld `dimension` ist optional und entspricht einer gewünschten Dimension. Wenn nicht angegeben, werden die Positionen der Tore aller Dimensionen zurückgegeben. *__Beispiel__:Enutrosor*\n - Das Feld `server` ist optional und entspricht dem gewünschten Spielserver. Wenn nicht angegeben, wird der für die Discord-Gilde definierte Spielserver verwendet (siehe `config`). *__Beispiel__:Imagiro*",
-            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/pos_DE.webp",
-            "source": "Die Daten stammen von [dofus-portals.fr](https://dofus-portals.fr/), die auf die Teilnahme der Portalsucher angewiesen sind."
-        },
-        "embed": {
-            "unknown": "Keine aktuellen Positionen gefunden :frowning:",
-            "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} Nutzungen\n\n*Hinzugefügt von **{{ .createdBy }}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nBearbeitet von **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
-            "transport": {
-                "name": "{{ .emoji }} {{ .type }} in der Nähe",
-                "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
-            }
-        }
-    },
     "set": {
         "help": {
             "overview": "liefert Sets",
@@ -341,10 +325,6 @@
             "constraints": "Das Datum muss im folgenden Format vorliegen: TT/MM/JJJJ :)",
             "outOfBounds": "Dieses Datum liegt außerhalb meines Wissens! Ich weiß, dass ich großartig bin, aber dennoch bin ich nicht der Gott Xelor! :face_with_peeking_eye:"
         },
-        "dimension": {
-            "not_found": "Aie! '*{{ .value }}*' entspricht keiner Dimension, die ich kenne. :pensive:",
-            "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Dimensionen ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Wenn du alle sehen möchtest, lass diese Option leer. :slight_smile:"
-        },
         "duration": {
             "constraints": "Die Dauer muss zwischen {{ .min }} und {{ .max }} Tagen liegen. :)"
         },
@@ -370,7 +350,7 @@
             "constraints": "Das Feld darf nicht leer sein! :grin:"
         },
         "server": {
-            "required": "Oops! Es scheint, dass kein {{ .game.Name }}-Server mit deiner Gilde (oder deinem Kanal) verknüpft ist. Nutze die Server-Option wie `/pos server Djaul`, oder verknüpfe deine Gilde mit einem Server über den Befehl `/config server`. :grin:",
+            "required": "Oops! Es scheint, dass kein {{ .game.Name }}-Server mit deiner Gilde (oder deinem Kanal) verknüpft ist. Nutze die Server-Option wie `/job get job: Alchemist server: Djaul`, oder verknüpfe deine Gilde mit einem Server über den Befehl `/config server`. :grin:",
             "not_found": "Aie! '*{{ .value }}*' entspricht keinem Server, den ich kenne. :pensive:",
             "too_many": "Outch! '*{{ .value }}*' entspricht zu vielen Servern ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Versuche es erneut, indem du einen existierenden aus der Liste auswählst. :slight_smile:"
         },

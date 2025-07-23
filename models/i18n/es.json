@@ -1,5 +1,5 @@
 {
-    "welcome": "¡Hola y gracias por la invitación! :tada:\n\nSoy **{{ .name }}**, tu nuevo asistente de Discord dedicado al juego **{{ .game.Name }}** {{ .gameLogo }}!\n¿Mi objetivo? Ofrecerte herramientas prácticas y divertidas para animar tu experiencia de juego. :fire:\nAquí tienes algunos de mis superpoderes: \n* :sparkles: Consultar el almanax, los objetos y los conjuntos del juego\n* :sparkles: Descubrir las posiciones de portales compartidas por la comunidad\n* :sparkles: Gestionar el directorio de artesanos y miembros alineados de tu gremio\n* :sparkles: Sortear mapas competitivos al azar para desafiar a tus amigos\n\n¿Tienes curiosidad por ver todo lo que puedo hacer? Escribe {{ .help }} y explora todos mis comandos. :smirk:\n\n<@{{ .owner }}>, como administrador de **{{ .guild }}**, puedes acceder a funciones avanzadas para configurar mis servicios.\nCon `/{{ .config }}`, puedes configurar:\n* :globe_with_meridians: El servidor principal de juego de tu gremio\n* {{ .almanax }} La entrega diaria del almanax\n* :bell: Notificaciones de tweets, feeds RSS del juego\n\n¿Suena épico, verdad? ¡Estoy emocionado por colaborar contigo para hacer este servidor aún más divertido y útil! :smile:",
+    "welcome": "¡Hola y gracias por la invitación! :tada:\n\nSoy **{{ .name }}**, tu nuevo asistente de Discord dedicado al juego **{{ .game.Name }}** {{ .gameLogo }}!\n¿Mi objetivo? Ofrecerte herramientas prácticas y divertidas para animar tu experiencia de juego. :fire:\nAquí tienes algunos de mis superpoderes: \n* :sparkles: Consultar el almanax, los objetos y los conjuntos del juego\n* :sparkles: Gestionar el directorio de artesanos y miembros alineados de tu gremio\n* :sparkles: Sortear mapas competitivos al azar para desafiar a tus amigos\n\n¿Tienes curiosidad por ver todo lo que puedo hacer? Escribe {{ .help }} y explora todos mis comandos. :smirk:\n\n<@{{ .owner }}>, como administrador de **{{ .guild }}**, puedes acceder a funciones avanzadas para configurar mis servicios.\nCon `/{{ .config }}`, puedes configurar:\n* :globe_with_meridians: El servidor principal de juego de tu gremio\n* {{ .almanax }} La entrega diaria del almanax\n* :bell: Notificaciones de tweets, feeds RSS del juego\n\n¿Suena épico, verdad? ¡Estoy emocionado por colaborar contigo para hacer este servidor aún más divertido y útil! :smile:",
     "about": {
         "help": {
             "overview": "proporciona información sobre mí y una forma de obtener ayuda",
@@ -130,7 +130,7 @@
                 "get": "muestra mi configuración actual para este servidor de Discord",
                 "almanax": "activa/desactiva el envío automático del Almanax a medianoche\n  - El campo `enabled` es obligatorio y corresponde a la activación o desactivación de esta función. *__Ejemplo__:Verdadero*\n  - El campo `channel` es opcional y corresponde al canal donde se publicarán los mensajes. Si no se especifica, se utiliza el canal actual. *__Ejemplo__:#general*\n  - El idioma utilizado es el del usuario. Si no está soportado, se usará el idioma predeterminado *{{ .defaultLocale }}*.",
                 "rss": "activa/desactiva el envío automático de [feeds RSS](https://es.wikipedia.org/wiki/RSS)\n  - El campo `feed` es obligatorio y corresponde a un tipo de feed RSS. *__Ejemplo__:Devblog*\n  - Los campos `enabled` y `channel`, así como la selección del idioma, son idénticos a `/config almanax`.",
-                "server": "vincula el servidor de Discord a un servidor del juego\n  - El campo `server` es obligatorio y corresponde a un servidor del juego. Una vez especificado, será el valor predeterminado para ciertos comandos como `align`, `job` o `pos`. *__Ejemplo__:Imagiro*\n  - El campo `channel` es opcional y se utiliza para vincular un servidor de juego a un canal específico. Este enlace tiene prioridad sobre el enlace al servidor de Discord. *__Ejemplo__:#general*",
+                "server": "vincula el servidor de Discord a un servidor del juego\n  - El campo `server` es obligatorio y corresponde a un servidor del juego. Una vez especificado, será el valor predeterminado para ciertos comandos como `align` o `job`. *__Ejemplo__:Imagiro*\n  - El campo `channel` es opcional y se utiliza para vincular un servidor de juego a un canal específico. Este enlace tiene prioridad sobre el enlace al servidor de Discord. *__Ejemplo__:#general*",
                 "twitter": "activa/desactiva el envío automático de tweets de la cuenta oficial de Twitter del juego\n  - El campo `twitter` es obligatorio y corresponde al nombre de una cuenta de Twitter. *__Ejemplo__:ES_DOFUS*\n  - Los campos `enabled` y `channel`, así como la selección del idioma, son idénticos a `/config almanax`."
             },
             "tutorial": {
@@ -285,22 +285,6 @@
             "normal": "Modo normal",
             "tactical": "Modo táctico"
         }
-    },   
-    "pos": {
-        "help": {
-            "overview": "proporciona las posiciones más recientes de los portales dimensionales",
-            "detailed": "proporciona las posiciones más recientes de los portales dimensionales\n   - El campo `dimension` es opcional y corresponde a una dimensión deseada. Si no se especifica, se devuelven las posiciones de los portales de todas las dimensiones. *__Ejemplo__:Anutropía*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, el servidor de juego utilizado será el definido para la guilda de Discord (ver `config`). *__Ejemplo__:Imagiro*",
-            "tutorial": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/pos_ES.webp",
-            "source": "Los datos provienen de [dofus-portals.fr](https://dofus-portals.fr/), que se basa en la participación de los buscadores de portales."
-        },
-        "embed": {
-            "unknown": "No se encontró ninguna posición reciente :frowning:",
-            "known": "**[{{ .position.X }}, {{ .position.Y }}]**, {{ .uses }} usos\n\n*Añadido por **{{ .createdBy }}** <t:{{ .createdAt.Seconds }}:R>{{ if .updatedBy }}\nActualizado por **{{ .updatedBy }}** <t:{{ .updatedAt.Seconds }}:R>{{end}}*",
-            "transport": {
-                "name": "{{ .emoji }} {{ .type }} cerca",
-                "value": "{{ .area }} ({{ .subArea }}) **[{{ .x }}, {{ .y }}]**"
-            }
-        }
     },
     "set": {
         "help": {
@@ -341,10 +325,6 @@
             "constraints": "La fecha debe respetar el siguiente formato: DD/MM/AAAA :)",
             "outOfBounds": "¡Esta fecha está fuera de mi conocimiento! Sé que soy increíble, pero aún así, ¡no soy el dios Xelor! :face_with_peeking_eye:"
         },
-        "dimension": {
-            "not_found": "¡Aie! '*{{ .value }}*' no corresponde a ninguna dimensión que conozca. :pensive:",
-            "too_many": "¡Outch! '*{{ .value }}*' coincide con demasiadas dimensiones ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }}) ¡Si quieres obtener todas, no completes esta opción! :slight_smile:"
-        },
         "duration": {
             "constraints": "La duración debe estar entre {{ .min }} y {{ .max }} días :)"
         },
@@ -370,7 +350,7 @@
             "constraints": "¡El campo debe estar rellenado! :grin:"
         },
         "server": {
-            "required": "¡Ups! Parece que no hay ningún servidor de {{ .game.Name }} vinculado a tu gremio (o canal). Usa la opción server como `/pos server Djaul` o vincula tu gremio con un servidor usando el comando `/config server`. :grin:",
+            "required": "¡Ups! Parece que no hay ningún servidor de {{ .game.Name }} vinculado a tu gremio (o canal). Usa la opción server como `/job get job: Alquimista server: Djaul` o vincula tu gremio con un servidor usando el comando `/config server`. :grin:",
             "not_found": "¡Aie! '*{{ .value }}*' no corresponde a ningún servidor que conozca. :pensive:",
             "too_many": "¡Outch! '*{{ .value }}*' coincide con demasiados servidores ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Vuelve a intentarlo seleccionando uno existente en la lista. :slight_smile:"
         },

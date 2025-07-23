@@ -32,7 +32,6 @@ const (
 	EmojiTypeJob            EmojiEntity = "Job"
 	EmojiTypeOrder          EmojiEntity = "Order"
 	EmojiTypeServer         EmojiEntity = "Server"
-	EmojiTypeTransportType  EmojiEntity = "TransportType"
 	EmojiWeaponAreaEffect   EmojiEntity = "WeaponAreaEffect"
 )
 

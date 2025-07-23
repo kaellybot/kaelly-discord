@@ -42,15 +42,6 @@ func GetCitiesLabels(cities []entities.City, locale discordgo.Locale) []string {
 	return labels
 }
 
-func GetDimensionsLabels(dimensions []entities.Dimension, locale discordgo.Locale) []string {
-	labels := make([]string, 0)
-	for _, dimension := range dimensions {
-		labels = append(labels, GetEntityLabel(dimension, locale))
-	}
-
-	return labels
-}
-
 func GetOrdersLabels(orders []entities.Order, locale discordgo.Locale) []string {
 	labels := make([]string, 0)
 	for _, order := range orders {
@@ -60,10 +51,10 @@ func GetOrdersLabels(orders []entities.Order, locale discordgo.Locale) []string 
 	return labels
 }
 
-func GetFeedTypesLabels(dimensions []entities.FeedType, locale discordgo.Locale) []string {
+func GetFeedTypesLabels(feedTypes []entities.FeedType, locale discordgo.Locale) []string {
 	labels := make([]string, 0)
-	for _, dimension := range dimensions {
-		labels = append(labels, GetEntityLabel(dimension, locale))
+	for _, feedType := range feedTypes {
+		labels = append(labels, GetEntityLabel(feedType, locale))
 	}
 
 	return labels

@@ -124,7 +124,6 @@ jobs:
                 --set-string secrets.ITEM_ID="${{ secrets.ITEM_ID }}" \
                 --set-string secrets.JOB_ID="${{ secrets.JOB_ID }}" \
                 --set-string secrets.MAP_ID="${{ secrets.MAP_ID }}" \
-                --set-string secrets.POS_ID="${{ secrets.POS_ID }}" \
                 --set-string secrets.SET_ID="${{ secrets.SET_ID }}" \
                 --set configMap.PROBE_PORT="${{ secrets.PROBE_PORT }}" \
                 --set configMap.METRIC_PORT="${{ secrets.METRIC_PORT }}" \

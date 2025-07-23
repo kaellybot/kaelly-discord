@@ -11,22 +11,17 @@ import (
 	"github.com/kaellybot/kaelly-discord/commands/help"
 	"github.com/kaellybot/kaelly-discord/commands/item"
 	"github.com/kaellybot/kaelly-discord/commands/job"
-	"github.com/kaellybot/kaelly-discord/commands/pos"
 	"github.com/kaellybot/kaelly-discord/commands/set"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	almanaxRepo "github.com/kaellybot/kaelly-discord/repositories/almanaxes"
-	"github.com/kaellybot/kaelly-discord/repositories/areas"
 	characRepo "github.com/kaellybot/kaelly-discord/repositories/characteristics"
 	"github.com/kaellybot/kaelly-discord/repositories/cities"
-	"github.com/kaellybot/kaelly-discord/repositories/dimensions"
 	emojiRepo "github.com/kaellybot/kaelly-discord/repositories/emojis"
 	feedRepo "github.com/kaellybot/kaelly-discord/repositories/feeds"
 	guildRepo "github.com/kaellybot/kaelly-discord/repositories/guilds"
 	"github.com/kaellybot/kaelly-discord/repositories/jobs"
 	"github.com/kaellybot/kaelly-discord/repositories/orders"
 	serverRepo "github.com/kaellybot/kaelly-discord/repositories/servers"
-	"github.com/kaellybot/kaelly-discord/repositories/subareas"
-	"github.com/kaellybot/kaelly-discord/repositories/transports"
 	twitterRepo "github.com/kaellybot/kaelly-discord/repositories/twitters"
 	"github.com/kaellybot/kaelly-discord/repositories/weapons"
 	"github.com/kaellybot/kaelly-discord/services/almanaxes"
@@ -37,7 +32,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/equipments"
 	"github.com/kaellybot/kaelly-discord/services/feeds"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
-	"github.com/kaellybot/kaelly-discord/services/portals"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/twitters"
 	"github.com/kaellybot/kaelly-discord/utils/databases"
@@ -66,18 +60,14 @@ func New() (*Impl, error) {
 
 	// Repositories
 	almanaxRepo := almanaxRepo.New(db)
-	areaRepo := areas.New(db)
 	characRepo := characRepo.New(db)
 	cityRepo := cities.New(db)
-	dimensionRepo := dimensions.New(db)
 	emojiRepo := emojiRepo.New(db)
 	feedRepo := feedRepo.New(db)
 	guildRepo := guildRepo.New(db)
 	jobRepo := jobs.New(db)
 	orderRepo := orders.New(db)
 	serverRepo := serverRepo.New(db)
-	subAreaRepo := subareas.New(db)
-	transportTypeRepo := transports.New(db)
 	twitterRepo := twitterRepo.New(db)
 	weaponRepo := weapons.New(db)
 
@@ -85,11 +75,6 @@ func New() (*Impl, error) {
 	almanaxService, errAlm := almanaxes.New(almanaxRepo)
 	if errAlm != nil {
 		return nil, errAlm
-	}
-
-	portalService, errPos := portals.New(dimensionRepo, areaRepo, subAreaRepo, transportTypeRepo)
-	if errPos != nil {
-		return nil, errPos
 	}
 
 	serverService, errServ := servers.New(serverRepo)
@@ -141,7 +126,6 @@ func New() (*Impl, error) {
 		item.New(characService, equipmentService, emojiService, requestsManager),
 		job.New(bookService, guildService, serverService, emojiService, requestsManager),
 		competition.New(emojiService, requestsManager),
-		pos.New(guildService, portalService, serverService, emojiService, requestsManager),
 		set.New(characService, emojiService, requestsManager),
 	)
 

@@ -354,12 +354,13 @@
             "not_found": "Aie! '*{{ .value }}*' não corresponde a nenhum servidor que conheça. :pensive:",
             "too_many": "Outch! '*{{ .value }}*' corresponde a muitos servidores ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! Tente novamente selecionando um da lista existente. :slight_smile:"
         },
-        "permission": {
-            "webhook": "Não tenho permissão para gerenciar webhooks! Desculpe, não posso fazer mais nada sem essa permissão. :("
-        },
         "twitterAccount": {
             "not_found": "Aie! '*{{ .value }}*' não corresponde a nenhuma conta do Twitter que conheça. :pensive:",
             "too_many": "Outch! '*{{ .value }}*' corresponde a muitas contas do Twitter ({{ if .collection }}{{$first := true}}{{ range .collection}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{ . }}{{ end }}{{ end }})! :slight_smile:"
+        },
+        "webhook": {
+            "permission": "Não tenho permissão para gerenciar webhooks! Desculpe, não posso fazer mais nada sem essa permissão :(",
+            "targetChannelType": "Desculpe! Só posso configurar notificações nos canais de texto do servidor :("
         }
     },
     "errors": {

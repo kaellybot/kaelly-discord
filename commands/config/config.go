@@ -46,15 +46,18 @@ func New(almanaxService almanaxes.Service, emojiService emojis.Service, feedServ
 
 	subCommandHandlers := cmd.HandleSubCommands(commands.SubCommandHandlers{
 		contract.ConfigAlmanaxSubCommandName: middlewares.
-			Use(cmd.checkEnabled, cmd.checkChannelID, cmd.almanaxRequest),
+			Use(cmd.checkEnabled, cmd.checkChannelID,
+				cmd.checkFollowConstraints, cmd.almanaxRequest),
 		contract.ConfigGetSubCommandName: middlewares.
 			Use(cmd.getRequest),
 		contract.ConfigRSSSubCommandName: middlewares.
-			Use(cmd.checkEnabled, cmd.checkFeedType, cmd.checkChannelID, cmd.rssRequest),
+			Use(cmd.checkEnabled, cmd.checkFeedType, cmd.checkChannelID,
+				cmd.checkFollowConstraints, cmd.rssRequest),
 		contract.ConfigServerSubCommandName: middlewares.
 			Use(checkServer, cmd.checkChannelID, cmd.serverRequest),
 		contract.ConfigTwitterSubCommandName: middlewares.
-			Use(cmd.checkEnabled, cmd.checkTwitterAccount, cmd.checkChannelID, cmd.twitterRequest),
+			Use(cmd.checkEnabled, cmd.checkTwitterAccount, cmd.checkChannelID,
+				cmd.checkFollowConstraints, cmd.twitterRequest),
 	})
 
 	cmd.handlers = commands.DiscordHandlers{

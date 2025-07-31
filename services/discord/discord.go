@@ -65,7 +65,7 @@ func (service *Impl) Shutdown() {
 
 func (service *Impl) ready(session *discordgo.Session, _ *discordgo.Ready) {
 	log.Info().
-		Int(constants.LogShard, session.ShardID).
+		Int(constants.LogShard, service.shardID).
 		Int(constants.LogGuildCount, len(session.State.Guilds)).
 		Msgf("Ready!")
 	err := session.UpdateGameStatus(0, constants.GetGame().Name)

@@ -142,7 +142,7 @@
             },
             "source": "The collected data is used only for my proper functioning."
         },
-        "success": "Change taken in account!",
+        "success": "Change take into account!",
         "embed": {
             "description": "{{ if .server }}{{ .server.Emoji }} **{{ .server.Name }}** is the current guild server!{{ else }}No {{ .game.Name }} server is linked to the guild!{{ end }}",
             "server": {

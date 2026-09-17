@@ -23,9 +23,7 @@ import (
 func New(emojiService emojis.Service, requestManager requests.RequestManager,
 ) *Command {
 	cmd := Command{
-		AbstractCommand: commands.AbstractCommand{
-			DiscordID: viper.GetString(constants.MapID),
-		},
+		DiscordID:      viper.GetString(constants.MapID),
 		requestManager: requestManager,
 		emojiService:   emojiService,
 	}

@@ -30,9 +30,7 @@ func New(almanaxService almanaxes.Service, emojiService emojis.Service, feedServ
 	guildService guilds.Service, serverService servers.Service, twitterService twitters.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		AbstractCommand: commands.AbstractCommand{
-			DiscordID: viper.GetString(constants.ConfigID),
-		},
+		DiscordID:      viper.GetString(constants.ConfigID),
 		almanaxService: almanaxService,
 		emojiService:   emojiService,
 		feedService:    feedService,

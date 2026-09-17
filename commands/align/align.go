@@ -25,9 +25,7 @@ func New(bookService books.Service, guildService guilds.Service,
 	serverService servers.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		AbstractCommand: commands.AbstractCommand{
-			DiscordID: viper.GetString(constants.AlignID),
-		},
+		DiscordID:      viper.GetString(constants.AlignID),
 		bookService:    bookService,
 		emojiService:   emojiService,
 		guildService:   guildService,

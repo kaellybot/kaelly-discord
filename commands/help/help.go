@@ -23,9 +23,7 @@ import (
 func New(broker amqp.MessageBroker, cmds *[]commands.DiscordCommand,
 	emojiService emojis.Service) *Command {
 	cmd := &Command{
-		AbstractCommand: commands.AbstractCommand{
-			DiscordID: viper.GetString(constants.HelpID),
-		},
+		DiscordID:    viper.GetString(constants.HelpID),
 		broker:       broker,
 		commands:     cmds,
 		emojiService: emojiService,

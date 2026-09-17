@@ -19,9 +19,7 @@ import (
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
 func New(emojiService emojis.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		AbstractCommand: commands.AbstractCommand{
-			DiscordID: viper.GetString(constants.AlmanaxID),
-		},
+		DiscordID:      viper.GetString(constants.AlmanaxID),
 		emojiService:   emojiService,
 		requestManager: requestManager,
 	}

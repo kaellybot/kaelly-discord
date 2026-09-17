@@ -15,15 +15,9 @@ func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 		return []discordgo.MessageComponent{}
 	}
 
-	previousPage := page - 1
-	if previousPage < constants.DefaultPage {
-		previousPage = constants.DefaultPage
-	}
+	previousPage := max(page-1, constants.DefaultPage)
 
-	nextPage := page + 1
-	if nextPage > lastPage {
-		nextPage = lastPage
-	}
+	nextPage := min(page+1, lastPage)
 
 	buttons := make([]discordgo.MessageComponent, 0)
 	if previousPage > constants.DefaultPage {

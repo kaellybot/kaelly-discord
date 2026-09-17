@@ -26,9 +26,7 @@ import (
 func New(characService characteristics.Service, equipmentService equipments.Service,
 	emojiService emojis.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		AbstractCommand: commands.AbstractCommand{
-			DiscordID: viper.GetString(constants.ItemID),
-		},
+		DiscordID:        viper.GetString(constants.ItemID),
 		characService:    characService,
 		equipmentService: equipmentService,
 		emojiService:     emojiService,

@@ -26,8 +26,7 @@ const (
 )
 
 func GetIntents() discordgo.Intent {
-	return discordgo.IntentMessageContent |
-		discordgo.IntentGuildMembers |
+	return discordgo.IntentGuildMembers |
 		discordgo.IntentGuilds |
 		discordgo.IntentGuildMessages |
 		discordgo.IntentGuildMessageReactions |

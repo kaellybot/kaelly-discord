@@ -87,21 +87,26 @@ func TestGetPaginationButtons_Navigation(t *testing.T) {
 	}
 }
 
-func TestGetPaginationButtons_OutOfRangePageIsNotClamped(t *testing.T) {
-	// Suspicious: the current page is never clamped into [0, pages-1], so an
-	// out-of-range page (e.g. a stale button after the list shrank) yields a
-	// "previous"/"next" button targeting a page that does not exist either.
+func TestGetPaginationButtons_OutOfRangePageIsClamped(t *testing.T) {
+	// A stale button (the list shrank since it was sent) must never offer a
+	// page outside of [0, pages-1].
 	beyond := GetPaginationButtons(10, 5, pageID, discordgo.EnglishGB, fakeEmojiService{})
 	assert.Equal(t, []expectedButton{
-		{"/page/9", "Previous page", constants.EmojiIDPrevious, false},
+		{"/page/3", "Previous page", constants.EmojiIDPrevious, false},
 		{"/page/4", "Last page", constants.EmojiIDLast, true},
-	}, toExpected(t, beyond))
+	}, toExpected(t, beyond), "clamped on the last page")
 
 	negative := GetPaginationButtons(-3, 5, pageID, discordgo.EnglishGB, fakeEmojiService{})
 	assert.Equal(t, []expectedButton{
 		{"/page/0", "First page", constants.EmojiIDFirst, true},
-		{"/page/-2", "Next page", constants.EmojiIDNext, false},
-	}, toExpected(t, negative))
+		{"/page/1", "Next page", constants.EmojiIDNext, false},
+	}, toExpected(t, negative), "clamped on the first page")
+
+	twoPages := GetPaginationButtons(7, 2, pageID, discordgo.EnglishGB, fakeEmojiService{})
+	assert.Equal(t, []expectedButton{
+		{"/page/0", "First page", constants.EmojiIDFirst, false},
+		{"/page/1", "Last page", constants.EmojiIDLast, true},
+	}, toExpected(t, twoPages))
 }
 
 func TestGetPaginationButtons_LabelsAreLocalized(t *testing.T) {

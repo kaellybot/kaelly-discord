@@ -412,15 +412,31 @@ func TestHandle_InvalidSelectionsPanic(t *testing.T) {
 	}
 }
 
-func TestHandle_OutOfRangePagePanics(t *testing.T) {
-	// A page index beyond the command's descriptions is not validated and ends
-	// in a runtime index-out-of-range panic (recovered upstream by HandlePanic).
-	f := newFixture(t)
-	s, fake := testutils.NewDiscordSession(t)
+func TestHandle_OutOfRangePageIsClampedToTheAvailableOnes(t *testing.T) {
+	// A crafted or stale custom ID can carry any page: it is clamped instead of
+	// indexing the descriptions out of range.
+	cases := map[string]struct {
+		page  string
+		title string
+		image string
+	}{
+		"beyond the last page": {"3", "Commande **config** : </config rss:222>", "https://tuto/config_rss.webp"},
+		"negative page":        {"-1", "Commande **config** : </config get:222>", "https://tuto/config_get.webp"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			f := newFixture(t)
+			s, fake := testutils.NewDiscordSession(t)
 
-	assert.Panics(t, func() { f.cmd.Handle(s, component("/help/config/page", "3")) })
-	assert.Panics(t, func() { f.cmd.Handle(s, component("/help/config/page", "-1")) })
-	assert.Empty(t, fake.Requests())
+			assert.NotPanics(t, func() { f.cmd.Handle(s, component("/help/config/page", tc.page)) })
+
+			payload := lastEdit(t, fake)
+			assert.Equal(t, tc.title, payload.Embeds[0].Title)
+			assert.Equal(t, tc.image, payload.Embeds[0].Image.URL)
+			_, pageDefaults := optionValues(selectMenus(t, payload)[1])
+			assert.Len(t, pageDefaults, 1, "the clamped page is the selected one")
+		})
+	}
 }
 
 func TestHandle_DiscordFailureIsSwallowed(t *testing.T) {

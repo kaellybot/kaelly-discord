@@ -37,7 +37,21 @@ func TestSlice_ChunksDoNotAliasEachOther(t *testing.T) {
 	assert.Equal(t, []string{"c", "d"}, sliced[1], "growing one chunk must not overwrite the next one")
 }
 
-func TestSlice_NonPositiveLimitPanics(t *testing.T) {
-	// Documents current behavior: there is no guard, a zero limit divides by zero.
-	assert.Panics(t, func() { Slice([]int{1, 2}, 0) })
+func TestSlice_NonPositiveLimitKeepsEverythingInOneChunk(t *testing.T) {
+	// A non-positive limit used to divide by zero on i%limit. Chosen no-op:
+	// skip the chunking rather than drop items, so the returned chunks still
+	// concatenate back to the input.
+	assert.Equal(t, [][]int{{1, 2, 3}}, Slice([]int{1, 2, 3}, 0))
+	assert.Equal(t, [][]int{{1, 2, 3}}, Slice([]int{1, 2, 3}, -3))
+	assert.Equal(t, [][]int{}, Slice([]int{}, 0))
+	assert.Equal(t, [][]int{}, Slice[int](nil, -1))
+}
+
+func TestSlice_NonPositiveLimitDoesNotAliasTheInput(t *testing.T) {
+	items := []int{1, 2, 3}
+
+	sliced := Slice(items, 0)
+	sliced[0][0] = 99
+
+	assert.Equal(t, []int{1, 2, 3}, items, "the single chunk must be a copy")
 }

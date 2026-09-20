@@ -56,6 +56,10 @@ func TestIsConnected_ReflectsUnderlyingPool(t *testing.T) {
 	assert.NotPanics(t, conn.Shutdown, "closing twice is harmless")
 }
 
+func TestShutdown_WithoutSuccessfulRunIsANoOp(t *testing.T) {
+	assert.NotPanics(t, New().Shutdown, "there is no pool to close until Run succeeds")
+}
+
 func TestIsConnected_FalseWhenGormHasNoSQLPool(t *testing.T) {
 	conn := &mySQLConnection{db: &gorm.DB{Config: &gorm.Config{}}}
 

@@ -15,6 +15,9 @@ func GetPaginationButtons(page, pages int, crafter CraftPageCustomID,
 		return []discordgo.MessageComponent{}
 	}
 
+	// Stale buttons may carry a page outside of the current range.
+	page = min(max(page, constants.DefaultPage), lastPage)
+
 	previousPage := max(page-1, constants.DefaultPage)
 
 	nextPage := min(page+1, lastPage)

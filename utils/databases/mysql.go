@@ -66,6 +66,11 @@ func (c *mySQLConnection) Run() error {
 }
 
 func (c *mySQLConnection) Shutdown() {
+	if c.db == nil {
+		log.Info().Msg("No MySQL connection to shutdown, ignoring it")
+		return
+	}
+
 	log.Info().Msg("Shutdown the connection to MySQL")
 	dbSQL, err := c.db.DB()
 	if err != nil {

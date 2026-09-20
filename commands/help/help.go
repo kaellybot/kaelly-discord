@@ -178,7 +178,10 @@ func (command *Command) getHelpCommand(commandName string, page int,
 			" for its help description, panicking", commandName))
 	}
 
+	// The page comes from a component custom ID: a crafted or stale one can
+	// point outside the command's descriptions.
 	details := wantedCommand.GetDescriptions(lg)
+	page = max(0, min(page, len(details)-1))
 	detail := details[page]
 	commandID := detail.CommandID
 	var subCommandID string

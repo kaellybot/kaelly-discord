@@ -1,6 +1,7 @@
 package almanax
 
 import (
+	"bytes"
 	"context"
 	"testing"
 	"time"
@@ -8,7 +9,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
+	"github.com/kaellybot/kaelly-discord/utils/parsing"
 	"github.com/kaellybot/kaelly-discord/utils/testutils"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -139,6 +143,30 @@ func TestCheckQuery_MissingOrBlankAnswersConstraints(t *testing.T) {
 			assertEditContent(t, fake, "Le champs ne doit pas être vide ! :grin:")
 		})
 	}
+}
+
+// captureLogs redirects the global logger to a buffer for the test duration.
+func captureLogs(t *testing.T) *bytes.Buffer {
+	t.Helper()
+	buffer := &bytes.Buffer{}
+	previous := log.Logger
+	log.Logger = zerolog.New(buffer)
+	t.Cleanup(func() { log.Logger = previous })
+	return buffer
+}
+
+func TestCheckDate_FailedAnswerLogsTheInteractionError(t *testing.T) {
+	logs := captureLogs(t)
+	cmd := newCommand(t, &fakeRequestManager{})
+	s, fake := testutils.NewDiscordSession(t)
+	fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 500, Body: `{}`})
+
+	cmd.checkDate(context.Background(), s, slash("day", stringOption("date", "tomorrow")),
+		func(context.Context) { t.Fatal("next must not be called") })
+
+	assert.Contains(t, logs.String(), "HTTP Internal Server Error")
+	assert.NotContains(t, logs.String(), parsing.ErrDateParsing.Error(),
+		"the failed edit is logged, not the date parsing error")
 }
 
 func TestChecks_DiscordFailureIsSwallowed(t *testing.T) {

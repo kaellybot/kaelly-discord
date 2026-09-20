@@ -28,7 +28,7 @@ func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 						Content: &content,
 					})
 					if errInteraction != nil {
-						log.Error().Err(err).Msg("Date check response ignored")
+						log.Error().Err(errInteraction).Msg("Date check response ignored")
 					}
 					return
 				}

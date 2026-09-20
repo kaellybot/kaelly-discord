@@ -191,7 +191,7 @@ func TestMapAlmanaxEffectsToWebhook_ListsDaysWithPaginationAndChoices(t *testing
 	edit := MapAlmanaxEffectsToWebhook(answer, discordgo.EnglishGB, fakeEmojis{})
 
 	embed := singleEmbed(t, edit.Embeds)
-	assert.Equal(t, "fish", embed.Title)
+	assert.Equal(t, "Fish", embed.Title, "the resolved effect name is shown, not the raw query")
 	assertRendered(t, embed.Description)
 	assert.Contains(t, embed.Description, "18")
 	assert.Contains(t, embed.Description, "page 2 on 4")
@@ -307,9 +307,80 @@ func TestMapAlmanaxResourceToWebhook_NoTributesAndUnlistedDuration(t *testing.T)
 	assertRendered(t, embed.Description)
 	assert.NotContains(t, embed.Description, "<item:")
 	rows := actionRows(t, edit.Components)
-	for _, option := range selectMenu(t, rows[0]).Options {
-		assert.False(t, option.Default, "a duration outside the proposed list selects nothing")
+	assertOptions(t, selectMenu(t, rows[0]).Options, constants.GetAlmanaxDayDuration(), "7")
+}
+
+func TestMapAlmanaxResourceToWebhook_UnlistedDurationSelectsTheClosestOption(t *testing.T) {
+	for duration, expected := range map[int64]string{1: "7", 6: "7", 12: "12", 99: "30"} {
+		t.Run(strconv.FormatInt(duration, 10), func(t *testing.T) {
+			answer := &amqp.EncyclopediaAlmanaxResourceAnswer{Duration: duration, Source: source()}
+
+			edit := MapAlmanaxResourceToWebhook(answer, 1, discordgo.EnglishGB, fakeEmojis{})
+
+			options := selectMenu(t, actionRows(t, edit.Components)[0]).Options
+			assertOptions(t, options, constants.GetAlmanaxDayDuration(), expected)
+		})
 	}
+}
+
+func TestMapAlmanaxResourceToWebhook_LeavesCallerTributesUnsorted(t *testing.T) {
+	answer := &amqp.EncyclopediaAlmanaxResourceAnswer{
+		Duration: 7, Source: source(),
+		Tributes: []*amqp.EncyclopediaAlmanaxResourceAnswer_Tribute{
+			{ItemName: "Zinc", ItemType: amqp.ItemType_RESOURCE_TYPE, Quantity: 1},
+			{ItemName: "Potion", ItemType: amqp.ItemType_CONSUMABLE_TYPE, Quantity: 3},
+		},
+	}
+
+	MapAlmanaxResourceToWebhook(answer, 1, discordgo.EnglishGB, fakeEmojis{})
+
+	names := make([]string, 0, len(answer.Tributes))
+	for _, tribute := range answer.Tributes {
+		names = append(names, tribute.ItemName)
+	}
+	assert.Equal(t, []string{"Zinc", "Potion"}, names, "the caller's slice is left untouched")
+}
+
+func TestMapAlmanaxToWebhook_MissingTributeAndSourceDoNotPanic(t *testing.T) {
+	almanax := almanaxOf(day(2024, time.July, 14), "More fish")
+	almanax.Tribute = nil
+	answer := &amqp.EncyclopediaAlmanaxAnswer{Almanax: almanax}
+
+	embed := singleEmbed(t, MapAlmanaxToWebhook(answer, discordgo.EnglishGB, fakeEmojis{}).Embeds)
+
+	assert.Empty(t, embed.Image.URL)
+	assert.Equal(t, &discordgo.MessageEmbedAuthor{}, embed.Author)
+	assertRendered(t, embed.Fields[1].Value)
+}
+
+func TestMapAlmanaxEffectsToEmbeds_TitleFallsBackToQueryWithoutEffectName(t *testing.T) {
+	answer := &amqp.EncyclopediaAlmanaxEffectAnswer{
+		Query: "fish", Pages: 1, Total: 1,
+		Almanaxes: []*amqp.Almanax{almanaxOf(day(2024, time.March, 3), "Bonus")},
+	}
+
+	embed := singleEmbed(t, mapAlmanaxEffectsToEmbeds(answer, discordgo.EnglishGB, fakeEmojis{}))
+
+	assert.Equal(t, "fish", embed.Title)
+}
+
+func TestMapAlmanaxEffectsToWebhook_MissingSourceLeavesAuthorEmpty(t *testing.T) {
+	answer := &amqp.EncyclopediaAlmanaxEffectAnswer{
+		Query: "fish", EffectName: "Fish", Pages: 1, Total: 1,
+		Almanaxes: []*amqp.Almanax{almanaxOf(day(2024, time.March, 3), "Bonus")},
+	}
+
+	embed := singleEmbed(t, MapAlmanaxEffectsToWebhook(answer, discordgo.EnglishGB, fakeEmojis{}).Embeds)
+
+	assert.Equal(t, &discordgo.MessageEmbedAuthor{}, embed.Author)
+}
+
+func TestMapAlmanaxResourceToWebhook_MissingSourceLeavesAuthorEmpty(t *testing.T) {
+	answer := &amqp.EncyclopediaAlmanaxResourceAnswer{Duration: 7}
+
+	embed := singleEmbed(t, MapAlmanaxResourceToWebhook(answer, 1, discordgo.EnglishGB, fakeEmojis{}).Embeds)
+
+	assert.Equal(t, &discordgo.MessageEmbedAuthor{}, embed.Author)
 }
 
 func assertOptions(t *testing.T, options []discordgo.SelectMenuOption, values []int64, selected string) {

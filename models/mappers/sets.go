@@ -33,22 +33,40 @@ func MapSetToDefaultWebhookEdit(answer *amqp.EncyclopediaItemAnswer,
 func MapSetToWebhookEdit(answer *amqp.EncyclopediaItemAnswer, itemNumber int,
 	characService characteristics.Service, emojiService emojis.Service,
 	locale amqp.Language) *discordgo.WebhookEdit {
-	set := answer.GetSet()
 	lg := i18n.MapAMQPLocale(locale)
-	bonus := &amqp.EncyclopediaItemAnswer_Set_Bonus{ItemNumber: 0}
-	for _, currentBonus := range set.Bonuses {
-		if currentBonus.ItemNumber == int64(itemNumber) {
-			bonus = currentBonus
-			break
-		} else if bonus.ItemNumber < currentBonus.ItemNumber {
-			bonus = currentBonus
-		}
-	}
+	bonus := findSetBonus(answer.GetSet().GetBonuses(), int64(itemNumber))
 
 	return &discordgo.WebhookEdit{
 		Embeds:     mapSetToEmbeds(answer, bonus, characService, emojiService, lg),
 		Components: mapSetToComponents(answer, bonus, emojiService, lg),
 	}
+}
+
+// findSetBonus returns the bonus matching itemNumber, else the closest bonus
+// below it, else the lowest one; nil when the set has no bonus at all.
+func findSetBonus(bonuses []*amqp.EncyclopediaItemAnswer_Set_Bonus,
+	itemNumber int64) *amqp.EncyclopediaItemAnswer_Set_Bonus {
+	var closest, lowest *amqp.EncyclopediaItemAnswer_Set_Bonus
+	for _, bonus := range bonuses {
+		currentNumber := bonus.GetItemNumber()
+		if currentNumber == itemNumber {
+			return bonus
+		}
+
+		if currentNumber < itemNumber && (closest == nil || currentNumber > closest.GetItemNumber()) {
+			closest = bonus
+		}
+
+		if lowest == nil || currentNumber < lowest.GetItemNumber() {
+			lowest = bonus
+		}
+	}
+
+	if closest != nil {
+		return closest
+	}
+
+	return lowest
 }
 
 func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
@@ -99,15 +117,15 @@ func mapSetToEmbeds(answer *amqp.EncyclopediaItemAnswer,
 
 	return &[]*discordgo.MessageEmbed{
 		{
-			Title:       set.Name,
-			Description: di18n.Get(lg, "set.description", di18n.Vars{"level": set.Level}),
+			Title:       set.GetName(),
+			Description: di18n.Get(lg, "set.description", di18n.Vars{"level": set.GetLevel()}),
 			Color:       constants.Color,
 			Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: set.GetIcon()},
 			Fields:      fields,
 			Author: &discordgo.MessageEmbedAuthor{
-				Name:    answer.Source.Name,
-				URL:     answer.Source.Url,
-				IconURL: answer.Source.Icon,
+				Name:    answer.GetSource().GetName(),
+				URL:     answer.GetSource().GetUrl(),
+				IconURL: answer.GetSource().GetIcon(),
 			},
 			Footer: discord.BuildDefaultFooter(lg),
 		},
@@ -121,22 +139,22 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 	components := make([]discordgo.MessageComponent, 0)
 
 	var maxItemNumber int
-	for _, currentBonus := range set.Bonuses {
-		itemNumber := int(currentBonus.ItemNumber)
+	for _, currentBonus := range set.GetBonuses() {
+		itemNumber := int(currentBonus.GetItemNumber())
 		if itemNumber > maxItemNumber {
 			maxItemNumber = itemNumber
 		}
 	}
 	bonuses := make([]discordgo.SelectMenuOption, 0)
-	for _, currentBonus := range set.Bonuses {
-		emoji := service.GetSetBonusEmoji(int(currentBonus.ItemNumber))
+	for _, currentBonus := range set.GetBonuses() {
+		emoji := service.GetSetBonusEmoji(int(currentBonus.GetItemNumber()))
 		bonuses = append(bonuses, discordgo.SelectMenuOption{
 			Label: di18n.Get(lg, "set.effects.option", di18n.Vars{
-				"itemNumber": currentBonus.ItemNumber,
+				"itemNumber": currentBonus.GetItemNumber(),
 				"itemCount":  maxItemNumber,
 			}),
-			Value:   fmt.Sprintf("%v", currentBonus.ItemNumber),
-			Default: currentBonus.ItemNumber == bonus.ItemNumber,
+			Value:   fmt.Sprintf("%v", currentBonus.GetItemNumber()),
+			Default: bonus != nil && currentBonus.GetItemNumber() == bonus.GetItemNumber(),
 			Emoji:   emoji,
 		})
 	}
@@ -145,7 +163,7 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 		components = append(components, discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.SelectMenu{
-					CustomID:    contract.CraftSetBonusCustomID(set.Id),
+					CustomID:    contract.CraftSetBonusCustomID(set.GetId()),
 					MenuType:    discordgo.StringSelectMenu,
 					Placeholder: di18n.Get(lg, "set.effects.placeholder"),
 					Options:     bonuses,
@@ -155,11 +173,11 @@ func mapSetToComponents(answer *amqp.EncyclopediaItemAnswer,
 	}
 
 	items := make([]discordgo.SelectMenuOption, 0)
-	for _, item := range set.Equipments {
+	for _, item := range set.GetEquipments() {
 		items = append(items, discordgo.SelectMenuOption{
-			Label: item.Name,
-			Value: item.Id,
-			Emoji: service.GetEquipmentEmoji(item.Type),
+			Label: item.GetName(),
+			Value: item.GetId(),
+			Emoji: service.GetEquipmentEmoji(item.GetType()),
 		})
 	}
 

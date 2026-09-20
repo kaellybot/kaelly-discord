@@ -78,8 +78,15 @@ func TestMapCompetitionMapToWebhookEdit_UnknownTypeHasNoImageNorButton(t *testin
 	assert.Empty(t, embed.Image.URL)
 	assert.Contains(t, testutils.Translations(t, discordgo.EnglishGB, "map.taunt"), embed.Description,
 		"unsupported AMQP language falls back to the default locale")
-	rows := actionRows(t, edit.Components)
-	require.Len(t, rows, 1)
-	// NOTE: an empty actions row is still emitted; Discord rejects such rows.
-	assert.Empty(t, rows[0].Components)
+	assert.Empty(t, actionRows(t, edit.Components), "no button means no row at all, Discord rejects empty rows")
+}
+
+func TestMapCompetitionMapToWebhookEdit_MissingSourceLeavesAuthorEmpty(t *testing.T) {
+	answer := competitionMap()
+	answer.Source = nil
+
+	embed := singleEmbed(t, MapCompetitionMapToWebhookEdit(answer, constants.MapTypeNormal,
+		fakeEmojis{}, amqp.Language_EN).Embeds)
+
+	assert.Equal(t, &discordgo.MessageEmbedAuthor{}, embed.Author)
 }

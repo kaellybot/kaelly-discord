@@ -93,18 +93,46 @@ func TestMapSetToWebhookEdit_MatchingBonusIsShownAndSelected(t *testing.T) {
 	require.Len(t, itemMenu.Options, 3)
 }
 
-func TestMapSetToWebhookEdit_UnmatchedItemNumberFallsBackToHighestBonus(t *testing.T) {
-	for _, itemNumber := range []int{1, 7} {
+func TestMapSetToWebhookEdit_UnmatchedItemNumberFallsBackToClosestBonusBelow(t *testing.T) {
+	cases := map[int]string{
+		4: "3", // closest bonus below the asked count
+		7: "5",
+		1: "2", // nothing below: the lowest bonus
+	}
+	for itemNumber, expected := range cases {
 		t.Run(fmt.Sprint(itemNumber), func(t *testing.T) {
 			edit := mapSet(setAnswer(3, 3, 5, 2), itemNumber)
 
 			embed := singleEmbed(t, edit.Embeds)
-			assert.Contains(t, embed.Fields[len(embed.Fields)-1].Value, "**50** Vitality")
+			assert.Contains(t, embed.Fields[len(embed.Fields)-1].Value,
+				fmt.Sprintf("**%s0** Vitality", expected))
 			for _, option := range selectMenu(t, actionRows(t, edit.Components)[0]).Options {
-				assert.Equal(t, option.Value == "5", option.Default, option.Value)
+				assert.Equal(t, option.Value == expected, option.Default, option.Value)
 			}
 		})
 	}
+}
+
+func TestMapSetToWebhookEdit_MissingSetAndSourceDoNotPanic(t *testing.T) {
+	edit := mapSet(&amqp.EncyclopediaItemAnswer{}, 1)
+
+	embed := singleEmbed(t, edit.Embeds)
+	assert.Empty(t, embed.Title)
+	assert.Empty(t, embed.Thumbnail.URL)
+	assert.Equal(t, &discordgo.MessageEmbedAuthor{}, embed.Author)
+	rows := actionRows(t, edit.Components)
+	require.Len(t, rows, 1, "no bonus menu, only the item one")
+	assert.Empty(t, selectMenu(t, rows[0]).Options)
+}
+
+func TestMapSetToWebhookEdit_MissingSourceLeavesAuthorEmpty(t *testing.T) {
+	answer := setAnswer(1, 1)
+	answer.Source = nil
+
+	embed := singleEmbed(t, mapSet(answer, 1).Embeds)
+
+	assert.Equal(t, &discordgo.MessageEmbedAuthor{}, embed.Author)
+	assert.Equal(t, "Gobball Set", embed.Title)
 }
 
 func TestMapSetToDefaultWebhookEdit_UsesEquipmentCount(t *testing.T) {

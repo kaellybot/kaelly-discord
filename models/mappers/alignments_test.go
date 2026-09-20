@@ -270,6 +270,17 @@ func TestMapAlignUserToEmbed_UsesNicknameAndSortsBeliefs(t *testing.T) {
 	assert.Equal(t, "Imagiro-FR", embed.Footer.Text)
 }
 
+func TestMapAlignUserToEmbed_MemberWithoutUserDegradesGracefully(t *testing.T) {
+	member := &discordgo.Member{Nick: "Nick"}
+
+	embeds := MapAlignUserToEmbed(nil, member, "srv", alignBooks(), fakeEmojis{},
+		fakeServers{servers: []entities.Server{testServer()}}, amqp.Language_EN)
+
+	embed := singleEmbed(t, embeds)
+	assert.Contains(t, embed.Title, "Nick")
+	assert.Empty(t, embed.Thumbnail.URL)
+}
+
 func TestMapAlignUserToEmbed_FallsBackToUsernameUserAvatarAndEmptyEntities(t *testing.T) {
 	member := &discordgo.Member{User: &discordgo.User{ID: "u", Username: "user", Avatar: "useravatar"}}
 

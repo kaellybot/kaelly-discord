@@ -16,10 +16,12 @@ func effect(id, label string) *amqp.EncyclopediaItemAnswer_Effect {
 
 func TestHighlightEffectValues_BoldsEverySignedInteger(t *testing.T) {
 	cases := map[string]string{
-		"10 to 15 Strength": "**10** to **15** Strength",
-		"-3 AP":             "**-3** AP",
-		"Invisibility":      "Invisibility",
-		"":                  "",
+		"10 to 15 Strength":       "**10** to **15** Strength",
+		"-3 AP":                   "**-3** AP",
+		"Invisibility":            "Invisibility",
+		"":                        "",
+		"<:fire:12345> 10 damage": "<:fire:12345> **10** damage",
+		"<a:kama:678> 2 kamas":    "<a:kama:678> **2** kamas",
 	}
 	for label, expected := range cases {
 		t.Run(label, func(t *testing.T) {
@@ -64,6 +66,21 @@ func TestMapEffects_ReplacesRegexExpressionsWithRelativeCharacteristicEmoji(t *t
 	require.Len(t, characs, 1)
 	assert.Equal(t, "**5** <Characteristic:fire>", characs[0].Label)
 	assert.Equal(t, "<Characteristic:dmg>", characs[0].Emoji)
+}
+
+func TestMapEffects_RegexesAreReplacedBeforeValuesAreBolded(t *testing.T) {
+	service := fakeCharacteristics{characs: map[string]entities.Characteristic{
+		"res": {ID: "res", SortOrder: 1, Regexes: []entities.RegexCharacteristic{
+			{CharacteristicID: "res", Expression: "(2 fire damage)", RelativeCharacteristicID: "fire"},
+		}},
+	}}
+
+	characs := mapEffects([]*amqp.EncyclopediaItemAnswer_Effect{effect("res", "10 (2 fire damage)")},
+		service, fakeEmojis{})
+
+	require.Len(t, characs, 1)
+	assert.Equal(t, "**10** <Characteristic:fire>", characs[0].Label,
+		"an expression holding digits still matches")
 }
 
 func TestMapEffects_EmptyInputGivesEmptySlice(t *testing.T) {

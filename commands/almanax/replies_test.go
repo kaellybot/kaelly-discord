@@ -297,7 +297,8 @@ func TestEffectRespond_ListsDaysWithDayChoiceMenu(t *testing.T) {
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
-	assert.Equal(t, "xp", payload.Embeds[0].Title)
+	assert.Equal(t, effectAnswer().GetEncyclopediaAlmanaxEffectAnswer().GetEffectName(),
+		payload.Embeds[0].Title, "the resolved effect name titles the embed, not the raw query")
 	require.Len(t, payload.Embeds[0].Fields, 2)
 	assert.Equal(t, ":calendar: <t:"+unix(refDay())+":D>", payload.Embeds[0].Fields[0].Name)
 	assert.Equal(t, []string{"/almanax/day?type=choice"}, componentValues(t, payload, "custom_id"),

@@ -34,24 +34,24 @@ func mapCompetitionMapToEmbed(competitiveMap *amqp.CompetitionMapAnswer,
 	var imageURL string
 	switch mapType {
 	case constants.MapTypeNormal:
-		imageURL = competitiveMap.MapNormalURL
+		imageURL = competitiveMap.GetMapNormalURL()
 	case constants.MapTypeTactical:
-		imageURL = competitiveMap.MapTacticalURL
+		imageURL = competitiveMap.GetMapTacticalURL()
 	default:
 		imageURL = ""
 	}
 
 	embed := discordgo.MessageEmbed{
 		Title: di18n.Get(lg, "map.title", di18n.Vars{
-			"mapNumber": competitiveMap.MapNumber,
+			"mapNumber": competitiveMap.GetMapNumber(),
 		}),
 		Description: di18n.Get(lg, "map.taunt"),
 		Color:       constants.Color,
 		Image:       &discordgo.MessageEmbedImage{URL: imageURL},
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    competitiveMap.Source.Name,
-			URL:     competitiveMap.Source.Url,
-			IconURL: competitiveMap.Source.Icon,
+			Name:    competitiveMap.GetSource().GetName(),
+			URL:     competitiveMap.GetSource().GetUrl(),
+			IconURL: competitiveMap.GetSource().GetIcon(),
 		},
 		Footer: discord.BuildDefaultFooter(lg),
 	}
@@ -61,17 +61,17 @@ func mapCompetitionMapToEmbed(competitiveMap *amqp.CompetitionMapAnswer,
 
 func mapCompetitionMapToComponents(competitiveMap *amqp.CompetitionMapAnswer, mapType constants.MapType,
 	service emojis.Service, lg discordgo.Locale) *[]discordgo.MessageComponent {
-	components := make([]discordgo.MessageComponent, 0)
+	buttons := make([]discordgo.MessageComponent, 0)
 	switch mapType {
 	case constants.MapTypeNormal:
-		components = append(components, discordgo.Button{
+		buttons = append(buttons, discordgo.Button{
 			CustomID: contract.CraftMapTacticalCustomID(competitiveMap.GetMapNumber()),
 			Label:    di18n.Get(lg, "map.button.tactical"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDTacticalMap),
 		})
 	case constants.MapTypeTactical:
-		components = append(components, discordgo.Button{
+		buttons = append(buttons, discordgo.Button{
 			CustomID: contract.CraftMapNormalCustomID(competitiveMap.GetMapNumber()),
 			Label:    di18n.Get(lg, "map.button.normal"),
 			Style:    discordgo.PrimaryButton,
@@ -79,9 +79,12 @@ func mapCompetitionMapToComponents(competitiveMap *amqp.CompetitionMapAnswer, ma
 		})
 	}
 
-	return &[]discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: components,
-		},
+	components := make([]discordgo.MessageComponent, 0)
+	if len(buttons) > 0 {
+		components = append(components, discordgo.ActionsRow{
+			Components: buttons,
+		})
 	}
+
+	return &components
 }

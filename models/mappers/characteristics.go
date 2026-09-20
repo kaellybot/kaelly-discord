@@ -25,7 +25,8 @@ type i18nCharacteristic struct {
 }
 
 var (
-	effectValue = regexp.MustCompile(`(-?\d+)`)
+	// Matches emojis first so their snowflake digits are left alone.
+	effectValue = regexp.MustCompile(`<a?:[^:<>\s]+:\d+>|-?\d+`)
 )
 
 func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
@@ -42,12 +43,13 @@ func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 
 		characEmoji := emojiService.
 			GetEntityStringEmoji(charac.ID, constants.EmojiTypeCharacteristic)
-		label := highlightEffectValues(effect.GetLabel())
+		label := effect.GetLabel()
 		for _, regex := range charac.Regexes {
 			regexEmoji := emojiService.
 				GetEntityStringEmoji(regex.RelativeCharacteristicID, constants.EmojiTypeCharacteristic)
 			label = strings.ReplaceAll(label, regex.Expression, regexEmoji)
 		}
+		label = highlightEffectValues(label)
 
 		characs = append(characs, i18nCharacteristic{
 			Label:     label,
@@ -62,6 +64,10 @@ func mapEffects[Characteristic AMQPCharacteristic](effects []Characteristic,
 
 func highlightEffectValues(label string) string {
 	return effectValue.ReplaceAllStringFunc(label, func(match string) string {
+		if strings.HasPrefix(match, "<") {
+			return match
+		}
+
 		return fmt.Sprintf("**%s**", match)
 	})
 }

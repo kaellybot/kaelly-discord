@@ -159,11 +159,11 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, characSer
 		fields = append(fields, effectFields...)
 	}
 
-	if equipment.Conditions != nil {
+	if equipment.GetConditions() != nil {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name: di18n.Get(lg, "item.conditions.title"),
 			Value: di18n.Get(lg, "item.conditions.description", di18n.Vars{
-				"conditions": getConditions(equipment.Conditions, lg),
+				"conditions": getConditions(equipment.GetConditions(), lg),
 			}),
 			Inline: false,
 		})
@@ -175,14 +175,14 @@ func getEffectFields(equipment *amqp.EncyclopediaItemAnswer_Equipment, characSer
 func getConditions(conditions *amqp.EncyclopediaItemAnswer_Conditions, lg discordgo.Locale) []string {
 	labels := make([]string, 0)
 
-	if conditions.Condition != nil {
+	if conditions.GetCondition() != nil {
 		labels = append(labels, fmt.Sprintf("%v %v %v",
-			conditions.Condition.Element.Name,
-			conditions.Condition.Operator,
-			conditions.Condition.Value))
+			conditions.GetCondition().GetElement().GetName(),
+			conditions.GetCondition().GetOperator(),
+			conditions.GetCondition().GetValue()))
 	}
 
-	switch conditions.Relation {
+	switch conditions.GetRelation() {
 	case amqp.EncyclopediaItemAnswer_Conditions_AND:
 		for _, child := range conditions.GetChildren() {
 			labels = append(labels, getConditions(child, lg)...)
@@ -247,14 +247,17 @@ func mapEquipmentToComponents(answer *amqp.EncyclopediaItemAnswer, isRecipe bool
 		})
 	}
 
-	if isRecipe && (len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0) {
+	hasEffects := len(equipment.GetWeaponEffects()) > 0 || len(equipment.GetEffects()) > 0
+	// Only the view which is not displayed yet deserves a button.
+	switch {
+	case isRecipe && hasEffects:
 		components = append(components, discordgo.Button{
 			CustomID: contract.CraftItemEffectsCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT_TYPE.String()),
 			Label:    di18n.Get(lg, "item.effects.button"),
 			Style:    discordgo.PrimaryButton,
 			Emoji:    service.GetMiscEmoji(constants.EmojiIDEffect),
 		})
-	} else if equipment.GetRecipe() != nil {
+	case !isRecipe && equipment.GetRecipe() != nil:
 		components = append(components, discordgo.Button{
 			CustomID: contract.CraftItemRecipeCustomID(equipment.GetId(), amqp.ItemType_EQUIPMENT_TYPE.String()),
 			Label:    di18n.Get(lg, "item.recipe.button"),

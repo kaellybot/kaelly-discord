@@ -251,23 +251,23 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 	cityValues := make(map[string]int64)
 	i18nAlignXp := make([]i18nAlignmentExperience, 0)
 	for _, alignXp := range alignExperiences {
-		value, foundCity := cityValues[alignXp.CityId]
+		value, foundCity := cityValues[alignXp.GetCityId()]
 		if foundCity {
-			cityValues[alignXp.CityId] = value + alignXp.Level
+			cityValues[alignXp.GetCityId()] = value + alignXp.GetLevel()
 		} else {
-			cityValues[alignXp.CityId] = alignXp.Level
+			cityValues[alignXp.GetCityId()] = alignXp.GetLevel()
 		}
 
-		city, foundCity := alignService.GetCity(alignXp.CityId)
+		city, foundCity := alignService.GetCity(alignXp.GetCityId())
 		if !foundCity {
-			log.Warn().Str(constants.LogEntity, alignXp.CityId).
+			log.Warn().Str(constants.LogEntity, alignXp.GetCityId()).
 				Msgf("Cannot find city based on ID sent internally, continuing with empty city")
 			city = entities.City{}
 		}
 
-		order, foundOrder := alignService.GetOrder(alignXp.OrderId)
+		order, foundOrder := alignService.GetOrder(alignXp.GetOrderId())
 		if !foundOrder {
-			log.Warn().Str(constants.LogEntity, alignXp.OrderId).
+			log.Warn().Str(constants.LogEntity, alignXp.GetOrderId()).
 				Msgf("Cannot find order based on ID sent internally, continuing with empty order")
 			order = entities.Order{}
 		}
@@ -276,7 +276,7 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 		i18nAlignXp = append(i18nAlignXp, i18nAlignmentExperience{
 			City:  emojiService.GetEntityStringEmoji(city.ID, constants.EmojiTypeCity),
 			Order: emojiService.GetEntityStringEmoji(orderEmojiID, constants.EmojiTypeOrder),
-			Level: alignXp.Level,
+			Level: alignXp.GetLevel(),
 		})
 	}
 
@@ -290,15 +290,7 @@ func MapAlignUserToEmbed(alignExperiences []*amqp.AlignGetUserAnswer_AlignExperi
 		return i18nAlignXp[i].Level > i18nAlignXp[j].Level
 	})
 
-	userName := member.Nick
-	if len(userName) == 0 {
-		userName = member.User.Username
-	}
-
-	userIcon := member.AvatarURL("")
-	if len(userIcon) == 0 {
-		userIcon = member.User.AvatarURL("")
-	}
+	userName, userIcon := mapMemberIdentity(member)
 
 	winningCity := mapWinningCity(cityValues, alignService)
 	embed := discordgo.MessageEmbed{

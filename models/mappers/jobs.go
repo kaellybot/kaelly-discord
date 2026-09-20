@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"slices"
 	"sort"
 
 	"github.com/bwmarrin/discordgo"
@@ -129,17 +130,19 @@ func mapJobBookToEmbeds(answer *amqp.JobGetBookAnswer, craftsmen []constants.Job
 		server = entities.Server{ID: answer.GetServerId()}
 	}
 
-	sort.SliceStable(craftsmen, func(i, j int) bool {
-		if craftsmen[i].Level == craftsmen[j].Level {
-			return craftsmen[i].Username < craftsmen[j].Username
+	// Sorting a copy keeps the caller's slice untouched.
+	sortedCraftsmen := slices.Clone(craftsmen)
+	sort.SliceStable(sortedCraftsmen, func(i, j int) bool {
+		if sortedCraftsmen[i].Level == sortedCraftsmen[j].Level {
+			return sortedCraftsmen[i].Username < sortedCraftsmen[j].Username
 		}
-		return craftsmen[i].Level > craftsmen[j].Level
+		return sortedCraftsmen[i].Level > sortedCraftsmen[j].Level
 	})
 
 	embed := discordgo.MessageEmbed{
 		Title: di18n.Get(lg, "job.embed.craftsmen.title", di18n.Vars{"job": translators.GetEntityLabel(job, lg)}),
 		Description: di18n.Get(lg, "job.embed.craftsmen.description", di18n.Vars{
-			"craftsmen": craftsmen,
+			"craftsmen": sortedCraftsmen,
 			"total":     answer.GetTotal(),
 			"page":      answer.GetPage() + 1,
 			"pages":     answer.GetPages(),
@@ -168,16 +171,16 @@ func MapJobUserToEmbed(jobExperiences []*amqp.JobGetUserAnswer_JobExperience, me
 
 	i18nJobXp := make([]i18nJobExperience, 0)
 	for _, jobXp := range jobExperiences {
-		job, foundJob := jobService.GetJob(jobXp.JobId)
+		job, foundJob := jobService.GetJob(jobXp.GetJobId())
 		if !foundJob {
-			log.Warn().Str(constants.LogEntity, jobXp.JobId).
+			log.Warn().Str(constants.LogEntity, jobXp.GetJobId()).
 				Msgf("Cannot find job based on ID sent internally, continuing with empty job")
-			job = entities.Job{ID: jobXp.JobId}
+			job = entities.Job{ID: jobXp.GetJobId()}
 		}
 
 		i18nJobXp = append(i18nJobXp, i18nJobExperience{
 			Job:   translators.GetEntityLabel(job, lg),
-			Level: jobXp.Level,
+			Level: jobXp.GetLevel(),
 		})
 	}
 
@@ -188,15 +191,7 @@ func MapJobUserToEmbed(jobExperiences []*amqp.JobGetUserAnswer_JobExperience, me
 		return i18nJobXp[i].Level > i18nJobXp[j].Level
 	})
 
-	userName := member.Nick
-	if len(userName) == 0 {
-		userName = member.User.Username
-	}
-
-	userIcon := member.AvatarURL("")
-	if len(userIcon) == 0 {
-		userIcon = member.User.AvatarURL("")
-	}
+	userName, userIcon := mapMemberIdentity(member)
 
 	embed := discordgo.MessageEmbed{
 		Title:       di18n.Get(lg, "job.embed.craftsman.title", di18n.Vars{"username": userName}),

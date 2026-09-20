@@ -221,7 +221,7 @@ func TestMapItemToWebhookEdit_RecipeViewSlicesIngredientsAndOffersEffects(t *tes
 	assert.Equal(t, "misc:effect", btns[0].Emoji.Name)
 }
 
-func TestMapItemToWebhookEdit_RecipeViewWithoutEffectsOffersRecipeAgain(t *testing.T) {
+func TestMapItemToWebhookEdit_RecipeViewWithoutEffectsOffersNoButton(t *testing.T) {
 	answer := weaponAnswer()
 	answer.Equipment.Set = nil
 	answer.Equipment.WeaponEffects = nil
@@ -229,12 +229,49 @@ func TestMapItemToWebhookEdit_RecipeViewWithoutEffectsOffersRecipeAgain(t *testi
 
 	edit := mapItem(answer, true)
 
-	// Current behavior: with no effects to switch to, the recipe view still
-	// offers a "recipe" button pointing to the view already displayed.
-	btns := buttons(t, actionRows(t, edit.Components)[0])
+	assert.Nil(t, edit.Components, "the recipe view never links back to itself")
+}
+
+func TestMapItemToWebhookEdit_RecipeViewWithoutEffectsStillLinksToTheSet(t *testing.T) {
+	answer := weaponAnswer()
+	answer.Equipment.WeaponEffects = nil
+	answer.Equipment.Effects = nil
+
+	btns := buttons(t, actionRows(t, mapItem(answer, true).Components)[0])
+
 	require.Len(t, btns, 1)
-	_, _, ok := contract.ExtractItemRecipeCustomID(btns[0].CustomID)
+	_, ok := contract.ExtractSetCustomID(btns[0].CustomID)
 	assert.True(t, ok, btns[0].CustomID)
+}
+
+func TestMapItemToWebhookEdit_EffectsViewWithoutRecipeOffersNoButton(t *testing.T) {
+	answer := weaponAnswer()
+	answer.Equipment.Set = nil
+	answer.Equipment.Recipe = nil
+
+	edit := mapItem(answer, false)
+
+	assert.Nil(t, edit.Components, "nothing to switch to without a recipe")
+}
+
+func TestMapItemToWebhookEdit_ConditionWithoutElementDoesNotPanic(t *testing.T) {
+	answer := weaponAnswer()
+	answer.Equipment.Conditions.Condition.Element = nil
+
+	embed := singleEmbed(t, mapItem(answer, false).Embeds)
+
+	conditions := embed.Fields[len(embed.Fields)-1]
+	assertTranslated(t, discordgo.EnglishGB, "item.conditions.title", conditions.Name)
+	assert.Contains(t, conditions.Value, "> 50")
+}
+
+func TestMapItemToWebhookEdit_MissingSourceLeavesAuthorEmpty(t *testing.T) {
+	answer := weaponAnswer()
+	answer.Source = nil
+
+	embed := singleEmbed(t, mapItem(answer, false).Embeds)
+
+	assert.Equal(t, &discordgo.MessageEmbedAuthor{}, embed.Author)
 }
 
 func TestMapItemToWebhookEdit_RecipeViewWithoutRecipeHasNoFields(t *testing.T) {

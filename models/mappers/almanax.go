@@ -2,6 +2,7 @@ package mappers
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"time"
 
@@ -84,18 +85,18 @@ func mapAlmanaxToEmbeds(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Loc
 	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
 	dateTranslator := i18n.MapDateTranslator(lg)
 	almanax := answer.GetAlmanax()
-	season := constants.GetSeason(almanax.Date.AsTime())
-	fullDate := dateTranslator.FmtDateFull(almanax.Date.AsTime())
+	season := constants.GetSeason(almanax.GetDate().AsTime())
+	fullDate := dateTranslator.FmtDateFull(almanax.GetDate().AsTime())
 
 	return &[]*discordgo.MessageEmbed{
 		{
 			Title: di18n.Get(lg, "almanax.day.title", di18n.Vars{"date": fullDate}),
 			URL: di18n.Get(lg, "almanax.day.url", di18n.Vars{
-				"date": almanax.Date.AsTime().Format(constants.KrosmozAlmanaxDateFormat),
+				"date": almanax.GetDate().AsTime().Format(constants.KrosmozAlmanaxDateFormat),
 			}),
 			Color:     season.Color,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{URL: season.AlmanaxIcon},
-			Image:     &discordgo.MessageEmbedImage{URL: almanax.Tribute.Item.Icon},
+			Image:     &discordgo.MessageEmbedImage{URL: almanax.GetTribute().GetItem().GetIcon()},
 			Author: &discordgo.MessageEmbedAuthor{
 				Name:    answer.GetSource().GetName(),
 				URL:     answer.GetSource().GetUrl(),
@@ -105,20 +106,20 @@ func mapAlmanaxToEmbeds(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Loc
 			Fields: []*discordgo.MessageEmbedField{
 				{
 					Name:  di18n.Get(lg, "almanax.day.bonus.title"),
-					Value: almanax.Bonus,
+					Value: almanax.GetBonus(),
 				},
 				{
 					Name: di18n.Get(lg, "almanax.day.tribute.title"),
 					Value: di18n.Get(lg, "almanax.day.tribute.description", di18n.Vars{
-						"item":     almanax.Tribute.Item.Name,
-						"emoji":    emojiService.GetItemTypeStringEmoji(almanax.GetTribute().Item.GetType()),
-						"quantity": almanax.Tribute.Quantity,
+						"item":     almanax.GetTribute().GetItem().GetName(),
+						"emoji":    emojiService.GetItemTypeStringEmoji(almanax.GetTribute().GetItem().GetType()),
+						"quantity": almanax.GetTribute().GetQuantity(),
 					}),
 				},
 				{
 					Name: di18n.Get(lg, "almanax.day.reward.title"),
 					Value: di18n.Get(lg, "almanax.day.reward.description", di18n.Vars{
-						"reward":   translators.FormatNumber(almanax.Reward, lg),
+						"reward":   translators.FormatNumber(almanax.GetReward(), lg),
 						"kamaIcon": emojiService.GetMiscStringEmoji(constants.EmojiIDKama),
 					}),
 				},
@@ -129,8 +130,8 @@ func mapAlmanaxToEmbeds(answer *amqp.EncyclopediaAlmanaxAnswer, lg discordgo.Loc
 
 func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 	emojiService emojis.Service) *[]discordgo.MessageComponent {
-	previousDate := almanax.Date.AsTime().AddDate(0, 0, -1)
-	nextDate := almanax.Date.AsTime().AddDate(0, 0, 1)
+	previousDate := almanax.GetDate().AsTime().AddDate(0, 0, -1)
+	nextDate := almanax.GetDate().AsTime().AddDate(0, 0, 1)
 	return &[]discordgo.MessageComponent{
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
@@ -147,7 +148,7 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDNext),
 				},
 				discordgo.Button{
-					CustomID: contract.CraftAlmanaxEffectCustomID(almanax.Date.AsTime(), constants.DefaultPage),
+					CustomID: contract.CraftAlmanaxEffectCustomID(almanax.GetDate().AsTime(), constants.DefaultPage),
 					Label:    di18n.Get(lg, "almanax.day.effect"),
 					Style:    discordgo.PrimaryButton,
 					Emoji:    emojiService.GetMiscEmoji(constants.EmojiIDEffect),
@@ -160,8 +161,8 @@ func mapAlmanaxToComponents(almanax *amqp.Almanax, lg discordgo.Locale,
 func MapAlmanaxEffectsToWebhook(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	lg discordgo.Locale, emojiService emojis.Service) *discordgo.WebhookEdit {
 	// Effect name was not even found
-	if answer.EffectName == "" {
-		return MapQueryMismatch(answer.Query, lg)
+	if answer.GetEffectName() == "" {
+		return MapQueryMismatch(answer.GetQuery(), lg)
 	}
 
 	// Effect found but no attached almanax days
@@ -185,17 +186,22 @@ func mapAlmanaxEffectsToEmbeds(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 		almanaxFields = append(almanaxFields, &discordgo.MessageEmbedField{
 			Name: di18n.Get(lg, "almanax.effect.day", di18n.Vars{
 				"emoji": emojiService.GetMiscStringEmoji(constants.EmojiIDCalendar),
-				"date":  almanax.GetDate().Seconds,
+				"date":  almanax.GetDate().GetSeconds(),
 			}),
 			Value:  almanax.GetBonus(),
 			Inline: false,
 		})
 	}
 
+	effectName := answer.GetEffectName()
+	if len(effectName) == 0 {
+		effectName = answer.GetQuery()
+	}
+
 	return &[]*discordgo.MessageEmbed{
 		{
 			Title: di18n.Get(lg, "almanax.effect.title", di18n.Vars{
-				"query": answer.GetQuery(),
+				"query": effectName,
 			}),
 			Description: di18n.Get(lg, "almanax.effect.description", di18n.Vars{
 				"total": answer.GetTotal(),
@@ -221,7 +227,7 @@ func mapAlmanaxEffectsToComponents(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	lg discordgo.Locale, emojiService emojis.Service) *[]discordgo.MessageComponent {
 	almanaxes := answer.GetAlmanaxes()
 	// Trick to store effect ID in customID based on day
-	dayWithWantedEffect := almanaxes[0].Date.AsTime()
+	dayWithWantedEffect := almanaxes[0].GetDate().AsTime()
 	crafter := func(page int) string {
 		return contract.CraftAlmanaxEffectCustomID(dayWithWantedEffect, page)
 	}
@@ -230,9 +236,9 @@ func mapAlmanaxEffectsToComponents(answer *amqp.EncyclopediaAlmanaxEffectAnswer,
 	for _, almanax := range almanaxes {
 		almanaxChoices = append(almanaxChoices, discordgo.SelectMenuOption{
 			Label: di18n.Get(lg, "almanax.effect.choice.value", di18n.Vars{
-				"date": almanax.Date.AsTime().Format(constants.DiscordDateOnlyFormat),
+				"date": almanax.GetDate().AsTime().Format(constants.DiscordDateOnlyFormat),
 			}),
-			Value: fmt.Sprintf("%v", almanax.Date.Seconds),
+			Value: fmt.Sprintf("%v", almanax.GetDate().GetSeconds()),
 			Emoji: emojiService.GetMiscEmoji(constants.EmojiIDCalendar),
 		})
 	}
@@ -264,11 +270,11 @@ func MapAlmanaxResourceToWebhook(almanaxResources *amqp.EncyclopediaAlmanaxResou
 	characterNumber int64, lg discordgo.Locale, emojiService emojis.Service) *discordgo.WebhookEdit {
 	now := time.Now()
 	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-	endDate := startDate.AddDate(0, 0, int(almanaxResources.Duration))
+	endDate := startDate.AddDate(0, 0, int(almanaxResources.GetDuration()))
 	return &discordgo.WebhookEdit{
 		Embeds: mapAlmanaxResourceToEmbeds(almanaxResources, startDate, endDate,
 			characterNumber, lg, emojiService),
-		Components: mapAlmanaxResourceToComponents(almanaxResources.Duration, characterNumber, lg),
+		Components: mapAlmanaxResourceToComponents(almanaxResources.GetDuration(), characterNumber, lg),
 	}
 }
 
@@ -276,13 +282,14 @@ func mapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 	startDate, endDate time.Time, characterNumber int64, lg discordgo.Locale,
 	emojiService emojis.Service) *[]*discordgo.MessageEmbed {
 	collator := i18n.MapCollator(lg)
-	sort.SliceStable(almanaxResources.Tributes, func(i, j int) bool {
-		if almanaxResources.Tributes[i].ItemType == almanaxResources.Tributes[j].ItemType {
-			return collator.CompareString(almanaxResources.Tributes[i].ItemName,
-				almanaxResources.Tributes[j].ItemName) == -1
+	tributes := slices.Clone(almanaxResources.GetTributes())
+	sort.SliceStable(tributes, func(i, j int) bool {
+		if tributes[i].GetItemType() == tributes[j].GetItemType() {
+			return collator.CompareString(tributes[i].GetItemName(),
+				tributes[j].GetItemName()) == -1
 		}
 
-		return almanaxResources.Tributes[i].ItemType < almanaxResources.Tributes[j].ItemType
+		return tributes[i].GetItemType() < tributes[j].GetItemType()
 	})
 
 	type i18nTribute struct {
@@ -292,7 +299,7 @@ func mapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 	}
 
 	i18nTributes := make([]i18nTribute, 0)
-	for _, tribute := range almanaxResources.Tributes {
+	for _, tribute := range tributes {
 		i18nTributes = append(i18nTributes, i18nTribute{
 			Name:     tribute.GetItemName(),
 			Emoji:    emojiService.GetItemTypeStringEmoji(tribute.GetItemType()),
@@ -313,9 +320,9 @@ func mapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 			Color:     constants.Color,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{URL: constants.GetUnknownSeason().AlmanaxIcon},
 			Author: &discordgo.MessageEmbedAuthor{
-				Name:    almanaxResources.Source.Name,
-				URL:     almanaxResources.Source.Url,
-				IconURL: almanaxResources.Source.Icon,
+				Name:    almanaxResources.GetSource().GetName(),
+				URL:     almanaxResources.GetSource().GetUrl(),
+				IconURL: almanaxResources.GetSource().GetIcon(),
 			},
 			Footer: discord.BuildDefaultFooter(lg),
 		},
@@ -325,14 +332,18 @@ func mapAlmanaxResourceToEmbeds(almanaxResources *amqp.EncyclopediaAlmanaxResour
 func mapAlmanaxResourceToComponents(duration, characterNumber int64,
 	lg discordgo.Locale) *[]discordgo.MessageComponent {
 	durationCustomID := contract.CraftAlmanaxResourceDurationCustomID(characterNumber)
+	durations := constants.GetAlmanaxDayDuration()
+	// The command accepts durations the menu does not propose: highlight the
+	// closest proposed one instead of leaving the menu blank.
+	selectedDuration := nearestNumber(durations, duration)
 	durationValues := make([]discordgo.SelectMenuOption, 0)
-	for _, number := range constants.GetAlmanaxDayDuration() {
+	for _, number := range durations {
 		durationValues = append(durationValues, discordgo.SelectMenuOption{
 			Label: di18n.Get(lg, "almanax.resource.duration.label", di18n.Vars{
 				"number": number,
 			}),
 			Value:   fmt.Sprintf("%v", number),
-			Default: duration == number,
+			Default: selectedDuration == number,
 		})
 	}
 
@@ -370,4 +381,19 @@ func mapAlmanaxResourceToComponents(duration, characterNumber int64,
 			},
 		},
 	}
+}
+
+// nearestNumber returns the value of numbers closest to wanted, favouring the
+// smallest one on a tie; wanted itself when numbers is empty.
+func nearestNumber(numbers []int64, wanted int64) int64 {
+	nearest := wanted
+	var bestGap int64
+	for i, number := range numbers {
+		gap := max(number-wanted, wanted-number)
+		if i == 0 || gap < bestGap {
+			nearest, bestGap = number, gap
+		}
+	}
+
+	return nearest
 }

@@ -117,6 +117,21 @@ func TestMapJobBookToWebhook_UnknownJobAndServerAndNoCraftsmen(t *testing.T) {
 	}
 }
 
+func TestMapJobBookToWebhook_LeavesCallerCraftsmenUnsorted(t *testing.T) {
+	craftsmen := []constants.JobUserLevel{
+		{Username: "Zed", Level: 100},
+		{Username: "Max", Level: 200},
+	}
+
+	MapJobBookToWebhook(&amqp.JobGetBookAnswer{JobId: "baker", ServerId: "srv", Pages: 1}, craftsmen,
+		jobBooks(), fakeServers{}, fakeEmojis{}, discordgo.EnglishGB)
+
+	assert.Equal(t, []constants.JobUserLevel{
+		{Username: "Zed", Level: 100},
+		{Username: "Max", Level: 200},
+	}, craftsmen, "the caller's slice is left untouched")
+}
+
 func TestMapJobUserToEmbed_SortsJobsByLevelThenLocalizedLabel(t *testing.T) {
 	member := &discordgo.Member{Nick: "Nick", User: &discordgo.User{ID: "u", Username: "user", Avatar: "useravatar"}}
 	experiences := []*amqp.JobGetUserAnswer_JobExperience{
@@ -135,6 +150,17 @@ func TestMapJobUserToEmbed_SortsJobsByLevelThenLocalizedLabel(t *testing.T) {
 	assert.Equal(t, constants.Color, embed.Color)
 	assert.Contains(t, embed.Thumbnail.URL, "useravatar", "member without guild avatar uses the user avatar")
 	assert.Equal(t, "Imagiro-FR", embed.Footer.Text)
+}
+
+func TestMapJobUserToEmbed_MemberWithoutUserDegradesGracefully(t *testing.T) {
+	member := &discordgo.Member{Nick: "Nick"}
+
+	embeds := MapJobUserToEmbed(nil, member, "srv", jobBooks(),
+		fakeServers{servers: []entities.Server{testServer()}}, amqp.Language_EN)
+
+	embed := singleEmbed(t, embeds)
+	assert.Contains(t, embed.Title, "Nick")
+	assert.Empty(t, embed.Thumbnail.URL)
 }
 
 func TestMapJobUserToEmbed_NoJobsAndUnknownServer(t *testing.T) {

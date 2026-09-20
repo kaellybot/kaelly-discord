@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseDate(t *testing.T) {
@@ -72,6 +73,32 @@ func TestParseDate(t *testing.T) {
 			assert.Equal(t, tc.expectedErr, err)
 		})
 	}
+}
+
+func TestParseDate_RejectsImpossibleOrAmbiguousInputs(t *testing.T) {
+	for _, input := range []string{
+		"31/02/2024", // no such day
+		"29/02/2023", // not a leap year
+		"20-02/1994", // mixed separators
+		"1994-20-02", // big endian with month/day swapped
+		"20/02/94",   // two-digit year
+		" 20/02/1994",
+		"20/02/1994 12:00",
+	} {
+		t.Run(input, func(t *testing.T) {
+			date, err := ParseDate(input)
+			require.ErrorIs(t, err, ErrDateParsing)
+			assert.Nil(t, date)
+		})
+	}
+}
+
+func TestParseDate_LeapDayIsMidnightUTC(t *testing.T) {
+	date, err := ParseDate("29/02/2024")
+
+	require.NoError(t, err)
+	assert.Equal(t, time.UTC, date.Location())
+	assert.Equal(t, time.Date(2024, time.February, 29, 0, 0, 0, 0, time.UTC), *date)
 }
 
 // helper function to create time.Time objects easily.

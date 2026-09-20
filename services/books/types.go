@@ -6,7 +6,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/repositories/cities"
 	"github.com/kaellybot/kaelly-discord/repositories/jobs"
 	"github.com/kaellybot/kaelly-discord/repositories/orders"
-	"golang.org/x/text/transform"
 )
 
 type Service interface {
@@ -22,7 +21,6 @@ type Service interface {
 }
 
 type Impl struct {
-	transformer     transform.Transformer
 	jobsMap         map[string]entities.Job
 	jobs            []entities.Job
 	citiesMap       map[string]entities.City

@@ -2,6 +2,7 @@ package requests
 
 import (
 	"context"
+	"sync"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -20,6 +21,7 @@ type RequestManager interface {
 
 type RequestManagerImpl struct {
 	broker   amqp.MessageBroker
+	mut      sync.Mutex
 	requests map[string]discordRequest
 }
 

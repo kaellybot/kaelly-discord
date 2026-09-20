@@ -2,7 +2,6 @@ package servers
 
 import (
 	"strings"
-	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
@@ -11,9 +10,6 @@ import (
 
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/text/runes"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 )
 
 func New(repository repository.Repository) (*Impl, error) {
@@ -32,10 +28,9 @@ func New(repository repository.Repository) (*Impl, error) {
 	}
 
 	return &Impl{
-		transformer: transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
-		serversMap:  serversMap,
-		servers:     servers,
-		repository:  repository,
+		serversMap: serversMap,
+		servers:    servers,
+		repository: repository,
 	}, nil
 }
 
@@ -50,15 +45,14 @@ func (service *Impl) GetServer(id string) (entities.Server, bool) {
 
 func (service *Impl) FindServers(name string, locale discordgo.Locale, limit int) []entities.Server {
 	serversFound := make([]entities.Server, 0)
-	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
+	cleanedName, err := translators.NormalizeName(name)
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot normalize server name, returning empty server list")
 		return serversFound
 	}
 
 	for _, server := range service.servers {
-		currentCleanedName, _, errStr := transform.String(service.transformer,
-			strings.ToLower(translators.GetEntityLabel(server, locale)))
+		currentCleanedName, errStr := translators.NormalizeName(translators.GetEntityLabel(server, locale))
 		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
 			if currentCleanedName == cleanedName {
 				return []entities.Server{server}

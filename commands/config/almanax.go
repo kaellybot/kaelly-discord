@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -20,6 +21,12 @@ func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session
 	}
 
 	almanaxNews := command.almanaxService.GetAlmanaxNews(i.Locale)
+	if almanaxNews == nil {
+		// Discord locales the bot does not translate have no almanax channel of
+		// their own: the default language is followed instead, as help promises.
+		almanaxNews = command.almanaxService.GetAlmanaxNews(i18n.DefaultLocale)
+	}
+
 	if almanaxNews == nil {
 		panic(fmt.Errorf("cannot find almanax news for locale %v", i.Locale))
 	}

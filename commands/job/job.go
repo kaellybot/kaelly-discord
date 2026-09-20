@@ -17,6 +17,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	i18n "github.com/kaysoro/discordgo-i18n"
+	"github.com/spf13/viper"
 )
 
 //nolint:exhaustive // only useful handlers must be implemented, it will panic also
@@ -24,11 +25,12 @@ func New(bookService books.Service, guildService guilds.Service,
 	serverService servers.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		bookService:    bookService,
-		emojiService:   emojiService,
-		guildService:   guildService,
-		serverService:  serverService,
-		requestManager: requestManager,
+		DiscordID: viper.GetString(constants.JobID),
+		bookService:     bookService,
+		emojiService:    emojiService,
+		guildService:    guildService,
+		serverService:   serverService,
+		requestManager:  requestManager,
 	}
 
 	checkServer := checks.CheckServerWithFallback(contract.JobServerOptionName,

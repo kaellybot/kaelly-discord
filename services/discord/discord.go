@@ -127,7 +127,16 @@ func (service *Impl) guildDelete(_ *discordgo.Session, event *discordgo.GuildDel
 		return
 	}
 
+	// discordgo only fills BeforeDelete when the guild was in state; without
+	// it there is nothing to announce, and dereferencing it would kill the shard.
 	guild := event.BeforeDelete
+	if guild == nil {
+		log.Warn().
+			Str(constants.LogGuildID, event.ID).
+			Msg("Guild absent from state on delete event, ignoring it")
+		return
+	}
+
 	exists, errExist := service.guildService.Exists(guild.ID)
 	if errExist != nil {
 		log.Error().Err(errExist).

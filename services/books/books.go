@@ -2,7 +2,6 @@ package books
 
 import (
 	"strings"
-	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
@@ -12,9 +11,6 @@ import (
 	"github.com/kaellybot/kaelly-discord/repositories/orders"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/text/runes"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 )
 
 func New(jobRepository jobs.Repository, cityRepository cities.Repository,
@@ -62,7 +58,6 @@ func New(jobRepository jobs.Repository, cityRepository cities.Repository,
 	}
 
 	return &Impl{
-		transformer:     transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
 		jobsMap:         jobsMap,
 		jobs:            jobs,
 		citiesMap:       citiesMap,
@@ -86,15 +81,14 @@ func (service *Impl) GetJob(id string) (entities.Job, bool) {
 
 func (service *Impl) FindJobs(name string, locale discordgo.Locale, limit int) []entities.Job {
 	jobsFound := make([]entities.Job, 0)
-	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
+	cleanedName, err := translators.NormalizeName(name)
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot normalize job name, returning empty job list")
 		return jobsFound
 	}
 
 	for _, job := range service.jobs {
-		currentCleanedName, _, errStr := transform.String(service.transformer,
-			strings.ToLower(translators.GetEntityLabel(job, locale)))
+		currentCleanedName, errStr := translators.NormalizeName(translators.GetEntityLabel(job, locale))
 		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
 			if currentCleanedName == cleanedName {
 				return []entities.Job{job}
@@ -122,15 +116,14 @@ func (service *Impl) GetCities() []entities.City {
 
 func (service *Impl) FindCities(name string, locale discordgo.Locale, limit int) []entities.City {
 	citiesFound := make([]entities.City, 0)
-	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
+	cleanedName, err := translators.NormalizeName(name)
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot normalize city name, returning empty city list")
 		return citiesFound
 	}
 
 	for _, city := range service.cities {
-		currentCleanedName, _, errStr := transform.String(service.transformer,
-			strings.ToLower(translators.GetEntityLabel(city, locale)))
+		currentCleanedName, errStr := translators.NormalizeName(translators.GetEntityLabel(city, locale))
 		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
 			if currentCleanedName == cleanedName {
 				return []entities.City{city}
@@ -158,15 +151,14 @@ func (service *Impl) GetOrders() []entities.Order {
 
 func (service *Impl) FindOrders(name string, locale discordgo.Locale, limit int) []entities.Order {
 	ordersFound := make([]entities.Order, 0)
-	cleanedName, _, err := transform.String(service.transformer, strings.ToLower(name))
+	cleanedName, err := translators.NormalizeName(name)
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot normalize order name, returning empty order list")
 		return ordersFound
 	}
 
 	for _, order := range service.orders {
-		currentCleanedName, _, errStr := transform.String(service.transformer,
-			strings.ToLower(translators.GetEntityLabel(order, locale)))
+		currentCleanedName, errStr := translators.NormalizeName(translators.GetEntityLabel(order, locale))
 		if errStr == nil && strings.Contains(currentCleanedName, cleanedName) {
 			if currentCleanedName == cleanedName {
 				return []entities.Order{order}

@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/models/constants"
+	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/models/i18n"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
@@ -20,12 +21,11 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 		panic(err)
 	}
 
-	var newsChannelID string
-	for _, source := range feed.Sources {
-		if source.Locale == i18n.MapDiscordLocale(i.Locale) {
-			newsChannelID = source.NewsChannelID
-			break
-		}
+	// The default language is followed for Discord locales the bot does not
+	// translate, which have no source of their own.
+	newsChannelID := findNewsChannelID(feed, i.Locale)
+	if newsChannelID == "" {
+		newsChannelID = findNewsChannelID(feed, i18n.DefaultLocale)
 	}
 
 	if newsChannelID == "" {
@@ -49,4 +49,14 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 	if err != nil {
 		panic(err)
 	}
+}
+
+func findNewsChannelID(feed entities.FeedType, locale discordgo.Locale) string {
+	for _, source := range feed.Sources {
+		if source.Locale == i18n.MapDiscordLocale(locale) {
+			return source.NewsChannelID
+		}
+	}
+
+	return ""
 }

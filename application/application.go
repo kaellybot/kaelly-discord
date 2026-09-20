@@ -48,10 +48,18 @@ func New() (*Impl, error) {
 	}
 
 	// Misc
+	// The handler is registered before the manager exists, but no message can be
+	// consumed until Run() starts the broker, well after New() has returned.
+	var requestsManager *requests.RequestManagerImpl
 	broker := amqp.New(
 		constants.GetRabbitMQClientID(),
 		viper.GetString(constants.RabbitMQAddress),
 		amqp.WithBindings(requests.GetBinding()),
+		// An answer the broker refuses never reaches the consumer: without this the
+		// caller would wait out the whole timeout for a reply already thrown away.
+		amqp.WithRejectedHandler(func(ctx amqp.Context, message *amqp.RabbitMQMessage, err error) {
+			requestsManager.Reject(ctx, message, err)
+		}),
 	)
 	db := databases.New()
 	if errDBRun := db.Run(); errDBRun != nil {
@@ -113,7 +121,7 @@ func New() (*Impl, error) {
 	}
 
 	guildService := guilds.New(guildRepo)
-	requestsManager := requests.New(broker)
+	requestsManager = requests.New(broker)
 
 	commands := make([]commands.DiscordCommand, 0)
 	commands = append(commands,

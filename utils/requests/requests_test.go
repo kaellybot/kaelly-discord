@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -277,4 +278,95 @@ func TestRequest_BrokerFailureIsReportedAsUnavailable(t *testing.T) {
 	err := manager.Request(nil, interaction("i1"), "rk", &amqp.RabbitMQMessage{}, (&callback{}).handle)
 
 	require.ErrorIs(t, err, commands.ErrUnavailable)
+}
+
+// withTimeout returns a manager whose requests expire almost immediately, so the
+// expiry path can be exercised without waiting a minute.
+func withTimeout(t *testing.T, broker *testutils.FakeBroker,
+	timeout time.Duration) *RequestManagerImpl {
+	t.Helper()
+	manager := New(broker)
+	manager.timeout = timeout
+	return manager
+}
+
+// Before the timeout, a request whose answer never comes left the caller on
+// "thinking..." until Discord's token expired, 15 minutes later.
+func TestRequest_ExpiresAndTellsTheCallerToRetry(t *testing.T) {
+	broker := &testutils.FakeBroker{}
+	manager := withTimeout(t, broker, time.Millisecond)
+	session, fake := testutils.NewDiscordSession(t)
+
+	require.NoError(t, manager.Request(session, interaction("i1"), "rk",
+		&amqp.RabbitMQMessage{}, (&callback{}).handle))
+
+	require.Eventually(t, func() bool { return len(fake.Requests()) > 0 }, time.Second, time.Millisecond,
+		"an answer that never arrives must still reach the caller")
+	payload := fake.LastEdit(t)
+	require.NotNil(t, payload.Content)
+	assert.Contains(t, testutils.Translations(t, discordgo.French, "errors.unavailable"), *payload.Content)
+}
+
+// A reply arriving after the timeout finds nothing to answer, and must not answer twice.
+func TestConsume_LateAnswerAfterExpiryIsIgnored(t *testing.T) {
+	broker := &testutils.FakeBroker{}
+	manager := withTimeout(t, broker, time.Millisecond)
+	manager.Listen()
+	consume := broker.Consumer(AnswersQueueName)
+	session, fake := testutils.NewDiscordSession(t)
+	cb := &callback{}
+
+	require.NoError(t, manager.Request(session, interaction("i1"), "rk", &amqp.RabbitMQMessage{}, cb.handle))
+	require.Eventually(t, func() bool { return len(fake.Requests()) > 0 }, time.Second, time.Millisecond)
+
+	consume(answer("i1"), &amqp.RabbitMQMessage{})
+
+	assert.Equal(t, 0, cb.calls, "the callback must not run after the request expired")
+	assert.Len(t, fake.Requests(), 1, "the caller must be answered exactly once")
+}
+
+// An answered request must not be expired afterwards: its timer is stopped.
+func TestConsume_AnsweredRequestIsNotExpiredLater(t *testing.T) {
+	broker := &testutils.FakeBroker{}
+	manager := withTimeout(t, broker, 20*time.Millisecond)
+	manager.Listen()
+	consume := broker.Consumer(AnswersQueueName)
+	session, fake := testutils.NewDiscordSession(t)
+	cb := &callback{}
+
+	require.NoError(t, manager.Request(session, interaction("i1"), "rk", &amqp.RabbitMQMessage{}, cb.handle))
+	consume(answer("i1"), &amqp.RabbitMQMessage{})
+
+	time.Sleep(60 * time.Millisecond)
+	assert.Equal(t, 1, cb.calls)
+	assert.Empty(t, fake.Requests(), "a served request must not also be told to retry")
+}
+
+// A reply the broker refuses never reaches consume: without Reject the caller
+// would wait out the whole timeout for an answer already thrown away.
+func TestReject_TellsTheCallerImmediately(t *testing.T) {
+	broker := &testutils.FakeBroker{}
+	manager := New(broker)
+	session, fake := testutils.NewDiscordSession(t)
+	cb := &callback{}
+
+	require.NoError(t, manager.Request(session, interaction("i1"), "rk", &amqp.RabbitMQMessage{}, cb.handle))
+	manager.Reject(answer("i1"), &amqp.RabbitMQMessage{}, amqp.ErrGameNotSet)
+
+	assert.Equal(t, 0, cb.calls, "a refused answer must not reach the callback")
+	require.Len(t, fake.Requests(), 1)
+	payload := fake.LastEdit(t)
+	require.NotNil(t, payload.Content)
+	assert.Contains(t, testutils.Translations(t, discordgo.French, "errors.unavailable"), *payload.Content)
+}
+
+func TestReject_UnknownCorrelationIsIgnored(t *testing.T) {
+	broker := &testutils.FakeBroker{}
+	manager := New(broker)
+	_, fake := testutils.NewDiscordSession(t)
+
+	assert.NotPanics(t, func() {
+		manager.Reject(answer("unknown"), &amqp.RabbitMQMessage{}, amqp.ErrGameNotSet)
+	})
+	assert.Empty(t, fake.Requests())
 }

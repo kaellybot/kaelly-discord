@@ -23,10 +23,13 @@ func TestGetServers_FiltersByGameAndPreloadsLabels(t *testing.T) {
 		{ID: "tiliwan", Game: amqp.Game_DOFUS_TOUCH},
 		{ID: "boune", Game: amqp.Game_DOFUS_RETRO},
 	}).Error)
+	// Labels are keyed by (server_id, game): the same server ID may exist in
+	// several games, each with its own labels.
 	require.NoError(t, conn.DB.Create(&[]entities.ServerLabel{
-		{ServerID: "draconiros", Locale: amqp.Language_FR, Label: "Draconiros"},
-		{ServerID: "draconiros", Locale: amqp.Language_ES, Label: "Draconiros ES"},
-		{ServerID: "tiliwan", Locale: amqp.Language_FR, Label: "Tiliwan"},
+		{ServerID: "draconiros", Game: amqp.Game_DOFUS_GAME, Locale: amqp.Language_FR, Label: "Draconiros"},
+		{ServerID: "draconiros", Game: amqp.Game_DOFUS_GAME, Locale: amqp.Language_ES, Label: "Draconiros ES"},
+		{ServerID: "draconiros", Game: amqp.Game_DOFUS_TOUCH, Locale: amqp.Language_FR, Label: "Draconiros Touch"},
+		{ServerID: "tiliwan", Game: amqp.Game_DOFUS_TOUCH, Locale: amqp.Language_FR, Label: "Tiliwan"},
 	}).Error)
 
 	got, err := New(conn).GetServers()
@@ -40,9 +43,10 @@ func TestGetServers_FiltersByGameAndPreloadsLabels(t *testing.T) {
 	}
 	assert.Equal(t, "d.webp", byID["draconiros"].Icon)
 	assert.Equal(t, "d.png", byID["draconiros"].Image)
+	// The Touch label of the same server ID must not be preloaded here.
 	assert.ElementsMatch(t, []entities.ServerLabel{
-		{ServerID: "draconiros", Locale: amqp.Language_FR, Label: "Draconiros"},
-		{ServerID: "draconiros", Locale: amqp.Language_ES, Label: "Draconiros ES"},
+		{ServerID: "draconiros", Game: amqp.Game_DOFUS_GAME, Locale: amqp.Language_FR, Label: "Draconiros"},
+		{ServerID: "draconiros", Game: amqp.Game_DOFUS_GAME, Locale: amqp.Language_ES, Label: "Draconiros ES"},
 	}, byID["draconiros"].Labels)
 	assert.Empty(t, byID["imagiro"].Labels)
 }

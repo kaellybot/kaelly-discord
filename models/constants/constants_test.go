@@ -114,14 +114,16 @@ func TestGetDefaultConfigValues_CoversEveryConfigKeyWithUsableDefaults(t *testin
 
 	for _, key := range []string{DiscordToken, DiscordShardID, DiscordShardCount, MySQLURL, MySQLUser,
 		MySQLPassword, MySQLDatabase, RabbitMQAddress, AboutID, AlignID, AlmanaxID, ConfigID, HelpID,
-		ItemID, JobID, MapID, SetID, ProbePort, MetricPort, LogLevel, Production} {
+		ItemID, JobID, MapID, SetID, ProbePort, MetricPort, LogLevel, Production,
+		RequestTimeout} {
 		assert.Contains(t, defaults, key)
 	}
-	assert.Len(t, defaults, 21)
+	assert.Len(t, defaults, 22)
 
 	assert.Equal(t, 1, defaults[DiscordShardCount], "a single shard by default")
 	assert.Equal(t, false, defaults[Production], "never register commands globally by accident")
 	assert.NotEqual(t, defaults[ProbePort], defaults[MetricPort], "both servers bind at once")
+	assert.Equal(t, 60, defaults[RequestTimeout], "well below Discord's 15-minute token lifetime")
 
 	rawLevel, ok := defaults[LogLevel].(string)
 	require.True(t, ok)
@@ -152,4 +154,19 @@ func TestGraphists_HaveNameAndLink(t *testing.T) {
 		assert.NotEmpty(t, graphist.Name)
 		assert.Regexp(t, `^https://`, graphist.URL)
 	}
+}
+
+// A missing or non-positive timeout would expire every request the instant it is
+// made, leaving every command answering "try again later".
+func TestGetRequestTimeout_FallsBackOnUnusableValues(t *testing.T) {
+	previous := viper.Get(RequestTimeout)
+	t.Cleanup(func() { viper.Set(RequestTimeout, previous) })
+
+	for _, value := range []any{nil, 0, -1} {
+		viper.Set(RequestTimeout, value)
+		assert.Equal(t, 60*time.Second, GetRequestTimeout())
+	}
+
+	viper.Set(RequestTimeout, 5)
+	assert.Equal(t, 5*time.Second, GetRequestTimeout())
 }

@@ -5,11 +5,13 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/i18n"
 )
 
+// TwitterAccount is identified by (id, game): each game has its own accounts and
+// its own news channel to follow.
 type TwitterAccount struct {
-	ID            string `gorm:"primaryKey"`
+	ID            string    `gorm:"primaryKey"`
+	Game          amqp.Game `gorm:"primaryKey"`
 	Name          string
 	NewsChannelID string
-	Game          amqp.Game
 }
 
 func (twittterAccount TwitterAccount) GetID() string {

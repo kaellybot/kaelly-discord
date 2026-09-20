@@ -60,17 +60,24 @@ func TestExists_FalseOnEmptyTable(t *testing.T) {
 	assert.False(t, exists)
 }
 
-// Where(&Guild{ID: ""}) drops the zero-valued ID from the condition, so an
-// empty guild ID matches any guild. Callers only pass real guild IDs today;
-// this documents the current behavior rather than endorsing it.
-func TestExists_EmptyGuildIDMatchesAnyGuild(t *testing.T) {
+// Where(&Guild{ID: ""}) drops the zero-valued ID from the condition, which
+// would make an empty guild ID match any guild: an empty ID is not a guild.
+func TestExists_EmptyGuildIDIsNeverAGuild(t *testing.T) {
 	conn := newConn(t)
 	exec(t, conn, "INSERT INTO guilds (id) VALUES ('g1')")
 
 	exists, err := New(conn).Exists("")
 
 	require.NoError(t, err)
-	assert.True(t, exists)
+	assert.False(t, exists)
+}
+
+// The empty ID is rejected before any query, so a broken schema is not reached.
+func TestExists_EmptyGuildIDDoesNotQuery(t *testing.T) {
+	exists, err := New(testutils.NewSQLiteConnection(t)).Exists("")
+
+	require.NoError(t, err)
+	assert.False(t, exists)
 }
 
 func TestExists_PropagatesDatabaseError(t *testing.T) {

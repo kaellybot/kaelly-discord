@@ -10,6 +10,12 @@ func New(db databases.MySQLConnection) *Impl {
 }
 
 func (repo *Impl) Exists(guildID string) (bool, error) {
+	// gorm drops zero-valued fields from a struct condition, so an empty ID
+	// would match any guild: no ID, no guild.
+	if guildID == "" {
+		return false, nil
+	}
+
 	guild := entities.Guild{ID: guildID}
 	var count int64
 	err := repo.db.GetDB().

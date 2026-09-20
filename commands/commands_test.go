@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func event(interactionType discordgo.InteractionType, data discordgo.InteractionData) *discordgo.InteractionCreate {
@@ -166,6 +167,27 @@ func TestHandleInteractionMessages_DispatchesOnCustomIDRegex(t *testing.T) {
 	handler(session, button("/set/42"))
 
 	assert.Equal(t, []string{"effects", "set"}, calls)
+}
+
+func TestHandleInteractionMessages_OverlappingPatternsDispatchDeterministically(t *testing.T) {
+	// Both patterns match the same custom ID: the winner must not depend on Go's
+	// randomized map iteration order. Patterns are tried sorted by their string,
+	// so the shorter one, a prefix of the other, always wins.
+	var calls []string
+	handlers := InteractionMessageHandlers{
+		regexp.MustCompile(`^/set/\d+`):          spy(t, "prefix", &calls, nil),
+		regexp.MustCompile(`^/set/\d+/effects$`): spy(t, "effects", &calls, nil),
+	}
+
+	const dispatches = 100
+	for range dispatches {
+		(&AbstractCommand{}).HandleInteractionMessages(handlers)(nil, button("/set/42/effects"))
+	}
+
+	require.Len(t, calls, dispatches)
+	for _, got := range calls {
+		assert.Equal(t, "prefix", got, "the same handler must win on every dispatch")
+	}
 }
 
 func TestHandleInteractionMessages_UnmatchedCustomIDPanics(t *testing.T) {

@@ -1,6 +1,10 @@
 package commands
 
 import (
+	"regexp"
+	"slices"
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/rs/zerolog/log"
@@ -37,12 +41,23 @@ func (command *AbstractCommand) HandleSubCommands(handlers SubCommandHandlers) D
 
 func (command *AbstractCommand) HandleInteractionMessages(handlers InteractionMessageHandlers,
 ) DiscordHandler {
+	// Map iteration order is randomized, so when several patterns match the same
+	// custom ID the winner would change from one interaction to the next: the
+	// patterns are sorted once here to keep the dispatch deterministic.
+	regexes := make([]*regexp.Regexp, 0, len(handlers))
+	for regex := range handlers {
+		regexes = append(regexes, regex)
+	}
+	slices.SortFunc(regexes, func(first, second *regexp.Regexp) int {
+		return strings.Compare(first.String(), second.String())
+	})
+
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if IsMessageCommand(i) {
 			customID := i.MessageComponentData().CustomID
-			for regex, handler := range handlers {
+			for _, regex := range regexes {
 				if regex.MatchString(customID) {
-					handler(s, i)
+					handlers[regex](s, i)
 					return
 				}
 			}

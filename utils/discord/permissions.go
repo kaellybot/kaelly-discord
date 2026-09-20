@@ -6,7 +6,9 @@ import (
 )
 
 func HasPermissions(s *discordgo.Session, channelID string, requiredPermissions int64) bool {
-	perms, errPerm := s.UserChannelPermissions(s.State.User.ID, channelID)
+	// A thread carries no overwrite of its own: computing on it would silently
+	// ignore the ones its parent defines.
+	perms, errPerm := s.UserChannelPermissions(s.State.User.ID, ResolveParentChannelID(s, channelID))
 	if errPerm != nil {
 		log.Warn().Err(errPerm).
 			Msgf("Cannot retrieve channel permissions, returning false")

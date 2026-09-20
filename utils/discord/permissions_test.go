@@ -82,5 +82,36 @@ func TestHasPermissions_UnknownChannelIsFalse(t *testing.T) {
 		Body: `{"code": 10003, "message": "Unknown Channel"}`})
 
 	assert.False(t, HasPermissions(s, "c1", 0), "lookup failures are not treated as granted")
-	assert.Len(t, fake.Requests(), 1, "no further lookups once the channel is unknown")
+	assert.Len(t, fake.Requests(), 2,
+		"one lookup to resolve a possible parent, one to compute the permissions")
+}
+
+// A thread owns no permission overwrite: everything is inherited from the
+// channel it lives in, so the parent is what gets computed.
+func TestHasPermissions_ThreadIsComputedOnItsParent(t *testing.T) {
+	cases := map[string]struct {
+		overwrites string
+		expected   bool
+	}{
+		"parent grants the missing bits": {
+			fmt.Sprintf(`{"id": "bot-id", "type": 1, "allow": "%d", "deny": "0"}`, required), true},
+		"parent denies a required bit": {
+			fmt.Sprintf(`{"id": "bot-id", "type": 1, "allow": "0", "deny": "%d"}`,
+				discordgo.PermissionManageWebhooks), false},
+	}
+	for name, testCase := range cases {
+		t.Run(name, func(t *testing.T) {
+			s, fake := cachedSession(t, thread("t1", "c1", discordgo.ChannelTypeGuildPublicThread))
+			// The role alone grants nothing: only the parent's overwrite decides.
+			withPermissions(fake, discordgo.PermissionViewChannel, testCase.overwrites)
+
+			assert.Equal(t, testCase.expected, HasPermissions(s, "t1", required))
+			paths := make([]string, 0)
+			for _, req := range fake.Requests() {
+				paths = append(paths, req.Path)
+			}
+			assert.Contains(t, paths, "/api/v"+discordgo.APIVersion+"/channels/c1",
+				"the parent is the channel being resolved")
+		})
+	}
 }

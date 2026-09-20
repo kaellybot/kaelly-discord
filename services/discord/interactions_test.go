@@ -161,7 +161,7 @@ func TestInteractionCreate_AutocompleteIsDispatchedWithoutDeferral(t *testing.T)
 	assert.Empty(t, fake.Requests(), "autocomplete answers itself")
 }
 
-func TestInteractionCreate_UnmatchedInteractionIsOnlyDeferred(t *testing.T) {
+func TestInteractionCreate_UnmatchedInteractionIsAnsweredWithAnError(t *testing.T) {
 	cases := map[string][]commands.DiscordCommand{
 		"no command registered": nil,
 		"no command matches":    {&fakeCommand{name: "about"}, &fakeCommand{name: "item"}},
@@ -181,21 +181,84 @@ func TestInteractionCreate_UnmatchedInteractionIsOnlyDeferred(t *testing.T) {
 				assert.Zero(t, fc.handledCount())
 			}
 			requests := fake.Requests()
-			require.Len(t, requests, 1, "the interaction stays in its deferred state: no error message")
+			require.Len(t, requests, 2, "deferral, then the error message: no eternal thinking state")
 			assert.Equal(t, discordgo.InteractionResponseDeferredChannelMessageWithSource,
 				callbackType(t, requests[0]))
+			assertUnknownInteractionMessage(t, fake)
 		})
 	}
 }
 
-func assertPanicMessage(t *testing.T, fake *testutils.FakeDiscord) {
+func TestInteractionCreate_UnmatchedComponentIsAnsweredWithAnError(t *testing.T) {
+	about := &fakeCommand{name: "about"}
+	service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{}, about)
+
+	service.interactionCreate(service.session, interaction(discordgo.InteractionMessageComponent,
+		discordgo.MessageComponentInteractionData{CustomID: "/unknown/1"}))
+
+	assert.Zero(t, about.handledCount())
+	requests := fake.Requests()
+	require.Len(t, requests, 2)
+	assert.Equal(t, discordgo.InteractionResponseDeferredMessageUpdate, callbackType(t, requests[0]))
+	assertUnknownInteractionMessage(t, fake)
+}
+
+func TestInteractionCreate_UnmatchedInteractionAnswerFailureIsIgnored(t *testing.T) {
+	service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{})
+	fake.Respond(testutils.DiscordResponse{Method: "PATCH", PathContains: "/messages/@original",
+		Status: 404, Body: `{"message":"Unknown Webhook","code":10015}`})
+
+	require.NotPanics(t, func() {
+		service.interactionCreate(service.session, slash("unknown"))
+	})
+
+	assert.Len(t, fake.Requests(), 2, "the failed answer is only logged")
+}
+
+func TestInteractionCreate_UnmatchedUndeferredInteractionsStaySilent(t *testing.T) {
+	cases := map[string]*discordgo.InteractionCreate{
+		"autocomplete": interaction(discordgo.InteractionApplicationCommandAutocomplete,
+			discordgo.ApplicationCommandInteractionData{Name: "unknown"}),
+		"modal submit": interaction(discordgo.InteractionModalSubmit, discordgo.ModalSubmitInteractionData{}),
+		"ping":         interaction(discordgo.InteractionPing, nil),
+	}
+	for name, event := range cases {
+		t.Run(name, func(t *testing.T) {
+			about := &fakeCommand{name: "about"}
+			service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{}, about)
+
+			service.interactionCreate(service.session, event)
+
+			assert.Zero(t, about.handledCount())
+			assert.Empty(t, fake.Requests(), "nothing was deferred, so there is nothing to edit")
+		})
+	}
+}
+
+// assertEditedWith checks the deferred answer was edited with the given key's
+// text, in the caller's locale.
+func assertEditedWith(t *testing.T, fake *testutils.FakeDiscord, key string) {
 	t.Helper()
 	req := fake.Last(t)
 	assert.Equal(t, "PATCH", req.Method)
 	assert.Equal(t, "/api/v9/webhooks/app/tok/messages/@original", req.Path)
 	payload := fake.LastEdit(t)
 	require.NotNil(t, payload.Content)
-	assert.Contains(t, testutils.Translations(t, discordgo.French, "panic"), *payload.Content)
+	assert.Contains(t, testutils.Translations(t, discordgo.French, key), *payload.Content)
+}
+
+func assertPanicMessage(t *testing.T, fake *testutils.FakeDiscord) {
+	t.Helper()
+	assertEditedWith(t, fake, "panic")
+}
+
+// assertUnknownInteractionMessage locks in that an interaction no command
+// claimed gets its own message, not the crash one.
+func assertUnknownInteractionMessage(t *testing.T, fake *testutils.FakeDiscord) {
+	t.Helper()
+	assertEditedWith(t, fake, "errors.unknown_interaction")
+	assert.NotContains(t, testutils.Translations(t, discordgo.French, "panic"),
+		*fake.LastEdit(t).Content, "an unhandled interaction is not a crash")
 }
 
 func TestInteractionCreate_CommandPanicIsRecoveredWithLocalizedMessage(t *testing.T) {

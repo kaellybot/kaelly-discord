@@ -89,6 +89,8 @@ func (service *Impl) interactionCreate(session *discordgo.Session, event *discor
 			return
 		}
 	}
+
+	service.answerUnmatchedInteraction(session, event)
 }
 
 func (service *Impl) guildCreate(_ *discordgo.Session, event *discordgo.GuildCreate) {

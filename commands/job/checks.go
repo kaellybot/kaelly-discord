@@ -68,4 +68,14 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 			}
 		}
 	}
+
+	// Discord marks the option as required, but a missing one must still be
+	// answered: the interaction is already deferred.
+	content := i18n.Get(i.Locale, "checks.query.constraints")
+	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Content: &content,
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("Level check response ignored")
+	}
 }

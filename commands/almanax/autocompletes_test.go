@@ -49,10 +49,14 @@ func TestAutocomplete_FocusedEffectRequestsEffectList(t *testing.T) {
 	assert.Equal(t, amqp.EncyclopediaListRequest_ALMANAX_EFFECT, call.message.GetEncyclopediaListRequest().GetType())
 }
 
-func TestAutocomplete_NonFocusedOrUnknownOptionsDoNothing(t *testing.T) {
+// Discord expects an answer for every keystroke: when there is nothing to
+// suggest, the interaction is answered with empty choices rather than left
+// hanging.
+func TestAutocomplete_NothingToSuggestAnswersEmptyChoices(t *testing.T) {
 	events := map[string]*discordgo.InteractionCreate{
 		"not focused":    autocompleteEvent(stringOption("effect", "pêc")),
 		"unknown option": autocompleteEvent(focused(stringOption("date", "18"))),
+		"blank query":    autocompleteEvent(focused(stringOption("effect", "  "))),
 	}
 	for name, event := range events {
 		t.Run(name, func(t *testing.T) {
@@ -61,22 +65,13 @@ func TestAutocomplete_NonFocusedOrUnknownOptionsDoNothing(t *testing.T) {
 
 			newCommand(t, manager).Handle(s, event)
 
-			assert.Empty(t, manager.calls)
-			assert.Empty(t, fake.Requests())
+			assert.Empty(t, manager.calls, "nothing is asked to the encyclopedia")
+			var response autocompleteResponse
+			fake.Last(t).Decode(t, &response)
+			assert.Equal(t, discordgo.InteractionApplicationCommandAutocompleteResult, response.Type)
+			assert.Empty(t, response.Data.Choices)
 		})
 	}
-}
-
-// A blank query neither requests nor answers: Discord is left without an
-// autocomplete response for that keystroke. Locked in as current behavior.
-func TestAutocomplete_BlankQueryIsNotRequested(t *testing.T) {
-	manager := &fakeRequestManager{}
-	s, fake := testutils.NewDiscordSession(t)
-
-	newCommand(t, manager).Handle(s, autocompleteEvent(focused(stringOption("effect", "  "))))
-
-	assert.Empty(t, manager.calls)
-	assert.Empty(t, fake.Requests())
 }
 
 func TestAutocomplete_RequestFailureIsSwallowed(t *testing.T) {

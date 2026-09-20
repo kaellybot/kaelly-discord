@@ -27,17 +27,21 @@ func (command *Command) autocomplete(s *discordgo.Session,
 				default:
 					log.Error().
 						Str(constants.LogCommandOption, option.Name).
-						Msgf("Option name not handled, ignoring it")
+						Msgf("Option name not handled, answering without choices")
+					respondAutocomplete(s, i, nil)
 				}
-				break
+				return
 			}
 		}
 	}
+
+	respondAutocomplete(s, i, nil)
 }
 
 func (command *Command) requestAlmanaxEffectList(s *discordgo.Session,
 	i *discordgo.InteractionCreate, query string) {
 	if len(strings.TrimSpace(query)) == 0 {
+		respondAutocomplete(s, i, nil)
 		return
 	}
 
@@ -65,6 +69,13 @@ func (command *Command) autocompleteAlmanaxEffectList(_ context.Context, s *disc
 			Msgf("Cannot retrieve autocomplete, retrieving empty choices...")
 	}
 
+	respondAutocomplete(s, i, choices)
+}
+
+// respondAutocomplete answers the interaction; Discord expects a response for
+// every keystroke, even when there is nothing to suggest.
+func respondAutocomplete(s *discordgo.Session, i *discordgo.InteractionCreate,
+	choices []*discordgo.ApplicationCommandOptionChoice) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
 		Data: &discordgo.InteractionResponseData{

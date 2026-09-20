@@ -38,10 +38,12 @@ func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Ses
 			}
 		}
 	}
+
+	answerMissingOption(s, i, "City check response ignored")
 }
 
 //nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
-func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Session,
+func (command *Command) checkOptionalCity(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
@@ -51,11 +53,15 @@ func (command *Command) checkOptionalCity(ctx context.Context, _ *discordgo.Sess
 			if option.Name == contract.AlignCityOptionName {
 				cities := command.bookService.FindCities(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetCitiesLabels(cities, i.Locale)
-				_, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), labels, i.Locale)
+				response, checkSuccess := validators.
+					ExpectOnlyOneElement("checks.city", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				} else {
-					next(ctx)
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("City check response ignored")
+					}
 				}
 
 				return
@@ -91,10 +97,12 @@ func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Se
 			}
 		}
 	}
+
+	answerMissingOption(s, i, "Order check response ignored")
 }
 
 //nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
-func (command *Command) checkOptionalOrder(ctx context.Context, _ *discordgo.Session,
+func (command *Command) checkOptionalOrder(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()
 
@@ -104,11 +112,15 @@ func (command *Command) checkOptionalOrder(ctx context.Context, _ *discordgo.Ses
 			if option.Name == contract.AlignOrderOptionName {
 				orders := command.bookService.FindOrders(option.StringValue(), i.Locale, constants.MaxChoices)
 				labels := translators.GetOrdersLabels(orders, i.Locale)
-				_, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), labels, i.Locale)
+				response, checkSuccess := validators.
+					ExpectOnlyOneElement("checks.order", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
 					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				} else {
-					next(ctx)
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("Order check response ignored")
+					}
 				}
 
 				return
@@ -144,5 +156,19 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 				return
 			}
 		}
+	}
+
+	answerMissingOption(s, i, "Level check response ignored")
+}
+
+// answerMissingOption answers the deferred interaction when Discord did not
+// send an option the sub-command needs; without it, the interaction hangs.
+func answerMissingOption(s *discordgo.Session, i *discordgo.InteractionCreate, logMessage string) {
+	content := i18n.Get(i.Locale, "checks.query.constraints")
+	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Content: &content,
+	})
+	if err != nil {
+		log.Error().Err(err).Msg(logMessage)
 	}
 }

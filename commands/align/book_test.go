@@ -118,9 +118,9 @@ func TestCheckMandatoryOrder_NoOrManyMatchesAnswersError(t *testing.T) {
 	}
 }
 
-// Mandatory checks rely on Discord enforcing the option: when it is absent,
-// next is not called and nothing is answered.
-func TestCheckMandatory_AbsentOptionStopsSilently(t *testing.T) {
+// Discord enforces the mandatory options, but an absent one must still be
+// answered: the interaction is deferred and would otherwise hang.
+func TestCheckMandatory_AbsentOptionAnswersEmptyFieldError(t *testing.T) {
 	for name, check := range map[string]func(*Command) middlewares.MiddlewareCommand{
 		"city": mandatoryCity, "order": mandatoryOrder, "level": level,
 	} {
@@ -128,7 +128,7 @@ func TestCheckMandatory_AbsentOptionStopsSilently(t *testing.T) {
 			result := runCheck(t, newDeps(), check, slash("set"))
 
 			assert.False(t, result.called)
-			assert.Empty(t, result.fake.Requests())
+			assert.Equal(t, "Le champs ne doit pas être vide ! :grin:", result.content(t))
 		})
 	}
 }
@@ -143,9 +143,6 @@ func TestCheckOptionalCityAndOrder_OnlyAnExactSingleMatchIsForwarded(t *testing.
 	}{
 		"single matches": {[]entities.City{bonta()}, []entities.Order{spirit()},
 			slash("get", stringOption("city", "b"), stringOption("order", "e")), bonta(), spirit()},
-		// An unknown or ambiguous filter is silently dropped: the book is listed unfiltered.
-		"ambiguous or unknown": {[]entities.City{bonta(), brakmar()}, nil,
-			slash("get", stringOption("city", "b"), stringOption("order", "e")), nil, nil},
 		"absent": {[]entities.City{bonta()}, []entities.Order{spirit()}, slash("get"), nil, nil},
 	}
 	for name, tc := range cases {
@@ -162,6 +159,38 @@ func TestCheckOptionalCityAndOrder_OnlyAnExactSingleMatchIsForwarded(t *testing.
 			assert.Equal(t, tc.wantOrder, order.ctx.Value(constants.ContextKeyOrder))
 			assert.Empty(t, city.fake.Requests())
 			assert.Empty(t, order.fake.Requests())
+		})
+	}
+}
+
+// An optional filter that matches nothing, or several entries, is a typo: it is
+// answered like the mandatory checks do, instead of silently listing the whole
+// book.
+func TestCheckOptionalCityAndOrder_AmbiguousOrUnknownAnswersError(t *testing.T) {
+	cases := map[string]struct {
+		prepare  func(*deps)
+		check    func(*Command) middlewares.MiddlewareCommand
+		expected string
+	}{
+		"unknown city": {func(*deps) {}, optionalCity,
+			"Aie! '*b*' ne correspond à aucune cité que je connaisse ! :pensive:"},
+		"ambiguous city": {func(d *deps) { d.books.cities = []entities.City{bonta(), brakmar()} }, optionalCity,
+			"Outch! '*b*' correspond à plusieurs cités (Bonta, Brâkmar) ! :slight_smile:"},
+		"unknown order": {func(*deps) {}, optionalOrder,
+			"Aie! '*e*' ne correspond à aucun ordre que je connaisse ! :pensive:"},
+		"ambiguous order": {func(d *deps) { d.books.orders = []entities.Order{spirit(), heart()} }, optionalOrder,
+			"Outch! '*e*' correspond à plusieurs ordres (Esprit, Coeur) ! :slight_smile:"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			d := newDeps()
+			tc.prepare(d)
+
+			result := runCheck(t, d, tc.check,
+				slash("get", stringOption("city", "b"), stringOption("order", "e")))
+
+			assert.False(t, result.called, "the book is not listed unfiltered")
+			assert.Equal(t, tc.expected, result.content(t))
 		})
 	}
 }

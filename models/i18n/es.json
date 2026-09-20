@@ -364,6 +364,7 @@
         }
     },
     "errors": {
+        "unknown_interaction": "Hmm, no conozco esta interacción... Puede que venga de un mensaje obsoleto, ¡vuelve a lanzar el comando! :sweat_smile:",
         "too_many_webhooks": "¡El número máximo de webhooks ha sido alcanzado en este canal! No puedo continuar...\n*(Haz clic en el icono del canal :gear:, luego `Integraciones` y finalmente `Webhooks` para gestionarlos)*",
         "query_mismatch": [
             "¡Ups! No encontré ningún resultado para \"*{{ .value }}*\". :confused:",

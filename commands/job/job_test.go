@@ -375,9 +375,9 @@ func TestCheckLevel_OutOfRangeAnswersConstraintError(t *testing.T) {
 	}
 }
 
-func TestCheckLevel_AbsentOptionStopsSilently(t *testing.T) {
-	// Unlike the other checks, a missing level neither continues nor answers:
-	// the interaction is left pending. Discord marks the option as required.
+func TestCheckLevel_AbsentOptionAnswersEmptyFieldError(t *testing.T) {
+	// Discord marks the option as required, but the interaction is already
+	// deferred: a missing level must be answered instead of left pending.
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 	next := &nextRecorder{}
@@ -386,7 +386,7 @@ func TestCheckLevel_AbsentOptionStopsSilently(t *testing.T) {
 		jobCommand("set", stringOption(contract.JobJobOptionName, "alch")), next.next)
 
 	assert.False(t, next.called)
-	assert.Empty(t, fake.Requests())
+	assert.Equal(t, "Le champs ne doit pas être vide ! :grin:", editContent(t, fake))
 }
 
 // ---- autocomplete ----

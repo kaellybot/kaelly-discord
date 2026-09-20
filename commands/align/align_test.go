@@ -430,6 +430,9 @@ func TestHandle_UserCommandRequestsTargetBeliefs(t *testing.T) {
 	d := newDeps()
 	d.guilds.server, d.guilds.found = djaul(), true
 	s, fake := testutils.NewDiscordSession(t)
+	require.NoError(t, s.State.GuildAdd(&discordgo.Guild{ID: "guild-id"}))
+	require.NoError(t, s.State.ChannelAdd(&discordgo.Channel{
+		ID: "channel-id", GuildID: "guild-id", Type: discordgo.ChannelTypeGuildText}))
 	member := &discordgo.Member{Nick: "Target"}
 	user := &discordgo.User{ID: "u9", Username: "target"}
 

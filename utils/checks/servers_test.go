@@ -95,7 +95,28 @@ func command(options ...*discordgo.ApplicationCommandInteractionDataOption) *dis
 func run(t *testing.T, middleware middlewares.MiddlewareCommand,
 	event *discordgo.InteractionCreate) (*nextSpy, *testutils.FakeDiscord) {
 	t.Helper()
+	return runWithChannels(t, middleware, event,
+		&discordgo.Channel{ID: event.ChannelID, GuildID: event.GuildID, Type: discordgo.ChannelTypeGuildText})
+}
+
+// cachedSession returns a session whose state already knows the guild and the
+// given channels, the way discordgo caches them in production.
+func cachedSession(t *testing.T, guildID string,
+	channels ...*discordgo.Channel) (*discordgo.Session, *testutils.FakeDiscord) {
+	t.Helper()
 	s, fake := testutils.NewDiscordSession(t)
+	require.NoError(t, s.State.GuildAdd(&discordgo.Guild{ID: guildID}))
+	for _, channel := range channels {
+		require.NoError(t, s.State.ChannelAdd(channel))
+	}
+
+	return s, fake
+}
+
+func runWithChannels(t *testing.T, middleware middlewares.MiddlewareCommand,
+	event *discordgo.InteractionCreate, channels ...*discordgo.Channel) (*nextSpy, *testutils.FakeDiscord) {
+	t.Helper()
+	s, fake := cachedSession(t, event.GuildID, channels...)
 	spy := &nextSpy{}
 	middleware(context.Background(), s, event, spy.next)
 	return spy, fake
@@ -270,7 +291,8 @@ func TestCheckServerWithFallback_NoGuildServerAsksToConfigureOne(t *testing.T) {
 }
 
 func TestCheckServerWithFallback_NoGuildServerDiscordFailureIsSwallowed(t *testing.T) {
-	s, fake := testutils.NewDiscordSession(t)
+	s, fake := cachedSession(t, "g1",
+		&discordgo.Channel{ID: "c1", GuildID: "g1", Type: discordgo.ChannelTypeGuildText})
 	fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: http.StatusNotFound,
 		Body: `{"code": 10015, "message": "Unknown Webhook"}`})
 	spy := &nextSpy{}
@@ -285,7 +307,8 @@ func TestCheckServerWithFallback_NoGuildServerDiscordFailureIsSwallowed(t *testi
 
 func TestCheckServerWithFallback_GuildLookupFailurePanics(t *testing.T) {
 	errDB := errors.New("database is down")
-	s, fake := testutils.NewDiscordSession(t)
+	s, fake := cachedSession(t, "g1",
+		&discordgo.Channel{ID: "c1", GuildID: "g1", Type: discordgo.ChannelTypeGuildText})
 	spy := &nextSpy{}
 
 	assert.PanicsWithValue(t, errDB, func() {
@@ -294,4 +317,36 @@ func TestCheckServerWithFallback_GuildLookupFailurePanics(t *testing.T) {
 	}, "the panic is left to the command's HandlePanic")
 	assert.False(t, spy.called)
 	assert.Empty(t, fake.Requests())
+}
+
+// A thread owns no configuration: the channel it lives in answers for it.
+func TestCheckServerWithFallback_ThreadUsesItsParentChannelConfiguration(t *testing.T) {
+	imagiro := server("imagiro", "Imagiro")
+	guildService := &fakeGuildService{server: imagiro, found: true}
+	event := command(subCommand("get", stringOption("job", "alchi")))
+	event.ChannelID = "thread-1"
+
+	spy, _ := runWithChannels(t, CheckServerWithFallback("server", &fakeServerService{}, guildService), event,
+		&discordgo.Channel{ID: "c1", GuildID: "g1", Type: discordgo.ChannelTypeGuildText},
+		&discordgo.Channel{ID: "thread-1", GuildID: "g1", ParentID: "c1",
+			Type: discordgo.ChannelTypeGuildPublicThread})
+
+	assert.True(t, spy.called)
+	assert.Equal(t, imagiro, spy.server)
+	assert.Equal(t, [][2]string{{"g1", "c1"}}, guildService.calls,
+		"the parent channel is looked up, not the thread")
+}
+
+func TestCheckServerWithFallback_UnknownChannelIsLookedUpAsItself(t *testing.T) {
+	guildService := &fakeGuildService{server: server("imagiro", "Imagiro"), found: true}
+	event := command(subCommand("get", stringOption("job", "alchi")))
+	event.ChannelID = "ghost"
+
+	// No channel cached and Discord answers 404: the interaction channel stands.
+	spy, fake := runWithChannels(t, CheckServerWithFallback("server", &fakeServerService{}, guildService), event)
+	fake.Respond(testutils.DiscordResponse{PathContains: "/channels/ghost", Status: 404,
+		Body: `{"code": 10003, "message": "Unknown Channel"}`})
+
+	assert.True(t, spy.called)
+	assert.Equal(t, [][2]string{{"g1", "ghost"}}, guildService.calls)
 }

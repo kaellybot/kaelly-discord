@@ -683,3 +683,38 @@ func TestHandle_CallbacksWiredToMatchingResponders(t *testing.T) {
 	f.manager.calls[1].callback(context.Background(), s, configCommand("almanax"), notificationAnswer(false), nil)
 	assert.Equal(t, testutils.Translations(t, discordgo.French, "config.success")[0], editContent(t, fake))
 }
+
+// A thread has no configuration of its own: binding one binds the channel it
+// lives in, which is also where the binding is read back from.
+func TestHandle_ServerBoundToAThreadBindsItsParentChannel(t *testing.T) {
+	f := newFixture(t)
+	f.servers.found = []entities.Server{server("djaul", "Djaul", "")}
+	s, _ := testutils.NewDiscordSession(t)
+	addGuild(t, s, 0, textChannel(currentChannel), textChannel(otherChannel),
+		&discordgo.Channel{ID: "thread-1", ParentID: otherChannel,
+			Type: discordgo.ChannelTypeGuildPublicThread})
+
+	f.cmd.Handle(s, configCommand(contract.ConfigServerSubCommandName,
+		stringOption(contract.ConfigServerOptionName, "dja"),
+		&discordgo.ApplicationCommandInteractionDataOption{
+			Name: contract.ConfigChannelOptionName,
+			Type: discordgo.ApplicationCommandOptionChannel, Value: "thread-1",
+		}))
+
+	req := singleRequest(t, f).message.GetConfigurationSetServerRequest()
+	assert.Equal(t, otherChannel, req.GetChannelId(), "the thread's parent is bound")
+	assert.Equal(t, "djaul", req.GetServerId())
+}
+
+func TestHandle_ServerBoundToARegularChannelIsUnchanged(t *testing.T) {
+	f := newFixture(t)
+	f.servers.found = []entities.Server{server("djaul", "Djaul", "")}
+	s, _ := testutils.NewDiscordSession(t)
+	addGuild(t, s, 0, textChannel(currentChannel), textChannel(otherChannel))
+
+	f.cmd.Handle(s, configCommand(contract.ConfigServerSubCommandName,
+		stringOption(contract.ConfigServerOptionName, "dja"), otherChannelOption()))
+
+	req := singleRequest(t, f).message.GetConfigurationSetServerRequest()
+	assert.Equal(t, otherChannel, req.GetChannelId())
+}

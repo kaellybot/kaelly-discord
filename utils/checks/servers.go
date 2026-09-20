@@ -7,6 +7,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/translators"
 	"github.com/kaellybot/kaelly-discord/utils/validators"
@@ -92,7 +93,8 @@ func getServerValue(optionName string, option *discordgo.ApplicationCommandInter
 
 func tryFallback(ctx context.Context, s *discordgo.Session, i *discordgo.InteractionCreate,
 	next middlewares.NextFunc, guildService guilds.Service) {
-	server, found, err := guildService.GetServer(i.GuildID, i.ChannelID)
+	server, found, err := guildService.GetServer(i.GuildID,
+		discord.ResolveParentChannelID(s, i.ChannelID))
 	if err != nil {
 		panic(err)
 	}

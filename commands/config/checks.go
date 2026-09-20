@@ -71,6 +71,22 @@ func (command *Command) checkTwitterAccount(ctx context.Context, s *discordgo.Se
 	next(ctx)
 }
 
+// checkServerChannelID binds the channel a thread belongs to: a thread has no
+// configuration of its own, and that is how the binding is read back.
+func (command *Command) checkServerChannelID(ctx context.Context, s *discordgo.Session,
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	command.checkChannelID(ctx, s, i, func(channelCtx context.Context) {
+		channelID, ok := channelCtx.Value(constants.ContextKeyChannel).(string)
+		if !ok {
+			next(channelCtx)
+			return
+		}
+
+		next(context.WithValue(channelCtx, constants.ContextKeyChannel,
+			discord.ResolveParentChannelID(s, channelID)))
+	})
+}
+
 func (command *Command) checkChannelID(ctx context.Context, s *discordgo.Session,
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	data := i.ApplicationCommandData()

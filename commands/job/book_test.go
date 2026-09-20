@@ -382,6 +382,11 @@ func TestHandle_UserCommandRequestsTargetJobsOnGuildServer(t *testing.T) {
 	f := newFixture(t)
 	f.guilds.server, f.guilds.found = server("imagiro", "Imagiro"), true
 	s, fake := testutils.NewDiscordSession(t)
+	// Cached like discordgo caches a guild's channels: resolving the channel
+	// the interaction came from then costs no API call.
+	require.NoError(t, s.State.GuildAdd(&discordgo.Guild{ID: guildID}))
+	require.NoError(t, s.State.ChannelAdd(&discordgo.Channel{
+		ID: channelID, GuildID: guildID, Type: discordgo.ChannelTypeGuildText}))
 
 	f.cmd.Handle(s, userCommand())
 

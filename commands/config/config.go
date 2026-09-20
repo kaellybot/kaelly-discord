@@ -52,7 +52,7 @@ func New(almanaxService almanaxes.Service, emojiService emojis.Service, feedServ
 			Use(cmd.checkEnabled, cmd.checkFeedType, cmd.checkChannelID,
 				cmd.checkFollowConstraints, cmd.rssRequest),
 		contract.ConfigServerSubCommandName: middlewares.
-			Use(checkServer, cmd.checkChannelID, cmd.serverRequest),
+			Use(checkServer, cmd.checkServerChannelID, cmd.serverRequest),
 		contract.ConfigTwitterSubCommandName: middlewares.
 			Use(cmd.checkEnabled, cmd.checkTwitterAccount, cmd.checkChannelID,
 				cmd.checkFollowConstraints, cmd.twitterRequest),

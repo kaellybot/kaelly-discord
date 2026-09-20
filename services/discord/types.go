@@ -1,8 +1,6 @@
 package discord
 
 import (
-	"errors"
-
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-discord/commands"
@@ -11,11 +9,8 @@ import (
 )
 
 const (
-	welcomeMessagePermissions = discordgo.PermissionSendMessages | discordgo.PermissionEmbedLinks
-)
-
-var (
-	ErrInvalidInteractionType = errors.New("interaction type is not handled")
+	welcomeMessagePermissions = discordgo.PermissionViewChannel |
+		discordgo.PermissionSendMessages | discordgo.PermissionEmbedLinks
 )
 
 type Service interface {

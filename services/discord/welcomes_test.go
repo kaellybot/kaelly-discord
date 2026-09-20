@@ -39,6 +39,12 @@ func denyEmbeds() *discordgo.PermissionOverwrite {
 		Deny: discordgo.PermissionEmbedLinks}
 }
 
+// denyView hides a channel from the bot: it cannot even read it.
+func denyView() *discordgo.PermissionOverwrite {
+	return &discordgo.PermissionOverwrite{ID: guildID, Type: discordgo.PermissionOverwriteTypeRole,
+		Deny: discordgo.PermissionViewChannel}
+}
+
 // guildWithBot builds a guild where the bot is a plain member, so its
 // permissions come from @everyone and the channel overwrites.
 func guildWithBot(everyoneRole *discordgo.Role, channels ...*discordgo.Channel) *discordgo.Guild {
@@ -126,10 +132,23 @@ func TestWelcomeGuild_ChannelSelection(t *testing.T) {
 		"send messages alone is not enough": {
 			guild: guildWithBot(everyone(discordgo.PermissionSendMessages),
 				textChannel("text", &discordgo.PermissionOverwrite{
-					ID: "g1", Type: discordgo.PermissionOverwriteTypeRole, Allow: discordgo.PermissionEmbedLinks,
+					ID: "g1", Type: discordgo.PermissionOverwriteTypeRole,
+					Allow: discordgo.PermissionEmbedLinks | discordgo.PermissionViewChannel,
 				}),
 				textChannel("never")),
 			target: "text",
+		},
+		"channels the bot cannot see are skipped": {
+			guild: guildWithBot(everyone(welcomeMessagePermissions),
+				textChannel("hidden", denyView()),
+				textChannel("visible")),
+			target: "visible",
+		},
+		"system channel the bot cannot see falls back to another channel": {
+			guild: withSystemChannel(guildWithBot(everyone(welcomeMessagePermissions),
+				textChannel("sys", denyView()),
+				textChannel("visible"))),
+			target: "visible",
 		},
 		"administrator bypasses channel denies": {
 			guild: withSystemChannel(guildWithBot(everyone(discordgo.PermissionAdministrator),
@@ -184,18 +203,39 @@ func TestWelcomeGuild_EnglishUSGuildGetsEnglish(t *testing.T) {
 	assert.Contains(t, embed.Description, "Hello and thanks for the invitation")
 }
 
-func TestWelcomeGuild_ChannelSendFailureDoesNotFallBack(t *testing.T) {
+func TestWelcomeGuild_ChannelSendFailureFallsBackToTheNextChannel(t *testing.T) {
+	guild := withSystemChannel(guildWithBot(everyone(welcomeMessagePermissions),
+		textChannel("sys"), textChannel("first"), textChannel("second")))
+	service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{})
+	require.NoError(t, service.session.State.GuildAdd(guild))
+	fake.Respond(testutils.DiscordResponse{PathContains: "/channels/sys/messages",
+		Status: 403, Body: `{"message":"no"}`})
+	fake.Respond(testutils.DiscordResponse{PathContains: "/channels/first/messages",
+		Status: 500, Body: `{"message":"nope"}`})
+
+	service.welcomeGuild(guild)
+
+	assert.Equal(t, []string{"sys", "first", "second"}, welcomeTargets(fake),
+		"every candidate channel is tried until one accepts the message")
+	assert.Len(t, fake.Requests(), 3, "no DM once a channel accepted the message")
+}
+
+func TestWelcomeGuild_EveryChannelFailingDMsTheOwner(t *testing.T) {
 	guild := guildWithBot(everyone(welcomeMessagePermissions),
 		textChannel("first"), textChannel("second"))
 	service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{})
 	require.NoError(t, service.session.State.GuildAdd(guild))
-	fake.Respond(testutils.DiscordResponse{PathContains: "/messages", Status: 403, Body: `{"message":"no"}`})
+	fake.Respond(testutils.DiscordResponse{PathContains: "/channels/first/messages",
+		Status: 403, Body: `{"message":"no"}`})
+	fake.Respond(testutils.DiscordResponse{PathContains: "/channels/second/messages",
+		Status: 403, Body: `{"message":"no"}`})
+	fake.Respond(testutils.DiscordResponse{Method: "POST", PathContains: "/users/@me/channels",
+		Status: 200, Body: `{"id":"dm-1","type":1}`})
 
 	service.welcomeGuild(guild)
 
-	assert.Equal(t, []string{"first"}, welcomeTargets(fake),
-		"a failed send is only logged: no other channel, no DM")
-	assert.Len(t, fake.Requests(), 1)
+	assert.Equal(t, []string{"first", "second", "dm-1"}, welcomeTargets(fake),
+		"the owner is the last resort when no channel accepts the message")
 }
 
 // ownerOnlyGuild has only channels the bot cannot write embeds into.
@@ -236,22 +276,32 @@ func TestWelcomeGuild_NoWritableChannelDMsTheOwnerInTheirLocale(t *testing.T) {
 	assert.Contains(t, embed.Description, "**Guild g1**")
 }
 
-func TestWelcomeGuild_OwnerLookupFailureFallsBackToDefaultLocale(t *testing.T) {
-	guild := ownerOnlyGuild()
-	guild.PreferredLocale = string(discordgo.French)
-	service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{})
-	require.NoError(t, service.session.State.GuildAdd(guild))
-	fake.Respond(testutils.DiscordResponse{Method: "POST", PathContains: "/users/@me/channels",
-		Status: 200, Body: `{"id":"dm-1","type":1}`})
-	fake.Respond(testutils.DiscordResponse{Method: "GET", PathContains: "/users/owner-1",
-		Status: 404, Body: `{"message":"Unknown User"}`})
+func TestWelcomeGuild_OwnerWithoutLocaleFallsBackToGuildPreferredLocale(t *testing.T) {
+	// Discord never returns the locale of a user fetched by a bot.
+	cases := map[string]testutils.DiscordResponse{
+		"user without locale": {Method: "GET", PathContains: "/users/owner-1",
+			Status: 200, Body: `{"id":"owner-1","username":"owner"}`},
+		"user lookup failure": {Method: "GET", PathContains: "/users/owner-1",
+			Status: 404, Body: `{"message":"Unknown User"}`},
+	}
+	for name, userResponse := range cases {
+		t.Run(name, func(t *testing.T) {
+			guild := ownerOnlyGuild()
+			guild.PreferredLocale = string(discordgo.French)
+			service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{})
+			require.NoError(t, service.session.State.GuildAdd(guild))
+			fake.Respond(testutils.DiscordResponse{Method: "POST", PathContains: "/users/@me/channels",
+				Status: 200, Body: `{"id":"dm-1","type":1}`})
+			fake.Respond(userResponse)
 
-	service.welcomeGuild(guild)
+			service.welcomeGuild(guild)
 
-	assert.Equal(t, []string{"dm-1"}, welcomeTargets(fake))
-	embed := welcomeEmbed(t, fake)
-	assert.Contains(t, embed.Description, "Hello and thanks for the invitation",
-		"default locale (en-GB), not the guild's preferred one")
+			assert.Equal(t, []string{"dm-1"}, welcomeTargets(fake))
+			embed := welcomeEmbed(t, fake)
+			assert.Contains(t, embed.Description, "Salut et merci pour l'invitation",
+				"the guild preferred locale, not the default one")
+		})
+	}
 }
 
 func TestWelcomeGuild_DMChannelFailureStopsSilently(t *testing.T) {

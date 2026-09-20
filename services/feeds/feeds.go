@@ -61,8 +61,9 @@ func (service *Impl) FindFeedTypes(name string, locale discordgo.Locale, limit i
 		}
 	}
 
+	// A negative limit is not a request for more than everything: it yields nothing.
 	if len(feedTypesFound) > limit {
-		return feedTypesFound[:limit]
+		return feedTypesFound[:max(limit, 0)]
 	}
 
 	return feedTypesFound

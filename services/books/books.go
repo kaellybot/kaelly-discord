@@ -98,8 +98,9 @@ func (service *Impl) FindJobs(name string, locale discordgo.Locale, limit int) [
 		}
 	}
 
+	// A negative limit is not a request for more than everything: it yields nothing.
 	if len(jobsFound) > limit {
-		return jobsFound[:limit]
+		return jobsFound[:max(limit, 0)]
 	}
 
 	return jobsFound
@@ -133,8 +134,9 @@ func (service *Impl) FindCities(name string, locale discordgo.Locale, limit int)
 		}
 	}
 
+	// A negative limit is not a request for more than everything: it yields nothing.
 	if len(citiesFound) > limit {
-		return citiesFound[:limit]
+		return citiesFound[:max(limit, 0)]
 	}
 
 	return citiesFound
@@ -168,8 +170,9 @@ func (service *Impl) FindOrders(name string, locale discordgo.Locale, limit int)
 		}
 	}
 
+	// A negative limit is not a request for more than everything: it yields nothing.
 	if len(ordersFound) > limit {
-		return ordersFound[:limit]
+		return ordersFound[:max(limit, 0)]
 	}
 
 	return ordersFound

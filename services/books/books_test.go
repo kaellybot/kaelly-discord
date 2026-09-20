@@ -169,6 +169,8 @@ func TestFindJobs(t *testing.T) {
 	assert.Equal(t, []string{"shoemaker", "shoemagus"}, ids(service.FindJobs("cordo", discordgo.French, 10)))
 	assert.Equal(t, []string{"shoemaker"}, ids(service.FindJobs("cordo", discordgo.French, 1)),
 		"partials are truncated to the limit")
+	assert.Empty(t, service.FindJobs("cordo", discordgo.French, 0))
+	assert.Empty(t, service.FindJobs("cordo", discordgo.French, -1), "a negative limit yields nothing")
 	assert.Equal(t, []string{"shoemagus"}, ids(service.FindJobs("Shoemagus", discordgo.EnglishGB, 10)),
 		"exact match wins over the earlier partial candidates")
 	assert.Empty(t, service.FindJobs("bucheron", discordgo.EnglishUS, 10), "French label not searched in English")
@@ -185,6 +187,7 @@ func TestFindCities(t *testing.T) {
 	assert.Equal(t, []string{"bonta", "brakmar"}, ids(service.FindCities("B", discordgo.French, 10)))
 	assert.Equal(t, []string{"bonta"}, ids(service.FindCities("b", discordgo.French, 1)))
 	assert.Empty(t, service.FindCities("b", discordgo.French, 0))
+	assert.Empty(t, service.FindCities("b", discordgo.French, -1), "a negative limit yields nothing")
 	none := service.FindCities("amakna", discordgo.French, 10)
 	assert.NotNil(t, none)
 	assert.Empty(t, none)
@@ -197,7 +200,9 @@ func TestFindOrders(t *testing.T) {
 		"exact match wins over the partial 'Esprit Bis' that follows it")
 	assert.Equal(t, []string{"spirit", "spirit-2"}, ids(service.FindOrders("spir", discordgo.EnglishGB, 10)))
 	assert.Equal(t, []string{"heart"}, ids(service.FindOrders("cœ", discordgo.French, 10)))
-	assert.Empty(t, service.FindOrders("coeur", discordgo.French, 10),
-		"the œ ligature is not decomposed by NFD, so 'coeur' does not match 'Cœur'")
+	assert.Equal(t, []string{"heart"}, ids(service.FindOrders("coeur", discordgo.French, 10)),
+		"the œ ligature is expanded, so typing 'coeur' matches 'Cœur'")
+	assert.Equal(t, []string{"heart"}, ids(service.FindOrders("COEUR", discordgo.French, 10)))
+	assert.Empty(t, service.FindOrders("spir", discordgo.EnglishGB, -1), "a negative limit yields nothing")
 	assert.NotNil(t, service.FindOrders("zzz", discordgo.French, 10))
 }

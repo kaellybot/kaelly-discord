@@ -62,8 +62,9 @@ func (service *Impl) FindServers(name string, locale discordgo.Locale, limit int
 		}
 	}
 
+	// A negative limit is not a request for more than everything: it yields nothing.
 	if len(serversFound) > limit {
-		return serversFound[:limit]
+		return serversFound[:max(limit, 0)]
 	}
 
 	return serversFound

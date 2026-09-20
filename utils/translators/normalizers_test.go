@@ -13,7 +13,9 @@ func TestNormalizeName_LowercasesAndStripsDiacritics(t *testing.T) {
 		"Draconiros": "draconiros",
 		"HÉNUAL":     "henual",
 		"Crâpaud":    "crapaud",
-		"Cœur":       "cœur", // the ligature is left alone: "coeur" does not match it
+		"Cœur":       "coeur", // ligatures are expanded so "coeur" matches it
+		"CŒUR":       "coeur",
+		"Æon-Nævius": "aeon-naevius",
 		"":           "",
 	}
 	for input, expected := range testCases {

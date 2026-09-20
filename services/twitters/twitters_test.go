@@ -90,6 +90,8 @@ func TestFindTwitterAccounts_ExactMatchLimitAndMisses(t *testing.T) {
 	assert.Equal(t, []string{"main"}, ids(service.FindTwitterAccounts("dofus", discordgo.French, 10)),
 		"exact match discards partials")
 	assert.Equal(t, []string{"fr", "main"}, ids(service.FindTwitterAccounts("dofu", discordgo.French, 2)))
+	assert.Empty(t, service.FindTwitterAccounts("dofu", discordgo.French, 0))
+	assert.Empty(t, service.FindTwitterAccounts("dofu", discordgo.French, -1), "a negative limit yields nothing")
 	assert.Equal(t, []string{"fr", "main", "es", "touch"},
 		ids(service.FindTwitterAccounts("DÔFU", discordgo.French, 10)), "accents in the query are ignored")
 

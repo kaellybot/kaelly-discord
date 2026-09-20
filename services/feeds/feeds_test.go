@@ -97,6 +97,8 @@ func TestFindFeedTypes_LimitAndLocale(t *testing.T) {
 	)
 
 	assert.Equal(t, []string{"a", "b"}, ids(service.FindFeedTypes("flux", discordgo.French, 2)))
+	assert.Empty(t, service.FindFeedTypes("flux", discordgo.French, 0))
+	assert.Empty(t, service.FindFeedTypes("flux", discordgo.French, -1), "a negative limit yields nothing")
 	assert.Empty(t, service.FindFeedTypes("flux", discordgo.EnglishUS, 10), "French label not searched in English")
 	assert.Equal(t, []string{"a", "b", "c"}, ids(service.FindFeedTypes("feed", discordgo.Japanese, 10)),
 		"unsupported locale searches the default English labels")

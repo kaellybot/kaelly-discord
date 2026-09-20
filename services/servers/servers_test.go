@@ -112,6 +112,7 @@ func TestFindServers_PartialMatchesAreTruncatedToLimitInRepositoryOrder(t *testi
 	assert.Equal(t, []string{"s1", "s2", "s3"}, ids(service.FindServers("serveur", discordgo.French, 3)))
 	assert.Equal(t, []string{"s1", "s2", "s3"}, ids(service.FindServers("serveur", discordgo.French, 25)))
 	assert.Empty(t, service.FindServers("serveur", discordgo.French, 0))
+	assert.Empty(t, service.FindServers("serveur", discordgo.French, -1), "a negative limit yields nothing")
 }
 
 func TestFindServers_EmptyQueryListsEverythingUpToLimit(t *testing.T) {

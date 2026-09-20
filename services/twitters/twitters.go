@@ -61,8 +61,9 @@ func (service *Impl) FindTwitterAccounts(name string, locale discordgo.Locale, l
 		}
 	}
 
+	// A negative limit is not a request for more than everything: it yields nothing.
 	if len(twitterAccountFound) > limit {
-		return twitterAccountFound[:limit]
+		return twitterAccountFound[:max(limit, 0)]
 	}
 
 	return twitterAccountFound

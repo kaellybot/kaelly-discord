@@ -664,17 +664,73 @@ func TestCheckFollowConstraints_PermissionLookupFailureCountsAsMissingPermission
 		editContent(t, fake))
 }
 
-func TestCheckFollowConstraints_MissingContextOrUncachedChannelPanics(t *testing.T) {
+func TestCheckFollowConstraints_UncachedChannelIsFetchedThroughREST(t *testing.T) {
 	f := newFixture(t)
-	s, _ := testutils.NewDiscordSession(t)
+	s, fake := testutils.NewDiscordSession(t)
+	addGuild(t, s, discordgo.PermissionManageWebhooks|discordgo.PermissionViewChannel)
+	fake.Respond(testutils.DiscordResponse{Method: "GET", PathContains: "/channels/" + currentChannel,
+		Status: 200, Body: fmt.Sprintf(`{"id":%q,"guild_id":%q,"type":0}`, currentChannel, guildID)})
+	next := &nextRecorder{}
+	ctx := channelCtx(currentChannel)
+
+	f.cmd.checkFollowConstraints(ctx, s, configCommand("almanax"), next.next)
+
+	require.True(t, next.called, "a channel absent from the state is fetched through REST")
+	assert.Equal(t, ctx, next.ctx, "context is forwarded untouched")
+	require.NotEmpty(t, fake.Requests())
+	assert.Equal(t, "/api/v9/channels/"+currentChannel, fake.Requests()[0].Path)
+}
+
+func TestCheckFollowConstraints_UncachedNonTextChannelIsRejected(t *testing.T) {
+	f := newFixture(t)
+	s, fake := testutils.NewDiscordSession(t)
+	addGuild(t, s, discordgo.PermissionAdministrator)
+	fake.Respond(testutils.DiscordResponse{Method: "GET", PathContains: "/channels/" + currentChannel,
+		Status: 200, Body: fmt.Sprintf(`{"id":%q,"guild_id":%q,"type":2}`, currentChannel, guildID)})
+	next := &nextRecorder{}
+
+	f.cmd.checkFollowConstraints(channelCtx(currentChannel), s, configCommand("almanax"), next.next)
+
+	assert.False(t, next.called)
+	assert.Equal(t, testutils.Translations(t, discordgo.French, "checks.webhook.targetChannelType")[0],
+		editContent(t, fake))
+}
+
+func TestCheckFollowConstraints_UnknownChannelPanics(t *testing.T) {
+	f := newFixture(t)
+	s, fake := testutils.NewDiscordSession(t)
+	fake.Respond(testutils.DiscordResponse{Method: "GET", PathContains: "/channels/",
+		Status: 404, Body: `{"message":"Unknown Channel","code":10003}`})
 	next := &nextRecorder{}
 
 	assert.Panics(t, func() {
-		f.cmd.checkFollowConstraints(context.Background(), s, configCommand("almanax"), next.next)
-	})
-	assert.Panics(t, func() {
 		f.cmd.checkFollowConstraints(channelCtx("not-cached"), s, configCommand("almanax"), next.next)
-	}, "channels absent from the state are not fetched through REST")
+	})
+	assert.False(t, next.called)
+}
+
+func TestCheckFollowConstraints_MissingContextFallsBackToInteractionChannel(t *testing.T) {
+	f := newFixture(t)
+	s, fake := testutils.NewDiscordSession(t)
+	addGuild(t, s, discordgo.PermissionAdministrator, textChannel(currentChannel))
+	next := &nextRecorder{}
+
+	f.cmd.checkFollowConstraints(context.Background(), s, configCommand("almanax"), next.next)
+
+	require.True(t, next.called)
+	assert.Empty(t, fake.Requests(), "the interaction channel is the one being checked")
+}
+
+func TestCheckFollowConstraints_NoChannelAtAllPanics(t *testing.T) {
+	f := newFixture(t)
+	s, _ := testutils.NewDiscordSession(t)
+	event := configCommand("almanax")
+	event.ChannelID = ""
+	next := &nextRecorder{}
+
+	assert.Panics(t, func() {
+		f.cmd.checkFollowConstraints(context.Background(), s, event, next.next)
+	})
 	assert.False(t, next.called)
 }
 

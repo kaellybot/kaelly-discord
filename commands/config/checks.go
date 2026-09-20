@@ -96,13 +96,22 @@ func (command *Command) checkFollowConstraints(ctx context.Context, s *discordgo
 	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
 	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
+		// Previous checks always fill it; fallback on the channel hosting the interaction.
+		channelID = i.ChannelID
+	}
+
+	if channelID == "" {
 		panic(fmt.Sprintf("cannot retrieve channelID from ctx (%v)", constants.ContextKeyChannel))
 	}
 
 	// Only regular Text channels (GUILD_TEXT) could follow Announcement channels.
 	channel, err := s.State.Channel(channelID)
 	if err != nil {
-		panic(err)
+		// Not cached yet, ask Discord about it.
+		channel, err = s.Channel(channelID)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	if channel.Type != discordgo.ChannelTypeGuildText {

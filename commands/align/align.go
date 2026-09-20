@@ -156,12 +156,18 @@ func getUserOptions(ctx context.Context) (entities.Server, error) {
 }
 
 func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
-	if commands.IsApplicationCommand(i) {
-		return len(i.ApplicationCommandData().TargetID) == 0 &&
-			command.GetName() == i.ApplicationCommandData().Name ||
-			contract.AlignUserCommandName == i.ApplicationCommandData().Name
+	if !commands.IsApplicationCommand(i) {
+		return false
 	}
-	return false
+
+	// The user command carries a target, the slash command never does; Handle
+	// routes them to their own handlers on that same criterion.
+	data := i.ApplicationCommandData()
+	if len(data.TargetID) == 0 {
+		return command.GetName() == data.Name
+	}
+
+	return contract.AlignUserCommandName == data.Name
 }
 
 func matchesMessageCommand(i *discordgo.InteractionCreate) bool {

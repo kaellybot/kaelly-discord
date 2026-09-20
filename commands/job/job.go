@@ -25,12 +25,12 @@ func New(bookService books.Service, guildService guilds.Service,
 	serverService servers.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
-		DiscordID: viper.GetString(constants.JobID),
-		bookService:     bookService,
-		emojiService:    emojiService,
-		guildService:    guildService,
-		serverService:   serverService,
-		requestManager:  requestManager,
+		DiscordID:      viper.GetString(constants.JobID),
+		bookService:    bookService,
+		emojiService:   emojiService,
+		guildService:   guildService,
+		serverService:  serverService,
+		requestManager: requestManager,
 	}
 
 	checkServer := checks.CheckServerWithFallback(contract.JobServerOptionName,
@@ -150,12 +150,18 @@ func getUserOptions(ctx context.Context) (entities.Server, error) {
 }
 
 func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {
-	if commands.IsApplicationCommand(i) {
-		return len(i.ApplicationCommandData().TargetID) == 0 &&
-			command.GetName() == i.ApplicationCommandData().Name ||
-			contract.JobUserCommandName == i.ApplicationCommandData().Name
+	if !commands.IsApplicationCommand(i) {
+		return false
 	}
-	return false
+
+	// The user command carries a target, the slash command never does; Handle
+	// routes them to their own handlers on that same criterion.
+	data := i.ApplicationCommandData()
+	if len(data.TargetID) == 0 {
+		return command.GetName() == data.Name
+	}
+
+	return contract.JobUserCommandName == data.Name
 }
 
 func matchesMessageCommand(i *discordgo.InteractionCreate) bool {

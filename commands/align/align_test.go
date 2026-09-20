@@ -285,6 +285,7 @@ func TestMatches(t *testing.T) {
 	alignWithTarget.Data = data
 	autocomplete := slash("get")
 	autocomplete.Type = discordgo.InteractionApplicationCommandAutocomplete
+	userNameWithoutTarget := userCommand("", nil)
 
 	cases := []struct {
 		name     string
@@ -295,6 +296,7 @@ func TestMatches(t *testing.T) {
 		{"autocomplete", autocomplete, true},
 		{"slash name with a target", alignWithTarget, false},
 		{"user command", userCommand("u1", nil), true},
+		{"user name without a target", userNameWithoutTarget, false},
 		{"other command", interaction(discordgo.InteractionApplicationCommand,
 			discordgo.ApplicationCommandInteractionData{Name: "job"}), false},
 		{"page button", component("/books/align?city=_&order=_&server=djaul&page=1"), true},

@@ -256,6 +256,7 @@ func TestMatches(t *testing.T) {
 		"autocomplete":              {jobAutocomplete("get"), true},
 		"user command":              {userCommand(contract.JobUserCommandName, "target"), true},
 		"slash name with target":    {userCommand(contract.JobSlashCommandName, "target"), false},
+		"user name without target":  {userCommand(contract.JobUserCommandName, ""), false},
 		"align command":             {userCommand("align", ""), false},
 		"book page button":          {component("/books/job/alchemist?server=djaul&page=2"), true},
 		"book job select":           {component("/books/job?server=djaul"), true},

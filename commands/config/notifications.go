@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -14,9 +15,9 @@ import (
 )
 
 func (command *Command) setNotificationRespond(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
 	if !isConfigSetNotificationAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
 	if message.ConfigurationSetNotificationAnswer.RemoveWebhook {
@@ -37,6 +38,8 @@ func (command *Command) setNotificationRespond(_ context.Context, s *discordgo.S
 	if err != nil {
 		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func isConfigSetNotificationAnswerValid(message *amqp.RabbitMQMessage) bool {

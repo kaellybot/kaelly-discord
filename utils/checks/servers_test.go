@@ -8,6 +8,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
@@ -61,14 +62,16 @@ func server(id, frLabel string) entities.Server {
 
 // nextSpy records whether the chain continued and which server was in context.
 type nextSpy struct {
+	err       error
 	called    bool
 	server    entities.Server
 	hasServer bool
 }
 
-func (n *nextSpy) next(ctx context.Context) {
+func (n *nextSpy) next(ctx context.Context) error {
 	n.called = true
 	n.server, n.hasServer = ctx.Value(constants.ContextKeyServer).(entities.Server)
+	return n.err
 }
 
 func stringOption(name, value string) *discordgo.ApplicationCommandInteractionDataOption {
@@ -118,7 +121,7 @@ func runWithChannels(t *testing.T, middleware middlewares.MiddlewareCommand,
 	t.Helper()
 	s, fake := cachedSession(t, event.GuildID, channels...)
 	spy := &nextSpy{}
-	middleware(context.Background(), s, event, spy.next)
+	assert.NoError(t, middleware(context.Background(), s, event, spy.next))
 	return spy, fake
 }
 
@@ -193,10 +196,8 @@ func TestCheckServer_DiscordFailureIsSwallowed(t *testing.T) {
 		Body: `{"message": "oops"}`})
 	spy := &nextSpy{}
 
-	require.NotPanics(t, func() {
-		CheckServer("server", &fakeServerService{})(context.Background(), s,
-			command(subCommand("get", stringOption("server", "xyz"))), spy.next)
-	})
+	assert.NoError(t, CheckServer("server", &fakeServerService{})(context.Background(), s,
+		command(subCommand("get", stringOption("server", "xyz"))), spy.next))
 	assert.False(t, spy.called)
 	assert.Len(t, fake.Requests(), 1)
 }
@@ -297,26 +298,25 @@ func TestCheckServerWithFallback_NoGuildServerDiscordFailureIsSwallowed(t *testi
 		Body: `{"code": 10015, "message": "Unknown Webhook"}`})
 	spy := &nextSpy{}
 
-	require.NotPanics(t, func() {
-		CheckServerWithFallback("server", &fakeServerService{}, &fakeGuildService{})(
-			context.Background(), s, command(), spy.next)
-	})
+	assert.NoError(t, CheckServerWithFallback("server", &fakeServerService{}, &fakeGuildService{})(
+		context.Background(), s, command(), spy.next))
 	assert.False(t, spy.called)
 	assert.Len(t, fake.Requests(), 1)
 }
 
-func TestCheckServerWithFallback_GuildLookupFailurePanics(t *testing.T) {
+func TestCheckServerWithFallback_GuildLookupFailureIsReportedAsUnavailable(t *testing.T) {
 	errDB := errors.New("database is down")
 	s, fake := cachedSession(t, "g1",
 		&discordgo.Channel{ID: "c1", GuildID: "g1", Type: discordgo.ChannelTypeGuildText})
 	spy := &nextSpy{}
 
-	assert.PanicsWithValue(t, errDB, func() {
-		CheckServerWithFallback("server", &fakeServerService{}, &fakeGuildService{err: errDB})(
-			context.Background(), s, command(), spy.next)
-	}, "the panic is left to the command's HandlePanic")
+	err := CheckServerWithFallback("server", &fakeServerService{}, &fakeGuildService{err: errDB})(
+		context.Background(), s, command(), spy.next)
+
+	require.ErrorIs(t, err, commands.ErrUnavailable, "a database outage is worth a retry message")
+	require.ErrorIs(t, err, errDB, "the cause is kept for the logs")
 	assert.False(t, spy.called)
-	assert.Empty(t, fake.Requests())
+	assert.Empty(t, fake.Requests(), "the router answers, not the check")
 }
 
 // A thread owns no configuration: the channel it lives in answers for it.

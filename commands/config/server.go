@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -16,25 +17,22 @@ import (
 )
 
 func (command *Command) serverRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	server, channelID, err := getServerOptions(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapConfigurationServerRequest(i.GuildID, channelID, server.ID, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.serverRespond)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) serverRespond(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
 	if !isConfigSetServerAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
 	content := di18n.Get(i18n.MapAMQPLocale(message.Language), "config.success")
@@ -45,6 +43,8 @@ func (command *Command) serverRespond(_ context.Context, s *discordgo.Session,
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func isConfigSetServerAnswerValid(message *amqp.RabbitMQMessage) bool {

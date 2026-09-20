@@ -44,7 +44,7 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 		i.ApplicationCommandData().Name == command.GetName()
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 	userID := discord.GetUserID(i.Interaction)
 	message := mappers.MapAboutRequest(userID, i.Locale)
 	errBroker := command.broker.Emit(message, amqp.ExchangeRequest, constants.AboutRoutingKey, i.ID)
@@ -57,4 +57,6 @@ func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCre
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle about reponse")
 	}
+
+	return nil
 }

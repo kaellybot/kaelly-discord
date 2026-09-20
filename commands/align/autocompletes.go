@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 	data := i.ApplicationCommandData()
 	var choices []*discordgo.ApplicationCommandOptionChoice
 
@@ -39,6 +39,8 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 	if err != nil {
 		log.Error().Err(err).Msg("Autocomplete request ignored")
 	}
+
+	return nil
 }
 
 func (command *Command) findServers(serverName string, lg discordgo.Locale) []*discordgo.

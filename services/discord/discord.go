@@ -8,6 +8,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/models/mappers"
 	"github.com/kaellybot/kaelly-discord/services/emojis"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/panics"
 	"github.com/rs/zerolog/log"
 )
@@ -88,14 +89,20 @@ func (service *Impl) ready(session *discordgo.Session, _ *discordgo.Ready) {
 func (service *Impl) interactionCreate(session *discordgo.Session, event *discordgo.InteractionCreate) {
 	defer panics.HandlePanic(session, event)
 
-	err := service.deferInteraction(session, event)
-	if err != nil {
-		panic(err)
+	if err := service.deferInteraction(session, event); err != nil {
+		// Nothing was deferred, so there is no answer to edit either.
+		log.Error().Err(err).
+			Uint32(constants.LogInteractionType, uint32(event.Type)).
+			Msgf("Cannot defer interaction, ignoring it")
+		return
 	}
 
 	for _, command := range service.commands {
 		if command.Matches(event) {
-			command.Handle(session, event)
+			if err := command.Handle(session, event); err != nil {
+				discord.AnswerError(session, event, err)
+			}
+
 			return
 		}
 	}

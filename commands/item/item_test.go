@@ -178,7 +178,7 @@ func TestHandle_QueryRequestsItemByName(t *testing.T) {
 	cmd, manager := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, itemCommand(queryOption("Coiffe du Bouftou")))
+	require.NoError(t, cmd.Handle(s, itemCommand(queryOption("Coiffe du Bouftou"))))
 
 	call := singleRequest(t, manager)
 	assert.Equal(t, amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST, call.message.Type)
@@ -199,7 +199,7 @@ func TestHandle_BlankQueryAnswersConstraintError(t *testing.T) {
 			cmd, manager := newCommand(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			cmd.Handle(s, event)
+			require.NoError(t, cmd.Handle(s, event))
 
 			assert.Empty(t, manager.calls)
 			req := fake.Last(t)
@@ -213,20 +213,20 @@ func TestHandle_BlankQueryAnswersConstraintError(t *testing.T) {
 	}
 }
 
-func TestHandle_RequestFailurePanics(t *testing.T) {
+func TestHandle_RequestFailureIsReported(t *testing.T) {
 	cmd, manager := newCommand(t)
-	manager.err = errors.New("broker down")
-	s, _ := testutils.NewDiscordSession(t)
+	errBroker := errors.New("broker down")
+	manager.err = errBroker
+	s, fake := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithError(t, "broker down", func() { cmd.Handle(s, itemCommand(queryOption("x"))) })
-	assert.PanicsWithError(t, "broker down", func() {
-		cmd.Handle(s, component("/item/1/recipe?type=EQUIPMENT_TYPE"))
-	})
+	require.ErrorIs(t, cmd.Handle(s, itemCommand(queryOption("x"))), errBroker)
+	require.ErrorIs(t, cmd.Handle(s, component("/item/1/recipe?type=EQUIPMENT_TYPE")), errBroker)
+	assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 }
 
-func TestGetItem_MissingQueryInContextPanics(t *testing.T) {
+func TestGetItem_MissingQueryInContextIsReported(t *testing.T) {
 	cmd, manager := newCommand(t)
-	assert.Panics(t, func() { cmd.getItem(context.Background(), nil, itemCommand(), nil) })
+	require.Error(t, cmd.getItem(context.Background(), nil, itemCommand(), nil))
 	assert.Empty(t, manager.calls)
 }
 
@@ -250,7 +250,7 @@ func TestHandle_ComponentsRequestItemByID(t *testing.T) {
 			cmd, manager := newCommand(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			cmd.Handle(s, tc.event)
+			require.NoError(t, cmd.Handle(s, tc.event))
 
 			call := singleRequest(t, manager)
 			req := call.message.GetEncyclopediaItemRequest()
@@ -264,7 +264,7 @@ func TestHandle_ComponentsRequestItemByID(t *testing.T) {
 	}
 }
 
-func TestHandle_InvalidComponentsPanic(t *testing.T) {
+func TestHandle_InvalidComponentsAreReportedAsStale(t *testing.T) {
 	cases := map[string]*discordgo.InteractionCreate{
 		"select without value":   component("/item?type=EQUIPMENT_TYPE"),
 		"select with two values": component("/item?type=EQUIPMENT_TYPE", "1", "2"),
@@ -274,10 +274,15 @@ func TestHandle_InvalidComponentsPanic(t *testing.T) {
 	for name, event := range cases {
 		t.Run(name, func(t *testing.T) {
 			cmd, manager := newCommand(t)
-			s, _ := testutils.NewDiscordSession(t)
+			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithError(t, commands.ErrInvalidInteraction.Error(), func() { cmd.Handle(s, event) })
+			err := cmd.Handle(s, event)
+
+			require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+			assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+				"a component we cannot read is a stale click, not a crash")
 			assert.Empty(t, manager.calls)
+			assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 		})
 	}
 }
@@ -288,7 +293,7 @@ func TestHandle_AutocompleteRequestsItemList(t *testing.T) {
 	cmd, manager := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, itemAutocomplete(focused(queryOption("bouf"))))
+	require.NoError(t, cmd.Handle(s, itemAutocomplete(focused(queryOption("bouf")))))
 
 	call := singleRequest(t, manager)
 	assert.Equal(t, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST, call.message.Type)
@@ -309,7 +314,7 @@ func TestHandle_AutocompleteIgnoresBlankUnfocusedOrUnknownOptions(t *testing.T) 
 			cmd, manager := newCommand(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			cmd.Handle(s, event)
+			require.NoError(t, cmd.Handle(s, event))
 
 			assert.Empty(t, manager.calls)
 			assert.Empty(t, fake.Requests(), "no answer at all: Discord shows its own empty state")
@@ -322,7 +327,8 @@ func TestHandle_AutocompleteRequestFailureIsSwallowed(t *testing.T) {
 	manager.err = errors.New("broker down")
 	s, fake := testutils.NewDiscordSession(t)
 
-	assert.NotPanics(t, func() { cmd.Handle(s, itemAutocomplete(focused(queryOption("bouf")))) })
+	assert.NoError(t, cmd.Handle(s, itemAutocomplete(focused(queryOption("bouf")))),
+		"an autocompletion cannot be answered with an error message")
 	assert.Empty(t, fake.Requests())
 }
 
@@ -337,13 +343,13 @@ func TestAutocompleteItemList_AnswersChoicesFromList(t *testing.T) {
 	cmd, _ := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.autocompleteItemList(context.Background(), s, itemAutocomplete(), &amqp.RabbitMQMessage{
+	require.NoError(t, cmd.autocompleteItemList(context.Background(), s, itemAutocomplete(), &amqp.RabbitMQMessage{
 		Type:   amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER,
 		Status: amqp.RabbitMQMessage_SUCCESS,
 		EncyclopediaListAnswer: &amqp.EncyclopediaListAnswer{Items: []*amqp.EncyclopediaListAnswer_Item{
 			{Id: "1", Name: "Coiffe du Bouftou"}, {Id: "2", Name: "Cape du Bouftou"},
 		}},
-	}, nil)
+	}, nil))
 
 	req := fake.Last(t)
 	assert.Equal(t, "POST", req.Method)
@@ -372,9 +378,8 @@ func TestAutocompleteItemList_InvalidAnswerSendsEmptyChoices(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			fake.Respond(testutils.DiscordResponse{PathContains: "/callback", Status: 400, Body: `{}`})
 
-			assert.NotPanics(t, func() {
-				cmd.autocompleteItemList(context.Background(), s, itemAutocomplete(), message, nil)
-			})
+			assert.NoError(t, cmd.autocompleteItemList(context.Background(), s, itemAutocomplete(),
+				message, nil))
 
 			var payload autocompletePayload
 			fake.Last(t).Decode(t, &payload)
@@ -433,7 +438,7 @@ func TestGetItemReply_ShowsEffectsWithRecipeButton(t *testing.T) {
 	cmd, _ := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.getItemReply(context.Background(), s, itemCommand(), itemAnswer(equipment()), nil)
+	require.NoError(t, cmd.getItemReply(context.Background(), s, itemCommand(), itemAnswer(equipment()), nil))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -449,8 +454,9 @@ func TestUpdateItemReply_RecipePropertySwitchesView(t *testing.T) {
 	cmd, _ := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.updateItemReply(context.Background(), s, component("/item/8/recipe?type=EQUIPMENT_TYPE"),
-		itemAnswer(equipment()), map[string]any{isRecipeProperty: true})
+	require.NoError(t, cmd.updateItemReply(context.Background(), s,
+		component("/item/8/recipe?type=EQUIPMENT_TYPE"), itemAnswer(equipment()),
+		map[string]any{isRecipeProperty: true}))
 
 	payload := fake.LastEdit(t)
 	embed := payload.Embeds[0]
@@ -464,7 +470,7 @@ func TestUpdateItemReply_NoEquipmentAnswersQueryMismatch(t *testing.T) {
 	cmd, _ := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.updateItemReply(context.Background(), s, itemCommand(), itemAnswer(nil), nil)
+	require.NoError(t, cmd.updateItemReply(context.Background(), s, itemCommand(), itemAnswer(nil), nil))
 
 	payload := fake.LastEdit(t)
 	require.NotNil(t, payload.Content)
@@ -482,7 +488,7 @@ func assertQueryMismatch(t *testing.T, locale discordgo.Locale, query, content s
 	assert.Contains(t, expected, content)
 }
 
-func TestUpdateItemReply_InvalidAnswerPanics(t *testing.T) {
+func TestUpdateItemReply_InvalidAnswerIsReported(t *testing.T) {
 	failed := itemAnswer(equipment())
 	failed.Status = amqp.RabbitMQMessage_FAILED
 	wrongType := itemAnswer(equipment())
@@ -497,16 +503,17 @@ func TestUpdateItemReply_InvalidAnswerPanics(t *testing.T) {
 			cmd, _ := newCommand(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithError(t, commands.ErrInvalidAnswerMessage.Error(), func() {
-				cmd.updateItemReply(context.Background(), s, itemCommand(), message,
-					map[string]any{isRecipeProperty: false})
-			})
+			err := cmd.updateItemReply(context.Background(), s, itemCommand(), message,
+				map[string]any{isRecipeProperty: false})
+
+			require.ErrorIs(t, err, commands.ErrInvalidAnswerMessage)
+			assert.ErrorIs(t, err, commands.ErrUnavailable, "a backend that failed is worth a retry")
 			assert.Empty(t, fake.Requests())
 		})
 	}
 }
 
-func TestUpdateItemReply_MissingOrWrongRecipePropertyPanics(t *testing.T) {
+func TestUpdateItemReply_MissingOrWrongRecipePropertyIsReported(t *testing.T) {
 	for name, properties := range map[string]map[string]any{
 		"missing":    {},
 		"not a bool": {isRecipeProperty: "true"},
@@ -515,9 +522,12 @@ func TestUpdateItemReply_MissingOrWrongRecipePropertyPanics(t *testing.T) {
 			cmd, _ := newCommand(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithError(t, commands.ErrRequestPropertyNotFound.Error(), func() {
-				cmd.updateItemReply(context.Background(), s, itemCommand(), itemAnswer(equipment()), properties)
-			})
+			err := cmd.updateItemReply(context.Background(), s, itemCommand(),
+				itemAnswer(equipment()), properties)
+
+			require.ErrorIs(t, err, commands.ErrRequestPropertyNotFound)
+			assert.NotErrorIs(t, err, commands.ErrStaleInteraction,
+				"wiring gone wrong is a bug, not a stale click")
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -527,15 +537,17 @@ func TestHandle_CallbacksRenderMatchingView(t *testing.T) {
 	cmd, manager := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, itemCommand(queryOption("bouftou")))
-	cmd.Handle(s, component("/item/8/recipe?type=EQUIPMENT_TYPE"))
+	require.NoError(t, cmd.Handle(s, itemCommand(queryOption("bouftou"))))
+	require.NoError(t, cmd.Handle(s, component("/item/8/recipe?type=EQUIPMENT_TYPE")))
 	require.Len(t, manager.calls, 2)
 
-	manager.calls[0].callback(context.Background(), s, itemCommand(), itemAnswer(equipment()), nil)
+	require.NoError(t, manager.calls[0].callback(context.Background(), s, itemCommand(),
+		itemAnswer(equipment()), nil))
 	assert.Equal(t, []string{"/item/8/recipe?type=EQUIPMENT_TYPE"}, buttonIDs(t, fake.LastEdit(t)),
 		"slash command answers default to the effects view")
 
 	call := manager.calls[1]
-	call.callback(context.Background(), s, component("x"), itemAnswer(equipment()), call.properties[0])
+	require.NoError(t, call.callback(context.Background(), s, component("x"),
+		itemAnswer(equipment()), call.properties[0]))
 	assert.Equal(t, []string{"/item/8/effects?type=EQUIPMENT_TYPE"}, buttonIDs(t, fake.LastEdit(t)))
 }

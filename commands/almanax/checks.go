@@ -15,7 +15,7 @@ import (
 )
 
 func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	date := time.Now()
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
@@ -30,7 +30,7 @@ func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 					if errInteraction != nil {
 						log.Error().Err(errInteraction).Msg("Date check response ignored")
 					}
-					return
+					return nil
 				}
 				date = *parsedDate
 				break
@@ -46,14 +46,14 @@ func (command *Command) checkDate(ctx context.Context, s *discordgo.Session,
 		if err != nil {
 			log.Error().Err(err).Msg("Date check response ignored")
 		}
-		return
+		return nil
 	}
 
-	next(context.WithValue(ctx, constants.ContextKeyDate, &date))
+	return next(context.WithValue(ctx, constants.ContextKeyDate, &date))
 }
 
 func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -62,34 +62,34 @@ func (command *Command) checkDuration(ctx context.Context, s *discordgo.Session,
 				duration := option.IntValue()
 
 				if duration >= contract.AlmanaxDurationMinimumValue && duration <= contract.AlmanaxDurationMaximumValue {
-					next(context.WithValue(ctx, constants.ContextKeyDuration, duration))
-				} else {
-					content := i18n.Get(i.Locale, "checks.duration.constraints",
-						i18n.Vars{"min": contract.AlmanaxDurationMinimumValue, "max": contract.AlmanaxDurationMaximumValue})
-					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-						Content: &content,
-					})
-					if err != nil {
-						log.Error().Err(err).Msg("Duration check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyDuration, duration))
 				}
 
-				return
+				content := i18n.Get(i.Locale, "checks.duration.constraints",
+					i18n.Vars{"min": contract.AlmanaxDurationMinimumValue, "max": contract.AlmanaxDurationMaximumValue})
+				_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+					Content: &content,
+				})
+				if err != nil {
+					log.Error().Err(err).Msg("Duration check response ignored")
+				}
+
+				return nil
 			}
 		}
 	}
 
-	next(context.WithValue(ctx, constants.ContextKeyDuration, int64(contract.AlmanaxDurationDefaultValue)))
+	return next(context.WithValue(ctx, constants.ContextKeyDuration,
+		int64(contract.AlmanaxDurationDefaultValue)))
 }
 
 func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.AlmanaxEffectOptionName && len(strings.TrimSpace(option.StringValue())) > 0 {
-				next(context.WithValue(ctx, constants.ContextKeyQuery, option.StringValue()))
-				return
+				return next(context.WithValue(ctx, constants.ContextKeyQuery, option.StringValue()))
 			}
 		}
 	}
@@ -101,4 +101,6 @@ func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
 	if err != nil {
 		log.Error().Err(err).Msg("Query check response ignored")
 	}
+
+	return nil
 }

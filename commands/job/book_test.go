@@ -50,8 +50,8 @@ func TestHandle_GetRequestsBookForGuildMembers(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	withMembers(fake)
 
-	f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName,
-		stringOption(contract.JobJobOptionName, "alch"), stringOption(contract.JobServerOptionName, "dja")))
+	require.NoError(t, f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName,
+		stringOption(contract.JobJobOptionName, "alch"), stringOption(contract.JobServerOptionName, "dja"))))
 
 	call := singleRequest(t, f)
 	assert.Equal(t, amqp.RabbitMQMessage_JOB_GET_BOOK_REQUEST, call.message.Type)
@@ -76,7 +76,8 @@ func TestHandle_GetFallsBackToGuildServer(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	withMembers(fake)
 
-	f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "alch")))
+	require.NoError(t,
+		f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "alch"))))
 
 	assert.Equal(t, []guildServerCall{{guildID, channelID}}, f.guilds.calls)
 	assert.Equal(t, "imagiro", singleRequest(t, f).message.GetJobGetBookRequest().GetServerId())
@@ -87,50 +88,59 @@ func TestHandle_GetWithoutAnyServerAnswersRequiredError(t *testing.T) {
 	f.books.found = []entities.Job{job("alchemist", "Alchimiste")}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "alch")))
+	require.NoError(t,
+		f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "alch"))))
 
 	assert.Empty(t, f.manager.calls)
 	assert.Contains(t, editContent(t, fake), "Il semble qu'il n'y a pas de serveur")
 }
 
-func TestHandle_GetGuildLookupFailurePanics(t *testing.T) {
+func TestHandle_GetGuildLookupFailureIsReported(t *testing.T) {
 	f := newFixture(t)
 	f.books.found = []entities.Job{job("alchemist", "Alchimiste")}
 	f.guilds.err = errors.New("db down")
-	s, _ := testutils.NewDiscordSession(t)
+	s, fake := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithError(t, "db down", func() {
-		f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "alch")))
-	})
+	err := f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName,
+		stringOption(contract.JobJobOptionName, "alch")))
+
+	require.ErrorContains(t, err, "db down")
+	assert.ErrorIs(t, err, commands.ErrUnavailable, "a database that refused is worth a retry")
 	assert.Empty(t, f.manager.calls)
+	require.Len(t, fake.Requests(), 1)
+	assert.Equal(t, "/api/v9/channels/"+channelID, fake.Requests()[0].Path,
+		"only the parent channel lookup: the router answers the caller, not the command")
 }
 
 func TestHandle_GetUnknownJobStopsBeforeServerLookup(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "zz")))
+	require.NoError(t,
+		f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "zz"))))
 
 	assert.Empty(t, f.guilds.calls)
 	assert.Empty(t, f.manager.calls)
 	assert.Contains(t, editContent(t, fake), "'*zz*'")
 }
 
-func TestHandle_GetMembersFailurePanics(t *testing.T) {
+func TestHandle_GetMembersFailureIsReported(t *testing.T) {
 	f := newFixture(t)
 	f.books.found = []entities.Job{job("alchemist", "Alchimiste")}
 	f.servers.found = []entities.Server{server("djaul", "Djaul")}
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/members", Status: 403, Body: `{"code":50001}`})
 
-	assert.Panics(t, func() {
-		f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName,
-			stringOption(contract.JobJobOptionName, "alch"), stringOption(contract.JobServerOptionName, "dja")))
-	})
+	err := f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName,
+		stringOption(contract.JobJobOptionName, "alch"), stringOption(contract.JobServerOptionName, "dja")))
+
+	require.ErrorIs(t, err, commands.ErrUnavailable,
+		"Discord refusing the member list is someone else failing, not our logic")
+	assert.NotErrorIs(t, err, commands.ErrStaleInteraction)
 	assert.Empty(t, f.manager.calls)
 }
 
-func TestHandle_RequestFailurePanics(t *testing.T) {
+func TestHandle_RequestFailureIsReported(t *testing.T) {
 	f := newFixture(t)
 	f.manager.err = errors.New("broker down")
 	f.books.found = []entities.Job{job("alchemist", "Alchimiste")}
@@ -148,7 +158,7 @@ func TestHandle_RequestFailurePanics(t *testing.T) {
 		"select": component("/books/job?server=djaul", "alchemist"),
 		"user":   userCommand(),
 	} {
-		assert.PanicsWithError(t, "broker down", func() { f.cmd.Handle(s, event) }, name)
+		assert.ErrorContains(t, f.cmd.Handle(s, event), "broker down", name)
 	}
 }
 
@@ -160,9 +170,9 @@ func TestHandle_SetRequestsLevelUpdateForAuthor(t *testing.T) {
 	f.servers.found = []entities.Server{server("djaul", "Djaul")}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, jobCommand(contract.JobSetSubCommandName,
+	require.NoError(t, f.cmd.Handle(s, jobCommand(contract.JobSetSubCommandName,
 		stringOption(contract.JobJobOptionName, "alch"), levelOption(200),
-		stringOption(contract.JobServerOptionName, "dja")))
+		stringOption(contract.JobServerOptionName, "dja"))))
 
 	call := singleRequest(t, f)
 	assert.Equal(t, amqp.RabbitMQMessage_JOB_SET_REQUEST, call.message.Type)
@@ -180,8 +190,8 @@ func TestHandle_SetInvalidLevelStopsBeforeServerLookup(t *testing.T) {
 	f.books.found = []entities.Job{job("alchemist", "Alchimiste")}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, jobCommand(contract.JobSetSubCommandName,
-		stringOption(contract.JobJobOptionName, "alch"), levelOption(201)))
+	require.NoError(t, f.cmd.Handle(s, jobCommand(contract.JobSetSubCommandName,
+		stringOption(contract.JobJobOptionName, "alch"), levelOption(201))))
 
 	assert.Empty(t, f.guilds.calls)
 	assert.Empty(t, f.manager.calls)
@@ -192,20 +202,21 @@ func TestSetBookReply_SuccessUsesAnswerLanguage(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.setBookReply(context.Background(), s, jobCommand("set"),
-		&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_SUCCESS, Language: amqp.Language_EN}, nil)
+	require.NoError(t, f.cmd.setBookReply(context.Background(), s, jobCommand("set"),
+		&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_SUCCESS, Language: amqp.Language_EN}, nil))
 
 	assert.Equal(t, "Craftsmen book updated!", editContent(t, fake))
 }
 
-func TestSetBookReply_FailurePanics(t *testing.T) {
+func TestSetBookReply_FailureIsReported(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithError(t, commands.ErrInvalidAnswerMessage.Error(), func() {
-		f.cmd.setBookReply(context.Background(), s, jobCommand("set"),
-			&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_FAILED}, nil)
-	})
+	err := f.cmd.setBookReply(context.Background(), s, jobCommand("set"),
+		&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_FAILED}, nil)
+
+	require.ErrorIs(t, err, commands.ErrInvalidAnswerMessage)
+	assert.ErrorIs(t, err, commands.ErrUnavailable, "a backend that failed is worth a retry")
 	assert.Empty(t, fake.Requests())
 }
 
@@ -216,7 +227,7 @@ func TestHandle_PageButtonRequestsRequestedPage(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	withMembers(fake)
 
-	f.cmd.Handle(s, component(contract.CraftJobBookPageCustomID("alchemist", "djaul", 2)))
+	require.NoError(t, f.cmd.Handle(s, component(contract.CraftJobBookPageCustomID("alchemist", "djaul", 2))))
 
 	call := singleRequest(t, f)
 	req := call.message.GetJobGetBookRequest()
@@ -232,7 +243,7 @@ func TestHandle_JobSelectRequestsFirstPageOfSelectedJob(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	withMembers(fake)
 
-	f.cmd.Handle(s, component(contract.CraftJobBookSelectCustomID("djaul"), "tailor"))
+	require.NoError(t, f.cmd.Handle(s, component(contract.CraftJobBookSelectCustomID("djaul"), "tailor")))
 
 	call := singleRequest(t, f)
 	req := call.message.GetJobGetBookRequest()
@@ -242,7 +253,7 @@ func TestHandle_JobSelectRequestsFirstPageOfSelectedJob(t *testing.T) {
 	assert.Equal(t, expectedNicknames(), call.properties[0])
 }
 
-func TestHandle_ComponentMembersFailurePanics(t *testing.T) {
+func TestHandle_ComponentMembersFailureIsReported(t *testing.T) {
 	for name, event := range map[string]*discordgo.InteractionCreate{
 		"page":   component(contract.CraftJobBookPageCustomID("alchemist", "djaul", 2)),
 		"select": component(contract.CraftJobBookSelectCustomID("djaul"), "tailor"),
@@ -252,45 +263,60 @@ func TestHandle_ComponentMembersFailurePanics(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			fake.Respond(testutils.DiscordResponse{PathContains: "/members", Status: 403, Body: `{"code":50001}`})
 
-			assert.Panics(t, func() { f.cmd.Handle(s, event) })
+			require.ErrorIs(t, f.cmd.Handle(s, event), commands.ErrUnavailable)
 			assert.Empty(t, f.manager.calls)
 		})
 	}
 }
 
-func TestHandle_InvalidComponentsPanic(t *testing.T) {
+func TestHandle_InvalidComponentsAreReportedAsStale(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithError(t, commands.ErrNoProvidedHandler.Error(), func() {
-		f.cmd.Handle(s, component("/books/align?server=djaul"))
-	}, "custom IDs matching no job pattern have no handler")
-	assert.PanicsWithError(t, commands.ErrInvalidInteraction.Error(), func() {
-		f.cmd.Handle(s, component(contract.CraftJobBookSelectCustomID("djaul")))
-	}, "a job select needs exactly one value")
-	assert.PanicsWithError(t, commands.ErrInvalidInteraction.Error(), func() {
-		f.cmd.Handle(s, component(contract.CraftJobBookSelectCustomID("djaul"), "a", "b"))
-	})
-	assert.PanicsWithError(t, commands.ErrInvalidInteraction.Error(), func() {
-		f.cmd.updateBookPage(s, component("/books/job?server=djaul"))
-	})
-	assert.PanicsWithError(t, commands.ErrInvalidInteraction.Error(), func() {
-		f.cmd.updateJobBook(s, component("/books/job/a?server=djaul&page=1", "a"))
-	})
+	cases := map[string]struct {
+		run     func() error
+		wantErr error
+	}{
+		"custom ID matching no job pattern": {
+			func() error { return f.cmd.Handle(s, component("/books/align?server=djaul")) },
+			commands.ErrNoProvidedHandler},
+		"job select without value": {
+			func() error { return f.cmd.Handle(s, component(contract.CraftJobBookSelectCustomID("djaul"))) },
+			commands.ErrInvalidInteraction},
+		"job select with two values": {
+			func() error {
+				return f.cmd.Handle(s, component(contract.CraftJobBookSelectCustomID("djaul"), "a", "b"))
+			},
+			commands.ErrInvalidInteraction},
+		"page custom ID without page": {
+			func() error { return f.cmd.updateBookPage(s, component("/books/job?server=djaul")) },
+			commands.ErrInvalidInteraction},
+		"select custom ID carrying a page": {
+			func() error { return f.cmd.updateJobBook(s, component("/books/job/a?server=djaul&page=1", "a")) },
+			commands.ErrInvalidInteraction},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			err := tc.run()
+
+			require.ErrorIs(t, err, tc.wantErr)
+			assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+				"a component we cannot read is a stale click, not a crash")
+		})
+	}
 	assert.Empty(t, f.manager.calls)
-	assert.Empty(t, fake.Requests())
+	assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 }
 
 func TestHandle_UnhandledInteractionTypesAreIgnored(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	assert.NotPanics(t, func() {
-		f.cmd.Handle(s, interaction(discordgo.InteractionModalSubmit, discordgo.ModalSubmitInteractionData{}))
-		userAutocomplete := userCommand()
-		userAutocomplete.Type = discordgo.InteractionApplicationCommandAutocomplete
-		f.cmd.Handle(s, userAutocomplete)
-	})
+	require.NoError(t,
+		f.cmd.Handle(s, interaction(discordgo.InteractionModalSubmit, discordgo.ModalSubmitInteractionData{})))
+	userAutocomplete := userCommand()
+	userAutocomplete.Type = discordgo.InteractionApplicationCommandAutocomplete
+	require.NoError(t, f.cmd.Handle(s, userAutocomplete))
 	assert.Empty(t, f.manager.calls)
 	assert.Empty(t, fake.Requests())
 }
@@ -315,11 +341,11 @@ func TestGetBookReply_ListsKnownCraftsmenByLevel(t *testing.T) {
 	f.servers.found = []entities.Server{server("djaul", "Djaul")}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.getBookReply(context.Background(), s, jobCommand("get"), bookAnswer(
+	require.NoError(t, f.cmd.getBookReply(context.Background(), s, jobCommand("get"), bookAnswer(
 		&amqp.JobGetBookAnswer_Craftsman{UserId: "u2", Level: 50},
 		&amqp.JobGetBookAnswer_Craftsman{UserId: "gone", Level: 200},
 		&amqp.JobGetBookAnswer_Craftsman{UserId: "u1", Level: 120},
-	), expectedNicknames())
+	), expectedNicknames()))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -342,7 +368,7 @@ func rawComponents(payload testutils.WebhookEditPayload) []string {
 	return raws
 }
 
-func TestGetBookReply_InvalidAnswerPanics(t *testing.T) {
+func TestGetBookReply_InvalidAnswerIsReported(t *testing.T) {
 	failed := bookAnswer()
 	failed.Status = amqp.RabbitMQMessage_FAILED
 	wrongType := bookAnswer()
@@ -357,9 +383,10 @@ func TestGetBookReply_InvalidAnswerPanics(t *testing.T) {
 			f := newFixture(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithError(t, commands.ErrInvalidAnswerMessage.Error(), func() {
-				f.cmd.getBookReply(context.Background(), s, jobCommand("get"), message, expectedNicknames())
-			})
+			err := f.cmd.getBookReply(context.Background(), s, jobCommand("get"), message, expectedNicknames())
+
+			require.ErrorIs(t, err, commands.ErrInvalidAnswerMessage)
+			assert.ErrorIs(t, err, commands.ErrUnavailable, "a backend that failed is worth a retry")
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -388,7 +415,7 @@ func TestHandle_UserCommandRequestsTargetJobsOnGuildServer(t *testing.T) {
 	require.NoError(t, s.State.ChannelAdd(&discordgo.Channel{
 		ID: channelID, GuildID: guildID, Type: discordgo.ChannelTypeGuildText}))
 
-	f.cmd.Handle(s, userCommand())
+	require.NoError(t, f.cmd.Handle(s, userCommand()))
 
 	call := singleRequest(t, f)
 	assert.Equal(t, amqp.RabbitMQMessage_JOB_GET_USER_REQUEST, call.message.Type)
@@ -408,13 +435,13 @@ func TestHandle_UserCommandWithoutGuildServerAnswersRequiredError(t *testing.T) 
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, userCommand())
+	require.NoError(t, f.cmd.Handle(s, userCommand()))
 
 	assert.Empty(t, f.manager.calls)
 	assert.Contains(t, editContent(t, fake), "Il semble qu'il n'y a pas de serveur")
 }
 
-func TestHandle_UserCommandWithUnresolvedTargetPanics(t *testing.T) {
+func TestHandle_UserCommandWithUnresolvedTargetIsReportedAsStale(t *testing.T) {
 	f := newFixture(t)
 	f.guilds.server, f.guilds.found = server("imagiro", "Imagiro"), true
 	s, _ := testutils.NewDiscordSession(t)
@@ -423,7 +450,11 @@ func TestHandle_UserCommandWithUnresolvedTargetPanics(t *testing.T) {
 	require.True(t, ok)
 	delete(data.Resolved.Members, "target-1")
 
-	assert.Panics(t, func() { f.cmd.Handle(s, event) })
+	err := f.cmd.Handle(s, event)
+
+	require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+	assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+		"an interaction whose target we cannot read is not a crash")
 	assert.Empty(t, f.manager.calls)
 }
 
@@ -445,8 +476,8 @@ func TestUserRespond_RendersMemberJobs(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	member := &discordgo.Member{Nick: "Caro", User: &discordgo.User{ID: "target-1", Username: "carol"}}
 
-	f.cmd.userRespond(context.Background(), s, userCommand(), userAnswer(amqp.RabbitMQMessage_SUCCESS),
-		map[string]any{userProperty: member})
+	require.NoError(t, f.cmd.userRespond(context.Background(), s, userCommand(),
+		userAnswer(amqp.RabbitMQMessage_SUCCESS), map[string]any{userProperty: member}))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -456,24 +487,29 @@ func TestUserRespond_RendersMemberJobs(t *testing.T) {
 	assert.Equal(t, "Imagiro", embed.Footer.Text)
 }
 
-func TestUserRespond_InvalidAnswerOrPropertyPanics(t *testing.T) {
+func TestUserRespond_InvalidAnswerOrPropertyIsReported(t *testing.T) {
 	member := &discordgo.Member{User: &discordgo.User{ID: "target-1"}}
 	cases := map[string]struct {
 		message    *amqp.RabbitMQMessage
 		properties map[string]any
+		wantErr    error
 	}{
-		"failed status":    {userAnswer(amqp.RabbitMQMessage_FAILED), map[string]any{userProperty: member}},
-		"missing property": {userAnswer(amqp.RabbitMQMessage_SUCCESS), map[string]any{}},
-		"wrong property":   {userAnswer(amqp.RabbitMQMessage_SUCCESS), map[string]any{userProperty: *member}},
+		"failed status": {userAnswer(amqp.RabbitMQMessage_FAILED),
+			map[string]any{userProperty: member}, commands.ErrInvalidAnswerMessage},
+		"missing property": {userAnswer(amqp.RabbitMQMessage_SUCCESS),
+			map[string]any{}, commands.ErrRequestPropertyNotFound},
+		"wrong property": {userAnswer(amqp.RabbitMQMessage_SUCCESS),
+			map[string]any{userProperty: *member}, commands.ErrRequestPropertyNotFound},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			f := newFixture(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.Panics(t, func() {
-				f.cmd.userRespond(context.Background(), s, userCommand(), tc.message, tc.properties)
-			})
+			err := f.cmd.userRespond(context.Background(), s, userCommand(), tc.message, tc.properties)
+
+			require.ErrorIs(t, err, tc.wantErr)
+			assert.NotErrorIs(t, err, commands.ErrStaleInteraction)
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -488,21 +524,22 @@ func TestHandle_CallbacksWiredToMatchingResponders(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	withMembers(fake)
 
-	f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "alch")))
-	f.cmd.Handle(s, jobCommand(contract.JobSetSubCommandName,
-		stringOption(contract.JobJobOptionName, "alch"), levelOption(3)))
-	f.cmd.Handle(s, userCommand())
+	require.NoError(t,
+		f.cmd.Handle(s, jobCommand(contract.JobGetSubCommandName, stringOption(contract.JobJobOptionName, "alch"))))
+	require.NoError(t, f.cmd.Handle(s, jobCommand(contract.JobSetSubCommandName,
+		stringOption(contract.JobJobOptionName, "alch"), levelOption(3))))
+	require.NoError(t, f.cmd.Handle(s, userCommand()))
 	require.Len(t, f.manager.calls, 3)
 
 	get, set, user := f.manager.calls[0], f.manager.calls[1], f.manager.calls[2]
-	get.callback(context.Background(), s, jobCommand("get"), bookAnswer(), get.properties[0])
+	require.NoError(t, get.callback(context.Background(), s, jobCommand("get"), bookAnswer(), get.properties[0]))
 	assert.Equal(t, "Alchimiste (en)s list", fake.LastEdit(t).Embeds[0].Title)
 
-	set.callback(context.Background(), s, jobCommand("set"),
-		&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_SUCCESS, Language: amqp.Language_EN}, nil)
+	require.NoError(t, set.callback(context.Background(), s, jobCommand("set"),
+		&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_SUCCESS, Language: amqp.Language_EN}, nil))
 	assert.Equal(t, "Craftsmen book updated!", editContent(t, fake))
 
-	user.callback(context.Background(), s, userCommand(), userAnswer(amqp.RabbitMQMessage_SUCCESS),
-		user.properties[0])
+	require.NoError(t, user.callback(context.Background(), s, userCommand(),
+		userAnswer(amqp.RabbitMQMessage_SUCCESS), user.properties[0]))
 	assert.Equal(t, "Caro jobs", fake.LastEdit(t).Embeds[0].Title)
 }

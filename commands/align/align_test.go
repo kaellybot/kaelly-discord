@@ -321,8 +321,8 @@ func TestHandle_GetRequestsBookWithGuildMembers(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	respondMembers(fake)
 
-	newCommand(t, d).Handle(s, slash("get",
-		stringOption("city", "bon"), stringOption("order", "esp"), stringOption("server", "dja")))
+	require.NoError(t, newCommand(t, d).Handle(s, slash("get",
+		stringOption("city", "bon"), stringOption("order", "esp"), stringOption("server", "dja"))))
 
 	req := fake.Last(t)
 	assert.Equal(t, "GET", req.Method)
@@ -348,7 +348,7 @@ func TestHandle_GetWithoutFiltersUsesGuildServer(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	respondMembers(fake)
 
-	newCommand(t, d).Handle(s, slash("get"))
+	require.NoError(t, newCommand(t, d).Handle(s, slash("get")))
 
 	assert.Equal(t, [][2]string{{"guild-id", "channel-id"}}, d.guilds.calls)
 	request := d.requests.single(t).message.GetAlignGetBookRequest()
@@ -361,7 +361,7 @@ func TestHandle_GetWithoutAnyServerAnswersServerRequired(t *testing.T) {
 	d := newDeps()
 	s, fake := testutils.NewDiscordSession(t)
 
-	newCommand(t, d).Handle(s, slash("get"))
+	require.NoError(t, newCommand(t, d).Handle(s, slash("get")))
 
 	assert.Empty(t, d.requests.calls)
 	payload := fake.LastEdit(t)
@@ -370,22 +370,31 @@ func TestHandle_GetWithoutAnyServerAnswersServerRequired(t *testing.T) {
 		*payload.Content)
 }
 
-func TestHandle_GetGuildLookupErrorPanics(t *testing.T) {
+func TestHandle_GetGuildLookupErrorIsReported(t *testing.T) {
 	d := newDeps()
 	d.guilds.err = errors.New("db down")
-	s, _ := testutils.NewDiscordSession(t)
+	s, fake := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithError(t, "db down", func() { newCommand(t, d).Handle(s, slash("get")) })
+	err := newCommand(t, d).Handle(s, slash("get"))
+
+	require.ErrorContains(t, err, "db down")
+	assert.ErrorIs(t, err, commands.ErrUnavailable, "a database that refused is worth a retry")
 	assert.Empty(t, d.requests.calls)
+	for _, request := range fake.Requests() {
+		assert.NotEqual(t, "PATCH", request.Method, "the router answers the caller, not the command")
+	}
 }
 
-func TestHandle_GetMembersFailurePanics(t *testing.T) {
+func TestHandle_GetMembersFailureIsReported(t *testing.T) {
 	d := newDeps()
 	d.servers.servers = []entities.Server{djaul()}
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/members", Status: 403, Body: `{"message":"no"}`})
 
-	assert.Panics(t, func() { newCommand(t, d).Handle(s, slash("get", stringOption("server", "djaul"))) })
+	err := newCommand(t, d).Handle(s, slash("get", stringOption("server", "djaul")))
+
+	require.Error(t, err)
+	assert.ErrorIs(t, err, commands.ErrUnavailable, "Discord refusing the member list is worth a retry")
 	assert.Empty(t, d.requests.calls)
 }
 
@@ -396,8 +405,8 @@ func TestHandle_SetRequestsUpdateForAuthor(t *testing.T) {
 	d.servers.servers = []entities.Server{djaul()}
 	s, fake := testutils.NewDiscordSession(t)
 
-	newCommand(t, d).Handle(s, slash("set", stringOption("city", "brak"), stringOption("order", "coeur"),
-		levelOption(42), stringOption("server", "djaul")))
+	require.NoError(t, newCommand(t, d).Handle(s, slash("set", stringOption("city", "brak"),
+		stringOption("order", "coeur"), levelOption(42), stringOption("server", "djaul"))))
 
 	assert.Empty(t, fake.Requests())
 	call := d.requests.single(t)
@@ -416,8 +425,8 @@ func TestHandle_SetStopsAtFirstFailedCheck(t *testing.T) {
 	d.books.orders = []entities.Order{heart()}
 	s, fake := testutils.NewDiscordSession(t)
 
-	newCommand(t, d).Handle(s, slash("set", stringOption("city", "nowhere"), stringOption("order", "coeur"),
-		levelOption(42), stringOption("server", "djaul")))
+	require.NoError(t, newCommand(t, d).Handle(s, slash("set", stringOption("city", "nowhere"),
+		stringOption("order", "coeur"), levelOption(42), stringOption("server", "djaul"))))
 
 	assert.Empty(t, d.requests.calls)
 	require.Len(t, fake.Requests(), 1)
@@ -436,10 +445,11 @@ func TestHandle_UserCommandRequestsTargetBeliefs(t *testing.T) {
 	member := &discordgo.Member{Nick: "Target"}
 	user := &discordgo.User{ID: "u9", Username: "target"}
 
-	newCommand(t, d).Handle(s, userCommand("u9", &discordgo.ApplicationCommandInteractionDataResolved{
-		Members: map[string]*discordgo.Member{"u9": member},
-		Users:   map[string]*discordgo.User{"u9": user},
-	}))
+	require.NoError(t, newCommand(t, d).Handle(s, userCommand("u9",
+		&discordgo.ApplicationCommandInteractionDataResolved{
+			Members: map[string]*discordgo.Member{"u9": member},
+			Users:   map[string]*discordgo.User{"u9": user},
+		})))
 
 	assert.Empty(t, fake.Requests())
 	call := d.requests.single(t)
@@ -453,24 +463,30 @@ func TestHandle_UserCommandRequestsTargetBeliefs(t *testing.T) {
 	assert.Same(t, user, got.User, "resolved user is attached to the member")
 }
 
-func TestHandle_UserCommandWithoutResolvedTargetPanics(t *testing.T) {
+func TestHandle_UserCommandWithoutResolvedTargetIsReportedAsStale(t *testing.T) {
 	d := newDeps()
 	d.guilds.server, d.guilds.found = djaul(), true
 	s, _ := testutils.NewDiscordSession(t)
 
-	assert.Panics(t, func() {
-		newCommand(t, d).Handle(s, userCommand("u9", &discordgo.ApplicationCommandInteractionDataResolved{
+	err := newCommand(t, d).Handle(s, userCommand("u9",
+		&discordgo.ApplicationCommandInteractionDataResolved{
 			Users: map[string]*discordgo.User{"u9": {ID: "u9"}},
 		}))
-	})
+
+	require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+	assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+		"an interaction without its resolved target cannot be interpreted")
 	assert.Empty(t, d.requests.calls)
 }
 
-func TestHandle_UnknownSubCommandPanics(t *testing.T) {
-	s, _ := testutils.NewDiscordSession(t)
-	assert.PanicsWithValue(t, commands.ErrNoProvidedHandler, func() {
-		newCommand(t, newDeps()).Handle(s, slash("delete"))
-	})
+func TestHandle_UnknownSubCommandIsReported(t *testing.T) {
+	s, fake := testutils.NewDiscordSession(t)
+
+	err := newCommand(t, newDeps()).Handle(s, slash("delete"))
+
+	require.ErrorIs(t, err, commands.ErrNoProvidedHandler)
+	assert.ErrorIs(t, err, commands.ErrStaleInteraction)
+	assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 }
 
 func TestHandle_UnhandledInteractionIsIgnored(t *testing.T) {
@@ -480,14 +496,15 @@ func TestHandle_UnhandledInteractionIsIgnored(t *testing.T) {
 	userAutocomplete.Type = discordgo.InteractionApplicationCommandAutocomplete
 
 	cmd := newCommand(t, d)
-	cmd.Handle(s, interaction(discordgo.InteractionModalSubmit, discordgo.ModalSubmitInteractionData{}))
-	cmd.Handle(s, userAutocomplete)
+	require.NoError(t, cmd.Handle(s,
+		interaction(discordgo.InteractionModalSubmit, discordgo.ModalSubmitInteractionData{})))
+	require.NoError(t, cmd.Handle(s, userAutocomplete))
 
 	assert.Empty(t, d.requests.calls)
 	assert.Empty(t, fake.Requests())
 }
 
-func TestHandle_RequestFailurePanics(t *testing.T) {
+func TestHandle_RequestFailureIsReported(t *testing.T) {
 	events := map[string]*discordgo.InteractionCreate{
 		"get": slash("get", stringOption("server", "djaul")),
 		"set": slash("set", stringOption("city", "bonta"), stringOption("order", "spirit"),
@@ -511,12 +528,12 @@ func TestHandle_RequestFailurePanics(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			respondMembers(fake)
 
-			assert.PanicsWithError(t, "broker down", func() { newCommand(t, d).Handle(s, event) })
+			require.ErrorContains(t, newCommand(t, d).Handle(s, event), "broker down")
 		})
 	}
 }
 
-func TestOptionGetters_MissingContextValuesPanic(t *testing.T) {
+func TestOptionGetters_MissingContextValuesAreReported(t *testing.T) {
 	d := newDeps()
 	cmd := newCommand(t, d)
 	s, _ := testutils.NewDiscordSession(t)
@@ -529,8 +546,8 @@ func TestOptionGetters_MissingContextValuesPanic(t *testing.T) {
 		{constants.ContextKeyLevel, int64(1)}, {constants.ContextKeyServer, djaul()},
 	}
 
-	assert.Panics(t, func() { cmd.getBook(context.Background(), s, slash("get"), nil) })
-	assert.Panics(t, func() { cmd.userBook(context.Background(), s, userCommand("u9", nil), nil) })
+	require.Error(t, cmd.getBook(context.Background(), s, slash("get"), nil))
+	require.Error(t, cmd.userBook(context.Background(), s, userCommand("u9", nil), nil))
 	for index, missing := range all {
 		ctx := context.Background()
 		for other, present := range all {
@@ -538,7 +555,7 @@ func TestOptionGetters_MissingContextValuesPanic(t *testing.T) {
 				ctx = context.WithValue(ctx, present.key, present.value)
 			}
 		}
-		assert.Panics(t, func() { cmd.setBook(ctx, s, slash("set"), nil) }, "missing %v", missing.key)
+		assert.Error(t, cmd.setBook(ctx, s, slash("set"), nil), "missing %v", missing.key)
 	}
 	assert.Empty(t, d.requests.calls)
 }

@@ -15,7 +15,7 @@ import (
 
 //nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] city
@@ -26,25 +26,27 @@ func (command *Command) checkMandatoryCity(ctx context.Context, s *discordgo.Ses
 				labels := translators.GetCitiesLabels(cities, i.Locale)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.city", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
-					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
-				} else {
-					_, err := s.InteractionResponseEdit(i.Interaction, &response)
-					if err != nil {
-						log.Error().Err(err).Msg("City check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				}
 
-				return
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
+				if err != nil {
+					log.Error().Err(err).Msg("City check response ignored")
+				}
+
+				return nil
 			}
 		}
 	}
 
 	answerMissingOption(s, i, "City check response ignored")
+
+	return nil
 }
 
 //nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkOptionalCity(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] city
@@ -56,25 +58,25 @@ func (command *Command) checkOptionalCity(ctx context.Context, s *discordgo.Sess
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.city", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
-					next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
-				} else {
-					_, err := s.InteractionResponseEdit(i.Interaction, &response)
-					if err != nil {
-						log.Error().Err(err).Msg("City check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyCity, cities[0]))
 				}
 
-				return
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
+				if err != nil {
+					log.Error().Err(err).Msg("City check response ignored")
+				}
+
+				return nil
 			}
 		}
 	}
 
-	next(ctx)
+	return next(ctx)
 }
 
 //nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] order
@@ -85,25 +87,27 @@ func (command *Command) checkMandatoryOrder(ctx context.Context, s *discordgo.Se
 				labels := translators.GetOrdersLabels(orders, i.Locale)
 				response, checkSuccess := validators.ExpectOnlyOneElement("checks.order", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
-					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
-				} else {
-					_, err := s.InteractionResponseEdit(i.Interaction, &response)
-					if err != nil {
-						log.Error().Err(err).Msg("Order check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				}
 
-				return
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
+				if err != nil {
+					log.Error().Err(err).Msg("Order check response ignored")
+				}
+
+				return nil
 			}
 		}
 	}
 
 	answerMissingOption(s, i, "Order check response ignored")
+
+	return nil
 }
 
 //nolint:dupl,nolintlint // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkOptionalOrder(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 
 	// Filled case, expecting [1, 1] order
@@ -115,24 +119,24 @@ func (command *Command) checkOptionalOrder(ctx context.Context, s *discordgo.Ses
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.order", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
-					next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
-				} else {
-					_, err := s.InteractionResponseEdit(i.Interaction, &response)
-					if err != nil {
-						log.Error().Err(err).Msg("Order check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyOrder, orders[0]))
 				}
 
-				return
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
+				if err != nil {
+					log.Error().Err(err).Msg("Order check response ignored")
+				}
+
+				return nil
 			}
 		}
 	}
 
-	next(ctx)
+	return next(ctx)
 }
 
 func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -141,24 +145,26 @@ func (command *Command) checkLevel(ctx context.Context, s *discordgo.Session,
 				level := option.IntValue()
 
 				if level >= constants.AlignmentMinLevel && level <= constants.AlignmentMaxLevel {
-					next(context.WithValue(ctx, constants.ContextKeyLevel, level))
-				} else {
-					content := i18n.Get(i.Locale, "checks.level.constraints",
-						i18n.Vars{"min": constants.AlignmentMinLevel, "max": constants.AlignmentMaxLevel})
-					_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-						Content: &content,
-					})
-					if err != nil {
-						log.Error().Err(err).Msg("Level check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyLevel, level))
 				}
 
-				return
+				content := i18n.Get(i.Locale, "checks.level.constraints",
+					i18n.Vars{"min": constants.AlignmentMinLevel, "max": constants.AlignmentMaxLevel})
+				_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+					Content: &content,
+				})
+				if err != nil {
+					log.Error().Err(err).Msg("Level check response ignored")
+				}
+
+				return nil
 			}
 		}
 	}
 
 	answerMissingOption(s, i, "Level check response ignored")
+
+	return nil
 }
 
 // answerMissingOption answers the deferred interaction when Discord did not

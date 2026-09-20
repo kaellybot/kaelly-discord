@@ -32,9 +32,10 @@ func button(customID string) *discordgo.InteractionCreate {
 // spy returns a handler recording its name, and asserts it got the expected arguments.
 func spy(t *testing.T, name string, calls *[]string, s *discordgo.Session) DiscordHandler {
 	t.Helper()
-	return func(gotSession *discordgo.Session, _ *discordgo.InteractionCreate) {
+	return func(gotSession *discordgo.Session, _ *discordgo.InteractionCreate) error {
 		assert.Same(t, s, gotSession)
 		*calls = append(*calls, name)
+		return nil
 	}
 }
 
@@ -72,8 +73,10 @@ func TestCallHandler_DispatchesOnInteractionType(t *testing.T) {
 	handlers[discordgo.InteractionApplicationCommandAutocomplete] = spy(t, "autocomplete", &calls, session)
 	command := &AbstractCommand{}
 
-	command.CallHandler(session, event(discordgo.InteractionApplicationCommandAutocomplete, nil), handlers)
-	command.CallHandler(session, event(discordgo.InteractionApplicationCommand, nil), handlers)
+	assert.NoError(t, command.CallHandler(session,
+		event(discordgo.InteractionApplicationCommandAutocomplete, nil), handlers))
+	assert.NoError(t, command.CallHandler(session,
+		event(discordgo.InteractionApplicationCommand, nil), handlers))
 
 	assert.Equal(t, []string{"autocomplete", "command"}, calls)
 }
@@ -83,11 +86,11 @@ func TestCallHandler_UnhandledTypeIsIgnored(t *testing.T) {
 	handlers := make(DiscordHandlers)
 	handlers[discordgo.InteractionApplicationCommand] = spy(t, "command", &calls, nil)
 
-	assert.NotPanics(t, func() {
-		(&AbstractCommand{}).CallHandler(nil, event(discordgo.InteractionMessageComponent, nil), handlers)
-		(&AbstractCommand{}).CallHandler(nil, event(discordgo.InteractionApplicationCommand, nil), nil)
-	})
-	assert.Empty(t, calls)
+	assert.NoError(t, (&AbstractCommand{}).CallHandler(nil,
+		event(discordgo.InteractionMessageComponent, nil), handlers))
+	assert.NoError(t, (&AbstractCommand{}).CallHandler(nil,
+		event(discordgo.InteractionApplicationCommand, nil), nil))
+	assert.Empty(t, calls, "an interaction type nobody registered is ignored, not reported")
 }
 
 func TestHandleSubCommands_DispatchesOnSubCommandName(t *testing.T) {
@@ -98,8 +101,8 @@ func TestHandleSubCommands_DispatchesOnSubCommandName(t *testing.T) {
 		"set": spy(t, "set", &calls, session),
 	})
 
-	handler(session, slash("set"))
-	handler(session, slash("get"))
+	assert.NoError(t, handler(session, slash("set")))
+	assert.NoError(t, handler(session, slash("get")))
 
 	assert.Equal(t, []string{"set", "get"}, calls)
 }
@@ -108,19 +111,25 @@ func TestHandleSubCommands_AutocompleteIsDispatchedToo(t *testing.T) {
 	var calls []string
 	handler := (&AbstractCommand{}).HandleSubCommands(SubCommandHandlers{"get": spy(t, "get", &calls, nil)})
 
-	handler(nil, event(discordgo.InteractionApplicationCommandAutocomplete,
+	autocomplete := event(discordgo.InteractionApplicationCommandAutocomplete,
 		discordgo.ApplicationCommandInteractionData{Options: []*discordgo.ApplicationCommandInteractionDataOption{
 			{Name: "get", Type: discordgo.ApplicationCommandOptionSubCommand},
-		}}))
+		}})
+
+	assert.NoError(t, handler(nil, autocomplete))
 
 	assert.Equal(t, []string{"get"}, calls)
 }
 
-func TestHandleSubCommands_UnknownSubCommandPanics(t *testing.T) {
+func TestHandleSubCommands_UnknownSubCommandIsReportedAsStale(t *testing.T) {
 	var calls []string
 	handler := (&AbstractCommand{}).HandleSubCommands(SubCommandHandlers{"get": spy(t, "get", &calls, nil)})
 
-	assert.PanicsWithValue(t, ErrNoProvidedHandler, func() { handler(nil, slash("delete")) })
+	err := handler(nil, slash("delete"))
+
+	require.ErrorIs(t, err, ErrNoProvidedHandler)
+	assert.ErrorIs(t, err, ErrStaleInteraction)
+	assert.Contains(t, err.Error(), "delete", "the sub-command is named for the logs")
 	assert.Empty(t, calls)
 }
 
@@ -128,7 +137,7 @@ func TestHandleSubCommands_NoSubCommandCallsNothing(t *testing.T) {
 	var calls []string
 	handler := (&AbstractCommand{}).HandleSubCommands(SubCommandHandlers{"get": spy(t, "get", &calls, nil)})
 
-	handler(nil, slash())
+	assert.NoError(t, handler(nil, slash()))
 
 	assert.Empty(t, calls)
 }
@@ -141,7 +150,7 @@ func TestHandleSubCommands_EveryTopLevelOptionIsDispatched(t *testing.T) {
 		"set": spy(t, "set", &calls, nil),
 	})
 
-	handler(nil, slash("get", "set"))
+	assert.NoError(t, handler(nil, slash("get", "set")))
 
 	assert.Equal(t, []string{"get", "set"}, calls)
 }
@@ -150,7 +159,7 @@ func TestHandleSubCommands_IgnoresNonApplicationInteractions(t *testing.T) {
 	var calls []string
 	handler := (&AbstractCommand{}).HandleSubCommands(SubCommandHandlers{"get": spy(t, "get", &calls, nil)})
 
-	assert.NotPanics(t, func() { handler(nil, button("get")) },
+	assert.NoError(t, handler(nil, button("get")),
 		"message component data must not be read as command data")
 	assert.Empty(t, calls)
 }
@@ -163,8 +172,8 @@ func TestHandleInteractionMessages_DispatchesOnCustomIDRegex(t *testing.T) {
 		regexp.MustCompile(`^/set/\d+/effects$`): spy(t, "effects", &calls, session),
 	})
 
-	handler(session, button("/set/42/effects"))
-	handler(session, button("/set/42"))
+	assert.NoError(t, handler(session, button("/set/42/effects")))
+	assert.NoError(t, handler(session, button("/set/42")))
 
 	assert.Equal(t, []string{"effects", "set"}, calls)
 }
@@ -181,7 +190,8 @@ func TestHandleInteractionMessages_OverlappingPatternsDispatchDeterministically(
 
 	const dispatches = 100
 	for range dispatches {
-		(&AbstractCommand{}).HandleInteractionMessages(handlers)(nil, button("/set/42/effects"))
+		assert.NoError(t, (&AbstractCommand{}).HandleInteractionMessages(handlers)(nil,
+			button("/set/42/effects")))
 	}
 
 	require.Len(t, calls, dispatches)
@@ -190,14 +200,17 @@ func TestHandleInteractionMessages_OverlappingPatternsDispatchDeterministically(
 	}
 }
 
-func TestHandleInteractionMessages_UnmatchedCustomIDPanics(t *testing.T) {
+func TestHandleInteractionMessages_UnmatchedCustomIDIsReportedAsStale(t *testing.T) {
 	var calls []string
 	handler := (&AbstractCommand{}).HandleInteractionMessages(InteractionMessageHandlers{
 		regexp.MustCompile(`^/set/\d+$`): spy(t, "set", &calls, nil),
 	})
 
-	assert.PanicsWithValue(t, ErrNoProvidedHandler, func() { handler(nil, button("/item/42")) })
-	assert.PanicsWithValue(t, ErrNoProvidedHandler, func() { handler(nil, button("/set/abc")) })
+	for _, customID := range []string{"/item/42", "/set/abc"} {
+		err := handler(nil, button(customID))
+		require.ErrorIs(t, err, ErrNoProvidedHandler)
+		assert.ErrorIs(t, err, ErrStaleInteraction, "a button from an older version is not a crash")
+	}
 	assert.Empty(t, calls)
 }
 
@@ -207,6 +220,6 @@ func TestHandleInteractionMessages_IgnoresApplicationCommands(t *testing.T) {
 		regexp.MustCompile(`.*`): spy(t, "any", &calls, nil),
 	})
 
-	assert.NotPanics(t, func() { handler(nil, slash("get")) })
+	assert.NoError(t, handler(nil, slash("get")))
 	assert.Empty(t, calls)
 }

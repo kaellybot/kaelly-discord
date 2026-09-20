@@ -17,15 +17,17 @@ import (
 )
 
 func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	job, server, err := getGetOptions(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	properties, err := discord.GetMemberNickNames(s, i.GuildID)
 	if err != nil {
-		panic(err)
+		// Discord refusing the member list is someone else failing, not our
+		// logic: worth a retry message rather than a crash report.
+		return fmt.Errorf("%w: %w", commands.ErrUnavailable, err)
 	}
 
 	var userIDs []string
@@ -36,27 +38,22 @@ func (command *Command) getBook(ctx context.Context, s *discordgo.Session,
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookJobGetBookRequest(job.ID, server.ID,
 		constants.DefaultPage, userIDs, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
 		msg, command.getBookReply, properties)
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (command *Command) updateBookPage(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateBookPage(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 	customID := i.MessageComponentData().CustomID
 	jobID, serverID, page, ok := contract.ExtractJobBookPageCustomID(customID)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, customID)
 	}
 
-	properties, errMembers := discord.GetMemberNickNames(s, i.GuildID)
-	if errMembers != nil {
-		panic(errMembers)
+	properties, err := discord.GetMemberNickNames(s, i.GuildID)
+	if err != nil {
+		// Discord refusing the member list is someone else failing, not our
+		// logic: worth a retry message rather than a crash report.
+		return fmt.Errorf("%w: %w", commands.ErrUnavailable, err)
 	}
 
 	var userIDs []string
@@ -67,36 +64,28 @@ func (command *Command) updateBookPage(s *discordgo.Session, i *discordgo.Intera
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookJobGetBookRequest(jobID, serverID,
 		page, userIDs, authorID, i.Locale)
-	errReq := command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
 		msg, command.getBookReply, properties)
-	if errReq != nil {
-		panic(errReq)
-	}
 }
 
-func (command *Command) updateJobBook(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateJobBook(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 	customID := i.MessageComponentData().CustomID
 	values := i.MessageComponentData().Values
 	if len(values) != 1 {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, i.MessageComponentData().CustomID).
-			Msgf("Cannot retrieve job name from value, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q carries %v selected jobs",
+			commands.ErrInvalidInteraction, customID, len(values))
 	}
 
 	serverID, ok := contract.ExtractJobBookSelectCustomID(customID)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, customID)
 	}
 
-	properties, errMembers := discord.GetMemberNickNames(s, i.GuildID)
-	if errMembers != nil {
-		panic(errMembers)
+	properties, err := discord.GetMemberNickNames(s, i.GuildID)
+	if err != nil {
+		// Discord refusing the member list is someone else failing, not our
+		// logic: worth a retry message rather than a crash report.
+		return fmt.Errorf("%w: %w", commands.ErrUnavailable, err)
 	}
 
 	var userIDs []string
@@ -107,17 +96,14 @@ func (command *Command) updateJobBook(s *discordgo.Session, i *discordgo.Interac
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookJobGetBookRequest(values[0], serverID,
 		constants.DefaultPage, userIDs, authorID, i.Locale)
-	errReq := command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
 		msg, command.getBookReply, properties)
-	if errReq != nil {
-		panic(errReq)
-	}
 }
 
 func (command *Command) getBookReply(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) error {
 	if !isJobGetBookAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
 	craftsmen := make([]constants.JobUserLevel, 0)
@@ -140,6 +126,8 @@ func (command *Command) getBookReply(_ context.Context, s *discordgo.Session,
 	if err != nil {
 		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func isJobGetBookAnswerValid(message *amqp.RabbitMQMessage) bool {

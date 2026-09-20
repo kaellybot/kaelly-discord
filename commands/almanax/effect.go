@@ -3,6 +3,7 @@ package almanax
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -17,45 +18,36 @@ import (
 )
 
 func (command *Command) getAlmanaxesByEffect(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	query, err := getQueryOption(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxEffectRequest(&query, nil, constants.DefaultPage, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.effectRespond)
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (command *Command) updateAlmanaxesByEffect(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateAlmanaxesByEffect(s *discordgo.Session,
+	i *discordgo.InteractionCreate) error {
 	customID := i.MessageComponentData().CustomID
 	day, page, ok := contract.ExtractAlmanaxEffectCustomID(customID)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, customID)
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxEffectRequest(nil, day, page, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.effectRespond)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) effectRespond(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
 	if !isAlmanaxEffectAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
 	webhookEdit := mappers.MapAlmanaxEffectsToWebhook(message.GetEncyclopediaAlmanaxEffectAnswer(),
@@ -65,6 +57,8 @@ func (command *Command) effectRespond(_ context.Context, s *discordgo.Session,
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func isAlmanaxEffectAnswerValid(message *amqp.RabbitMQMessage) bool {

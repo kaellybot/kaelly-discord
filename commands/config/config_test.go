@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	contract "github.com/kaellybot/kaelly-commands"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/entities"
 	"github.com/kaellybot/kaelly-discord/models/i18n"
@@ -17,6 +18,7 @@ import (
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
 	"github.com/kaellybot/kaelly-discord/services/twitters"
+	"github.com/kaellybot/kaelly-discord/utils/middlewares"
 	"github.com/kaellybot/kaelly-discord/utils/requests"
 	"github.com/kaellybot/kaelly-discord/utils/testutils"
 	"github.com/spf13/viper"
@@ -270,9 +272,10 @@ type nextRecorder struct {
 	ctx    context.Context
 }
 
-func (n *nextRecorder) next(ctx context.Context) {
+func (n *nextRecorder) next(ctx context.Context) error {
 	n.called = true
 	n.ctx = ctx
+	return nil
 }
 
 func editContent(t *testing.T, fake *testutils.FakeDiscord) string {
@@ -345,8 +348,7 @@ type labelledCheck struct {
 	setFound   func(f *fixture, count int)
 	calls      func(f *fixture) []findCall
 	ctxKey     constants.ContextKey
-	check      func(f *fixture) func(context.Context, *discordgo.Session,
-		*discordgo.InteractionCreate, func(context.Context))
+	check      func(f *fixture) middlewares.MiddlewareCommand
 }
 
 func labelledChecks() []labelledCheck {
@@ -363,13 +365,7 @@ func labelledChecks() []labelledCheck {
 			},
 			calls:  func(f *fixture) []findCall { return f.feeds.calls },
 			ctxKey: constants.ContextKeyFeed,
-			check: func(f *fixture) func(context.Context, *discordgo.Session,
-				*discordgo.InteractionCreate, func(context.Context)) {
-				return func(ctx context.Context, s *discordgo.Session, i *discordgo.InteractionCreate,
-					next func(context.Context)) {
-					f.cmd.checkFeedType(ctx, s, i, next)
-				}
-			},
+			check:  func(f *fixture) middlewares.MiddlewareCommand { return f.cmd.checkFeedType },
 		},
 		{
 			name:       "twitter account",
@@ -385,13 +381,7 @@ func labelledChecks() []labelledCheck {
 			},
 			calls:  func(f *fixture) []findCall { return f.twitters.calls },
 			ctxKey: constants.ContextKeyTwitter,
-			check: func(f *fixture) func(context.Context, *discordgo.Session,
-				*discordgo.InteractionCreate, func(context.Context)) {
-				return func(ctx context.Context, s *discordgo.Session, i *discordgo.InteractionCreate,
-					next func(context.Context)) {
-					f.cmd.checkTwitterAccount(ctx, s, i, next)
-				}
-			},
+			check:  func(f *fixture) middlewares.MiddlewareCommand { return f.cmd.checkTwitterAccount },
 		},
 	}
 }
@@ -404,8 +394,8 @@ func TestLabelledChecks_ExactlyOneMatchIsPutInContext(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			next := &nextRecorder{}
 
-			tc.check(f)(context.Background(), s,
-				configCommand("sub", stringOption(tc.optionName, "  quer")), next.next)
+			require.NoError(t, tc.check(f)(context.Background(), s,
+				configCommand("sub", stringOption(tc.optionName, "  quer")), next.next))
 
 			require.True(t, next.called)
 			assert.NotNil(t, next.ctx.Value(tc.ctxKey))
@@ -433,8 +423,8 @@ func TestLabelledChecks_NoOrManyMatchesAnswerWithLocalizedErrorAndStop(t *testin
 				s, fake := testutils.NewDiscordSession(t)
 				next := &nextRecorder{}
 
-				tc.check(f)(context.Background(), s,
-					configCommand("sub", stringOption(tc.optionName, "zzz")), next.next)
+				require.NoError(t, tc.check(f)(context.Background(), s,
+					configCommand("sub", stringOption(tc.optionName, "zzz")), next.next))
 
 				assert.False(t, next.called)
 				assertEditedWebhook(t, fake)
@@ -456,8 +446,8 @@ func TestLabelledChecks_AmbiguousMessageListsLabels(t *testing.T) {
 	f.feeds.found = []entities.FeedType{feedType("news", "Actualités"), feedType("devblog", "Devblog")}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.checkFeedType(context.Background(), s,
-		configCommand("rss", stringOption(contract.ConfigFeedTypeOptionName, "a")), (&nextRecorder{}).next)
+	require.NoError(t, f.cmd.checkFeedType(context.Background(), s,
+		configCommand("rss", stringOption(contract.ConfigFeedTypeOptionName, "a")), (&nextRecorder{}).next))
 
 	assert.Contains(t, editContent(t, fake), "(Actualités, Devblog)")
 }
@@ -469,8 +459,8 @@ func TestLabelledChecks_OptionAbsentPassesThroughUnchanged(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			next := &nextRecorder{}
 
-			tc.check(f)(context.Background(), s,
-				configCommand("sub", enabledOption(true)), next.next)
+			require.NoError(t, tc.check(f)(context.Background(), s,
+				configCommand("sub", enabledOption(true)), next.next))
 
 			require.True(t, next.called)
 			assert.Nil(t, next.ctx.Value(tc.ctxKey))
@@ -486,10 +476,9 @@ func TestLabelledChecks_EditFailureIsSwallowed(t *testing.T) {
 	fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 400, Body: `{"code":0}`})
 	next := &nextRecorder{}
 
-	assert.NotPanics(t, func() {
-		f.cmd.checkTwitterAccount(context.Background(), s,
-			configCommand("twitter", stringOption(contract.ConfigTwitterAccountOptionName, "x")), next.next)
-	})
+	assert.NoError(t, f.cmd.checkTwitterAccount(context.Background(), s,
+		configCommand("twitter", stringOption(contract.ConfigTwitterAccountOptionName, "x")), next.next),
+		"a Discord hiccup while answering the caller is logged, not reported back")
 	assert.False(t, next.called)
 	assert.Len(t, fake.Requests(), 1)
 }
@@ -500,9 +489,9 @@ func TestCheckChannelID_ExplicitChannelOptionWins(t *testing.T) {
 	addGuild(t, s, 0, textChannel(otherChannel))
 	next := &nextRecorder{}
 
-	f.cmd.checkChannelID(context.Background(), s,
+	require.NoError(t, f.cmd.checkChannelID(context.Background(), s,
 		configCommand(contract.ConfigAlmanaxSubCommandName,
-			enabledOption(true), otherChannelOption()), next.next)
+			enabledOption(true), otherChannelOption()), next.next))
 
 	require.True(t, next.called)
 	assert.Equal(t, otherChannel, next.ctx.Value(constants.ContextKeyChannel))
@@ -518,8 +507,8 @@ func TestCheckChannelID_WebhookSubCommandsDefaultToCurrentChannel(t *testing.T) 
 			s, _ := testutils.NewDiscordSession(t)
 			next := &nextRecorder{}
 
-			f.cmd.checkChannelID(context.Background(), s,
-				configCommand(sub, enabledOption(false)), next.next)
+			require.NoError(t, f.cmd.checkChannelID(context.Background(), s,
+				configCommand(sub, enabledOption(false)), next.next))
 
 			require.True(t, next.called)
 			assert.Equal(t, currentChannel, next.ctx.Value(constants.ContextKeyChannel))
@@ -532,9 +521,9 @@ func TestCheckChannelID_ServerSubCommandWithoutChannelTargetsWholeGuild(t *testi
 	s, _ := testutils.NewDiscordSession(t)
 	next := &nextRecorder{}
 
-	f.cmd.checkChannelID(context.Background(), s,
+	require.NoError(t, f.cmd.checkChannelID(context.Background(), s,
 		configCommand(contract.ConfigServerSubCommandName,
-			stringOption(contract.ConfigServerOptionName, "Djaul")), next.next)
+			stringOption(contract.ConfigServerOptionName, "Djaul")), next.next))
 
 	require.True(t, next.called)
 	assert.Nil(t, next.ctx.Value(constants.ContextKeyChannel),
@@ -546,9 +535,9 @@ func TestCheckEnabled_PutsOptionValueInContext(t *testing.T) {
 		f := newFixture(t)
 		next := &nextRecorder{}
 
-		f.cmd.checkEnabled(context.Background(), nil,
+		require.NoError(t, f.cmd.checkEnabled(context.Background(), nil,
 			configCommand(contract.ConfigAlmanaxSubCommandName,
-				enabledOption(enabled)), next.next)
+				enabledOption(enabled)), next.next))
 
 		require.True(t, next.called)
 		assert.Equal(t, enabled, next.ctx.Value(constants.ContextKeyEnabled))
@@ -559,8 +548,8 @@ func TestCheckEnabled_AbsentOptionPassesThrough(t *testing.T) {
 	f := newFixture(t)
 	next := &nextRecorder{}
 
-	f.cmd.checkEnabled(context.Background(), nil,
-		configCommand(contract.ConfigAlmanaxSubCommandName), next.next)
+	require.NoError(t, f.cmd.checkEnabled(context.Background(), nil,
+		configCommand(contract.ConfigAlmanaxSubCommandName), next.next))
 
 	require.True(t, next.called)
 	assert.Nil(t, next.ctx.Value(constants.ContextKeyEnabled))
@@ -582,7 +571,7 @@ func TestCheckFollowConstraints_TextChannelWithWebhookPermissionContinues(t *tes
 			next := &nextRecorder{}
 			ctx := channelCtx(currentChannel)
 
-			f.cmd.checkFollowConstraints(ctx, s, configCommand("almanax"), next.next)
+			require.NoError(t, f.cmd.checkFollowConstraints(ctx, s, configCommand("almanax"), next.next))
 
 			require.True(t, next.called)
 			assert.Equal(t, ctx, next.ctx, "context is forwarded untouched")
@@ -604,7 +593,8 @@ func TestCheckFollowConstraints_NonTextChannelIsRejected(t *testing.T) {
 				&discordgo.Channel{ID: currentChannel, Type: channelType})
 			next := &nextRecorder{}
 
-			f.cmd.checkFollowConstraints(channelCtx(currentChannel), s, configCommand("almanax"), next.next)
+			require.NoError(t, f.cmd.checkFollowConstraints(channelCtx(currentChannel), s,
+				configCommand("almanax"), next.next))
 
 			assert.False(t, next.called)
 			assertEditedWebhook(t, fake)
@@ -621,7 +611,8 @@ func TestCheckFollowConstraints_MissingWebhookPermissionIsRejected(t *testing.T)
 		textChannel(currentChannel))
 	next := &nextRecorder{}
 
-	f.cmd.checkFollowConstraints(channelCtx(currentChannel), s, configCommand("almanax"), next.next)
+	require.NoError(t, f.cmd.checkFollowConstraints(channelCtx(currentChannel), s,
+		configCommand("almanax"), next.next))
 
 	assert.False(t, next.called)
 	assert.Equal(t, testutils.Translations(t, discordgo.French, "checks.webhook.permission")[0],
@@ -638,7 +629,8 @@ func TestCheckFollowConstraints_ChannelOverwriteDenyingWebhooksIsRejected(t *tes
 	addGuild(t, s, discordgo.PermissionManageWebhooks, channel)
 	next := &nextRecorder{}
 
-	f.cmd.checkFollowConstraints(channelCtx(currentChannel), s, configCommand("almanax"), next.next)
+	require.NoError(t, f.cmd.checkFollowConstraints(channelCtx(currentChannel), s,
+		configCommand("almanax"), next.next))
 
 	assert.False(t, next.called)
 	assert.Equal(t, testutils.Translations(t, discordgo.French, "checks.webhook.permission")[0],
@@ -656,7 +648,8 @@ func TestCheckFollowConstraints_PermissionLookupFailureCountsAsMissingPermission
 	fake.Respond(testutils.DiscordResponse{PathContains: "/members/", Status: 404, Body: `{"code":10007}`})
 	next := &nextRecorder{}
 
-	f.cmd.checkFollowConstraints(channelCtx(currentChannel), s, configCommand("almanax"), next.next)
+	require.NoError(t, f.cmd.checkFollowConstraints(channelCtx(currentChannel), s,
+		configCommand("almanax"), next.next))
 
 	assert.False(t, next.called)
 	assert.Equal(t, "/api/v9/guilds/"+guildID+"/members/bot-id", fake.Requests()[0].Path)
@@ -673,7 +666,7 @@ func TestCheckFollowConstraints_UncachedChannelIsFetchedThroughREST(t *testing.T
 	next := &nextRecorder{}
 	ctx := channelCtx(currentChannel)
 
-	f.cmd.checkFollowConstraints(ctx, s, configCommand("almanax"), next.next)
+	require.NoError(t, f.cmd.checkFollowConstraints(ctx, s, configCommand("almanax"), next.next))
 
 	require.True(t, next.called, "a channel absent from the state is fetched through REST")
 	assert.Equal(t, ctx, next.ctx, "context is forwarded untouched")
@@ -689,23 +682,25 @@ func TestCheckFollowConstraints_UncachedNonTextChannelIsRejected(t *testing.T) {
 		Status: 200, Body: fmt.Sprintf(`{"id":%q,"guild_id":%q,"type":2}`, currentChannel, guildID)})
 	next := &nextRecorder{}
 
-	f.cmd.checkFollowConstraints(channelCtx(currentChannel), s, configCommand("almanax"), next.next)
+	require.NoError(t, f.cmd.checkFollowConstraints(channelCtx(currentChannel), s,
+		configCommand("almanax"), next.next))
 
 	assert.False(t, next.called)
 	assert.Equal(t, testutils.Translations(t, discordgo.French, "checks.webhook.targetChannelType")[0],
 		editContent(t, fake))
 }
 
-func TestCheckFollowConstraints_UnknownChannelPanics(t *testing.T) {
+func TestCheckFollowConstraints_UnknownChannelIsReported(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{Method: "GET", PathContains: "/channels/",
 		Status: 404, Body: `{"message":"Unknown Channel","code":10003}`})
 	next := &nextRecorder{}
 
-	assert.Panics(t, func() {
-		f.cmd.checkFollowConstraints(channelCtx("not-cached"), s, configCommand("almanax"), next.next)
-	})
+	err := f.cmd.checkFollowConstraints(channelCtx("not-cached"), s, configCommand("almanax"), next.next)
+
+	require.Error(t, err)
+	assert.ErrorIs(t, err, commands.ErrUnavailable, "a channel Discord will not hand us is a dependency failure")
 	assert.False(t, next.called)
 }
 
@@ -715,22 +710,24 @@ func TestCheckFollowConstraints_MissingContextFallsBackToInteractionChannel(t *t
 	addGuild(t, s, discordgo.PermissionAdministrator, textChannel(currentChannel))
 	next := &nextRecorder{}
 
-	f.cmd.checkFollowConstraints(context.Background(), s, configCommand("almanax"), next.next)
+	require.NoError(t, f.cmd.checkFollowConstraints(context.Background(), s,
+		configCommand("almanax"), next.next))
 
 	require.True(t, next.called)
 	assert.Empty(t, fake.Requests(), "the interaction channel is the one being checked")
 }
 
-func TestCheckFollowConstraints_NoChannelAtAllPanics(t *testing.T) {
+func TestCheckFollowConstraints_NoChannelAtAllIsReported(t *testing.T) {
 	f := newFixture(t)
 	s, _ := testutils.NewDiscordSession(t)
 	event := configCommand("almanax")
 	event.ChannelID = ""
 	next := &nextRecorder{}
 
-	assert.Panics(t, func() {
-		f.cmd.checkFollowConstraints(context.Background(), s, event, next.next)
-	})
+	err := f.cmd.checkFollowConstraints(context.Background(), s, event, next.next)
+
+	require.Error(t, err)
+	assert.NotErrorIs(t, err, commands.ErrStaleInteraction, "a check left without a channel is our bug")
 	assert.False(t, next.called)
 }
 
@@ -774,8 +771,8 @@ func TestAutocomplete_ServersAreLocalizedAndSortedByLabel(t *testing.T) {
 	}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, configAutocomplete(contract.ConfigServerSubCommandName,
-		focused(stringOption(contract.ConfigServerOptionName, "i"))))
+	require.NoError(t, f.cmd.Handle(s, configAutocomplete(contract.ConfigServerSubCommandName,
+		focused(stringOption(contract.ConfigServerOptionName, "i")))))
 
 	payload := autocompleteAnswer(t, fake)
 	assert.Equal(t, []string{"Draconiros", "Imagiro", "Tylézia"}, choiceNames(payload.Data.Choices))
@@ -787,9 +784,9 @@ func TestAutocomplete_FeedTypesAreSortedByLabel(t *testing.T) {
 	f.feeds.found = []entities.FeedType{feedType("b", "Zaap"), feedType("a", "Almanax")}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, configAutocomplete(contract.ConfigRSSSubCommandName,
+	require.NoError(t, f.cmd.Handle(s, configAutocomplete(contract.ConfigRSSSubCommandName,
 		enabledOption(true),
-		focused(stringOption(contract.ConfigFeedTypeOptionName, ""))))
+		focused(stringOption(contract.ConfigFeedTypeOptionName, "")))))
 
 	assert.Equal(t, []string{"Almanax", "Zaap"}, choiceNames(autocompleteAnswer(t, fake).Data.Choices))
 	assert.Equal(t, []findCall{{"", discordgo.French, constants.MaxChoices}}, f.feeds.calls,
@@ -801,13 +798,13 @@ func TestAutocomplete_TwitterAccountsRequireNonBlankQuery(t *testing.T) {
 	f.twitters.found = []entities.TwitterAccount{{ID: "2", Name: "KaellyBot"}, {ID: "1", Name: "DOFUSfr"}}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, configAutocomplete(contract.ConfigTwitterSubCommandName,
-		focused(stringOption(contract.ConfigTwitterAccountOptionName, "   "))))
+	require.NoError(t, f.cmd.Handle(s, configAutocomplete(contract.ConfigTwitterSubCommandName,
+		focused(stringOption(contract.ConfigTwitterAccountOptionName, "   ")))))
 	assert.Empty(t, autocompleteAnswer(t, fake).Data.Choices)
 	assert.Empty(t, f.twitters.calls, "blank queries do not hit the service")
 
-	f.cmd.Handle(s, configAutocomplete(contract.ConfigTwitterSubCommandName,
-		focused(stringOption(contract.ConfigTwitterAccountOptionName, "o"))))
+	require.NoError(t, f.cmd.Handle(s, configAutocomplete(contract.ConfigTwitterSubCommandName,
+		focused(stringOption(contract.ConfigTwitterAccountOptionName, "o")))))
 	assert.Equal(t, []string{"DOFUSfr", "KaellyBot"}, choiceNames(autocompleteAnswer(t, fake).Data.Choices))
 	assert.Len(t, f.twitters.calls, 1)
 }
@@ -818,9 +815,9 @@ func TestAutocomplete_OnlyFocusedOptionIsCompleted(t *testing.T) {
 	f.feeds.found = []entities.FeedType{feedType("a", "Almanax")}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, configAutocomplete(contract.ConfigRSSSubCommandName,
+	require.NoError(t, f.cmd.Handle(s, configAutocomplete(contract.ConfigRSSSubCommandName,
 		stringOption(contract.ConfigServerOptionName, "d"),
-		focused(stringOption(contract.ConfigFeedTypeOptionName, "a"))))
+		focused(stringOption(contract.ConfigFeedTypeOptionName, "a")))))
 
 	assert.Equal(t, []string{"Almanax"}, choiceNames(autocompleteAnswer(t, fake).Data.Choices))
 	assert.Empty(t, f.servers.calls)
@@ -838,7 +835,7 @@ func TestAutocomplete_UnknownOrNoFocusedOptionAnswersNoChoices(t *testing.T) {
 			f := newFixture(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			f.cmd.Handle(s, event)
+			require.NoError(t, f.cmd.Handle(s, event))
 
 			assert.Empty(t, autocompleteAnswer(t, fake).Data.Choices)
 			assert.Empty(t, f.feeds.calls)
@@ -851,8 +848,7 @@ func TestAutocomplete_DiscordFailureIsSwallowed(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/callback", Status: 400, Body: `{}`})
 
-	assert.NotPanics(t, func() {
-		f.cmd.Handle(s, configAutocomplete(contract.ConfigServerSubCommandName,
-			focused(stringOption(contract.ConfigServerOptionName, "a"))))
-	})
+	assert.NoError(t, f.cmd.Handle(s, configAutocomplete(contract.ConfigServerSubCommandName,
+		focused(stringOption(contract.ConfigServerOptionName, "a")))),
+		"a refused autocomplete answer is logged, not reported back")
 }

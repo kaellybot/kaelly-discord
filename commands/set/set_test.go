@@ -166,7 +166,7 @@ func TestHandle_QueryRequestsSetByName(t *testing.T) {
 	cmd, manager := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, setCommand(queryOption("Panoplie du Bouftou")))
+	require.NoError(t, cmd.Handle(s, setCommand(queryOption("Panoplie du Bouftou"))))
 
 	call := singleRequest(t, manager)
 	assert.Equal(t, amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST, call.message.Type)
@@ -187,7 +187,7 @@ func TestHandle_BlankQueryAnswersConstraintError(t *testing.T) {
 			cmd, manager := newCommand(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			cmd.Handle(s, event)
+			require.NoError(t, cmd.Handle(s, event))
 
 			assert.Empty(t, manager.calls)
 			assert.Equal(t, "PATCH", fake.Last(t).Method)
@@ -199,18 +199,20 @@ func TestHandle_BlankQueryAnswersConstraintError(t *testing.T) {
 	}
 }
 
-func TestHandle_RequestFailurePanics(t *testing.T) {
+func TestHandle_RequestFailureIsReported(t *testing.T) {
 	cmd, manager := newCommand(t)
-	manager.err = errors.New("broker down")
-	s, _ := testutils.NewDiscordSession(t)
+	errBroker := errors.New("broker down")
+	manager.err = errBroker
+	s, fake := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithError(t, "broker down", func() { cmd.Handle(s, setCommand(queryOption("x"))) })
-	assert.PanicsWithError(t, "broker down", func() { cmd.Handle(s, component("/set/1")) })
+	require.ErrorIs(t, cmd.Handle(s, setCommand(queryOption("x"))), errBroker)
+	require.ErrorIs(t, cmd.Handle(s, component("/set/1")), errBroker)
+	assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 }
 
-func TestGetSet_MissingQueryInContextPanics(t *testing.T) {
+func TestGetSet_MissingQueryInContextIsReported(t *testing.T) {
 	cmd, manager := newCommand(t)
-	assert.Panics(t, func() { cmd.getSet(context.Background(), nil, setCommand(), nil) })
+	require.Error(t, cmd.getSet(context.Background(), nil, setCommand(), nil))
 	assert.Empty(t, manager.calls)
 }
 
@@ -220,7 +222,7 @@ func TestHandle_SetButtonRequestsSetByIDWithDefaultView(t *testing.T) {
 	cmd, manager := newCommand(t)
 	s, _ := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, component("/set/250"))
+	require.NoError(t, cmd.Handle(s, component("/set/250")))
 
 	call := singleRequest(t, manager)
 	req := call.message.GetEncyclopediaItemRequest()
@@ -235,7 +237,7 @@ func TestHandle_BonusSelectRequestsSetWithItemNumber(t *testing.T) {
 	cmd, manager := newCommand(t)
 	s, _ := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, component("/set/250/bonuses", "3"))
+	require.NoError(t, cmd.Handle(s, component("/set/250/bonuses", "3")))
 
 	call := singleRequest(t, manager)
 	req := call.message.GetEncyclopediaItemRequest()
@@ -245,25 +247,31 @@ func TestHandle_BonusSelectRequestsSetWithItemNumber(t *testing.T) {
 	assert.Equal(t, map[string]any{itemNumberProperty: 3}, call.properties[0])
 }
 
-func TestHandle_InvalidComponentsPanic(t *testing.T) {
+func TestHandle_InvalidComponentsAreReportedAsStale(t *testing.T) {
 	cases := map[string]struct {
-		event   *discordgo.InteractionCreate
-		wantErr string
+		event    *discordgo.InteractionCreate
+		contains string
 	}{
-		"bonus without value":  {component("/set/1/bonuses"), commands.ErrInvalidInteraction.Error()},
-		"bonus with 2 values":  {component("/set/1/bonuses", "1", "2"), commands.ErrInvalidInteraction.Error()},
+		"bonus without value":  {component("/set/1/bonuses"), "/set/1/bonuses"},
+		"bonus with 2 values":  {component("/set/1/bonuses", "1", "2"), "/set/1/bonuses"},
 		"bonus not a number":   {component("/set/1/bonuses", "two"), `strconv.Atoi: parsing "two": invalid syntax`},
-		"foreign custom ID":    {component("/item/1/recipe?type=EQUIPMENT_TYPE"), commands.ErrInvalidInteraction.Error()},
-		"set ID with a dash":   {component("/set/1-2"), commands.ErrInvalidInteraction.Error()},
-		"unknown set subroute": {component("/set/1/other"), commands.ErrInvalidInteraction.Error()},
+		"foreign custom ID":    {component("/item/1/recipe?type=EQUIPMENT_TYPE"), "/item/1/recipe"},
+		"set ID with a dash":   {component("/set/1-2"), "/set/1-2"},
+		"unknown set subroute": {component("/set/1/other"), "/set/1/other"},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			cmd, manager := newCommand(t)
-			s, _ := testutils.NewDiscordSession(t)
+			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithError(t, tc.wantErr, func() { cmd.Handle(s, tc.event) })
+			err := cmd.Handle(s, tc.event)
+
+			require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+			assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+				"a component we cannot read is a stale click, not a crash")
+			assert.ErrorContains(t, err, tc.contains)
 			assert.Empty(t, manager.calls)
+			assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 		})
 	}
 }
@@ -274,7 +282,7 @@ func TestHandle_AutocompleteRequestsSetList(t *testing.T) {
 	cmd, manager := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, setAutocomplete(focused(queryOption("bouf"))))
+	require.NoError(t, cmd.Handle(s, setAutocomplete(focused(queryOption("bouf")))))
 
 	call := singleRequest(t, manager)
 	assert.Equal(t, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST, call.message.Type)
@@ -295,7 +303,7 @@ func TestHandle_AutocompleteIgnoresBlankUnfocusedOrUnknownOptions(t *testing.T) 
 			cmd, manager := newCommand(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			cmd.Handle(s, event)
+			require.NoError(t, cmd.Handle(s, event))
 
 			assert.Empty(t, manager.calls)
 			assert.Empty(t, fake.Requests())
@@ -308,7 +316,8 @@ func TestHandle_AutocompleteRequestFailureIsSwallowed(t *testing.T) {
 	manager.err = errors.New("broker down")
 	s, _ := testutils.NewDiscordSession(t)
 
-	assert.NotPanics(t, func() { cmd.Handle(s, setAutocomplete(focused(queryOption("bouf")))) })
+	assert.NoError(t, cmd.Handle(s, setAutocomplete(focused(queryOption("bouf")))),
+		"an autocompletion cannot be answered with an error message")
 }
 
 type autocompletePayload struct {
@@ -332,9 +341,9 @@ func TestAutocompleteSetList_AnswersChoicesFromList(t *testing.T) {
 	cmd, _ := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.autocompleteSetList(context.Background(), s, setAutocomplete(),
+	require.NoError(t, cmd.autocompleteSetList(context.Background(), s, setAutocomplete(),
 		listAnswer(amqp.RabbitMQMessage_SUCCESS, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER,
-			"Panoplie du Bouftou", "Panoplie du Boune"), nil)
+			"Panoplie du Bouftou", "Panoplie du Boune"), nil))
 
 	req := fake.Last(t)
 	assert.Equal(t, "/api/v9/interactions/interaction-id/tok/callback", req.Path)
@@ -362,9 +371,8 @@ func TestAutocompleteSetList_InvalidAnswerSendsEmptyChoices(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			fake.Respond(testutils.DiscordResponse{PathContains: "/callback", Status: 400, Body: `{}`})
 
-			assert.NotPanics(t, func() {
-				cmd.autocompleteSetList(context.Background(), s, setAutocomplete(), message, nil)
-			})
+			assert.NoError(t, cmd.autocompleteSetList(context.Background(), s, setAutocomplete(),
+				message, nil))
 
 			var payload autocompletePayload
 			fake.Last(t).Decode(t, &payload)
@@ -444,7 +452,8 @@ func TestGetSetReply_DefaultViewShowsFullSetBonus(t *testing.T) {
 	cmd, _ := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.getSetReply(context.Background(), s, setCommand(), setAnswer(bouftouSet()), nil)
+	require.NoError(t, cmd.getSetReply(context.Background(), s, setCommand(),
+		setAnswer(bouftouSet()), nil))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -458,8 +467,8 @@ func TestUpdateSetReply_ShowsRequestedBonus(t *testing.T) {
 	cmd, _ := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.updateSetReply(context.Background(), s, component("/set/250/bonuses", "2"), setAnswer(bouftouSet()),
-		map[string]any{itemNumberProperty: 2})
+	require.NoError(t, cmd.updateSetReply(context.Background(), s, component("/set/250/bonuses", "2"),
+		setAnswer(bouftouSet()), map[string]any{itemNumberProperty: 2}))
 
 	payload := fake.LastEdit(t)
 	assert.Equal(t, "2", selectedBonus(t, payload))
@@ -467,7 +476,7 @@ func TestUpdateSetReply_ShowsRequestedBonus(t *testing.T) {
 	assert.NotContains(t, bonusFieldText(payload), "Strength")
 }
 
-func TestUpdateSetReply_MissingOrWrongItemNumberPanics(t *testing.T) {
+func TestUpdateSetReply_MissingOrWrongItemNumberIsReported(t *testing.T) {
 	for name, properties := range map[string]map[string]any{
 		"missing":      {},
 		"not an int":   {itemNumberProperty: "2"},
@@ -477,10 +486,12 @@ func TestUpdateSetReply_MissingOrWrongItemNumberPanics(t *testing.T) {
 			cmd, _ := newCommand(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithError(t, commands.ErrRequestPropertyNotFound.Error(), func() {
-				cmd.updateSetReply(context.Background(), s, component("/set/250/bonuses", "2"),
-					setAnswer(bouftouSet()), properties)
-			})
+			err := cmd.updateSetReply(context.Background(), s, component("/set/250/bonuses", "2"),
+				setAnswer(bouftouSet()), properties)
+
+			require.ErrorIs(t, err, commands.ErrRequestPropertyNotFound)
+			assert.NotErrorIs(t, err, commands.ErrStaleInteraction,
+				"wiring gone wrong is a bug, not a stale click")
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -490,7 +501,7 @@ func TestGetSetReply_NoSetAnswersQueryMismatch(t *testing.T) {
 	cmd, _ := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.getSetReply(context.Background(), s, setCommand(), setAnswer(nil), nil)
+	require.NoError(t, cmd.getSetReply(context.Background(), s, setCommand(), setAnswer(nil), nil))
 
 	payload := fake.LastEdit(t)
 	require.NotNil(t, payload.Content)
@@ -502,7 +513,7 @@ func TestGetSetReply_NoSetAnswersQueryMismatch(t *testing.T) {
 	assert.Empty(t, payload.Embeds)
 }
 
-func TestSetReplies_InvalidAnswerPanics(t *testing.T) {
+func TestSetReplies_InvalidAnswerIsReported(t *testing.T) {
 	failed := setAnswer(bouftouSet())
 	failed.Status = amqp.RabbitMQMessage_FAILED
 	wrongType := setAnswer(bouftouSet())
@@ -520,12 +531,12 @@ func TestSetReplies_InvalidAnswerPanics(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			properties := map[string]any{itemNumberProperty: 2}
 
-			assert.PanicsWithError(t, commands.ErrInvalidAnswerMessage.Error(), func() {
-				cmd.getSetReply(context.Background(), s, setCommand(), message, properties)
-			})
-			assert.PanicsWithError(t, commands.ErrInvalidAnswerMessage.Error(), func() {
-				cmd.updateSetReply(context.Background(), s, setCommand(), message, properties)
-			})
+			for _, reply := range []requests.RequestCallback{cmd.getSetReply, cmd.updateSetReply} {
+				err := reply(context.Background(), s, setCommand(), message, properties)
+
+				require.ErrorIs(t, err, commands.ErrInvalidAnswerMessage)
+				assert.ErrorIs(t, err, commands.ErrUnavailable, "a backend that failed is worth a retry")
+			}
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -535,9 +546,9 @@ func TestHandle_CallbacksMatchComponentKind(t *testing.T) {
 	cmd, manager := newCommand(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, setCommand(queryOption("bouftou")))
-	cmd.Handle(s, component("/set/250"))
-	cmd.Handle(s, component("/set/250/bonuses", "2"))
+	require.NoError(t, cmd.Handle(s, setCommand(queryOption("bouftou"))))
+	require.NoError(t, cmd.Handle(s, component("/set/250")))
+	require.NoError(t, cmd.Handle(s, component("/set/250/bonuses", "2")))
 	require.Len(t, manager.calls, 3)
 
 	for i, want := range []string{"3", "3", "2"} {
@@ -546,7 +557,8 @@ func TestHandle_CallbacksMatchComponentKind(t *testing.T) {
 		if len(call.properties) > 0 {
 			properties = call.properties[0]
 		}
-		call.callback(context.Background(), s, setCommand(), setAnswer(bouftouSet()), properties)
+		require.NoError(t, call.callback(context.Background(), s, setCommand(),
+			setAnswer(bouftouSet()), properties))
 		assert.Equal(t, want, selectedBonus(t, fake.LastEdit(t)), "call #%d", i)
 	}
 }

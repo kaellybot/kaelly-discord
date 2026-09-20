@@ -38,10 +38,13 @@ func runCheck(t *testing.T, d *deps, check func(*Command) middlewares.Middleware
 	cmd := newCommand(t, d)
 	s, fake := testutils.NewDiscordSession(t)
 	result := checkResult{fake: fake}
-	check(cmd)(context.Background(), s, event, func(ctx context.Context) {
+	// A check either forwards to next or answers the caller itself: neither is
+	// an error worth reporting back.
+	require.NoError(t, check(cmd)(context.Background(), s, event, func(ctx context.Context) error {
 		result.called = true
 		result.ctx = ctx
-	})
+		return nil
+	}))
 	return result
 }
 
@@ -223,10 +226,8 @@ func TestChecks_DiscordFailureIsSwallowed(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 500, Body: `{}`})
 
-			assert.NotPanics(t, func() {
-				tc.check(cmd)(context.Background(), s, tc.event,
-					func(context.Context) { t.Fatal("next must not be called") })
-			})
+			require.NoError(t, tc.check(cmd)(context.Background(), s, tc.event,
+				func(context.Context) error { t.Fatal("next must not be called"); return nil }))
 			assert.Len(t, fake.Requests(), 1)
 		})
 	}
@@ -256,7 +257,7 @@ func focused(option *discordgo.ApplicationCommandInteractionDataOption,
 func autocomplete(t *testing.T, d *deps, event *discordgo.InteractionCreate) autocompleteResponse {
 	t.Helper()
 	s, fake := testutils.NewDiscordSession(t)
-	newCommand(t, d).Handle(s, event)
+	require.NoError(t, newCommand(t, d).Handle(s, event))
 
 	req := fake.Last(t)
 	assert.Equal(t, "POST", req.Method)
@@ -331,9 +332,8 @@ func TestAutocomplete_DiscordFailureIsSwallowed(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/callback", Status: 500, Body: `{}`})
 
-	assert.NotPanics(t, func() {
-		newCommand(t, newDeps()).Handle(s, autocompleteEvent(focused(stringOption("city", "b"))))
-	})
+	assert.NoError(t, newCommand(t, newDeps()).Handle(s, autocompleteEvent(focused(stringOption("city", "b")))),
+		"a Discord hiccup on the autocomplete answer is logged, not reported back")
 	assert.Len(t, fake.Requests(), 1)
 }
 
@@ -358,7 +358,7 @@ func TestComponents_RequestTheBookForTheSelectedFilters(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			respondMembers(fake)
 
-			newCommand(t, d).Handle(s, tc.event)
+			require.NoError(t, newCommand(t, d).Handle(s, tc.event))
 
 			call := d.requests.single(t)
 			assert.Equal(t, amqp.RabbitMQMessage_ALIGN_GET_BOOK_REQUEST, call.message.Type)
@@ -374,7 +374,7 @@ func TestComponents_RequestTheBookForTheSelectedFilters(t *testing.T) {
 	}
 }
 
-func TestComponents_InvalidSelectionOrCustomIDPanics(t *testing.T) {
+func TestComponents_InvalidSelectionOrCustomIDIsReportedAsStale(t *testing.T) {
 	d := newDeps()
 	cmd := newCommand(t, d)
 	s, fake := testutils.NewDiscordSession(t)
@@ -393,14 +393,18 @@ func TestComponents_InvalidSelectionOrCustomIDPanics(t *testing.T) {
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			assert.PanicsWithValue(t, commands.ErrInvalidInteraction, func() { tc.handler(s, tc.event) })
+			err := tc.handler(s, tc.event)
+
+			require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+			assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+				"a selection or a custom ID we cannot read is a stale click, not a crash")
 		})
 	}
 	assert.Empty(t, d.requests.calls)
 	assert.Empty(t, fake.Requests(), "members are not fetched for invalid interactions")
 }
 
-func TestComponents_MembersFailurePanics(t *testing.T) {
+func TestComponents_MembersFailureIsReported(t *testing.T) {
 	for name, event := range map[string]*discordgo.InteractionCreate{
 		"page":  component("/books/align?city=_&order=_&server=djaul&page=1"),
 		"city":  component("/books/align?order=_&server=djaul", "bonta"),
@@ -411,17 +415,23 @@ func TestComponents_MembersFailurePanics(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			fake.Respond(testutils.DiscordResponse{PathContains: "/members", Status: 403, Body: `{}`})
 
-			assert.Panics(t, func() { newCommand(t, d).Handle(s, event) })
+			err := newCommand(t, d).Handle(s, event)
+
+			require.Error(t, err)
+			assert.ErrorIs(t, err, commands.ErrUnavailable, "Discord refusing the member list is worth a retry")
 			assert.Empty(t, d.requests.calls)
 		})
 	}
 }
 
-func TestComponents_UnknownCustomIDPanics(t *testing.T) {
-	s, _ := testutils.NewDiscordSession(t)
-	assert.PanicsWithValue(t, commands.ErrNoProvidedHandler, func() {
-		newCommand(t, newDeps()).Handle(s, component("/books/align?unknown=1"))
-	})
+func TestComponents_UnknownCustomIDIsReported(t *testing.T) {
+	s, fake := testutils.NewDiscordSession(t)
+
+	err := newCommand(t, newDeps()).Handle(s, component("/books/align?unknown=1"))
+
+	require.ErrorIs(t, err, commands.ErrNoProvidedHandler)
+	assert.ErrorIs(t, err, commands.ErrStaleInteraction)
+	assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 }
 
 // --- replies --------------------------------------------------------------
@@ -453,8 +463,8 @@ func TestGetBookReply_ListsOnlyKnownMembersSortedByLevel(t *testing.T) {
 	cmd := newCommand(t, bookDeps())
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.getBookReply(context.Background(), s, slash("get"), bookAnswer(),
-		map[string]any{"u1": "Ali", "u2": "bob"})
+	require.NoError(t, cmd.getBookReply(context.Background(), s, slash("get"), bookAnswer(),
+		map[string]any{"u1": "Ali", "u2": "bob"}))
 
 	req := fake.Last(t)
 	assert.Equal(t, "PATCH", req.Method)
@@ -492,7 +502,7 @@ func TestGetBookReply_ListsOnlyKnownMembersSortedByLevel(t *testing.T) {
 	assert.True(t, rows[1].Components[0].Options[1].Default)
 }
 
-func TestGetBookReply_InvalidAnswerPanics(t *testing.T) {
+func TestGetBookReply_InvalidAnswerIsReported(t *testing.T) {
 	failed := bookAnswer()
 	failed.Status = amqp.RabbitMQMessage_FAILED
 	wrongType := bookAnswer()
@@ -505,9 +515,11 @@ func TestGetBookReply_InvalidAnswerPanics(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
-			assert.PanicsWithValue(t, commands.ErrInvalidAnswerMessage, func() {
-				newCommand(t, bookDeps()).getBookReply(context.Background(), s, slash("get"), message, nil)
-			})
+
+			err := newCommand(t, bookDeps()).getBookReply(context.Background(), s, slash("get"), message, nil)
+
+			require.ErrorIs(t, err, commands.ErrInvalidAnswerMessage)
+			assert.ErrorIs(t, err, commands.ErrUnavailable, "a backend that failed is worth a retry")
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -516,20 +528,22 @@ func TestGetBookReply_InvalidAnswerPanics(t *testing.T) {
 func TestSetBookReply(t *testing.T) {
 	t.Run("success answers in the answer language", func(t *testing.T) {
 		s, fake := testutils.NewDiscordSession(t)
-		newCommand(t, newDeps()).setBookReply(context.Background(), s, slash("set"),
-			&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_SUCCESS, Language: amqp.Language_FR}, nil)
+		require.NoError(t, newCommand(t, newDeps()).setBookReply(context.Background(), s, slash("set"),
+			&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_SUCCESS, Language: amqp.Language_FR}, nil))
 
 		payload := fake.LastEdit(t)
 		require.NotNil(t, payload.Content)
 		assert.Equal(t, "L'annuaire a été mise à jour !", *payload.Content)
 	})
 
-	t.Run("failure panics", func(t *testing.T) {
+	t.Run("failure is reported", func(t *testing.T) {
 		s, fake := testutils.NewDiscordSession(t)
-		assert.PanicsWithValue(t, commands.ErrInvalidAnswerMessage, func() {
-			newCommand(t, newDeps()).setBookReply(context.Background(), s, slash("set"),
-				&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_FAILED}, nil)
-		})
+
+		err := newCommand(t, newDeps()).setBookReply(context.Background(), s, slash("set"),
+			&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_FAILED}, nil)
+
+		require.ErrorIs(t, err, commands.ErrInvalidAnswerMessage)
+		assert.ErrorIs(t, err, commands.ErrUnavailable)
 		assert.Empty(t, fake.Requests())
 	})
 }
@@ -552,8 +566,8 @@ func TestUserRespond_EditsWithMemberBeliefs(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	member := &discordgo.Member{Nick: "Target", User: &discordgo.User{ID: "u9", Username: "target"}}
 
-	newCommand(t, bookDeps()).userRespond(context.Background(), s, userCommand("u9", nil), userAnswer(),
-		map[string]any{"user": member})
+	require.NoError(t, newCommand(t, bookDeps()).userRespond(context.Background(), s, userCommand("u9", nil),
+		userAnswer(), map[string]any{"user": member}))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -564,7 +578,7 @@ func TestUserRespond_EditsWithMemberBeliefs(t *testing.T) {
 	assert.Equal(t, "Djaul EN", embed.Footer.Text)
 }
 
-func TestUserRespond_FailureOrMissingMemberPanics(t *testing.T) {
+func TestUserRespond_FailureOrMissingMemberIsReported(t *testing.T) {
 	failed := userAnswer()
 	failed.Status = amqp.RabbitMQMessage_FAILED
 	member := &discordgo.Member{User: &discordgo.User{ID: "u9"}}
@@ -572,18 +586,23 @@ func TestUserRespond_FailureOrMissingMemberPanics(t *testing.T) {
 	cases := map[string]struct {
 		message    *amqp.RabbitMQMessage
 		properties map[string]any
+		expected   error
 	}{
-		"failed status":  {failed, map[string]any{"user": member}},
-		"missing member": {userAnswer(), map[string]any{}},
-		"not a *Member":  {userAnswer(), map[string]any{"user": *member}},
+		// A backend answer that failed is worth a retry; a member missing from
+		// the request properties is our own wiring gone wrong.
+		"failed status":  {failed, map[string]any{"user": member}, commands.ErrInvalidAnswerMessage},
+		"missing member": {userAnswer(), map[string]any{}, commands.ErrRequestPropertyNotFound},
+		"not a *Member":  {userAnswer(), map[string]any{"user": *member}, commands.ErrRequestPropertyNotFound},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
-			assert.Panics(t, func() {
-				newCommand(t, bookDeps()).userRespond(context.Background(), s, userCommand("u9", nil),
-					tc.message, tc.properties)
-			})
+
+			err := newCommand(t, bookDeps()).userRespond(context.Background(), s, userCommand("u9", nil),
+				tc.message, tc.properties)
+
+			require.ErrorIs(t, err, tc.expected)
+			assert.NotErrorIs(t, err, commands.ErrStaleInteraction)
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -596,10 +615,11 @@ func TestReplies_DiscordFailureIsSwallowed(t *testing.T) {
 	ctx := context.Background()
 	member := &discordgo.Member{User: &discordgo.User{ID: "u9", Username: "target"}}
 
-	assert.NotPanics(t, func() {
-		cmd.getBookReply(ctx, s, slash("get"), bookAnswer(), map[string]any{})
-		cmd.setBookReply(ctx, s, slash("set"), &amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_SUCCESS}, nil)
-		cmd.userRespond(ctx, s, userCommand("u9", nil), userAnswer(), map[string]any{"user": member})
-	})
+	// The caller is already being answered: there is nothing left to report.
+	assert.NoError(t, cmd.getBookReply(ctx, s, slash("get"), bookAnswer(), map[string]any{}))
+	assert.NoError(t, cmd.setBookReply(ctx, s, slash("set"),
+		&amqp.RabbitMQMessage{Status: amqp.RabbitMQMessage_SUCCESS}, nil))
+	assert.NoError(t, cmd.userRespond(ctx, s, userCommand("u9", nil), userAnswer(),
+		map[string]any{"user": member}))
 	assert.Len(t, fake.Requests(), 3)
 }

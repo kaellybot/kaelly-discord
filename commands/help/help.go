@@ -56,78 +56,76 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	command.CallHandler(s, i, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	return command.CallHandler(s, i, command.handlers)
 }
 
 func (command *Command) trace(ctx context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	authorID := discord.GetUserID(i.Interaction)
 	message := mappers.MapHelpRequest(authorID, i.Locale)
 	errBroker := command.broker.Emit(message, amqp.ExchangeRequest, constants.HelpRoutingKey, i.ID)
 	if errBroker != nil {
+		// Tracing is a side concern: the caller still gets their help.
 		log.Error().Err(errBroker).Msgf("Cannot trace help interaction through AMQP")
 	}
 
-	next(ctx)
+	return next(ctx)
 }
 
 func (command *Command) getHelp(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	_, err := s.InteractionResponseEdit(i.Interaction, command.getHelpMenu(i.Locale))
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle help reponse")
 	}
+
+	return nil
 }
 
 func (command *Command) updateHelp(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	var commandName string
 	var page int
 	customID := i.MessageComponentData().CustomID
 	values := i.MessageComponentData().Values
 	if len(values) != 1 {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, i.MessageComponentData().CustomID).
-			Msgf("Cannot retrieve command name from value, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q carries %v selected commands",
+			commands.ErrInvalidInteraction, customID, len(values))
 	}
 
 	if customCmdName, ok := contract.ExtractHelpPageCustomID(customID); ok {
 		commandName = customCmdName
 		customPage, err := strconv.Atoi(values[0])
 		if err != nil {
-			log.Error().
-				Err(err).
-				Str(constants.LogCommand, command.GetName()).
-				Str(constants.LogCustomID, customID).
-				Msgf("Cannot convert page value to int, panicking...")
-			panic(commands.ErrInvalidInteraction)
+			return fmt.Errorf("%w: page %q of custom ID %q: %w",
+				commands.ErrInvalidInteraction, values[0], customID, err)
 		}
 		page = customPage
 	} else if contract.IsBelongsToHelp(customID) {
 		commandName = values[0]
 		page = 0
 	} else {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, customID)
 	}
 
 	var webhookEdit *discordgo.WebhookEdit
 	if commandName == menuCommandName {
 		webhookEdit = command.getHelpMenu(i.Locale)
 	} else {
-		webhookEdit = command.getHelpCommand(commandName, page, i.Locale)
+		var err error
+		webhookEdit, err = command.getHelpCommand(commandName, page, i.Locale)
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err := s.InteractionResponseEdit(i.Interaction, webhookEdit)
 	if err != nil {
 		log.Error().Err(err).Msgf("Cannot handle help reponse")
 	}
+
+	return nil
 }
 
 func (command *Command) getHelpMenu(lg discordgo.Locale) *discordgo.WebhookEdit {
@@ -163,8 +161,10 @@ func (command *Command) getHelpMenu(lg discordgo.Locale) *discordgo.WebhookEdit 
 	}
 }
 
+// getHelpCommand renders one command's help page. A command we cannot describe
+// is our own wiring gone wrong, not a stale click: it stays a plain error.
 func (command *Command) getHelpCommand(commandName string, page int,
-	lg discordgo.Locale) *discordgo.WebhookEdit {
+	lg discordgo.Locale) (*discordgo.WebhookEdit, error) {
 	var wantedCommand commands.DiscordCommand
 	for _, cmd := range *command.commands {
 		if cmd.GetName() == commandName {
@@ -174,8 +174,8 @@ func (command *Command) getHelpCommand(commandName string, page int,
 	}
 
 	if wantedCommand == nil {
-		panic(fmt.Errorf("cannot find command (%s) while searching"+
-			" for its help description, panicking", commandName))
+		return nil, fmt.Errorf("cannot find command %q while searching"+
+			" for its help description", commandName)
 	}
 
 	// The page comes from a component custom ID: a crafted or stale one can
@@ -208,7 +208,7 @@ func (command *Command) getHelpCommand(commandName string, page int,
 			},
 		},
 		Components: command.getHelpComponents(commandName, page, details, lg),
-	}
+	}, nil
 }
 
 func (command *Command) getHelpComponents(selectedCommandName string, page int,

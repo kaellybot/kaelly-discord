@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"regexp"
 	"slices"
 	"strings"
@@ -11,59 +12,65 @@ import (
 )
 
 func (command *AbstractCommand) CallHandler(s *discordgo.Session, i *discordgo.InteractionCreate,
-	handlers DiscordHandlers) {
+	handlers DiscordHandlers) error {
 	handler, found := handlers[i.Type]
-	if found {
-		handler(s, i)
-	} else {
+	if !found {
 		log.Error().
 			Uint32(constants.LogInteractionType, uint32(i.Type)).
 			Msgf("Interaction not handled, ignoring it")
+		return nil
 	}
+
+	return handler(s, i)
 }
 
 func (command *AbstractCommand) HandleSubCommands(handlers SubCommandHandlers) DiscordHandler {
-	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if IsApplicationCommand(i) {
-			data := i.ApplicationCommandData()
-			for _, subCommand := range data.Options {
-				handler, found := handlers[subCommand.Name]
-				if found {
-					handler(s, i)
-				} else {
-					panic(ErrNoProvidedHandler)
-				}
-			}
-			return
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+		if !IsApplicationCommand(i) {
+			return nil
 		}
+
+		data := i.ApplicationCommandData()
+		for _, subCommand := range data.Options {
+			handler, found := handlers[subCommand.Name]
+			if !found {
+				return fmt.Errorf("%w: sub-command %q", ErrNoProvidedHandler, subCommand.Name)
+			}
+
+			if err := handler(s, i); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}
 }
 
 func (command *AbstractCommand) HandleInteractionMessages(handlers InteractionMessageHandlers,
 ) DiscordHandler {
-	// Map iteration order is randomized, so when several patterns match the same
-	// custom ID the winner would change from one interaction to the next: the
-	// patterns are sorted once here to keep the dispatch deterministic.
-	regexes := make([]*regexp.Regexp, 0, len(handlers))
+	// Iterated in a stable order: several patterns can match one custom ID, and
+	// map iteration would pick a different handler from one call to the next.
+	patterns := make([]*regexp.Regexp, 0, len(handlers))
 	for regex := range handlers {
-		regexes = append(regexes, regex)
+		patterns = append(patterns, regex)
 	}
-	slices.SortFunc(regexes, func(first, second *regexp.Regexp) int {
-		return strings.Compare(first.String(), second.String())
+	slices.SortFunc(patterns, func(a, b *regexp.Regexp) int {
+		return strings.Compare(a.String(), b.String())
 	})
 
-	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if IsMessageCommand(i) {
-			customID := i.MessageComponentData().CustomID
-			for _, regex := range regexes {
-				if regex.MatchString(customID) {
-					handlers[regex](s, i)
-					return
-				}
-			}
-
-			panic(ErrNoProvidedHandler)
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+		if !IsMessageCommand(i) {
+			return nil
 		}
+
+		customID := i.MessageComponentData().CustomID
+		for _, regex := range patterns {
+			if regex.MatchString(customID) {
+				return handlers[regex](s, i)
+			}
+		}
+
+		return fmt.Errorf("%w: custom ID %q", ErrNoProvidedHandler, customID)
 	}
 }
 

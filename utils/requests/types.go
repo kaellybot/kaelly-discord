@@ -32,5 +32,7 @@ type discordRequest struct {
 	properties  map[string]any
 }
 
+// RequestCallback handles the answer to a request. Returning an error means
+// the caller could not be served: the manager turns it into a message for them.
 type RequestCallback func(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any)
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) error

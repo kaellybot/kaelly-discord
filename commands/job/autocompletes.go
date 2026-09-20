@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 	data := i.ApplicationCommandData()
 	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0)
 
@@ -35,8 +35,11 @@ func (command *Command) autocomplete(s *discordgo.Session, i *discordgo.Interact
 		},
 	})
 	if err != nil {
+		// The caller sees no suggestion; there is nothing else to tell them.
 		log.Error().Err(err).Msg("Autocomplete request ignored")
 	}
+
+	return nil
 }
 
 func (command *Command) findJobs(jobName string, lg discordgo.Locale) []*discordgo.

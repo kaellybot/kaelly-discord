@@ -19,6 +19,7 @@ type fakeCommand struct {
 	commands.DiscordCommand
 	name     string
 	panicMsg any
+	err      error
 
 	mu      sync.Mutex
 	matched int
@@ -40,13 +41,15 @@ func (c *fakeCommand) Matches(i *discordgo.InteractionCreate) bool {
 	return false
 }
 
-func (c *fakeCommand) Handle(_ *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *fakeCommand) Handle(_ *discordgo.Session, i *discordgo.InteractionCreate) error {
 	c.mu.Lock()
 	c.handled = append(c.handled, i)
 	c.mu.Unlock()
 	if c.panicMsg != nil {
 		panic(c.panicMsg)
 	}
+
+	return c.err
 }
 
 func (c *fakeCommand) handledCount() int {
@@ -297,7 +300,42 @@ func TestInteractionCreate_DeferralFailureAbortsDispatch(t *testing.T) {
 
 	assert.Zero(t, about.matched, "no command is even considered")
 	assert.Zero(t, about.handledCount())
+	assert.Len(t, fake.Requests(), 1,
+		"nothing was deferred, so there is no answer to edit: trying again would only fail twice")
+}
+
+// A command reports instead of answering: the router is the one place turning
+// a failure into a message, and the category picks which message.
+func TestInteractionCreate_CommandErrorIsAnsweredByTheRouter(t *testing.T) {
+	cases := map[string]struct {
+		err error
+		key string
+	}{
+		"stale interaction": {commands.ErrInvalidInteraction, "errors.unknown_interaction"},
+		"backend refused":   {commands.ErrInvalidAnswerMessage, "errors.unavailable"},
+		"anything else":     {errors.New("boom"), "panic"},
+	}
+	for name, testCase := range cases {
+		t.Run(name, func(t *testing.T) {
+			about := &fakeCommand{name: "about", err: testCase.err}
+			service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{}, about)
+
+			service.interactionCreate(service.session, slash("about"))
+
+			assert.Equal(t, 1, about.handledCount())
+			assertEditedWith(t, fake, testCase.key)
+		})
+	}
+}
+
+func TestInteractionCreate_SuccessfulCommandAnswersNothingExtra(t *testing.T) {
+	about := &fakeCommand{name: "about"}
+	service, fake := newService(t, &fakeGuildService{}, &testutils.FakeBroker{}, about)
+
+	service.interactionCreate(service.session, slash("about"))
+
 	requests := fake.Requests()
-	require.Len(t, requests, 2, "failed deferral, then the panic message attempt")
-	assertPanicMessage(t, fake)
+	require.Len(t, requests, 1, "only the deferral: the command answered the caller itself")
+	assert.Equal(t, discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		callbackType(t, requests[0]))
 }

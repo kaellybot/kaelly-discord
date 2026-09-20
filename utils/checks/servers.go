@@ -2,8 +2,10 @@ package checks
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/services/guilds"
 	"github.com/kaellybot/kaelly-discord/services/servers"
@@ -17,7 +19,7 @@ import (
 
 func CheckServer(optionName string, serverService servers.Service) middlewares.MiddlewareCommand {
 	return func(ctx context.Context, s *discordgo.Session,
-		i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+		i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 		data := i.ApplicationCommandData()
 		for _, subCommand := range data.Options {
 			for _, option := range subCommand.Options {
@@ -27,27 +29,27 @@ func CheckServer(optionName string, serverService servers.Service) middlewares.M
 					response, checkSuccess := validators.
 						ExpectOnlyOneElement("checks.server", option.StringValue(), labels, i.Locale)
 					if checkSuccess {
-						next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
-					} else {
-						_, err := s.InteractionResponseEdit(i.Interaction, &response)
-						if err != nil {
-							log.Error().Err(err).Msg("Server check response ignored")
-						}
+						return next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
 					}
 
-					return
+					_, err := s.InteractionResponseEdit(i.Interaction, &response)
+					if err != nil {
+						log.Error().Err(err).Msg("Server check response ignored")
+					}
+
+					return nil
 				}
 			}
 		}
 
-		next(ctx)
+		return next(ctx)
 	}
 }
 
 func CheckServerWithFallback(optionName string, serverService servers.Service,
 	guildService guilds.Service) middlewares.MiddlewareCommand {
 	return func(ctx context.Context, s *discordgo.Session,
-		i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+		i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 		data := i.ApplicationCommandData()
 
 		// Filled case, expecting [1, 1] server
@@ -59,20 +61,20 @@ func CheckServerWithFallback(optionName string, serverService servers.Service,
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.server", serverValue, labels, i.Locale)
 				if checkSuccess {
-					next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
-				} else {
-					_, err := s.InteractionResponseEdit(i.Interaction, &response)
-					if err != nil {
-						log.Error().Err(err).Msg("Server check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyServer, servers[0]))
 				}
 
-				return
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
+				if err != nil {
+					log.Error().Err(err).Msg("Server check response ignored")
+				}
+
+				return nil
 			}
 		}
 
 		// Option not filled (refers to guild and/or channel)
-		tryFallback(ctx, s, i, next, guildService)
+		return tryFallback(ctx, s, i, next, guildService)
 	}
 }
 
@@ -92,22 +94,24 @@ func getServerValue(optionName string, option *discordgo.ApplicationCommandInter
 }
 
 func tryFallback(ctx context.Context, s *discordgo.Session, i *discordgo.InteractionCreate,
-	next middlewares.NextFunc, guildService guilds.Service) {
+	next middlewares.NextFunc, guildService guilds.Service) error {
 	server, found, err := guildService.GetServer(i.GuildID,
 		discord.ResolveParentChannelID(s, i.ChannelID))
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("%w: %w", commands.ErrUnavailable, err)
 	}
 
-	if !found {
-		content := i18n.Get(i.Locale, "checks.server.required", i18n.Vars{"game": constants.GetGame()})
-		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Content: &content,
-		})
-		if err != nil {
-			log.Error().Err(err).Msg("Server check response ignored")
-		}
-	} else {
-		next(context.WithValue(ctx, constants.ContextKeyServer, server))
+	if found {
+		return next(context.WithValue(ctx, constants.ContextKeyServer, server))
 	}
+
+	content := i18n.Get(i.Locale, "checks.server.required", i18n.Vars{"game": constants.GetGame()})
+	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Content: &content,
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("Server check response ignored")
+	}
+
+	return nil
 }

@@ -364,6 +364,7 @@
         }
     },
     "errors": {
+        "unavailable": "Meu cérebro não está respondendo agora :sweat: Me dê um minuto e tente novamente!",
         "unknown_interaction": "Hmm, não conheço esta interação... Talvez venha de uma mensagem desatualizada, tente executar o comando novamente! :sweat_smile:",
         "too_many_webhooks": "O número máximo de webhooks foi alcançado neste canal, não posso continuar...\n*(Clique no ícone do canal :gear:, depois em `Integrações` e finalmente em `Webhooks` para gerenciá-los)*",
         "query_mismatch": [

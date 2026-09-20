@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-//nolint:exhaustive // only useful handlers must be implemented, it will panic also
+//nolint:exhaustive // only the useful interaction types are handled.
 func New(bookService books.Service, guildService guilds.Service,
 	serverService servers.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
@@ -84,21 +84,24 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if commands.IsApplicationCommand(i) {
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	switch {
+	case commands.IsApplicationCommand(i):
 		if len(i.ApplicationCommandData().TargetID) == 0 {
-			command.CallHandler(s, i, command.slashHandlers)
-		} else {
-			command.CallHandler(s, i, command.userHandlers)
+			return command.CallHandler(s, i, command.slashHandlers)
 		}
-	} else if commands.IsMessageCommand(i) {
-		command.CallHandler(s, i, command.slashHandlers)
+
+		return command.CallHandler(s, i, command.userHandlers)
+	case commands.IsMessageCommand(i):
+		return command.CallHandler(s, i, command.slashHandlers)
+	default:
+		return nil
 	}
 }
 
 func (command *Command) userRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
-	command.userJobRequest(ctx, s, i)
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
+	return command.userJobRequest(ctx, s, i)
 }
 
 func getGetOptions(ctx context.Context) (entities.Job, entities.Server, error) {

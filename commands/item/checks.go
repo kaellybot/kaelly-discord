@@ -13,12 +13,11 @@ import (
 )
 
 func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 	for _, option := range data.Options {
 		if option.Name == contract.ItemQueryOptionName && len(strings.TrimSpace(option.StringValue())) > 0 {
-			next(context.WithValue(ctx, constants.ContextKeyQuery, option.StringValue()))
-			return
+			return next(context.WithValue(ctx, constants.ContextKeyQuery, option.StringValue()))
 		}
 	}
 
@@ -29,4 +28,6 @@ func (command *Command) checkQuery(ctx context.Context, s *discordgo.Session,
 	if err != nil {
 		log.Error().Err(err).Msg("Query check response ignored")
 	}
+
+	return nil
 }

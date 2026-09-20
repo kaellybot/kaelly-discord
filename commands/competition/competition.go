@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-//nolint:exhaustive // only useful handlers must be implemented, it will panic also
+//nolint:exhaustive // only the useful interaction types are handled.
 func New(emojiService emojis.Service, requestManager requests.RequestManager,
 ) *Command {
 	cmd := Command{
@@ -56,27 +56,24 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	command.CallHandler(s, i, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	return command.CallHandler(s, i, command.handlers)
 }
 
 func (command *Command) getMap(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	mapNumber, err := getOptions(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapCompetitionMapRequest(mapNumber, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, constants.CompetitionRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.CompetitionRequestRoutingKey,
 		msg, command.getMapReply)
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (command *Command) updateMap(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateMap(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 	customID := i.MessageComponentData().CustomID
 	properties := make(map[string]any)
 	var mapNumber int64
@@ -86,48 +83,30 @@ func (command *Command) updateMap(s *discordgo.Session, i *discordgo.Interaction
 	} else if mapNumber, ok = contract.ExtractMapTacticalCustomID(customID); ok {
 		properties[mapTypeProperty] = constants.MapTypeTactical
 	} else {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, customID)
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapCompetitionMapRequest(mapNumber, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, constants.CompetitionRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.CompetitionRequestRoutingKey,
 		msg, command.updateMapReply, properties)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) getMapReply(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	command.updateMapReply(ctx, s, i, message, map[string]any{mapTypeProperty: constants.MapTypeNormal})
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
+	return command.updateMapReply(ctx, s, i, message,
+		map[string]any{mapTypeProperty: constants.MapTypeNormal})
 }
 
 func (command *Command) updateMapReply(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) error {
 	if !isAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
-	mapTypeValue, found := properties[mapTypeProperty]
-	if !found {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, mapTypeProperty).
-			Msgf("Cannot find request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
-	}
-	mapType, ok := mapTypeValue.(constants.MapType)
+	mapType, ok := properties[mapTypeProperty].(constants.MapType)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, mapTypeProperty).
-			Msgf("Cannot convert request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
+		return fmt.Errorf("%w: %v", commands.ErrRequestPropertyNotFound, mapTypeProperty)
 	}
 
 	reply := mappers.MapCompetitionMapToWebhookEdit(message.GetCompetitionMapAnswer(),
@@ -137,6 +116,8 @@ func (command *Command) updateMapReply(_ context.Context, s *discordgo.Session,
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func getOptions(ctx context.Context) (int64, error) {

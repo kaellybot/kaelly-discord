@@ -88,7 +88,7 @@ func TestUpdateAlmanax_DayButtonRequestsThatDay(t *testing.T) {
 	manager := &fakeRequestManager{}
 	s, _ := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, component("/almanax/day/"+unix(refDay())))
+	require.NoError(t, newCommand(t, manager).Handle(s, component("/almanax/day/"+unix(refDay()))))
 
 	call := manager.single(t)
 	assert.Equal(t, amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_REQUEST, call.message.Type)
@@ -99,26 +99,36 @@ func TestUpdateAlmanaxByDate_SelectedValueIsUnixSeconds(t *testing.T) {
 	manager := &fakeRequestManager{}
 	s, _ := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, component("/almanax/day?type=choice", unix(refDay())))
+	require.NoError(t, newCommand(t, manager).Handle(s,
+		component("/almanax/day?type=choice", unix(refDay()))))
 
 	call := manager.single(t)
 	assert.Equal(t, refDay(), call.message.GetEncyclopediaAlmanaxRequest().GetDate().AsTime())
 }
 
-func TestUpdateAlmanaxByDate_InvalidSelectionPanics(t *testing.T) {
-	for name, values := range map[string][]string{
-		"no value":     nil,
-		"two values":   {"1", "2"},
-		"not a number": {"today"},
+func TestUpdateAlmanaxByDate_InvalidSelectionIsReported(t *testing.T) {
+	for name, testCase := range map[string]struct {
+		values []string
+		stale  bool
+	}{
+		"no value":     {nil, true},
+		"two values":   {[]string{"1", "2"}, true},
+		"not a number": {[]string{"today"}, false},
 	} {
 		t.Run(name, func(t *testing.T) {
 			manager := &fakeRequestManager{}
-			s, _ := testutils.NewDiscordSession(t)
+			s, fake := testutils.NewDiscordSession(t)
 
-			assert.Panics(t, func() {
-				newCommand(t, manager).Handle(s, component("/almanax/day?type=choice", values...))
-			})
+			err := newCommand(t, manager).Handle(s,
+				component("/almanax/day?type=choice", testCase.values...))
+
+			require.Error(t, err)
+			if testCase.stale {
+				assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+					"a selection nobody can read is a stale click, not a crash")
+			}
 			assert.Empty(t, manager.calls)
+			assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 		})
 	}
 }
@@ -127,7 +137,8 @@ func TestUpdateAlmanaxesByEffect_PageButtonRequestsByDate(t *testing.T) {
 	manager := &fakeRequestManager{}
 	s, _ := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, component("/almanax/effect?date="+unix(refDay())+"&page=2"))
+	require.NoError(t, newCommand(t, manager).Handle(s,
+		component("/almanax/effect?date="+unix(refDay())+"&page=2")))
 
 	call := manager.single(t)
 	request := call.message.GetEncyclopediaAlmanaxEffectRequest()
@@ -143,7 +154,8 @@ func TestUpdateResourceCharacter_KeepsDurationFromCustomIDAndCharactersFromSelec
 	manager := &fakeRequestManager{}
 	s, _ := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, component("/almanax/resource?duration=14", "50"))
+	require.NoError(t, newCommand(t, manager).Handle(s,
+		component("/almanax/resource?duration=14", "50")))
 
 	call := manager.single(t)
 	assert.Equal(t, amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_REQUEST, call.message.Type)
@@ -156,7 +168,8 @@ func TestUpdateResourceDuration_KeepsCharactersFromCustomIDAndDurationFromSelect
 	manager := &fakeRequestManager{}
 	s, _ := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, component("/almanax/resource?characters=4", "30"))
+	require.NoError(t, newCommand(t, manager).Handle(s,
+		component("/almanax/resource?characters=4", "30")))
 
 	call := manager.single(t)
 	assert.Equal(t, int64(30), call.message.GetEncyclopediaAlmanaxResourceRequest().GetDuration())
@@ -173,8 +186,8 @@ func TestUpdateResourceDuration_CharacterNumberAboveThirtyIsKept(t *testing.T) {
 			manager := &fakeRequestManager{}
 			s, _ := testutils.NewDiscordSession(t)
 
-			newCommand(t, manager).Handle(s,
-				component("/almanax/resource?characters="+strconv.FormatInt(characterNumber, 10), "7"))
+			require.NoError(t, newCommand(t, manager).Handle(s,
+				component("/almanax/resource?characters="+strconv.FormatInt(characterNumber, 10), "7")))
 
 			call := manager.single(t)
 			assert.Equal(t, int64(7), call.message.GetEncyclopediaAlmanaxResourceRequest().GetDuration())
@@ -183,19 +196,20 @@ func TestUpdateResourceDuration_CharacterNumberAboveThirtyIsKept(t *testing.T) {
 	}
 }
 
-func TestUpdateResources_InvalidSelectionPanics(t *testing.T) {
+func TestUpdateResources_InvalidSelectionIsReported(t *testing.T) {
 	for _, customID := range []string{"/almanax/resource?duration=14", "/almanax/resource?characters=4"} {
 		t.Run(customID, func(t *testing.T) {
 			manager := &fakeRequestManager{}
-			s, _ := testutils.NewDiscordSession(t)
+			s, fake := testutils.NewDiscordSession(t)
 
-			assert.Panics(t, func() { newCommand(t, manager).Handle(s, component(customID, "x")) })
+			require.Error(t, newCommand(t, manager).Handle(s, component(customID, "x")))
 			assert.Empty(t, manager.calls)
+			assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 		})
 	}
 }
 
-func TestComponentHandlers_MalformedCustomIDPanics(t *testing.T) {
+func TestComponentHandlers_MalformedCustomIDIsReportedAsStale(t *testing.T) {
 	manager := &fakeRequestManager{}
 	cmd := newCommand(t, manager)
 	s, _ := testutils.NewDiscordSession(t)
@@ -208,13 +222,17 @@ func TestComponentHandlers_MalformedCustomIDPanics(t *testing.T) {
 		"resource duration":  cmd.updateResourceDuration,
 	} {
 		t.Run(name, func(t *testing.T) {
-			assert.PanicsWithValue(t, commands.ErrInvalidInteraction, func() { handler(s, event) })
+			err := handler(s, event)
+
+			require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+			assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+				"a custom ID we cannot read is a stale click, not a crash")
 		})
 	}
 	assert.Empty(t, manager.calls)
 }
 
-func TestComponentHandlers_RequestFailurePanics(t *testing.T) {
+func TestComponentHandlers_RequestFailureIsReported(t *testing.T) {
 	events := map[string]*discordgo.InteractionCreate{
 		"day":                component("/almanax/day/" + unix(refDay())),
 		"day choice":         component("/almanax/day?type=choice", unix(refDay())),
@@ -224,9 +242,12 @@ func TestComponentHandlers_RequestFailurePanics(t *testing.T) {
 	}
 	for name, event := range events {
 		t.Run(name, func(t *testing.T) {
-			s, _ := testutils.NewDiscordSession(t)
-			cmd := newCommand(t, &fakeRequestManager{err: errors.New("broker down")})
-			assert.PanicsWithError(t, "broker down", func() { cmd.Handle(s, event) })
+			s, fake := testutils.NewDiscordSession(t)
+			errBroker := errors.New("broker down")
+			cmd := newCommand(t, &fakeRequestManager{err: errBroker})
+
+			require.ErrorIs(t, cmd.Handle(s, event), errBroker)
+			assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 		})
 	}
 }
@@ -235,7 +256,7 @@ func TestAlmanaxRespond_EditsWithDayEmbedAndNavigation(t *testing.T) {
 	cmd := newCommand(t, &fakeRequestManager{})
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.almanaxRespond(context.Background(), s, slash("day"), almanaxAnswer(), nil)
+	require.NoError(t, cmd.almanaxRespond(context.Background(), s, slash("day"), almanaxAnswer(), nil))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -260,17 +281,17 @@ func TestAlmanaxRespond_MissingDayAnswersMissingMessage(t *testing.T) {
 	answer := almanaxAnswer()
 	answer.EncyclopediaAlmanaxAnswer.Almanax = nil
 
-	cmd.almanaxRespond(context.Background(), s, slash("day"), answer, nil)
+	require.NoError(t, cmd.almanaxRespond(context.Background(), s, slash("day"), answer, nil))
 
 	payload := fake.LastEdit(t)
 	require.NotNil(t, payload.Content)
 	assert.Equal(t, testutils.Translations(t, discordgo.EnglishGB, "almanax.day.missing")[0], *payload.Content)
 }
 
-func TestReplies_InvalidAnswersPanicWithoutAnswering(t *testing.T) {
+func TestReplies_InvalidAnswersAreReportedWithoutAnswering(t *testing.T) {
 	cmd := newCommand(t, &fakeRequestManager{})
 	type reply func(context.Context, *discordgo.Session, *discordgo.InteractionCreate,
-		*amqp.RabbitMQMessage, map[string]any)
+		*amqp.RabbitMQMessage, map[string]any) error
 	cases := map[string]struct {
 		reply    reply
 		variants map[string]*amqp.RabbitMQMessage
@@ -286,9 +307,11 @@ func TestReplies_InvalidAnswersPanicWithoutAnswering(t *testing.T) {
 		for variant, message := range tc.variants {
 			t.Run(name+"/"+variant, func(t *testing.T) {
 				s, fake := testutils.NewDiscordSession(t)
-				assert.PanicsWithValue(t, commands.ErrInvalidAnswerMessage, func() {
-					tc.reply(context.Background(), s, slash("day"), message, nil)
-				})
+
+				err := tc.reply(context.Background(), s, slash("day"), message, nil)
+
+				require.ErrorIs(t, err, commands.ErrInvalidAnswerMessage)
+				assert.ErrorIs(t, err, commands.ErrUnavailable, "a backend that failed is worth a retry")
 				assert.Empty(t, fake.Requests())
 			})
 		}
@@ -299,7 +322,7 @@ func TestEffectRespond_ListsDaysWithDayChoiceMenu(t *testing.T) {
 	cmd := newCommand(t, &fakeRequestManager{})
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.effectRespond(context.Background(), s, slash("effects"), effectAnswer(), nil)
+	require.NoError(t, cmd.effectRespond(context.Background(), s, slash("effects"), effectAnswer(), nil))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -320,7 +343,7 @@ func TestEffectRespond_UnknownEffectAndNoUpcomingDay(t *testing.T) {
 		answer := effectAnswer()
 		answer.EncyclopediaAlmanaxEffectAnswer.Almanaxes = nil
 
-		cmd.effectRespond(context.Background(), s, slash("effects"), answer, nil)
+		require.NoError(t, cmd.effectRespond(context.Background(), s, slash("effects"), answer, nil))
 
 		payload := fake.LastEdit(t)
 		require.NotNil(t, payload.Content)
@@ -332,7 +355,7 @@ func TestEffectRespond_UnknownEffectAndNoUpcomingDay(t *testing.T) {
 		answer := effectAnswer()
 		answer.EncyclopediaAlmanaxEffectAnswer.EffectName = ""
 
-		cmd.effectRespond(context.Background(), s, slash("effects"), answer, nil)
+		require.NoError(t, cmd.effectRespond(context.Background(), s, slash("effects"), answer, nil))
 
 		payload := fake.LastEdit(t)
 		require.NotNil(t, payload.Content)
@@ -345,7 +368,8 @@ func TestGetResourcesReply_DefaultsToOneCharacter(t *testing.T) {
 	cmd := newCommand(t, &fakeRequestManager{})
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.getResourcesReply(context.Background(), s, slash("resources"), resourceAnswer(), nil)
+	require.NoError(t, cmd.getResourcesReply(context.Background(), s, slash("resources"),
+		resourceAnswer(), nil))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -358,8 +382,9 @@ func TestUpdateResourcesReply_MultipliesQuantitiesByCharacterNumber(t *testing.T
 	cmd := newCommand(t, &fakeRequestManager{})
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.updateResourcesReply(context.Background(), s, component("/almanax/resource?duration=7", "3"),
-		resourceAnswer(), map[string]any{"characterNumber": int64(3)})
+	require.NoError(t, cmd.updateResourcesReply(context.Background(), s,
+		component("/almanax/resource?duration=7", "3"),
+		resourceAnswer(), map[string]any{"characterNumber": int64(3)}))
 
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
@@ -367,7 +392,7 @@ func TestUpdateResourcesReply_MultipliesQuantitiesByCharacterNumber(t *testing.T
 	assert.Contains(t, componentValues(t, payload, "custom_id"), "/almanax/resource?characters=3")
 }
 
-func TestUpdateResourcesReply_MissingOrMistypedPropertyPanics(t *testing.T) {
+func TestUpdateResourcesReply_MissingOrMistypedPropertyIsReported(t *testing.T) {
 	for name, properties := range map[string]map[string]any{
 		"missing":   {},
 		"not int64": {"characterNumber": 3},
@@ -376,9 +401,12 @@ func TestUpdateResourcesReply_MissingOrMistypedPropertyPanics(t *testing.T) {
 			cmd := newCommand(t, &fakeRequestManager{})
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithValue(t, commands.ErrRequestPropertyNotFound, func() {
-				cmd.updateResourcesReply(context.Background(), s, slash("resources"), resourceAnswer(), properties)
-			})
+			err := cmd.updateResourcesReply(context.Background(), s, slash("resources"),
+				resourceAnswer(), properties)
+
+			require.ErrorIs(t, err, commands.ErrRequestPropertyNotFound)
+			assert.NotErrorIs(t, err, commands.ErrStaleInteraction,
+				"wiring gone wrong is a bug, not a stale click")
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -390,11 +418,10 @@ func TestReplies_DiscordFailureIsSwallowed(t *testing.T) {
 	fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 500, Body: `{}`})
 	ctx := context.Background()
 
-	assert.NotPanics(t, func() {
-		cmd.almanaxRespond(ctx, s, slash("day"), almanaxAnswer(), nil)
-		cmd.effectRespond(ctx, s, slash("effects"), effectAnswer(), nil)
-		cmd.getResourcesReply(ctx, s, slash("resources"), resourceAnswer(), nil)
-	})
+	assert.NoError(t, cmd.almanaxRespond(ctx, s, slash("day"), almanaxAnswer(), nil),
+		"a Discord hiccup on the final edit is logged, not reported back")
+	assert.NoError(t, cmd.effectRespond(ctx, s, slash("effects"), effectAnswer(), nil))
+	assert.NoError(t, cmd.getResourcesReply(ctx, s, slash("resources"), resourceAnswer(), nil))
 	assert.Len(t, fake.Requests(), 3)
 }
 
@@ -436,8 +463,8 @@ func TestUpdateResources_CraftedCharacterNumberFallsBackToTheDefault(t *testing.
 			manager := &fakeRequestManager{}
 			s, _ := testutils.NewDiscordSession(t)
 
-			newCommand(t, manager).Handle(s,
-				component("/almanax/resource?characters="+characterNumber, "7"))
+			require.NoError(t, newCommand(t, manager).Handle(s,
+				component("/almanax/resource?characters="+characterNumber, "7")))
 
 			call := manager.single(t)
 			assert.Equal(t, map[string]any{"characterNumber": int64(defaultCharacterNumber)},
@@ -461,7 +488,8 @@ func TestUpdateResources_CraftedDurationIsClampedToTheCommandBounds(t *testing.T
 			manager := &fakeRequestManager{}
 			s, _ := testutils.NewDiscordSession(t)
 
-			newCommand(t, manager).Handle(s, component(testCase.customID, testCase.selected))
+			require.NoError(t, newCommand(t, manager).Handle(s,
+				component(testCase.customID, testCase.selected)))
 
 			call := manager.single(t)
 			assert.Equal(t, testCase.expected,

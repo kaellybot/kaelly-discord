@@ -9,6 +9,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/utils/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,6 +21,7 @@ func TestMain(m *testing.M) {
 }
 
 type callback struct {
+	err        error
 	calls      int
 	ctx        context.Context
 	session    *discordgo.Session
@@ -29,9 +31,10 @@ type callback struct {
 }
 
 func (c *callback) handle(ctx context.Context, s *discordgo.Session, i *discordgo.InteractionCreate,
-	message *amqp.RabbitMQMessage, properties map[string]any) {
+	message *amqp.RabbitMQMessage, properties map[string]any) error {
 	c.calls++
 	c.ctx, c.session, c.event, c.message, c.properties = ctx, s, i, message, properties
+	return c.err
 }
 
 func interaction(id string) *discordgo.InteractionCreate {
@@ -179,7 +182,7 @@ func TestConsume_PanickingCallbackIsRecoveredAndUserIsNotified(t *testing.T) {
 	session, fake := testutils.NewDiscordSession(t)
 	calls := 0
 	panicking := func(context.Context, *discordgo.Session, *discordgo.InteractionCreate,
-		*amqp.RabbitMQMessage, map[string]any) {
+		*amqp.RabbitMQMessage, map[string]any) error {
 		calls++
 		panic("nil answer")
 	}
@@ -245,4 +248,33 @@ func TestRequest_AnswerArrivingBeforeRequestReturnsIsDelivered(t *testing.T) {
 	require.NoError(t, manager.Request(nil, interaction("i1"), "rk", &amqp.RabbitMQMessage{}, cb.handle))
 
 	assert.Equal(t, 1, cb.calls, "the answer was routed even though it raced Request")
+}
+
+func TestConsume_CallbackErrorIsAnsweredToTheCaller(t *testing.T) {
+	// A callback reports instead of answering: the manager is the one place
+	// turning that into a message, exactly like the interaction router.
+	broker := &testutils.FakeBroker{}
+	manager, consume := listening(t, broker)
+	session, fake := testutils.NewDiscordSession(t)
+	cb := &callback{err: commands.ErrInvalidAnswerMessage}
+	require.NoError(t, manager.Request(session, interaction("i1"), "rk", &amqp.RabbitMQMessage{}, cb.handle))
+
+	consume(answer("i1"), &amqp.RabbitMQMessage{})
+
+	assert.Equal(t, 1, cb.calls)
+	req := fake.Last(t)
+	assert.Equal(t, "PATCH", req.Method)
+	payload := fake.LastEdit(t)
+	require.NotNil(t, payload.Content)
+	assert.Contains(t, testutils.Translations(t, discordgo.French, "errors.unavailable"), *payload.Content,
+		"a backend that failed to answer is worth a retry message")
+}
+
+func TestRequest_BrokerFailureIsReportedAsUnavailable(t *testing.T) {
+	broker := &testutils.FakeBroker{Err: errors.New("channel closed")}
+	manager, _ := listening(t, broker)
+
+	err := manager.Request(nil, interaction("i1"), "rk", &amqp.RabbitMQMessage{}, (&callback{}).handle)
+
+	require.ErrorIs(t, err, commands.ErrUnavailable)
 }

@@ -14,10 +14,10 @@ import (
 )
 
 func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	channelID, enabled, err := getWebhookAlmanaxOptions(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	almanaxNews := command.almanaxService.GetAlmanaxNews(i.Locale)
@@ -28,24 +28,25 @@ func (command *Command) almanaxRequest(ctx context.Context, s *discordgo.Session
 	}
 
 	if almanaxNews == nil {
-		panic(fmt.Errorf("cannot find almanax news for locale %v", i.Locale))
+		return fmt.Errorf("cannot find almanax news for locale %v", i.Locale)
 	}
 
 	var webhookID string
 	if enabled {
 		var created bool
-		webhookID, created = command.followAnnouncement(s, i, almanaxNews.NewsChannelID, channelID)
+		webhookID, created, err = command.followAnnouncement(s, i, almanaxNews.NewsChannelID, channelID)
+		if err != nil {
+			return err
+		}
+
 		if !created {
-			return
+			return nil
 		}
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapConfigurationNotificationRequest(i.GuildID, channelID, webhookID,
 		authorID, "", amqp.NotificationType_ALMANAX, enabled, i.Locale)
-	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.setNotificationRespond)
-	if err != nil {
-		panic(err)
-	}
 }

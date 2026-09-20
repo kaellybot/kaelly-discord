@@ -25,7 +25,8 @@ func runCheck(t *testing.T, check func(*Command) middlewares.MiddlewareCommand,
 	cmd := newCommand(t, &fakeRequestManager{})
 	s, fake := testutils.NewDiscordSession(t)
 	var got context.Context
-	check(cmd)(context.Background(), s, event, func(ctx context.Context) { got = ctx })
+	require.NoError(t, check(cmd)(context.Background(), s, event,
+		func(ctx context.Context) error { got = ctx; return nil }))
 	return got, fake
 }
 
@@ -161,8 +162,8 @@ func TestCheckDate_FailedAnswerLogsTheInteractionError(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 500, Body: `{}`})
 
-	cmd.checkDate(context.Background(), s, slash("day", stringOption("date", "tomorrow")),
-		func(context.Context) { t.Fatal("next must not be called") })
+	require.NoError(t, cmd.checkDate(context.Background(), s, slash("day", stringOption("date", "tomorrow")),
+		func(context.Context) error { t.Fatal("next must not be called"); return nil }))
 
 	assert.Contains(t, logs.String(), "HTTP Internal Server Error")
 	assert.NotContains(t, logs.String(), parsing.ErrDateParsing.Error(),
@@ -185,10 +186,9 @@ func TestChecks_DiscordFailureIsSwallowed(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 500, Body: `{}`})
 
-			assert.NotPanics(t, func() {
-				tc.check(cmd)(context.Background(), s, tc.event,
-					func(context.Context) { t.Fatal("next must not be called") })
-			})
+			assert.NoError(t, tc.check(cmd)(context.Background(), s, tc.event,
+				func(context.Context) error { t.Fatal("next must not be called"); return nil }),
+				"a Discord hiccup on the check answer is logged, not reported back")
 			assert.Len(t, fake.Requests(), 1)
 		})
 	}

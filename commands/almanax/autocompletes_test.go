@@ -40,7 +40,8 @@ func TestAutocomplete_FocusedEffectRequestsEffectList(t *testing.T) {
 	manager := &fakeRequestManager{}
 	s, fake := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, autocompleteEvent(focused(stringOption("effect", "pêc"))))
+	require.NoError(t, newCommand(t, manager).Handle(s,
+		autocompleteEvent(focused(stringOption("effect", "pêc")))))
 
 	assert.Empty(t, fake.Requests(), "the answer is sent once the list comes back")
 	call := manager.single(t)
@@ -63,7 +64,7 @@ func TestAutocomplete_NothingToSuggestAnswersEmptyChoices(t *testing.T) {
 			manager := &fakeRequestManager{}
 			s, fake := testutils.NewDiscordSession(t)
 
-			newCommand(t, manager).Handle(s, event)
+			require.NoError(t, newCommand(t, manager).Handle(s, event))
 
 			assert.Empty(t, manager.calls, "nothing is asked to the encyclopedia")
 			var response autocompleteResponse
@@ -74,15 +75,17 @@ func TestAutocomplete_NothingToSuggestAnswersEmptyChoices(t *testing.T) {
 	}
 }
 
-func TestAutocomplete_RequestFailureIsSwallowed(t *testing.T) {
-	manager := &fakeRequestManager{err: errors.New("broker down")}
+func TestAutocomplete_RequestFailureIsReported(t *testing.T) {
+	errBroker := errors.New("broker down")
+	manager := &fakeRequestManager{err: errBroker}
 	s, fake := testutils.NewDiscordSession(t)
 
-	assert.NotPanics(t, func() {
-		newCommand(t, manager).Handle(s, autocompleteEvent(focused(stringOption("effect", "xp"))))
-	})
+	err := newCommand(t, manager).Handle(s, autocompleteEvent(focused(stringOption("effect", "xp"))))
+
+	require.ErrorIs(t, err, errBroker,
+		"an autocomplete nobody can answer is reported like any other failure")
 	assert.Len(t, manager.calls, 1)
-	assert.Empty(t, fake.Requests())
+	assert.Empty(t, fake.Requests(), "the suggestion box is left to Discord to time out")
 }
 
 func TestAutocompleteAlmanaxEffectList_RespondsWithEffectNames(t *testing.T) {
@@ -90,7 +93,8 @@ func TestAutocompleteAlmanaxEffectList_RespondsWithEffectNames(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	event := autocompleteEvent(focused(stringOption("effect", "xp")))
 
-	cmd.autocompleteAlmanaxEffectList(context.Background(), s, event, listAnswer("XP bonus", "XP malus"), nil)
+	require.NoError(t, cmd.autocompleteAlmanaxEffectList(context.Background(), s, event,
+		listAnswer("XP bonus", "XP malus"), nil))
 
 	req := fake.Last(t)
 	assert.Equal(t, "POST", req.Method)
@@ -119,8 +123,9 @@ func TestAutocompleteAlmanaxEffectList_InvalidAnswerRespondsWithoutChoices(t *te
 			cmd := newCommand(t, &fakeRequestManager{})
 			s, fake := testutils.NewDiscordSession(t)
 
-			cmd.autocompleteAlmanaxEffectList(context.Background(), s,
-				autocompleteEvent(focused(stringOption("effect", "xp"))), message, nil)
+			require.NoError(t, cmd.autocompleteAlmanaxEffectList(context.Background(), s,
+				autocompleteEvent(focused(stringOption("effect", "xp"))), message, nil),
+				"Discord is answered with empty choices instead of being reported to")
 
 			var response autocompleteResponse
 			fake.Last(t).Decode(t, &response)
@@ -135,9 +140,8 @@ func TestAutocompleteAlmanaxEffectList_DiscordFailureIsSwallowed(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/callback", Status: 500, Body: `{}`})
 
-	assert.NotPanics(t, func() {
-		cmd.autocompleteAlmanaxEffectList(context.Background(), s,
-			autocompleteEvent(focused(stringOption("effect", "xp"))), listAnswer("XP"), nil)
-	})
+	assert.NoError(t, cmd.autocompleteAlmanaxEffectList(context.Background(), s,
+		autocompleteEvent(focused(stringOption("effect", "xp"))), listAnswer("XP"), nil),
+		"a Discord hiccup on the autocomplete answer is logged, not reported back")
 	assert.Len(t, fake.Requests(), 1)
 }

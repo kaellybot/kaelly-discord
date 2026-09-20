@@ -364,6 +364,7 @@
         }
     },
     "errors": {
+        "unavailable": "My brain is not answering right now :sweat: Give me a minute and try again!",
         "unknown_interaction": "Hmm, I don't know this interaction... It may come from an outdated message, try the command again! :sweat_smile:",
         "too_many_webhooks": "Webhooks maximum number reached on this channel, I can't continue...\n*(Click on the channel icon :gear: then `Integrations` and finally `Webhooks` to handle them)*",
         "query_mismatch": [

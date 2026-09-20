@@ -152,10 +152,12 @@ func TestCheckOptionalMapNumber_ValidOrAbsentNumberReachesNext(t *testing.T) {
 			var got any
 			called := false
 
-			cmd.checkOptionalMapNumber(context.Background(), s, tc.event, func(ctx context.Context) {
-				called = true
-				got = ctx.Value(constants.ContextKeyMap)
-			})
+			require.NoError(t, cmd.checkOptionalMapNumber(context.Background(), s, tc.event,
+				func(ctx context.Context) error {
+					called = true
+					got = ctx.Value(constants.ContextKeyMap)
+					return nil
+				}))
 
 			require.True(t, called)
 			assert.Equal(t, tc.expected, got)
@@ -169,8 +171,9 @@ func TestCheckOptionalMapNumber_OutOfBoundsAnswersLocalizedErrorAndStops(t *test
 		cmd := newCommand(t, &fakeRequestManager{})
 		s, fake := testutils.NewDiscordSession(t)
 
-		cmd.checkOptionalMapNumber(context.Background(), s, mapCommand(numberOption(value)),
-			func(context.Context) { t.Fatal("next must not be called") })
+		require.NoError(t, cmd.checkOptionalMapNumber(context.Background(), s,
+			mapCommand(numberOption(value)),
+			func(context.Context) error { t.Fatal("next must not be called"); return nil }))
 
 		payload := fake.LastEdit(t)
 		require.NotNil(t, payload.Content)
@@ -183,7 +186,7 @@ func TestHandle_SlashCommandRequestsMapWithCheckedNumber(t *testing.T) {
 	cmd := newCommand(t, manager)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, mapCommand(numberOption(12)))
+	require.NoError(t, cmd.Handle(s, mapCommand(numberOption(12))))
 
 	assert.Empty(t, fake.Requests())
 	require.Len(t, manager.calls, 1)
@@ -196,7 +199,7 @@ func TestHandle_SlashCommandRequestsMapWithCheckedNumber(t *testing.T) {
 	assert.Empty(t, call.properties)
 
 	// The slash command reply always shows the normal map.
-	call.callback(context.Background(), s, mapCommand(), mapAnswer(), nil)
+	require.NoError(t, call.callback(context.Background(), s, mapCommand(), mapAnswer(), nil))
 	payload := fake.LastEdit(t)
 	require.Len(t, payload.Embeds, 1)
 	assert.Equal(t, "https://maps/12-normal.png", payload.Embeds[0].Image.URL)
@@ -211,17 +214,21 @@ func TestHandle_SlashCommandInvalidNumberDoesNotRequest(t *testing.T) {
 	cmd := newCommand(t, manager)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, mapCommand(numberOption(0)))
+	require.NoError(t, cmd.Handle(s, mapCommand(numberOption(0))))
 
 	assert.Empty(t, manager.calls)
 	assert.Len(t, fake.Requests(), 1)
 }
 
-func TestHandle_SlashCommandRequestFailurePanics(t *testing.T) {
-	cmd := newCommand(t, &fakeRequestManager{err: errors.New("broker down")})
-	s, _ := testutils.NewDiscordSession(t)
+func TestHandle_SlashCommandRequestFailureIsReported(t *testing.T) {
+	errBroker := errors.New("broker down")
+	cmd := newCommand(t, &fakeRequestManager{err: errBroker})
+	s, fake := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithError(t, "broker down", func() { cmd.Handle(s, mapCommand()) })
+	err := cmd.Handle(s, mapCommand())
+
+	require.ErrorIs(t, err, errBroker)
+	assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 }
 
 func TestHandle_ButtonsRequestTheMapWithTheirType(t *testing.T) {
@@ -242,7 +249,7 @@ func TestHandle_ButtonsRequestTheMapWithTheirType(t *testing.T) {
 			cmd := newCommand(t, manager)
 			s, fake := testutils.NewDiscordSession(t)
 
-			cmd.Handle(s, button(tc.customID))
+			require.NoError(t, cmd.Handle(s, button(tc.customID)))
 
 			require.Len(t, manager.calls, 1)
 			call := manager.calls[0]
@@ -251,7 +258,8 @@ func TestHandle_ButtonsRequestTheMapWithTheirType(t *testing.T) {
 			require.Len(t, call.properties, 1)
 			assert.Equal(t, map[string]any{"mapType": tc.mapType}, call.properties[0])
 
-			call.callback(context.Background(), s, button(tc.customID), mapAnswer(), call.properties[0])
+			require.NoError(t, call.callback(context.Background(), s, button(tc.customID),
+				mapAnswer(), call.properties[0]))
 			payload := fake.LastEdit(t)
 			require.Len(t, payload.Embeds, 1)
 			assert.Equal(t, tc.expectedURL, payload.Embeds[0].Image.URL)
@@ -260,22 +268,24 @@ func TestHandle_ButtonsRequestTheMapWithTheirType(t *testing.T) {
 	}
 }
 
-func TestUpdateMap_UnknownCustomIDPanics(t *testing.T) {
+func TestUpdateMap_UnknownCustomIDIsReportedAsStale(t *testing.T) {
 	manager := &fakeRequestManager{}
 	cmd := newCommand(t, manager)
 	s, _ := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithValue(t, commands.ErrInvalidInteraction, func() {
-		cmd.updateMap(s, button("/map/7?type=unknown"))
-	})
+	err := cmd.updateMap(s, button("/map/7?type=unknown"))
+
+	require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+	assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+		"a custom ID we cannot read is a stale click, not a crash")
 	assert.Empty(t, manager.calls)
 }
 
-func TestUpdateMap_RequestFailurePanics(t *testing.T) {
+func TestUpdateMap_RequestFailureIsReported(t *testing.T) {
 	cmd := newCommand(t, &fakeRequestManager{err: errors.New("broker down")})
 	s, _ := testutils.NewDiscordSession(t)
 
-	assert.PanicsWithError(t, "broker down", func() { cmd.Handle(s, button("/map/7?type=normal")) })
+	require.ErrorContains(t, cmd.Handle(s, button("/map/7?type=normal")), "broker down")
 }
 
 func TestUpdateMapReply_InvalidAnswersPanic(t *testing.T) {
@@ -293,16 +303,17 @@ func TestUpdateMapReply_InvalidAnswersPanic(t *testing.T) {
 			cmd := newCommand(t, &fakeRequestManager{})
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithValue(t, commands.ErrInvalidAnswerMessage, func() {
-				cmd.updateMapReply(context.Background(), s, button("/map/1?type=normal"), message,
-					map[string]any{"mapType": constants.MapTypeNormal})
-			})
+			err := cmd.updateMapReply(context.Background(), s, button("/map/1?type=normal"), message,
+				map[string]any{"mapType": constants.MapTypeNormal})
+
+			require.ErrorIs(t, err, commands.ErrInvalidAnswerMessage)
+			assert.ErrorIs(t, err, commands.ErrUnavailable, "a backend that failed is worth a retry")
 			assert.Empty(t, fake.Requests())
 		})
 	}
 }
 
-func TestUpdateMapReply_MissingOrMistypedPropertyPanics(t *testing.T) {
+func TestUpdateMapReply_MissingOrMistypedPropertyIsReported(t *testing.T) {
 	for name, properties := range map[string]map[string]any{
 		"missing":    {},
 		"not a type": {"mapType": "normal"},
@@ -311,9 +322,11 @@ func TestUpdateMapReply_MissingOrMistypedPropertyPanics(t *testing.T) {
 			cmd := newCommand(t, &fakeRequestManager{})
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithValue(t, commands.ErrRequestPropertyNotFound, func() {
-				cmd.updateMapReply(context.Background(), s, button("/map/1?type=normal"), mapAnswer(), properties)
-			})
+			err := cmd.updateMapReply(context.Background(), s, button("/map/1?type=normal"),
+				mapAnswer(), properties)
+
+			require.ErrorIs(t, err, commands.ErrRequestPropertyNotFound)
+			assert.NotErrorIs(t, err, commands.ErrStaleInteraction, "wiring gone wrong is a bug, not a stale click")
 			assert.Empty(t, fake.Requests())
 		})
 	}
@@ -324,18 +337,17 @@ func TestUpdateMapReply_DiscordFailureIsSwallowed(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 500, Body: `{}`})
 
-	assert.NotPanics(t, func() {
-		cmd.getMapReply(context.Background(), s, mapCommand(), mapAnswer(), nil)
-	})
+	assert.NoError(t, cmd.getMapReply(context.Background(), s, mapCommand(), mapAnswer(), nil),
+		"a Discord hiccup on the final edit is logged, not reported back")
 	assert.Len(t, fake.Requests(), 1)
 }
 
-func TestGetMap_MissingContextValuePanics(t *testing.T) {
+func TestGetMap_MissingContextValueIsReported(t *testing.T) {
 	manager := &fakeRequestManager{}
 	cmd := newCommand(t, manager)
 	s, _ := testutils.NewDiscordSession(t)
 
-	assert.Panics(t, func() { cmd.getMap(context.Background(), s, mapCommand(), nil) })
+	require.Error(t, cmd.getMap(context.Background(), s, mapCommand(), nil))
 	assert.Empty(t, manager.calls)
 }
 

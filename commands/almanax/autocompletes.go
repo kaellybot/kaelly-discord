@@ -15,7 +15,7 @@ import (
 )
 
 func (command *Command) autocomplete(s *discordgo.Session,
-	i *discordgo.InteractionCreate) {
+	i *discordgo.InteractionCreate) error {
 	data := i.ApplicationCommandData()
 
 	for _, subCommand := range data.Options {
@@ -23,39 +23,37 @@ func (command *Command) autocomplete(s *discordgo.Session,
 			if option.Focused {
 				switch option.Name {
 				case contract.AlmanaxEffectOptionName:
-					command.requestAlmanaxEffectList(s, i, option.StringValue())
+					return command.requestAlmanaxEffectList(s, i, option.StringValue())
 				default:
 					log.Error().
 						Str(constants.LogCommandOption, option.Name).
 						Msgf("Option name not handled, answering without choices")
 					respondAutocomplete(s, i, nil)
 				}
-				return
+				return nil
 			}
 		}
 	}
 
 	respondAutocomplete(s, i, nil)
+	return nil
 }
 
 func (command *Command) requestAlmanaxEffectList(s *discordgo.Session,
-	i *discordgo.InteractionCreate, query string) {
+	i *discordgo.InteractionCreate, query string) error {
 	if len(strings.TrimSpace(query)) == 0 {
 		respondAutocomplete(s, i, nil)
-		return
+		return nil
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxEffectListRequest(query, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.autocompleteAlmanaxEffectList)
-	if err != nil {
-		log.Error().Err(err).Msg("Autocomplete request ignored")
-	}
 }
 
 func (command *Command) autocompleteAlmanaxEffectList(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
 	var choices []*discordgo.ApplicationCommandOptionChoice
 	if isAlmanaxEffectListAnswerValid(message) {
 		for _, effect := range message.EncyclopediaListAnswer.Items {
@@ -69,11 +67,15 @@ func (command *Command) autocompleteAlmanaxEffectList(_ context.Context, s *disc
 			Msgf("Cannot retrieve autocomplete, retrieving empty choices...")
 	}
 
+	// Answering with what we have keeps the suggestion box alive, so a bad
+	// answer is reported here rather than returned: the caller is already served.
 	respondAutocomplete(s, i, choices)
+	return nil
 }
 
 // respondAutocomplete answers the interaction; Discord expects a response for
-// every keystroke, even when there is nothing to suggest.
+// every keystroke, even when there is nothing to suggest. This answer is the
+// last thing left to do, so a Discord hiccup is logged, not reported back.
 func respondAutocomplete(s *discordgo.Session, i *discordgo.InteractionCreate,
 	choices []*discordgo.ApplicationCommandOptionChoice) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

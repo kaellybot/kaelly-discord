@@ -13,27 +13,28 @@ import (
 )
 
 func (command *Command) twitterRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	channelID, twitterAccount, enabled, err := getWebhookTwitterOptions(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	var webhookID string
 	if enabled {
 		var created bool
-		webhookID, created = command.followAnnouncement(s, i, twitterAccount.NewsChannelID, channelID)
+		webhookID, created, err = command.followAnnouncement(s, i, twitterAccount.NewsChannelID, channelID)
+		if err != nil {
+			return err
+		}
+
 		if !created {
-			return
+			return nil
 		}
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapConfigurationNotificationRequest(i.GuildID, channelID, webhookID,
 		authorID, twitterAccount.ID, amqp.NotificationType_TWITTER, enabled, i.Locale)
-	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.setNotificationRespond)
-	if err != nil {
-		panic(err)
-	}
 }

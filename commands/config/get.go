@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -14,43 +15,42 @@ import (
 )
 
 func (command *Command) getRequest(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapConfigurationGetRequest(i.GuildID, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.getRespond)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) getRespond(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-		guild, err := command.getGuildConfigData(s, message.ConfigurationGetAnswer)
-		if err != nil {
-			panic(err)
-		}
-
-		_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Embeds: &[]*discordgo.MessageEmbed{
-				mappers.MapConfigToEmbed(guild, command.emojiService, command.serverService,
-					command.feedService, command.twitterService, message.Language),
-			},
-		})
-		if err != nil {
-			log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
-		}
-	} else {
-		panic(commands.ErrInvalidAnswerMessage)
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
+	if message.Status != amqp.RabbitMQMessage_SUCCESS {
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
+
+	guild, err := command.getGuildConfigData(s, message.ConfigurationGetAnswer)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Embeds: &[]*discordgo.MessageEmbed{
+			mappers.MapConfigToEmbed(guild, command.emojiService, command.serverService,
+				command.feedService, command.twitterService, message.Language),
+		},
+	})
+	if err != nil {
+		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+	}
+
+	return nil
 }
 
 func (command *Command) getGuildConfigData(s *discordgo.Session,
 	answer *amqp.ConfigurationGetAnswer) (constants.GuildConfig, error) {
 	guild, err := s.Guild(answer.GuildId)
 	if err != nil {
-		return constants.GuildConfig{}, err
+		return constants.GuildConfig{}, fmt.Errorf("%w: %w", commands.ErrUnavailable, err)
 	}
 
 	cache := make(map[string]*discordgo.Channel)

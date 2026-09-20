@@ -12,7 +12,7 @@ import (
 )
 
 func (command *Command) checkOptionalMapNumber(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 	var mapNumber int64
 	for _, option := range data.Options {
@@ -32,9 +32,10 @@ func (command *Command) checkOptionalMapNumber(ctx context.Context, s *discordgo
 			if err != nil {
 				log.Error().Err(err).Msg("Map number check response ignored")
 			}
-			return
+
+			return nil
 		}
 	}
 
-	next(context.WithValue(ctx, constants.ContextKeyMap, mapNumber))
+	return next(context.WithValue(ctx, constants.ContextKeyMap, mapNumber))
 }

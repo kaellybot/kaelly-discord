@@ -14,8 +14,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// autocomplete never reports back: an autocompletion cannot be answered with a
+// message, so a failure is logged and the caller simply sees no suggestion.
 func (command *Command) autocomplete(s *discordgo.Session,
-	i *discordgo.InteractionCreate) {
+	i *discordgo.InteractionCreate) error {
 	data := i.ApplicationCommandData()
 
 	for _, option := range data.Options {
@@ -31,6 +33,8 @@ func (command *Command) autocomplete(s *discordgo.Session,
 			break
 		}
 	}
+
+	return nil
 }
 
 func (command *Command) requestItemList(s *discordgo.Session,
@@ -49,7 +53,7 @@ func (command *Command) requestItemList(s *discordgo.Session,
 }
 
 func (command *Command) autocompleteItemList(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
 	var choices []*discordgo.ApplicationCommandOptionChoice
 	if isItemListAnswerValid(message) {
 		for _, item := range message.EncyclopediaListAnswer.Items {
@@ -72,6 +76,8 @@ func (command *Command) autocompleteItemList(_ context.Context, s *discordgo.Ses
 	if err != nil {
 		log.Error().Err(err).Msg("Autocomplete request ignored")
 	}
+
+	return nil
 }
 
 func isItemListAnswerValid(message *amqp.RabbitMQMessage) bool {

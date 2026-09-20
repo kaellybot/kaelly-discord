@@ -15,10 +15,10 @@ import (
 )
 
 func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	channelID, feed, enabled, err := getWebhookRssOptions(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// The default language is followed for Discord locales the bot does not
@@ -29,26 +29,27 @@ func (command *Command) rssRequest(ctx context.Context, s *discordgo.Session,
 	}
 
 	if newsChannelID == "" {
-		panic(fmt.Errorf("cannot find feed source for '%v' in %v", feed.ID, i.Locale))
+		return fmt.Errorf("cannot find feed source for '%v' in %v", feed.ID, i.Locale)
 	}
 
 	var webhookID string
 	if enabled {
 		var created bool
-		webhookID, created = command.followAnnouncement(s, i, newsChannelID, channelID)
+		webhookID, created, err = command.followAnnouncement(s, i, newsChannelID, channelID)
+		if err != nil {
+			return err
+		}
+
 		if !created {
-			return
+			return nil
 		}
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapConfigurationNotificationRequest(i.GuildID, channelID, webhookID,
 		authorID, feed.ID, amqp.NotificationType_RSS, enabled, i.Locale)
-	err = command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.ConfigurationRequestRoutingKey,
 		msg, command.setNotificationRespond)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func findNewsChannelID(feed entities.FeedType, locale discordgo.Locale) string {

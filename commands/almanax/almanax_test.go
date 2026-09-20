@@ -188,7 +188,7 @@ func TestHandle_SubCommandsRunTheirChecksThenRequest(t *testing.T) {
 			manager := &fakeRequestManager{}
 			s, fake := testutils.NewDiscordSession(t)
 
-			newCommand(t, manager).Handle(s, tc.event)
+			require.NoError(t, newCommand(t, manager).Handle(s, tc.event))
 
 			assert.Empty(t, fake.Requests(), "no error answer on valid input")
 			call := manager.single(t)
@@ -202,38 +202,46 @@ func TestHandle_FailedCheckStopsBeforeRequest(t *testing.T) {
 	manager := &fakeRequestManager{}
 	s, fake := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, slash("resources", durationOption(99)))
+	require.NoError(t, newCommand(t, manager).Handle(s, slash("resources", durationOption(99))))
 
 	assert.Empty(t, manager.calls)
 	assert.Len(t, fake.Requests(), 1)
 }
 
-func TestHandle_UnknownSubCommandPanics(t *testing.T) {
-	s, _ := testutils.NewDiscordSession(t)
-	assert.PanicsWithValue(t, commands.ErrNoProvidedHandler, func() {
-		newCommand(t, &fakeRequestManager{}).Handle(s, slash("unknown"))
-	})
+func TestHandle_UnknownSubCommandIsReported(t *testing.T) {
+	s, fake := testutils.NewDiscordSession(t)
+
+	err := newCommand(t, &fakeRequestManager{}).Handle(s, slash("unknown"))
+
+	require.ErrorIs(t, err, commands.ErrNoProvidedHandler)
+	assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+		"a sub-command nobody handles is a stale interaction, not a crash")
+	assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 }
 
-func TestHandle_UnknownComponentPanics(t *testing.T) {
-	s, _ := testutils.NewDiscordSession(t)
-	assert.PanicsWithValue(t, commands.ErrNoProvidedHandler, func() {
-		newCommand(t, &fakeRequestManager{}).Handle(s, component("/almanax/unknown"))
-	})
+func TestHandle_UnknownComponentIsReported(t *testing.T) {
+	s, fake := testutils.NewDiscordSession(t)
+
+	err := newCommand(t, &fakeRequestManager{}).Handle(s, component("/almanax/unknown"))
+
+	require.ErrorIs(t, err, commands.ErrNoProvidedHandler)
+	assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+		"a component nobody handles is a stale click, not a crash")
+	assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 }
 
 func TestHandle_UnhandledInteractionTypeIsIgnored(t *testing.T) {
 	manager := &fakeRequestManager{}
 	s, fake := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, interaction(discordgo.InteractionModalSubmit,
-		discordgo.ModalSubmitInteractionData{CustomID: "/almanax/day/1"}))
+	require.NoError(t, newCommand(t, manager).Handle(s, interaction(discordgo.InteractionModalSubmit,
+		discordgo.ModalSubmitInteractionData{CustomID: "/almanax/day/1"})))
 
 	assert.Empty(t, manager.calls)
 	assert.Empty(t, fake.Requests())
 }
 
-func TestHandle_RequestFailurePanicsForEverySubCommand(t *testing.T) {
+func TestHandle_RequestFailureIsReportedForEverySubCommand(t *testing.T) {
 	events := map[string]*discordgo.InteractionCreate{
 		"day":       slash("day"),
 		"resources": slash("resources"),
@@ -241,21 +249,24 @@ func TestHandle_RequestFailurePanicsForEverySubCommand(t *testing.T) {
 	}
 	for name, event := range events {
 		t.Run(name, func(t *testing.T) {
-			s, _ := testutils.NewDiscordSession(t)
-			cmd := newCommand(t, &fakeRequestManager{err: errors.New("broker down")})
-			assert.PanicsWithError(t, "broker down", func() { cmd.Handle(s, event) })
+			s, fake := testutils.NewDiscordSession(t)
+			errBroker := errors.New("broker down")
+			cmd := newCommand(t, &fakeRequestManager{err: errBroker})
+
+			require.ErrorIs(t, cmd.Handle(s, event), errBroker)
+			assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 		})
 	}
 }
 
-func TestRequestHandlers_MissingContextValuePanics(t *testing.T) {
+func TestRequestHandlers_MissingContextValueIsReported(t *testing.T) {
 	manager := &fakeRequestManager{}
 	cmd := newCommand(t, manager)
 	s, _ := testutils.NewDiscordSession(t)
 	ctx := context.Background()
 
-	assert.Panics(t, func() { cmd.getAlmanax(ctx, s, slash("day"), nil) })
-	assert.Panics(t, func() { cmd.getResources(ctx, s, slash("resources"), nil) })
-	assert.Panics(t, func() { cmd.getAlmanaxesByEffect(ctx, s, slash("effects"), nil) })
+	require.Error(t, cmd.getAlmanax(ctx, s, slash("day"), nil))
+	require.Error(t, cmd.getResources(ctx, s, slash("resources"), nil))
+	require.Error(t, cmd.getAlmanaxesByEffect(ctx, s, slash("effects"), nil))
 	assert.Empty(t, manager.calls)
 }

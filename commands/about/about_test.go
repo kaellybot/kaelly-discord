@@ -94,8 +94,8 @@ func TestHandle_EmitsTraceAndEditsResponseWithAboutEmbed(t *testing.T) {
 	cmd := newCommand(t, broker, emojiService)
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, interaction(discordgo.InteractionApplicationCommand,
-		discordgo.ApplicationCommandInteractionData{Name: "about"}))
+	require.NoError(t, cmd.Handle(s, interaction(discordgo.InteractionApplicationCommand,
+		discordgo.ApplicationCommandInteractionData{Name: "about"})))
 
 	calls := broker.Calls()
 	require.Len(t, calls, 1)
@@ -130,8 +130,8 @@ func TestHandle_BrokerFailureStillAnswersUser(t *testing.T) {
 	cmd := newCommand(t, broker, &fakeEmojis{})
 	s, fake := testutils.NewDiscordSession(t)
 
-	cmd.Handle(s, interaction(discordgo.InteractionApplicationCommand,
-		discordgo.ApplicationCommandInteractionData{Name: "about"}))
+	require.NoError(t, cmd.Handle(s, interaction(discordgo.InteractionApplicationCommand,
+		discordgo.ApplicationCommandInteractionData{Name: "about"})))
 
 	assert.Len(t, broker.Calls(), 1)
 	require.Len(t, fake.Requests(), 1)
@@ -143,9 +143,8 @@ func TestHandle_DiscordFailureIsSwallowed(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 500, Body: `{"message":"x"}`})
 
-	assert.NotPanics(t, func() {
-		cmd.Handle(s, interaction(discordgo.InteractionApplicationCommand,
-			discordgo.ApplicationCommandInteractionData{Name: "about"}))
-	})
+	assert.NoError(t, cmd.Handle(s, interaction(discordgo.InteractionApplicationCommand,
+		discordgo.ApplicationCommandInteractionData{Name: "about"})),
+		"a Discord hiccup on the answer is logged, not reported back")
 	assert.Len(t, fake.Requests(), 1)
 }

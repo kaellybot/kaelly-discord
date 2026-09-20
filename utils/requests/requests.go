@@ -1,8 +1,12 @@
 package requests
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-discord/commands"
+	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/panics"
 	"github.com/rs/zerolog/log"
 )
@@ -46,7 +50,9 @@ func (manager *RequestManagerImpl) Request(s *discordgo.Session, i *discordgo.In
 		manager.mut.Lock()
 		delete(manager.requests, i.ID)
 		manager.mut.Unlock()
-		return err
+		// Classified here rather than at each caller: a broker refusing a
+		// publish is the textbook "try again later".
+		return fmt.Errorf("%w: %w", commands.ErrUnavailable, err)
 	}
 
 	return nil
@@ -68,6 +74,9 @@ func (manager *RequestManagerImpl) consume(ctx amqp.Context, message *amqp.Rabbi
 
 	if found {
 		defer panics.HandlePanic(request.session, request.interaction)
-		request.callback(ctx, request.session, request.interaction, message, request.properties)
+		if err := request.callback(ctx, request.session, request.interaction,
+			message, request.properties); err != nil {
+			discord.AnswerError(request.session, request.interaction, err)
+		}
 	}
 }

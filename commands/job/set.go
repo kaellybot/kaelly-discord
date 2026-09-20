@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -16,32 +17,31 @@ import (
 )
 
 func (command *Command) setBook(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	job, level, server, err := getSetOptions(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	userID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookJobSetRequest(userID, job.ID, server.ID, level, i.Locale)
-	err = command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.JobRequestRoutingKey,
 		msg, command.setBookReply)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) setBookReply(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	if message.Status == amqp.RabbitMQMessage_SUCCESS {
-		content := di18n.Get(i18n.MapAMQPLocale(message.Language), "job.success")
-		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Content: &content,
-		})
-		if err != nil {
-			log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
-		}
-	} else {
-		panic(commands.ErrInvalidAnswerMessage)
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
+	if message.Status != amqp.RabbitMQMessage_SUCCESS {
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
+
+	content := di18n.Get(i18n.MapAMQPLocale(message.Language), "job.success")
+	_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Content: &content,
+	})
+	if err != nil {
+		log.Warn().Err(err).Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
+	}
+
+	return nil
 }

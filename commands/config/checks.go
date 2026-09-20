@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	contract "github.com/kaellybot/kaelly-commands"
+	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/utils/discord"
 	"github.com/kaellybot/kaelly-discord/utils/middlewares"
@@ -17,7 +18,7 @@ import (
 
 //nolint:dupl // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
@@ -27,25 +28,25 @@ func (command *Command) checkFeedType(ctx context.Context, s *discordgo.Session,
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.feed", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
-					next(context.WithValue(ctx, constants.ContextKeyFeed, feedTypes[0]))
-				} else {
-					_, err := s.InteractionResponseEdit(i.Interaction, &response)
-					if err != nil {
-						log.Error().Err(err).Msg("Feed check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyFeed, feedTypes[0]))
 				}
 
-				return
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
+				if err != nil {
+					log.Error().Err(err).Msg("Feed check response ignored")
+				}
+
+				return nil
 			}
 		}
 	}
 
-	next(ctx)
+	return next(ctx)
 }
 
 //nolint:dupl // OK for DRY concept but refactor at any cost is not relevant here.
 func (command *Command) checkTwitterAccount(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
@@ -55,61 +56,58 @@ func (command *Command) checkTwitterAccount(ctx context.Context, s *discordgo.Se
 				response, checkSuccess := validators.
 					ExpectOnlyOneElement("checks.twitterAccount", option.StringValue(), labels, i.Locale)
 				if checkSuccess {
-					next(context.WithValue(ctx, constants.ContextKeyTwitter, twitterAccounts[0]))
-				} else {
-					_, err := s.InteractionResponseEdit(i.Interaction, &response)
-					if err != nil {
-						log.Error().Err(err).Msg("Twitter check response ignored")
-					}
+					return next(context.WithValue(ctx, constants.ContextKeyTwitter, twitterAccounts[0]))
 				}
 
-				return
+				_, err := s.InteractionResponseEdit(i.Interaction, &response)
+				if err != nil {
+					log.Error().Err(err).Msg("Twitter check response ignored")
+				}
+
+				return nil
 			}
 		}
 	}
 
-	next(ctx)
+	return next(ctx)
 }
 
 // checkServerChannelID binds the channel a thread belongs to: a thread has no
 // configuration of its own, and that is how the binding is read back.
 func (command *Command) checkServerChannelID(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
-	command.checkChannelID(ctx, s, i, func(channelCtx context.Context) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
+	return command.checkChannelID(ctx, s, i, func(channelCtx context.Context) error {
 		channelID, ok := channelCtx.Value(constants.ContextKeyChannel).(string)
 		if !ok {
-			next(channelCtx)
-			return
+			return next(channelCtx)
 		}
 
-		next(context.WithValue(channelCtx, constants.ContextKeyChannel,
+		return next(context.WithValue(channelCtx, constants.ContextKeyChannel,
 			discord.ResolveParentChannelID(s, channelID)))
 	})
 }
 
 func (command *Command) checkChannelID(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigChannelOptionName {
-				next(context.WithValue(ctx, constants.ContextKeyChannel, option.ChannelValue(s).ID))
-				return
+				return next(context.WithValue(ctx, constants.ContextKeyChannel, option.ChannelValue(s).ID))
 			}
 		}
 
 		// If option not found, guess we're using the current channel for webhook queries
 		if subCommand.Name != contract.ConfigServerSubCommandName {
-			next(context.WithValue(ctx, constants.ContextKeyChannel, i.ChannelID))
-			return
+			return next(context.WithValue(ctx, constants.ContextKeyChannel, i.ChannelID))
 		}
 	}
 
-	next(ctx)
+	return next(ctx)
 }
 
 func (command *Command) checkFollowConstraints(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	channelID, ok := ctx.Value(constants.ContextKeyChannel).(string)
 	if !ok {
 		// Previous checks always fill it; fallback on the channel hosting the interaction.
@@ -117,7 +115,7 @@ func (command *Command) checkFollowConstraints(ctx context.Context, s *discordgo
 	}
 
 	if channelID == "" {
-		panic(fmt.Sprintf("cannot retrieve channelID from ctx (%v)", constants.ContextKeyChannel))
+		return fmt.Errorf("cannot retrieve channelID from ctx (%v)", constants.ContextKeyChannel)
 	}
 
 	// Only regular Text channels (GUILD_TEXT) could follow Announcement channels.
@@ -126,7 +124,7 @@ func (command *Command) checkFollowConstraints(ctx context.Context, s *discordgo
 		// Not cached yet, ask Discord about it.
 		channel, err = s.Channel(channelID)
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("%w: %w", commands.ErrUnavailable, err)
 		}
 	}
 
@@ -138,7 +136,8 @@ func (command *Command) checkFollowConstraints(ctx context.Context, s *discordgo
 		if err != nil {
 			log.Error().Err(err).Msg("Channel type check response ignored")
 		}
-		return
+
+		return nil
 	}
 
 	// But have we got the permission to follow?
@@ -150,23 +149,23 @@ func (command *Command) checkFollowConstraints(ctx context.Context, s *discordgo
 		if err != nil {
 			log.Error().Err(err).Msg("Permission check response ignored")
 		}
-		return
+
+		return nil
 	}
 
-	next(ctx)
+	return next(ctx)
 }
 
 func (command *Command) checkEnabled(ctx context.Context, _ *discordgo.Session,
-	i *discordgo.InteractionCreate, next middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, next middlewares.NextFunc) error {
 	data := i.ApplicationCommandData()
 	for _, subCommand := range data.Options {
 		for _, option := range subCommand.Options {
 			if option.Name == contract.ConfigEnabledOptionName {
-				next(context.WithValue(ctx, constants.ContextKeyEnabled, option.BoolValue()))
-				return
+				return next(context.WithValue(ctx, constants.ContextKeyEnabled, option.BoolValue()))
 			}
 		}
 	}
 
-	next(ctx)
+	return next(ctx)
 }

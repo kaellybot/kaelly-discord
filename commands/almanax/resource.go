@@ -2,6 +2,7 @@ package almanax
 
 import (
 	"context"
+	"fmt"
 	"slices"
 
 	"github.com/bwmarrin/discordgo"
@@ -17,41 +18,30 @@ import (
 )
 
 func (command *Command) getResources(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	duration, err := getDurationOption(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxResourceRequest(duration, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.getResourcesReply)
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (command *Command) updateResourceCharacter(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	customID := i.MessageComponentData().CustomID
-	dayDuration, ok := contract.ExtractAlmanaxResourceCharacterCustomID(customID)
+func (command *Command) updateResourceCharacter(s *discordgo.Session,
+	i *discordgo.InteractionCreate) error {
+	data := i.MessageComponentData()
+	dayDuration, ok := contract.ExtractAlmanaxResourceCharacterCustomID(data.CustomID)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, data.CustomID)
 	}
 
-	characterNumber, errConv := discord.GetInt64Value(i.MessageComponentData())
+	characterNumber, errConv := discord.GetInt64Value(data)
 	if errConv != nil {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Str(constants.LogRequestProperty, characterNumberProperty).
-			Strs(constants.LogRequestValue, i.MessageComponentData().Values).
-			Msgf("Cannot retrieve duration from values selected by user, panicking...")
-		panic(errConv)
+		return fmt.Errorf("cannot read the %v selected on custom ID %q among %v: %w",
+			characterNumberProperty, data.CustomID, data.Values, errConv)
 	}
 
 	properties := map[string]any{
@@ -60,46 +50,32 @@ func (command *Command) updateResourceCharacter(s *discordgo.Session, i *discord
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxResourceRequest(sanitizeDayDuration(dayDuration), authorID, i.Locale)
-	errReq := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.updateResourcesReply, properties)
-	if errReq != nil {
-		panic(errReq)
-	}
 }
 
-func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	customID := i.MessageComponentData().CustomID
-	characterNumber, ok := contract.ExtractAlmanaxResourceDurationCustomID(customID)
+func (command *Command) updateResourceDuration(s *discordgo.Session,
+	i *discordgo.InteractionCreate) error {
+	data := i.MessageComponentData()
+	characterNumber, ok := contract.ExtractAlmanaxResourceDurationCustomID(data.CustomID)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, data.CustomID)
 	}
 
 	properties := map[string]any{
 		characterNumberProperty: sanitizeCharacterNumber(characterNumber),
 	}
 
-	duration, errConv := discord.GetInt64Value(i.MessageComponentData())
+	duration, errConv := discord.GetInt64Value(data)
 	if errConv != nil {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Str(constants.LogRequestProperty, dayDurationProperty).
-			Strs(constants.LogRequestValue, i.MessageComponentData().Values).
-			Msgf("Cannot retrieve duration from values selected by user, panicking...")
-		panic(errConv)
+		return fmt.Errorf("cannot read the %v selected on custom ID %q among %v: %w",
+			dayDurationProperty, data.CustomID, data.Values, errConv)
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxResourceRequest(sanitizeDayDuration(duration), authorID, i.Locale)
-	errReq := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.updateResourcesReply, properties)
-	if errReq != nil {
-		panic(errReq)
-	}
 }
 
 // sanitizeCharacterNumber keeps the character count among the values the menu
@@ -122,33 +98,21 @@ func sanitizeDayDuration(dayDuration int64) int64 {
 }
 
 func (command *Command) getResourcesReply(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	command.updateResourcesReply(ctx, s, i, message, map[string]any{
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
+	return command.updateResourcesReply(ctx, s, i, message, map[string]any{
 		characterNumberProperty: int64(defaultCharacterNumber),
 	})
 }
 
 func (command *Command) updateResourcesReply(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) error {
 	if !isAlmanaxResourceAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
-	characterNumberValue, found := properties[characterNumberProperty]
-	if !found {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, characterNumberProperty).
-			Msgf("Cannot find request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
-	}
-	characterNumber, ok := characterNumberValue.(int64)
+	characterNumber, ok := properties[characterNumberProperty].(int64)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, characterNumberProperty).
-			Msgf("Cannot convert request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
+		return fmt.Errorf("%w: %v", commands.ErrRequestPropertyNotFound, characterNumberProperty)
 	}
 
 	webhookEdit := mappers.MapAlmanaxResourceToWebhook(message.GetEncyclopediaAlmanaxResourceAnswer(),
@@ -159,6 +123,8 @@ func (command *Command) updateResourcesReply(_ context.Context, s *discordgo.Ses
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func isAlmanaxResourceAnswerValid(message *amqp.RabbitMQMessage) bool {

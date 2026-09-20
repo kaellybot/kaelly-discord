@@ -192,8 +192,8 @@ func TestHandle_EveryInteractionIsTracedThroughAMQP(t *testing.T) {
 	f := newFixture(t)
 	s, _ := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, helpCommand())
-	f.cmd.Handle(s, component("/help", "item"))
+	require.NoError(t, f.cmd.Handle(s, helpCommand()))
+	require.NoError(t, f.cmd.Handle(s, component("/help", "item")))
 
 	calls := f.broker.Calls()
 	require.Len(t, calls, 2)
@@ -213,7 +213,7 @@ func TestHandle_TracingFailureDoesNotBlockHelp(t *testing.T) {
 	f.broker.Err = errors.New("broker down")
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, helpCommand())
+	require.NoError(t, f.cmd.Handle(s, helpCommand()))
 
 	require.Len(t, fake.Requests(), 1)
 	assert.Len(t, lastEdit(t, fake).Embeds, 1)
@@ -225,7 +225,7 @@ func TestHandle_UnhandledInteractionTypesAreIgnored(t *testing.T) {
 	event := helpCommand()
 	event.Type = discordgo.InteractionApplicationCommandAutocomplete
 
-	f.cmd.Handle(s, event)
+	require.NoError(t, f.cmd.Handle(s, event))
 
 	assert.Empty(t, f.broker.Calls())
 	assert.Empty(t, fake.Requests())
@@ -266,7 +266,7 @@ func TestHandle_SlashCommandShowsMenu(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, helpCommand())
+	require.NoError(t, f.cmd.Handle(s, helpCommand()))
 
 	assertMenu(t, lastEdit(t, fake))
 }
@@ -280,7 +280,7 @@ func TestHandle_MenuSelectionShowsMenu(t *testing.T) {
 			f := newFixture(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			f.cmd.Handle(s, event)
+			require.NoError(t, f.cmd.Handle(s, event))
 
 			assertMenu(t, lastEdit(t, fake))
 		})
@@ -292,7 +292,7 @@ func TestHandle_MenuReflectsCommandsRegisteredAfterConstruction(t *testing.T) {
 	*f.commands = []commands.DiscordCommand{singleDescription()}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, helpCommand())
+	require.NoError(t, f.cmd.Handle(s, helpCommand()))
 
 	payload := lastEdit(t, fake)
 	values, _ := optionValues(selectMenus(t, payload)[0])
@@ -305,7 +305,7 @@ func TestHandle_MenuWithoutCommands(t *testing.T) {
 	*f.commands = nil
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, helpCommand())
+	require.NoError(t, f.cmd.Handle(s, helpCommand()))
 
 	payload := lastEdit(t, fake)
 	assert.Equal(t, "Aucune commande disponible !", payload.Embeds[0].Description)
@@ -317,7 +317,7 @@ func TestHandle_SingleDescriptionCommandHasNoPages(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, component("/help", "item"))
+	require.NoError(t, f.cmd.Handle(s, component("/help", "item")))
 
 	payload := lastEdit(t, fake)
 	require.Len(t, payload.Embeds, 1)
@@ -338,7 +338,7 @@ func TestHandle_MultiDescriptionCommandShowsFirstPageAndPageSelect(t *testing.T)
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, component("/help", "config"))
+	require.NoError(t, f.cmd.Handle(s, component("/help", "config")))
 
 	payload := lastEdit(t, fake)
 	embed := payload.Embeds[0]
@@ -365,7 +365,7 @@ func TestHandle_PageSelectShowsRequestedSubCommand(t *testing.T) {
 	f := newFixture(t)
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, component("/help/config/page", "2"))
+	require.NoError(t, f.cmd.Handle(s, component("/help/config/page", "2")))
 
 	payload := lastEdit(t, fake)
 	embed := payload.Embeds[0]
@@ -381,35 +381,49 @@ func TestHandle_DetailIsLocalized(t *testing.T) {
 	event := component("/help", "item")
 	event.Locale = discordgo.EnglishGB
 
-	f.cmd.Handle(s, event)
+	require.NoError(t, f.cmd.Handle(s, event))
 
 	embed := lastEdit(t, fake).Embeds[0]
 	assert.Equal(t, "**</item:111>** command", embed.Title)
 	assert.Contains(t, embed.Description, testutils.Translations(t, discordgo.EnglishGB, "item.help.source")[0])
 }
 
-func TestHandle_InvalidSelectionsPanic(t *testing.T) {
-	cases := map[string]struct {
-		event   *discordgo.InteractionCreate
-		wantErr string
-	}{
-		"no value":          {component("/help"), commands.ErrInvalidInteraction.Error()},
-		"two values":        {component("/help", "item", "config"), commands.ErrInvalidInteraction.Error()},
-		"page not a number": {component("/help/config/page", "two"), commands.ErrInvalidInteraction.Error()},
-		"foreign custom ID": {component("/set/1", "item"), commands.ErrInvalidInteraction.Error()},
-		"unknown command": {component("/help", "ghost"),
-			"cannot find command (ghost) while searching for its help description, panicking"},
+func TestHandle_UnreadableSelectionsAreReportedAsStale(t *testing.T) {
+	cases := map[string]*discordgo.InteractionCreate{
+		"no value":          component("/help"),
+		"two values":        component("/help", "item", "config"),
+		"page not a number": component("/help/config/page", "two"),
+		"foreign custom ID": component("/set/1", "item"),
 	}
-	for name, tc := range cases {
+	for name, event := range cases {
 		t.Run(name, func(t *testing.T) {
 			f := newFixture(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.PanicsWithError(t, tc.wantErr, func() { f.cmd.Handle(s, tc.event) })
-			assert.Empty(t, fake.Requests())
+			err := f.cmd.Handle(s, event)
+
+			require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+			assert.ErrorIs(t, err, commands.ErrStaleInteraction,
+				"a selection we cannot read is a stale click, not a crash")
+			assert.Empty(t, fake.Requests(), "the router answers the caller, not the command")
 			assert.Len(t, f.broker.Calls(), 1, "tracing happens before validation")
 		})
 	}
+}
+
+func TestHandle_CommandWithoutHelpDescriptionIsReportedAsABug(t *testing.T) {
+	// The select only offers registered commands: a name we cannot describe
+	// means our own wiring is wrong, so it is not a stale interaction.
+	f := newFixture(t)
+	s, fake := testutils.NewDiscordSession(t)
+
+	err := f.cmd.Handle(s, component("/help", "ghost"))
+
+	require.ErrorContains(t, err, `cannot find command "ghost"`)
+	assert.NotErrorIs(t, err, commands.ErrStaleInteraction)
+	assert.NotErrorIs(t, err, commands.ErrUnavailable)
+	assert.Empty(t, fake.Requests())
+	assert.Len(t, f.broker.Calls(), 1, "tracing happens before validation")
 }
 
 func TestHandle_OutOfRangePageIsClampedToTheAvailableOnes(t *testing.T) {
@@ -428,7 +442,7 @@ func TestHandle_OutOfRangePageIsClampedToTheAvailableOnes(t *testing.T) {
 			f := newFixture(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			assert.NotPanics(t, func() { f.cmd.Handle(s, component("/help/config/page", tc.page)) })
+			require.NoError(t, f.cmd.Handle(s, component("/help/config/page", tc.page)))
 
 			payload := lastEdit(t, fake)
 			assert.Equal(t, tc.title, payload.Embeds[0].Title)
@@ -444,9 +458,8 @@ func TestHandle_DiscordFailureIsSwallowed(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/webhooks/", Status: 400, Body: `{}`})
 
-	assert.NotPanics(t, func() {
-		f.cmd.Handle(s, helpCommand())
-		f.cmd.Handle(s, component("/help", "item"))
-	})
+	assert.NoError(t, f.cmd.Handle(s, helpCommand()),
+		"a Discord hiccup on the final edit is logged, not reported back")
+	assert.NoError(t, f.cmd.Handle(s, component("/help", "item")))
 	assert.Len(t, fake.Requests(), 2)
 }

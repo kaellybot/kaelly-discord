@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
@@ -45,7 +46,16 @@ func GetMemberNickNames(s *discordgo.Session, guildID string) (map[string]any, e
 func GetInt64Value(data discordgo.MessageComponentInteractionData) (int64, error) {
 	values := data.Values
 	if len(values) != 1 {
-		return 0, commands.ErrInvalidInteraction
+		return 0, fmt.Errorf("%w: %v values selected instead of one",
+			commands.ErrInvalidInteraction, len(values))
 	}
-	return strconv.ParseInt(values[0], 10, 64)
+
+	value, err := strconv.ParseInt(values[0], 10, 64)
+	if err != nil {
+		// Classified here so every select menu reports it the same way: the
+		// value comes from the caller's client, it is not our logic failing.
+		return 0, fmt.Errorf("%w: %w", commands.ErrInvalidInteraction, err)
+	}
+
+	return value, nil
 }

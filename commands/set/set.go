@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-//nolint:exhaustive // only useful handlers must be implemented, it will panic also
+//nolint:exhaustive // only the useful interaction types are handled.
 func New(characService characteristics.Service, emojiService emojis.Service,
 	requestManager requests.RequestManager) *Command {
 	cmd := Command{
@@ -60,27 +60,24 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	command.CallHandler(s, i, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	return command.CallHandler(s, i, command.handlers)
 }
 
 func (command *Command) getSet(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	query, err := getQueryOption(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemRequest(query, false, amqp.ItemType_SET_TYPE, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, constants.SetRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.SetRequestRoutingKey,
 		msg, command.getSetReply)
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (command *Command) updateSet(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateSet(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 	customID := i.MessageComponentData().CustomID
 	properties := make(map[string]any)
 	var query string
@@ -93,37 +90,24 @@ func (command *Command) updateSet(s *discordgo.Session, i *discordgo.Interaction
 		callback = command.updateSetReply
 		itemNumber, err := getBonusValue(i.MessageComponentData())
 		if err != nil {
-			log.Error().
-				Str(constants.LogCommand, command.GetName()).
-				Str(constants.LogCustomID, customID).
-				Str(constants.LogRequestProperty, itemNumberProperty).
-				Strs(constants.LogRequestValue, i.MessageComponentData().Values).
-				Msgf("Cannot retrieve itemNumber from values selected by user, panicking...")
-			panic(err)
+			return fmt.Errorf("%w: custom ID %q", err, customID)
 		}
 
 		properties[itemNumberProperty] = itemNumber
 	} else {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, customID)
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemRequest(query, true, amqp.ItemType_SET_TYPE, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, constants.SetRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.SetRequestRoutingKey,
 		msg, callback, properties)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) getSetReply(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
 	if !isAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
 	if message.GetEncyclopediaItemAnswer().GetSet() == nil {
@@ -135,7 +119,8 @@ func (command *Command) getSetReply(_ context.Context, s *discordgo.Session,
 			log.Warn().Err(err).
 				Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 		}
-		return
+
+		return nil
 	}
 
 	reply := mappers.MapSetToDefaultWebhookEdit(message.EncyclopediaItemAnswer,
@@ -145,29 +130,19 @@ func (command *Command) getSetReply(_ context.Context, s *discordgo.Session,
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func (command *Command) updateSetReply(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) error {
 	if !isAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
-	itemNumberValue, found := properties[itemNumberProperty]
-	if !found {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, itemNumberProperty).
-			Msgf("Cannot find request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
-	}
-	itemNumber, ok := itemNumberValue.(int)
+	itemNumber, ok := properties[itemNumberProperty].(int)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, itemNumberProperty).
-			Msgf("Cannot convert request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
+		return fmt.Errorf("%w: %v", commands.ErrRequestPropertyNotFound, itemNumberProperty)
 	}
 
 	reply := mappers.MapSetToWebhookEdit(message.EncyclopediaItemAnswer, itemNumber,
@@ -177,6 +152,8 @@ func (command *Command) updateSetReply(_ context.Context, s *discordgo.Session,
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func isAnswerValid(message *amqp.RabbitMQMessage) bool {
@@ -195,12 +172,21 @@ func getQueryOption(ctx context.Context) (string, error) {
 	return query, nil
 }
 
+// getBonusValue reads the number of items the caller selected. Anything else
+// than one parsable number means the component is not one we can read.
 func getBonusValue(data discordgo.MessageComponentInteractionData) (int, error) {
 	values := data.Values
 	if len(values) != 1 {
-		return 0, commands.ErrInvalidInteraction
+		return 0, fmt.Errorf("%w: selected %v values instead of one",
+			commands.ErrInvalidInteraction, len(values))
 	}
-	return strconv.Atoi(values[0])
+
+	itemNumber, err := strconv.Atoi(values[0])
+	if err != nil {
+		return 0, fmt.Errorf("%w: %w", commands.ErrInvalidInteraction, err)
+	}
+
+	return itemNumber, nil
 }
 
 func (command *Command) matchesApplicationCommand(i *discordgo.InteractionCreate) bool {

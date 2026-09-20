@@ -3,6 +3,7 @@ package almanax
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -18,66 +19,50 @@ import (
 )
 
 func (command *Command) getAlmanax(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	date, err := getDateOption(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxRequest(date, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.almanaxRespond)
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (command *Command) updateAlmanax(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (command *Command) updateAlmanax(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 	customID := i.MessageComponentData().CustomID
 	date, ok := contract.ExtractAlmanaxDayCustomID(customID)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, customID)
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxRequest(date, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.almanaxRespond)
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (command *Command) updateAlmanaxByDate(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	seconds, errConv := discord.GetInt64Value(i.MessageComponentData())
+func (command *Command) updateAlmanaxByDate(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	data := i.MessageComponentData()
+	seconds, errConv := discord.GetInt64Value(data)
 	if errConv != nil {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, i.MessageComponentData().CustomID).
-			Strs(constants.LogRequestValue, i.MessageComponentData().Values).
-			Msgf("Cannot retrieve duration from values selected by user, panicking...")
-		panic(errConv)
+		return fmt.Errorf("cannot read the day selected on custom ID %q among %v: %w",
+			data.CustomID, data.Values, errConv)
 	}
 
 	day := time.Unix(seconds, 0).UTC()
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapAlmanaxRequest(&day, authorID, i.Locale)
-	err := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.almanaxRespond)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) almanaxRespond(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
 	if !isAlmanaxAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
 	webhookEdit := mappers.MapAlmanaxToWebhook(message.GetEncyclopediaAlmanaxAnswer(),
@@ -87,6 +72,8 @@ func (command *Command) almanaxRespond(_ context.Context, s *discordgo.Session,
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func isAlmanaxAnswerValid(message *amqp.RabbitMQMessage) bool {

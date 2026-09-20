@@ -364,6 +364,7 @@
         }
     },
     "errors": {
+        "unavailable": "Mon cerveau ne répond plus pour le moment :sweat: Laisse-moi une minute et réessaye !",
         "unknown_interaction": "Hmm, je ne connais pas cette interaction... Elle vient peut-être d'un message obsolète, relance la commande ! :sweat_smile:",
         "too_many_webhooks": "Le nombre maximum de webhooks est atteint sur ce salon, je ne peux pas continuer...\n*(Clique sur l'icône :gear: du salon puis `Intégrations` et enfin `Webhooks` pour les gérer)*",
         "query_mismatch": [

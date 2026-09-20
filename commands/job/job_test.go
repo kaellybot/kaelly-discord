@@ -225,9 +225,10 @@ type nextRecorder struct {
 	ctx    context.Context
 }
 
-func (n *nextRecorder) next(ctx context.Context) {
+func (n *nextRecorder) next(ctx context.Context) error {
 	n.called = true
 	n.ctx = ctx
+	return nil
 }
 
 func editContent(t *testing.T, fake *testutils.FakeDiscord) string {
@@ -297,8 +298,8 @@ func TestCheckJob_ExactlyOneMatchIsPutInContext(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	next := &nextRecorder{}
 
-	f.cmd.checkJob(context.Background(), s,
-		jobCommand("get", stringOption(contract.JobJobOptionName, "alch")), next.next)
+	require.NoError(t, f.cmd.checkJob(context.Background(), s,
+		jobCommand("get", stringOption(contract.JobJobOptionName, "alch")), next.next))
 
 	require.True(t, next.called)
 	assert.Equal(t, f.books.found[0], next.ctx.Value(constants.ContextKeyJob))
@@ -322,8 +323,8 @@ func TestCheckJob_NoOrManyMatchesAnswerLocalizedError(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			next := &nextRecorder{}
 
-			f.cmd.checkJob(context.Background(), s,
-				jobCommand("get", stringOption(contract.JobJobOptionName, "xx")), next.next)
+			require.NoError(t, f.cmd.checkJob(context.Background(), s,
+				jobCommand("get", stringOption(contract.JobJobOptionName, "xx")), next.next))
 
 			assert.False(t, next.called)
 			assert.Equal(t, tc.want, editContent(t, fake))
@@ -335,8 +336,8 @@ func TestCheckJob_AbsentOptionPassesThrough(t *testing.T) {
 	f := newFixture(t)
 	next := &nextRecorder{}
 
-	f.cmd.checkJob(context.Background(), nil,
-		jobCommand("get", stringOption(contract.JobServerOptionName, "djaul")), next.next)
+	require.NoError(t, f.cmd.checkJob(context.Background(), nil,
+		jobCommand("get", stringOption(contract.JobServerOptionName, "djaul")), next.next))
 
 	require.True(t, next.called)
 	assert.Nil(t, next.ctx.Value(constants.ContextKeyJob))
@@ -352,7 +353,8 @@ func TestCheckLevel_BoundsAreInclusive(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			next := &nextRecorder{}
 
-			f.cmd.checkLevel(context.Background(), s, jobCommand("set", levelOption(level)), next.next)
+			require.NoError(t,
+				f.cmd.checkLevel(context.Background(), s, jobCommand("set", levelOption(level)), next.next))
 
 			require.True(t, next.called)
 			assert.Equal(t, level, next.ctx.Value(constants.ContextKeyLevel))
@@ -368,7 +370,8 @@ func TestCheckLevel_OutOfRangeAnswersConstraintError(t *testing.T) {
 			s, fake := testutils.NewDiscordSession(t)
 			next := &nextRecorder{}
 
-			f.cmd.checkLevel(context.Background(), s, jobCommand("set", levelOption(level)), next.next)
+			require.NoError(t,
+				f.cmd.checkLevel(context.Background(), s, jobCommand("set", levelOption(level)), next.next))
 
 			assert.False(t, next.called)
 			assert.Equal(t, "Le niveau doit être compris entre 0 et 200 ! :grin:", editContent(t, fake))
@@ -383,8 +386,8 @@ func TestCheckLevel_AbsentOptionAnswersEmptyFieldError(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	next := &nextRecorder{}
 
-	f.cmd.checkLevel(context.Background(), s,
-		jobCommand("set", stringOption(contract.JobJobOptionName, "alch")), next.next)
+	require.NoError(t, f.cmd.checkLevel(context.Background(), s,
+		jobCommand("set", stringOption(contract.JobJobOptionName, "alch")), next.next))
 
 	assert.False(t, next.called)
 	assert.Equal(t, "Le champs ne doit pas être vide ! :grin:", editContent(t, fake))
@@ -420,7 +423,8 @@ func TestAutocomplete_JobsKeepServiceOrderAndLocale(t *testing.T) {
 	f.books.found = []entities.Job{job("tailor", "Tailleur"), job("alchemist", "Alchimiste")}
 	s, fake := testutils.NewDiscordSession(t)
 
-	f.cmd.Handle(s, jobAutocomplete("get", focused(stringOption(contract.JobJobOptionName, "a"))))
+	require.NoError(t,
+		f.cmd.Handle(s, jobAutocomplete("get", focused(stringOption(contract.JobJobOptionName, "a")))))
 
 	assert.Equal(t, []string{"Tailleur", "Alchimiste"}, autocompleteChoices(t, fake),
 		"unlike config, job choices are not re-sorted")
@@ -435,7 +439,7 @@ func TestAutocomplete_Servers(t *testing.T) {
 		focused(stringOption(contract.JobServerOptionName, "dj")))
 	event.Locale = discordgo.EnglishGB
 
-	f.cmd.Handle(s, event)
+	require.NoError(t, f.cmd.Handle(s, event))
 
 	assert.Equal(t, []string{"Djaul"}, autocompleteChoices(t, fake))
 	assert.Equal(t, []findCall{{"dj", discordgo.EnglishGB, constants.MaxChoices}}, f.servers.calls)
@@ -451,7 +455,7 @@ func TestAutocomplete_UnknownOrNoFocusedOptionAnswersEmpty(t *testing.T) {
 			f := newFixture(t)
 			s, fake := testutils.NewDiscordSession(t)
 
-			f.cmd.Handle(s, event)
+			require.NoError(t, f.cmd.Handle(s, event))
 
 			assert.Empty(t, autocompleteChoices(t, fake))
 			assert.Empty(t, f.books.calls)
@@ -465,9 +469,9 @@ func TestAutocomplete_DiscordFailureIsSwallowed(t *testing.T) {
 	s, fake := testutils.NewDiscordSession(t)
 	fake.Respond(testutils.DiscordResponse{PathContains: "/callback", Status: 400, Body: `{}`})
 
-	assert.NotPanics(t, func() {
-		f.cmd.Handle(s, jobAutocomplete("get", focused(stringOption(contract.JobJobOptionName, "x"))))
-	})
+	assert.NoError(t,
+		f.cmd.Handle(s, jobAutocomplete("get", focused(stringOption(contract.JobJobOptionName, "x")))),
+		"a caller who gets no suggestion has nothing left to be told")
 }
 
 // ---- option extraction ----

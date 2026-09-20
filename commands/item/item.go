@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-//nolint:exhaustive // only useful handlers must be implemented, it will panic also
+//nolint:exhaustive // only the useful interaction types are handled.
 func New(characService characteristics.Service, equipmentService equipments.Service,
 	emojiService emojis.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
@@ -61,28 +61,25 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	command.CallHandler(s, i, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	return command.CallHandler(s, i, command.handlers)
 }
 
 func (command *Command) getItem(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, _ middlewares.NextFunc) {
+	i *discordgo.InteractionCreate, _ middlewares.NextFunc) error {
 	query, err := getQueryOption(ctx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemRequest(query, false, amqp.ItemType_ANY_ITEM_TYPE, authorID, i.Locale)
-	err = command.requestManager.Request(s, i, constants.ItemRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.ItemRequestRoutingKey,
 		msg, command.getItemReply)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) updateItem(s *discordgo.Session,
-	i *discordgo.InteractionCreate) {
+	i *discordgo.InteractionCreate) error {
 	customID := i.MessageComponentData().CustomID
 	properties := make(map[string]any)
 	var query, itemType string
@@ -90,11 +87,8 @@ func (command *Command) updateItem(s *discordgo.Session,
 	if itemType, ok = contract.ExtractItemCustomID(customID); ok {
 		values := i.MessageComponentData().Values
 		if len(values) != 1 {
-			log.Error().
-				Str(constants.LogCommand, command.GetName()).
-				Str(constants.LogCustomID, customID).
-				Msgf("Cannot retrieve item ID from value, panicking...")
-			panic(commands.ErrInvalidInteraction)
+			return fmt.Errorf("%w: custom ID %q selected %v values instead of one",
+				commands.ErrInvalidInteraction, customID, len(values))
 		}
 		query = values[0]
 		properties[isRecipeProperty] = false
@@ -103,40 +97,30 @@ func (command *Command) updateItem(s *discordgo.Session,
 	} else if query, itemType, ok = contract.ExtractItemRecipeCustomID(customID); ok {
 		properties[isRecipeProperty] = true
 	} else {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot handle custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q", commands.ErrInvalidInteraction, customID)
 	}
 
 	itemTypeID, found := amqp.ItemType_value[itemType]
 	if !found {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogCustomID, customID).
-			Msgf("Cannot retrieve item type from custom ID, panicking...")
-		panic(commands.ErrInvalidInteraction)
+		return fmt.Errorf("%w: custom ID %q carries unknown item type %q",
+			commands.ErrInvalidInteraction, customID, itemType)
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapItemRequest(query, true, amqp.ItemType(itemTypeID), authorID, i.Locale)
-	err := command.requestManager.Request(s, i, constants.ItemRequestRoutingKey,
+	return command.requestManager.Request(s, i, constants.ItemRequestRoutingKey,
 		msg, command.updateItemReply, properties)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (command *Command) getItemReply(ctx context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) {
-	command.updateItemReply(ctx, s, i, message, map[string]any{isRecipeProperty: false})
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, _ map[string]any) error {
+	return command.updateItemReply(ctx, s, i, message, map[string]any{isRecipeProperty: false})
 }
 
 func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
-	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) {
+	i *discordgo.InteractionCreate, message *amqp.RabbitMQMessage, properties map[string]any) error {
 	if !isAnswerValid(message) {
-		panic(commands.ErrInvalidAnswerMessage)
+		return fmt.Errorf("%w: %v", commands.ErrInvalidAnswerMessage, message.GetStatus())
 	}
 
 	if message.GetEncyclopediaItemAnswer().GetEquipment() == nil {
@@ -148,24 +132,13 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 			log.Warn().Err(err).
 				Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 		}
-		return
+
+		return nil
 	}
 
-	isRecipeValue, found := properties[isRecipeProperty]
-	if !found {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, isRecipeProperty).
-			Msgf("Cannot find request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
-	}
-	isRecipe, ok := isRecipeValue.(bool)
+	isRecipe, ok := properties[isRecipeProperty].(bool)
 	if !ok {
-		log.Error().
-			Str(constants.LogCommand, command.GetName()).
-			Str(constants.LogRequestProperty, isRecipeProperty).
-			Msgf("Cannot convert request property, panicking...")
-		panic(commands.ErrRequestPropertyNotFound)
+		return fmt.Errorf("%w: %v", commands.ErrRequestPropertyNotFound, isRecipeProperty)
 	}
 
 	reply := mappers.MapItemToWebhookEdit(message.GetEncyclopediaItemAnswer(), isRecipe,
@@ -176,6 +149,8 @@ func (command *Command) updateItemReply(_ context.Context, s *discordgo.Session,
 		log.Warn().Err(err).
 			Msgf("Cannot respond to interaction after receiving internal answer, ignoring request")
 	}
+
+	return nil
 }
 
 func isAnswerValid(message *amqp.RabbitMQMessage) bool {

@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-//nolint:exhaustive // only useful handlers must be implemented, it will panic also
+//nolint:exhaustive // only the useful interaction types are handled.
 func New(emojiService emojis.Service, requestManager requests.RequestManager) *Command {
 	cmd := Command{
 		DiscordID:      viper.GetString(constants.AlmanaxID),
@@ -81,8 +81,8 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 	return command.matchesApplicationCommand(i) || matchesMessageCommand(i)
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	command.CallHandler(s, i, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	return command.CallHandler(s, i, command.handlers)
 }
 
 func getDateOption(ctx context.Context) (*time.Time, error) {

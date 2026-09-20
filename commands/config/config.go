@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-//nolint:exhaustive // only useful handlers must be implemented, it will panic also
+//nolint:exhaustive // only the useful interaction types are handled.
 func New(almanaxService almanaxes.Service, emojiService emojis.Service, feedService feeds.Service,
 	guildService guilds.Service, serverService servers.Service, twitterService twitters.Service,
 	requestManager requests.RequestManager) *Command {
@@ -113,12 +113,16 @@ func (command *Command) Matches(i *discordgo.InteractionCreate) bool {
 		i.ApplicationCommandData().Name == command.GetName()
 }
 
-func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	command.CallHandler(s, i, command.handlers)
+func (command *Command) Handle(s *discordgo.Session, i *discordgo.InteractionCreate) error {
+	return command.CallHandler(s, i, command.handlers)
 }
 
+// followAnnouncement makes targetChannelID follow the announcement channel and
+// returns the webhook Discord created for it. A guild that reached its webhook
+// limit is told so here and reported as not followed, without an error: nothing
+// went wrong on our side, the caller simply has to make room first.
 func (command *Command) followAnnouncement(s *discordgo.Session, i *discordgo.InteractionCreate,
-	newsChannelID, targetChannelID string) (string, bool) {
+	newsChannelID, targetChannelID string) (string, bool, error) {
 	chanFollow, err := s.ChannelNewsFollow(newsChannelID, targetChannelID)
 	if err != nil {
 		apiError, ok := discord.ExtractAPIError(err)
@@ -130,13 +134,13 @@ func (command *Command) followAnnouncement(s *discordgo.Session, i *discordgo.In
 			if err != nil {
 				log.Error().Err(err).Msg("Too many webhooks error response ignored")
 			}
-			return "", false
+			return "", false, nil
 		}
 
-		panic(err)
+		return "", false, fmt.Errorf("%w: %w", commands.ErrUnavailable, err)
 	}
 
-	return chanFollow.WebhookID, true
+	return chanFollow.WebhookID, true, nil
 }
 
 func getServerOptions(ctx context.Context) (entities.Server, string, error) {

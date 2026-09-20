@@ -164,17 +164,23 @@ func TestUpdateResourceDuration_KeepsCharactersFromCustomIDAndDurationFromSelect
 	assert.Equal(t, map[string]any{"characterNumber": int64(4)}, call.properties[0])
 }
 
-// The contract clamps the character number carried by the duration select to
-// the *duration* bounds [1, 30], so a user tracking 50 characters falls back to
-// 30 as soon as they change the period. Locked in as current behavior.
-func TestUpdateResourceDuration_CharacterNumberIsClampedToDurationBounds(t *testing.T) {
-	manager := &fakeRequestManager{}
-	s, _ := testutils.NewDiscordSession(t)
+// kaelly-commands clamped the character number to the *duration* bounds
+// [1, 30] until v1.0.3; the character selection goes up to 100 and must
+// survive a change of period untouched.
+func TestUpdateResourceDuration_CharacterNumberAboveThirtyIsKept(t *testing.T) {
+	for _, characterNumber := range []int64{40, 50, 100} {
+		t.Run(strconv.FormatInt(characterNumber, 10), func(t *testing.T) {
+			manager := &fakeRequestManager{}
+			s, _ := testutils.NewDiscordSession(t)
 
-	newCommand(t, manager).Handle(s, component("/almanax/resource?characters=50", "7"))
+			newCommand(t, manager).Handle(s,
+				component("/almanax/resource?characters="+strconv.FormatInt(characterNumber, 10), "7"))
 
-	call := manager.single(t)
-	assert.Equal(t, map[string]any{"characterNumber": int64(30)}, call.properties[0])
+			call := manager.single(t)
+			assert.Equal(t, int64(7), call.message.GetEncyclopediaAlmanaxResourceRequest().GetDuration())
+			assert.Equal(t, map[string]any{"characterNumber": characterNumber}, call.properties[0])
+		})
+	}
 }
 
 func TestUpdateResources_InvalidSelectionPanics(t *testing.T) {
@@ -419,4 +425,47 @@ func componentValues(t *testing.T, payload testutils.WebhookEditPayload, key str
 		walk(node)
 	}
 	return values
+}
+
+// Both values reaching these handlers come from the caller — the custom ID and
+// the selected value — so a crafted interaction must not smuggle anything the
+// menus never offered.
+func TestUpdateResources_CraftedCharacterNumberFallsBackToTheDefault(t *testing.T) {
+	for _, characterNumber := range []string{"999999", "35", "0"} {
+		t.Run(characterNumber, func(t *testing.T) {
+			manager := &fakeRequestManager{}
+			s, _ := testutils.NewDiscordSession(t)
+
+			newCommand(t, manager).Handle(s,
+				component("/almanax/resource?characters="+characterNumber, "7"))
+
+			call := manager.single(t)
+			assert.Equal(t, map[string]any{"characterNumber": int64(defaultCharacterNumber)},
+				call.properties[0])
+		})
+	}
+}
+
+func TestUpdateResources_CraftedDurationIsClampedToTheCommandBounds(t *testing.T) {
+	testCases := map[string]struct {
+		customID string
+		selected string
+		expected int64
+	}{
+		"duration above the maximum":  {"/almanax/resource?characters=4", "99999", 30},
+		"duration below the minimum":  {"/almanax/resource?characters=4", "0", 1},
+		"duration from the custom ID": {"/almanax/resource?duration=99999", "4", 30},
+	}
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			manager := &fakeRequestManager{}
+			s, _ := testutils.NewDiscordSession(t)
+
+			newCommand(t, manager).Handle(s, component(testCase.customID, testCase.selected))
+
+			call := manager.single(t)
+			assert.Equal(t, testCase.expected,
+				call.message.GetEncyclopediaAlmanaxResourceRequest().GetDuration())
+		})
+	}
 }

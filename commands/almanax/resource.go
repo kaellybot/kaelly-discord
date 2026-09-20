@@ -2,6 +2,7 @@ package almanax
 
 import (
 	"context"
+	"slices"
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -54,11 +55,11 @@ func (command *Command) updateResourceCharacter(s *discordgo.Session, i *discord
 	}
 
 	properties := map[string]any{
-		characterNumberProperty: characterNumber,
+		characterNumberProperty: sanitizeCharacterNumber(characterNumber),
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapAlmanaxResourceRequest(dayDuration, authorID, i.Locale)
+	msg := mappers.MapAlmanaxResourceRequest(sanitizeDayDuration(dayDuration), authorID, i.Locale)
 	errReq := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.updateResourcesReply, properties)
 	if errReq != nil {
@@ -78,7 +79,7 @@ func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordg
 	}
 
 	properties := map[string]any{
-		characterNumberProperty: characterNumber,
+		characterNumberProperty: sanitizeCharacterNumber(characterNumber),
 	}
 
 	duration, errConv := discord.GetInt64Value(i.MessageComponentData())
@@ -93,12 +94,31 @@ func (command *Command) updateResourceDuration(s *discordgo.Session, i *discordg
 	}
 
 	authorID := discord.GetUserID(i.Interaction)
-	msg := mappers.MapAlmanaxResourceRequest(duration, authorID, i.Locale)
+	msg := mappers.MapAlmanaxResourceRequest(sanitizeDayDuration(duration), authorID, i.Locale)
 	errReq := command.requestManager.Request(s, i, constants.AlmanaxRequestRoutingKey,
 		msg, command.updateResourcesReply, properties)
 	if errReq != nil {
 		panic(errReq)
 	}
+}
+
+// sanitizeCharacterNumber keeps the character count among the values the menu
+// offers. Both the custom ID carrying it and the selected values come from the
+// caller, so neither can be trusted; the library stopped clamping it in v1.0.3
+// because those values are owned here.
+func sanitizeCharacterNumber(characterNumber int64) int64 {
+	if slices.Contains(constants.GetCharacterNumbers(), characterNumber) {
+		return characterNumber
+	}
+
+	return defaultCharacterNumber
+}
+
+// sanitizeDayDuration keeps the duration within the bounds the slash command
+// advertises; the menu only offers a subset of them, and the command itself
+// accepts any value in between.
+func sanitizeDayDuration(dayDuration int64) int64 {
+	return min(max(dayDuration, contract.AlmanaxDurationMinimumValue), contract.AlmanaxDurationMaximumValue)
 }
 
 func (command *Command) getResourcesReply(ctx context.Context, s *discordgo.Session,

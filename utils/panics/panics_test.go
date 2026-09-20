@@ -1,6 +1,7 @@
 package panics
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/bwmarrin/discordgo"
@@ -71,4 +72,20 @@ func TestHandlePanic_DiscordFailureIsSwallowed(t *testing.T) {
 		panic("boom")
 	})
 	assert.Len(t, fake.Requests(), 1)
+}
+
+func TestHandleBackgroundPanic_RecoversWithoutAnswering(t *testing.T) {
+	_, fake := testutils.NewDiscordSession(t)
+
+	assert.NotPanics(t, func() {
+		defer HandleBackgroundPanic("guildCreate")
+		panic(errors.New("boom"))
+	})
+	assert.Empty(t, fake.Requests(), "there is no interaction to answer")
+}
+
+func TestHandleBackgroundPanic_NoPanicIsANoOp(t *testing.T) {
+	assert.NotPanics(t, func() {
+		defer HandleBackgroundPanic("ready")
+	})
 }

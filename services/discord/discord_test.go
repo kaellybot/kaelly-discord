@@ -280,3 +280,29 @@ func TestGuildDelete_EmitFailureIsSwallowed(t *testing.T) {
 	})
 	assert.Len(t, broker.Calls(), 1, "the emit was attempted once, without retry")
 }
+
+func TestRecovered_KeepsTheShardAliveWhenAHandlerPanics(t *testing.T) {
+	// guildCreate and guildDelete run in their own goroutine with nobody to
+	// answer: an unrecovered panic there takes the whole shard down.
+	called := false
+	handler := recovered(func(_ *discordgo.Session, _ *discordgo.GuildDelete) {
+		called = true
+		panic("boom")
+	}, "guildDelete")
+
+	assert.NotPanics(t, func() {
+		handler(nil, &discordgo.GuildDelete{Guild: &discordgo.Guild{ID: "g1"}})
+	})
+	assert.True(t, called, "the handler still runs")
+}
+
+func TestRecovered_LeavesAHealthyHandlerAlone(t *testing.T) {
+	var got string
+	handler := recovered(func(_ *discordgo.Session, event *discordgo.GuildCreate) {
+		got = event.ID
+	}, "guildCreate")
+
+	handler(nil, &discordgo.GuildCreate{Guild: &discordgo.Guild{ID: "g1"}})
+
+	assert.Equal(t, "g1", got)
+}

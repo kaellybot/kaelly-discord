@@ -32,12 +32,22 @@ func New(token string, shardID, shardCount int, commands []commands.DiscordComma
 
 	dg.Identify.Shard = &[2]int{shardID, shardCount}
 	dg.Identify.Intents = constants.GetIntents()
-	dg.AddHandler(service.ready)
+	dg.AddHandler(recovered(service.ready, "ready"))
 	dg.AddHandler(service.interactionCreate)
-	dg.AddHandler(service.guildCreate)
-	dg.AddHandler(service.guildDelete)
+	dg.AddHandler(recovered(service.guildCreate, "guildCreate"))
+	dg.AddHandler(recovered(service.guildDelete, "guildDelete"))
 
 	return &service, nil
+}
+
+// recovered shields the gateway handlers that answer nobody: interactionCreate
+// has its own net, apologising to the caller it kept waiting.
+func recovered[Event any](handler func(*discordgo.Session, Event),
+	event string) func(*discordgo.Session, Event) {
+	return func(session *discordgo.Session, eventData Event) {
+		defer panics.HandleBackgroundPanic(event)
+		handler(session, eventData)
+	}
 }
 
 func (service *Impl) Listen() error {

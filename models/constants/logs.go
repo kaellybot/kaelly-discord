@@ -4,6 +4,7 @@ import "github.com/rs/zerolog"
 
 const (
 	LogCommand              = "command"
+	LogEvent                = "event"
 	LogCommandOption        = "option"
 	LogGuildCount           = "guildCount"
 	LogGuildID              = "guildID"

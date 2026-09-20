@@ -46,3 +46,18 @@ func HandlePanic(session *discordgo.Session, event *discordgo.InteractionCreate)
 		log.Warn().Err(err).Msgf("Could not respond to caller after panicking")
 	}
 }
+
+// HandleBackgroundPanic recovers a panic raised while handling a gateway event
+// nobody is waiting an answer for. There is no caller to apologise to; the
+// point is that one broken event does not take the shard down with it.
+func HandleBackgroundPanic(event string) {
+	r := recover()
+	if r == nil {
+		return
+	}
+
+	log.Error().
+		Str(constants.LogEvent, event).
+		Str(constants.LogPanic, fmt.Sprintf("%v", r)).
+		Msgf("Panic occurred while handling event, recovering")
+}

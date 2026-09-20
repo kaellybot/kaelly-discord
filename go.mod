@@ -10,7 +10,7 @@ require (
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-playground/locales v0.14.1
 	github.com/kaellybot/kaelly-amqp v1.0.6
-	github.com/kaellybot/kaelly-commands v1.0.3
+	github.com/kaellybot/kaelly-commands v1.0.4
 	github.com/kaysoro/discordgo-i18n v1.0.5
 	github.com/prometheus/client_golang v1.24.1
 	github.com/rs/zerolog v1.35.1

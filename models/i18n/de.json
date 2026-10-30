@@ -13,6 +13,10 @@
             "title": ":bulb: Support-Server",
             "desc": "Hast du ein Problem mit der Nutzung? Einen Vorschlag? Trete dem [Support-Discord]({{ .discord }}) bei!"
         },
+        "invite": {
+            "title": ":link: Ein Kaelly pro Spiel",
+            "desc": "Lade den Bot für dein Spiel ein: [KaellyBot]({{ .dofus }}) für DOFUS, [KaellyTouch]({{ .touch }}) für DOFUS Touch und [KaellyRetro]({{ .retro }}) für DOFUS Retro!"
+        },
         "twitter": {
             "title": "{{ .twitterLogo }} Twitter",
             "desc": "Ich bin auch auf [Twitter]({{ .twitter }}): Dort findest du die neuesten Nachrichten!"

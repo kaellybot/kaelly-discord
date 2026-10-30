@@ -115,11 +115,11 @@ func TestHandle_EmitsTraceAndEditsResponseWithAboutEmbed(t *testing.T) {
 	require.Len(t, payload.Embeds, 1)
 	embed := payload.Embeds[0]
 	assert.Contains(t, embed.Description, "<:dofusGame:1>", "game logo comes from the emoji service")
-	require.Len(t, embed.Fields, 6)
-	assert.Contains(t, embed.Fields[1].Name, "<:twitter:1>")
-	assert.Contains(t, embed.Fields[2].Name, "<:github:1>")
+	require.Len(t, embed.Fields, 7)
+	assert.Contains(t, embed.Fields[2].Name, "<:twitter:1>")
+	assert.Contains(t, embed.Fields[3].Name, "<:github:1>")
 	assert.Equal(t, testutils.Translations(t, discordgo.French, "about.privacy.title")[0],
-		embed.Fields[4].Name)
+		embed.Fields[5].Name)
 	assert.ElementsMatch(t, []constants.EmojiMiscID{
 		constants.EmojiIDGame, constants.EmojiIDTwitter, constants.EmojiIDGithub,
 	}, emojiService.requested)

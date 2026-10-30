@@ -26,16 +26,20 @@ func TestMapAboutToWebhook_BuildsSingleEmbedWithLinksAndEmojis(t *testing.T) {
 	assertTranslated(t, discordgo.EnglishGB, "about.footer", embed.Footer.Text)
 	assert.Equal(t, constants.AnkamaLogo, embed.Footer.IconURL)
 
-	require.Len(t, embed.Fields, 6)
+	require.Len(t, embed.Fields, 7)
 	for _, field := range embed.Fields {
 		assert.False(t, field.Inline)
 		assertRendered(t, field.Name)
 		assertRendered(t, field.Value)
 	}
-	support, twitter, github, free, privacy, graphist := embed.Fields[0], embed.Fields[1],
-		embed.Fields[2], embed.Fields[3], embed.Fields[4], embed.Fields[5]
+	support, invite, twitter, github, free, privacy, graphist := embed.Fields[0], embed.Fields[1],
+		embed.Fields[2], embed.Fields[3], embed.Fields[4], embed.Fields[5], embed.Fields[6]
 	assertTranslated(t, discordgo.EnglishGB, "about.support.title", support.Name)
 	assert.Contains(t, support.Value, constants.Discord)
+	assertTranslated(t, discordgo.EnglishGB, "about.invite.title", invite.Name)
+	for _, link := range []string{constants.InviteDofus, constants.InviteTouch, constants.InviteRetro} {
+		assert.Contains(t, invite.Value, "("+link+")")
+	}
 	assert.Contains(t, twitter.Name, "<misc:twitter>")
 	assert.Contains(t, twitter.Value, constants.Twitter)
 	assert.Contains(t, github.Name, "<misc:github>")
@@ -55,5 +59,5 @@ func TestMapAboutToWebhook_UsesRequestedLocale(t *testing.T) {
 
 	embed := singleEmbed(t, edit.Embeds)
 	assertTranslated(t, discordgo.French, "about.footer", embed.Footer.Text)
-	assertTranslated(t, discordgo.French, "about.privacy.title", embed.Fields[4].Name)
+	assertTranslated(t, discordgo.French, "about.privacy.title", embed.Fields[5].Name)
 }

@@ -35,6 +35,15 @@ func MapAboutToWebhook(lg discordgo.Locale, emojiService emojis.Service) *discor
 						Inline: false,
 					},
 					{
+						Name: i18n.Get(lg, "about.invite.title"),
+						Value: i18n.Get(lg, "about.invite.desc", i18n.Vars{
+							"dofus": constants.InviteDofus,
+							"touch": constants.InviteTouch,
+							"retro": constants.InviteRetro,
+						}),
+						Inline: false,
+					},
+					{
 						Name: i18n.Get(lg, "about.twitter.title", i18n.Vars{
 							"twitterLogo": emojiService.GetMiscStringEmoji(constants.EmojiIDTwitter),
 						}),

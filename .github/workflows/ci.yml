@@ -9,7 +9,6 @@ on:
   pull_request:
   release:
     types:
-      - created
       - published
 
 permissions:
@@ -112,7 +111,6 @@ jobs:
             for i in $(seq 0 $(( ${{ secrets.DISCORD_SHARD_COUNT }} - 1))); do
               helm upgrade --install ${{ github.event.repository.name }}-$i charts/${{ github.event.repository.name }} \
                 --rollback-on-failure \
-                --force-replace \
                 --namespace kaellybot \
                 --create-namespace \
                 --set image.tag="${{ env.image_tag_name }}" \

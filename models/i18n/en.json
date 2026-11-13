@@ -44,11 +44,13 @@
             "overview": "handles the alignment book",
             "detailed": {
                 "get": "displays the book of aligned players on your Discord server\n   - The `city` field is optional and corresponds to the city to which players have pledged allegiance. If not specified, the directory is displayed without considering this filter. *__Example__:Bonta*\n - The `order` field is optional and corresponds to the order joined by players. If not specified, the directory is displayed without considering this filter. *__Example__:Spirit*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*",
-                "set": "records your alignment in the book, independently of the Discord server; this recording cannot be done for others.\n   - The `city` field is mandatory and corresponds to the city to which players have pledged allegiance. *__Example__:Bonta*\n - The `order` field is mandatory and corresponds to the order joined by players. *__Example__:Spirit*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__:200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*"
+                "set": "records your alignment in the book, independently of the Discord server; this recording cannot be done for others.\n   - The `city` field is mandatory and corresponds to the city to which players have pledged allegiance. *__Example__:Bonta*\n - The `order` field is mandatory and corresponds to the order joined by players. *__Example__:Spirit*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__:200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*",
+                "user": "displays the alignments of a member of your Discord server\n   - The `member` field is optional and corresponds to a member of the Discord server. If not specified, your own alignments are displayed. *__Example__:@Kaelly*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*"
             },
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_get_EN.webp",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_EN.webp"
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_EN.webp",
+                "user": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_user_EN.webp"
             },
             "source": "The collected data is used only for my proper functioning."
         },
@@ -233,11 +235,13 @@
             "overview": "handles the craftsmen book",
             "detailed": {
                 "get": "displays the craftsmen players on your Discord server\n   - The `job` field is mandatory and corresponds to a profession in the game. *__Example__:Lumberjack*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*",
-                "set": "records your profession in the book, independently of the Discord server; this recording cannot be done for others.\n    - The `job` field is mandatory and corresponds to a profession in the game. *__Example__:Lumberjack*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__:200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*"
+                "set": "records your profession in the book, independently of the Discord server; this recording cannot be done for others.\n    - The `job` field is mandatory and corresponds to a profession in the game. *__Example__:Lumberjack*\n - The `level` field is mandatory and corresponds to the alignment level between 0 and 200, with 0 indicating removal from the directory. *__Example__:200*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*",
+                "user": "displays the jobs of a member of your Discord server\n   - The `member` field is optional and corresponds to a member of the Discord server. If not specified, your own jobs are displayed. *__Example__:@Kaelly*\n - The `server` field is optional and corresponds to the desired game server. If not specified, the game server used is the one defined for the Discord guild (see `config`). *__Example__:Imagiro*"
             },
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_get_EN.webp",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_EN.webp"
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_EN.webp",
+                "user": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_user_EN.webp"
             },
             "source": "The collected data is used only for my proper functioning."
         },

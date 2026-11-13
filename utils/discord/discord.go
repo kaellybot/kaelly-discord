@@ -25,6 +25,62 @@ func GetUserID(i *discordgo.Interaction) string {
 	return ""
 }
 
+// GetTargetMember returns the member whose books are requested: the target of
+// a user command, else the member picked through the optionName option of its
+// slash twin, else the author. The resolved user is attached to the member.
+// An option also accepts the ID of a user who is not in the guild: they come
+// back without guild data, where a target is always expected to be a member.
+func GetTargetMember(i *discordgo.InteractionCreate, optionName string) (*discordgo.Member, error) {
+	data := i.ApplicationCommandData()
+	userID := data.TargetID
+	if len(userID) == 0 {
+		userID = getUserOptionValue(optionName, data.Options)
+	}
+
+	if len(userID) == 0 {
+		if i.Member == nil || i.Member.User == nil {
+			return nil, fmt.Errorf("%w: no author to fall back on", commands.ErrInvalidInteraction)
+		}
+
+		return i.Member, nil
+	}
+
+	if data.Resolved == nil {
+		return nil, fmt.Errorf("%w: user %q is not resolved", commands.ErrInvalidInteraction, userID)
+	}
+
+	user, found := data.Resolved.Users[userID]
+	if !found {
+		return nil, fmt.Errorf("%w: user %q is not resolved", commands.ErrInvalidInteraction, userID)
+	}
+
+	member, found := data.Resolved.Members[userID]
+	if !found {
+		if len(data.TargetID) > 0 {
+			return nil, fmt.Errorf("%w: member %q is not resolved", commands.ErrInvalidInteraction, userID)
+		}
+
+		member = &discordgo.Member{}
+	}
+	member.User = user
+
+	return member, nil
+}
+
+func getUserOptionValue(optionName string, options []*discordgo.ApplicationCommandInteractionDataOption) string {
+	for _, option := range options {
+		if option.Type == discordgo.ApplicationCommandOptionUser && option.Name == optionName {
+			return option.UserValue(nil).ID
+		}
+
+		if userID := getUserOptionValue(optionName, option.Options); len(userID) > 0 {
+			return userID
+		}
+	}
+
+	return ""
+}
+
 func GetMemberNickNames(s *discordgo.Session, guildID string) (map[string]any, error) {
 	members, err := s.GuildMembers(guildID, "", constants.MemberListLimit)
 	if err != nil {

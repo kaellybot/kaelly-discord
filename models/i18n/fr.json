@@ -44,11 +44,13 @@
             "overview": "gère l'annuaire des alignés",
             "detailed": {
                 "get": "affiche l'annuaire des joueurs alignés de ton serveur Discord\n   - Le champ `city` est optionnel et correspond à la cité auquel les joueurs ont fait allégeance. Si non renseigné, l'annuaire est affiché en ne prenant pas compte de ce filtre *__Exemple__ : Bonta*\n - Le champ `order` est optionnel et correspond à l'ordre rejoint par les joueurs. Si non renseigné, l'annuaire est affiché en ne prenant pas compte de ce filtre *__Exemple__ : Esprit*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
-                "set": "enregistre ton alignement dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n   - Le champ `city` est obligatoire et correspond à la cité auquel les joueurs ont fait allégeance. *__Exemple__ : Bonta*\n - Le champ `order` est obligatoire et correspond à l'ordre rejoint par les joueurs. *__Exemple__ : Esprit*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
+                "set": "enregistre ton alignement dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n   - Le champ `city` est obligatoire et correspond à la cité auquel les joueurs ont fait allégeance. *__Exemple__ : Bonta*\n - Le champ `order` est obligatoire et correspond à l'ordre rejoint par les joueurs. *__Exemple__ : Esprit*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
+                "user": "affiche les alignements d'un membre de ton serveur Discord\n   - Le champ `member` est optionnel et correspond à un membre du serveur Discord. Si non renseigné, tes propres alignements sont affichés. *__Exemple__ : @Kaelly*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
             },
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_get_FR.webp",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_FR.webp"
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_FR.webp",
+                "user": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_user_FR.webp"
             },
             "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },
@@ -233,11 +235,13 @@
             "overview": "gère l'annuaire des artisans",
             "detailed": {
                 "get": "affiche l'annuaire des joueurs artisans de ton serveur Discord\n   - Le champ `job` est obligatoire et correspond à un métier du jeu. *__Exemple__ : Bûcheron*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
-                "set": "enregistre ta profession dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n    - Le champ `job` est obligatoire et correspond à un métier du jeu. *__Exemple__ : Bûcheron*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
+                "set": "enregistre ta profession dans l'annuaire, indépendamment du serveur Discord; cet enregistrement ne peut être fait pour autrui.\n    - Le champ `job` est obligatoire et correspond à un métier du jeu. *__Exemple__ : Bûcheron*\n - Le champ `level` est obligatoire et correspond au niveau d'alignement compris entre 0 et 200, le 0 correspondant à une suppression de l'annuaire. *__Exemple__ : 200*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*",
+                "user": "affiche les métiers d'un membre de ton serveur Discord\n   - Le champ `member` est optionnel et correspond à un membre du serveur Discord. Si non renseigné, tes propres métiers sont affichés. *__Exemple__ : @Kaelly*\n - Le champ `server` est optionnel et correspond au serveur de jeu souhaité. Si non renseigné, le serveur de jeu utilisé est celui défini pour la guilde Discord (cf. `config`). *__Exemple__ : Imagiro*"
             },
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_get_FR.webp",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_FR.webp"
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_FR.webp",
+                "user": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_user_FR.webp"
             },
             "source": "Les données récoltées ne sont utilisées que pour mon bon fonctionnement uniquement."
         },

@@ -263,11 +263,11 @@ func TestGetName_IsAlign(t *testing.T) {
 	assert.Equal(t, "align", newCommand(t, newDeps()).GetName())
 }
 
-func TestGetDescriptions_GetAndSet(t *testing.T) {
+func TestGetDescriptions_EverySubCommand(t *testing.T) {
 	descriptions := newCommand(t, newDeps()).GetDescriptions(discordgo.French)
 
-	require.Len(t, descriptions, 2)
-	for index, sub := range []string{"get", "set"} {
+	require.Len(t, descriptions, 3)
+	for index, sub := range []string{"get", "set", "user"} {
 		assert.Equal(t, "/align "+sub, descriptions[index].Name)
 		assert.Equal(t, "</align "+sub+":align-discord-id>", descriptions[index].CommandID)
 		assert.Equal(t, testutils.Translations(t, discordgo.French, "align.help.detailed."+sub)[0],
@@ -461,6 +461,64 @@ func TestHandle_UserCommandRequestsTargetBeliefs(t *testing.T) {
 	require.True(t, ok)
 	assert.Same(t, member, got)
 	assert.Same(t, user, got.User, "resolved user is attached to the member")
+}
+
+func userSubCommand(resolved *discordgo.ApplicationCommandInteractionDataResolved,
+	options ...*discordgo.ApplicationCommandInteractionDataOption) *discordgo.InteractionCreate {
+	event := slash("user", options...)
+	data, _ := event.Data.(discordgo.ApplicationCommandInteractionData)
+	data.Resolved = resolved
+	event.Data = data
+	return event
+}
+
+func TestHandle_UserSubCommandRequestsMemberBeliefsOnGivenServer(t *testing.T) {
+	d := newDeps()
+	d.servers.servers = []entities.Server{djaul()}
+	s, fake := testutils.NewDiscordSession(t)
+	member := &discordgo.Member{Nick: "Target"}
+	user := &discordgo.User{ID: "u9", Username: "target"}
+
+	require.NoError(t, newCommand(t, d).Handle(s, userSubCommand(
+		&discordgo.ApplicationCommandInteractionDataResolved{
+			Members: map[string]*discordgo.Member{"u9": member},
+			Users:   map[string]*discordgo.User{"u9": user},
+		},
+		&discordgo.ApplicationCommandInteractionDataOption{
+			Name: "member", Type: discordgo.ApplicationCommandOptionUser, Value: "u9",
+		},
+		stringOption("server", "dja"))))
+
+	assert.Empty(t, fake.Requests())
+	assert.Empty(t, d.guilds.calls, "a given server needs no guild fallback")
+	call := d.requests.single(t)
+	assert.Equal(t, amqp.RabbitMQMessage_ALIGN_GET_USER_REQUEST, call.message.Type)
+	assert.Equal(t, "u9", call.message.GetAlignGetUserRequest().GetUserId())
+	assert.Equal(t, "djaul", call.message.GetAlignGetUserRequest().GetServerId())
+	require.Len(t, call.properties, 1)
+	got, ok := call.properties[0]["user"].(*discordgo.Member)
+	require.True(t, ok)
+	assert.Same(t, member, got)
+	assert.Same(t, user, got.User, "resolved user is attached to the member")
+}
+
+func TestHandle_UserSubCommandDefaultsToAuthorAndGuildServer(t *testing.T) {
+	d := newDeps()
+	d.guilds.server, d.guilds.found = djaul(), true
+	s, _ := testutils.NewDiscordSession(t)
+	require.NoError(t, s.State.GuildAdd(&discordgo.Guild{ID: "guild-id"}))
+	require.NoError(t, s.State.ChannelAdd(&discordgo.Channel{
+		ID: "channel-id", GuildID: "guild-id", Type: discordgo.ChannelTypeGuildText}))
+
+	require.NoError(t, newCommand(t, d).Handle(s, userSubCommand(nil)))
+
+	call := d.requests.single(t)
+	assert.Equal(t, "author-id", call.message.GetAlignGetUserRequest().GetUserId())
+	assert.Equal(t, "djaul", call.message.GetAlignGetUserRequest().GetServerId())
+	require.Len(t, call.properties, 1)
+	got, ok := call.properties[0]["user"].(*discordgo.Member)
+	require.True(t, ok)
+	assert.Equal(t, "author-id", got.User.ID)
 }
 
 func TestHandle_UserCommandWithoutResolvedTargetIsReportedAsStale(t *testing.T) {

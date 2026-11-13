@@ -273,13 +273,13 @@ func TestMatches(t *testing.T) {
 	assert.Equal(t, "job", f.cmd.GetName())
 }
 
-func TestGetDescriptions_GetAndSetSubCommands(t *testing.T) {
+func TestGetDescriptions_EverySubCommand(t *testing.T) {
 	f := newFixture(t)
 
 	descriptions := f.cmd.GetDescriptions(discordgo.French)
 
-	require.Len(t, descriptions, 2)
-	for i, sub := range []string{"get", "set"} {
+	require.Len(t, descriptions, 3)
+	for i, sub := range []string{"get", "set", "user"} {
 		assert.Equal(t, "/job "+sub, descriptions[i].Name)
 		assert.Equal(t, testutils.Translations(t, discordgo.French, "job.help.detailed."+sub)[0],
 			descriptions[i].Description)

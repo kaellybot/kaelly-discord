@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	contract "github.com/kaellybot/kaelly-commands"
 	"github.com/kaellybot/kaelly-discord/commands"
 	"github.com/kaellybot/kaelly-discord/models/constants"
 	"github.com/kaellybot/kaelly-discord/models/mappers"
@@ -20,13 +21,10 @@ func (command *Command) userJobRequest(ctx context.Context, s *discordgo.Session
 		return err
 	}
 
-	member, memberFound := i.ApplicationCommandData().Resolved.Members[i.ApplicationCommandData().TargetID]
-	user, userFound := i.ApplicationCommandData().Resolved.Users[i.ApplicationCommandData().TargetID]
-	if !memberFound || !userFound {
-		return fmt.Errorf("%w: target %q is not resolved",
-			commands.ErrInvalidInteraction, i.ApplicationCommandData().TargetID)
+	member, err := discord.GetTargetMember(i, contract.JobMemberOptionName)
+	if err != nil {
+		return err
 	}
-	member.User = user
 
 	authorID := discord.GetUserID(i.Interaction)
 	msg := mappers.MapBookJobGetUserRequest(member.User.ID, server.ID, authorID, i.Locale)

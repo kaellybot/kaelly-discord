@@ -458,6 +458,79 @@ func TestHandle_UserCommandWithUnresolvedTargetIsReportedAsStale(t *testing.T) {
 	assert.Empty(t, f.manager.calls)
 }
 
+// ---- user sub-command ----
+
+func userSubCommand(options ...*discordgo.ApplicationCommandInteractionDataOption) *discordgo.InteractionCreate {
+	event := jobCommand(contract.JobUserSubCommandName, options...)
+	data, _ := event.Data.(discordgo.ApplicationCommandInteractionData)
+	data.Resolved = &discordgo.ApplicationCommandInteractionDataResolved{
+		Users:   map[string]*discordgo.User{"target-1": {ID: "target-1", Username: "carol"}},
+		Members: map[string]*discordgo.Member{"target-1": {Nick: "Caro"}},
+	}
+	event.Data = data
+	return event
+}
+
+func memberOption(userID string) *discordgo.ApplicationCommandInteractionDataOption {
+	return &discordgo.ApplicationCommandInteractionDataOption{
+		Name: contract.JobMemberOptionName, Type: discordgo.ApplicationCommandOptionUser, Value: userID,
+	}
+}
+
+func TestHandle_UserSubCommandRequestsMemberJobsOnGivenServer(t *testing.T) {
+	f := newFixture(t)
+	f.servers.found = []entities.Server{server("imagiro", "Imagiro")}
+	s, fake := testutils.NewDiscordSession(t)
+
+	require.NoError(t, f.cmd.Handle(s, userSubCommand(
+		memberOption("target-1"), stringOption(contract.JobServerOptionName, "ima"))))
+
+	call := singleRequest(t, f)
+	assert.Equal(t, amqp.RabbitMQMessage_JOB_GET_USER_REQUEST, call.message.Type)
+	req := call.message.GetJobGetUserRequest()
+	assert.Equal(t, "target-1", req.GetUserId())
+	assert.Equal(t, "imagiro", req.GetServerId())
+	require.Len(t, call.properties, 1)
+	member, ok := call.properties[0][userProperty].(*discordgo.Member)
+	require.True(t, ok)
+	assert.Equal(t, "Caro", member.Nick)
+	require.NotNil(t, member.User, "resolved user is attached to the member")
+	assert.Equal(t, "carol", member.User.Username)
+	assert.Empty(t, f.guilds.calls, "a given server needs no guild fallback")
+	assert.Empty(t, fake.Requests())
+}
+
+func TestHandle_UserSubCommandDefaultsToAuthorAndGuildServer(t *testing.T) {
+	f := newFixture(t)
+	f.guilds.server, f.guilds.found = server("imagiro", "Imagiro"), true
+	s, _ := testutils.NewDiscordSession(t)
+	require.NoError(t, s.State.GuildAdd(&discordgo.Guild{ID: guildID}))
+	require.NoError(t, s.State.ChannelAdd(&discordgo.Channel{
+		ID: channelID, GuildID: guildID, Type: discordgo.ChannelTypeGuildText}))
+
+	require.NoError(t, f.cmd.Handle(s, userSubCommand()))
+
+	call := singleRequest(t, f)
+	req := call.message.GetJobGetUserRequest()
+	assert.Equal(t, authorID, req.GetUserId())
+	assert.Equal(t, "imagiro", req.GetServerId())
+	require.Len(t, call.properties, 1)
+	member, ok := call.properties[0][userProperty].(*discordgo.Member)
+	require.True(t, ok)
+	assert.Equal(t, authorID, member.User.ID)
+}
+
+func TestHandle_UserSubCommandWithUnresolvedMemberIsReportedAsStale(t *testing.T) {
+	f := newFixture(t)
+	f.guilds.server, f.guilds.found = server("imagiro", "Imagiro"), true
+	s, _ := testutils.NewDiscordSession(t)
+
+	err := f.cmd.Handle(s, userSubCommand(memberOption("unknown")))
+
+	require.ErrorIs(t, err, commands.ErrInvalidInteraction)
+	assert.Empty(t, f.manager.calls)
+}
+
 func userAnswer(status amqp.RabbitMQMessage_Status) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_JOB_GET_USER_ANSWER,

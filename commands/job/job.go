@@ -41,6 +41,8 @@ func New(bookService books.Service, guildService guilds.Service,
 			Use(cmd.checkJob, checkServer, cmd.getBook),
 		contract.JobSetSubCommandName: middlewares.
 			Use(cmd.checkJob, cmd.checkLevel, checkServer, cmd.setBook),
+		contract.JobUserSubCommandName: middlewares.
+			Use(checkServer, cmd.userRequest),
 	})
 
 	interactionHandlers := cmd.HandleInteractionMessages(commands.InteractionMessageHandlers{
@@ -76,6 +78,12 @@ func (command *Command) GetDescriptions(lg discordgo.Locale) []commands.Descript
 			CommandID:   fmt.Sprintf("</%v set:%v>", contract.JobSlashCommandName, command.DiscordID),
 			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.set", contract.JobSlashCommandName)),
 			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.set", contract.JobSlashCommandName)),
+		},
+		{
+			Name:        fmt.Sprintf("/%v user", contract.JobSlashCommandName),
+			CommandID:   fmt.Sprintf("</%v user:%v>", contract.JobSlashCommandName, command.DiscordID),
+			Description: i18n.Get(lg, fmt.Sprintf("%v.help.detailed.user", contract.JobSlashCommandName)),
+			TutorialURL: i18n.Get(lg, fmt.Sprintf("%v.help.tutorial.user", contract.JobSlashCommandName)),
 		},
 	}
 }

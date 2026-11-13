@@ -44,12 +44,14 @@
             "overview": "gestiona el libro de alineamientos",
             "detailed": {
                 "get": "muestra el libro de jugadores alineados de tu servidor de Discord\n   - El campo `city` es opcional y corresponde a la ciudad a la que los jugadores han jurado lealtad. Si no se especifica, el directorio se muestra sin considerar este filtro. *__Ejemplo__:Bonta*\n - El campo `order` es opcional y corresponde al orden al que se han unido los jugadores. Si no se especifica, el directorio se muestra sin considerar este filtro. *__Ejemplo__:Espíritu*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, se utiliza el servidor de juego definido para la guilda de Discord (ver `config`). *__Ejemplo__:Imagiro*",
-                "set": "registra tu alineamiento en el libro, independientemente del servidor de Discord; este registro no puede hacerse para otros.\n   - El campo `city` es obligatorio y corresponde a la ciudad a la que los jugadores han jurado lealtad. *__Ejemplo__:Bonta*\n - El campo `order` es obligatorio y corresponde al orden al que se han unido los jugadores. *__Ejemplo__:Espíritu*\n - El campo `level` es obligatorio y corresponde al nivel de alineamiento entre 0 y 200, siendo 0 la eliminación del directorio. *__Ejemplo__:200*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, se utiliza el servidor de juego definido para la guilda de Discord (ver `config`). *__Ejemplo__:Imagiro*"
+                "set": "registra tu alineamiento en el libro, independientemente del servidor de Discord; este registro no puede hacerse para otros.\n   - El campo `city` es obligatorio y corresponde a la ciudad a la que los jugadores han jurado lealtad. *__Ejemplo__:Bonta*\n - El campo `order` es obligatorio y corresponde al orden al que se han unido los jugadores. *__Ejemplo__:Espíritu*\n - El campo `level` es obligatorio y corresponde al nivel de alineamiento entre 0 y 200, siendo 0 la eliminación del directorio. *__Ejemplo__:200*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, se utiliza el servidor de juego definido para la guilda de Discord (ver `config`). *__Ejemplo__:Imagiro*",
+                "user": "muestra las alineaciones de un miembro de tu servidor de Discord\n   - El campo `member` es opcional y corresponde a un miembro del servidor de Discord. Si no se especifica, se muestran tus propias alineaciones. *__Ejemplo__:@Kaelly*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, se utiliza el servidor de juego definido para la guilda de Discord (ver `config`). *__Ejemplo__:Imagiro*"
             },
             "source": "Los datos recopilados se utilizan únicamente para mi correcto funcionamiento.",
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_get_ES.webp",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_ES.webp"
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_ES.webp",
+                "user": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_user_ES.webp"
             }
         },
         "success": "¡El libro de alineamientos ha sido actualizado!",
@@ -233,11 +235,13 @@
             "overview": "gestiona el directorio de artesanos",
             "detailed": {
                 "get": "muestra el directorio de jugadores artesanos de tu servidor de Discord\n   - El campo `job` es obligatorio y corresponde a una profesión del juego. *__Ejemplo__: Leñador*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, se utiliza el servidor de juego definido para la guilda de Discord (ver `config`). *__Ejemplo__: Imagiro*",
-                "set": "registra tu profesión en el directorio, independientemente del servidor de Discord; este registro no puede hacerse para otros.\n    - El campo `job` es obligatorio y corresponde a una profesión del juego. *__Ejemplo__: Leñador*\n - El campo `level` es obligatorio y corresponde al nivel de alineación entre 0 y 200, siendo 0 la eliminación del directorio. *__Ejemplo__: 200*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, se utiliza el servidor de juego definido para la guilda de Discord (ver `config`). *__Ejemplo__: Imagiro*"
+                "set": "registra tu profesión en el directorio, independientemente del servidor de Discord; este registro no puede hacerse para otros.\n    - El campo `job` es obligatorio y corresponde a una profesión del juego. *__Ejemplo__: Leñador*\n - El campo `level` es obligatorio y corresponde al nivel de alineación entre 0 y 200, siendo 0 la eliminación del directorio. *__Ejemplo__: 200*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, se utiliza el servidor de juego definido para la guilda de Discord (ver `config`). *__Ejemplo__: Imagiro*",
+                "user": "muestra las profesiones de un miembro de tu servidor de Discord\n   - El campo `member` es opcional y corresponde a un miembro del servidor de Discord. Si no se especifica, se muestran tus propias profesiones. *__Ejemplo__: @Kaelly*\n - El campo `server` es opcional y corresponde al servidor de juego deseado. Si no se especifica, se utiliza el servidor de juego definido para la guilda de Discord (ver `config`). *__Ejemplo__: Imagiro*"
             },
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_get_ES.webp",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_ES.webp"
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_ES.webp",
+                "user": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_user_ES.webp"
             },
             "source": "Los datos recopilados se utilizan únicamente para mi correcto funcionamiento."
         },

@@ -44,12 +44,14 @@
             "overview": "gerencia o livro de alinhamentos",
             "detailed": {
                 "get": "exibe o livro de jogadores alinhados do seu servidor Discord\n   - O campo `city` é opcional e corresponde à cidade à qual os jogadores juraram lealdade. Se não especificado, o diretório será exibido sem considerar esse filtro. *__Exemplo__:Bonta*\n - O campo `order` é opcional e corresponde à ordem que os jogadores se uniram. Se não especificado, o diretório será exibido sem considerar esse filtro. *__Exemplo__:Espírito*\n - O campo `server` é opcional e corresponde ao servidor de jogo desejado. Se não especificado, será usado o servidor de jogo definido para a guilda do Discord (veja `config`). *__Exemplo__:Imagiro*",
-                "set": "registra seu alinhamento no livro, independentemente do servidor Discord; este registro não pode ser feito para outros.\n   - O campo `city` é obrigatório e corresponde à cidade à qual os jogadores juraram lealdade. *__Exemplo__:Bonta*\n - O campo `order` é obrigatório e corresponde à ordem que os jogadores se uniram. *__Exemplo__:Espírito*\n - O campo `level` é obrigatório e corresponde ao nível de alinhamento entre 0 e 200, sendo 0 a remoção do diretório. *__Exemplo__:200*\n - O campo `server` é opcional e corresponde ao servidor de jogo desejado. Se não especificado, será usado o servidor de jogo definido para a guilda do Discord (veja `config`). *__Exemplo__:Imagiro*"
+                "set": "registra seu alinhamento no livro, independentemente do servidor Discord; este registro não pode ser feito para outros.\n   - O campo `city` é obrigatório e corresponde à cidade à qual os jogadores juraram lealdade. *__Exemplo__:Bonta*\n - O campo `order` é obrigatório e corresponde à ordem que os jogadores se uniram. *__Exemplo__:Espírito*\n - O campo `level` é obrigatório e corresponde ao nível de alinhamento entre 0 e 200, sendo 0 a remoção do diretório. *__Exemplo__:200*\n - O campo `server` é opcional e corresponde ao servidor de jogo desejado. Se não especificado, será usado o servidor de jogo definido para a guilda do Discord (veja `config`). *__Exemplo__:Imagiro*",
+                "user": "exibe os alinhamentos de um membro do seu servidor Discord\n   - O campo `member` é opcional e corresponde a um membro do servidor Discord. Se não especificado, seus próprios alinhamentos serão exibidos. *__Exemplo__:@Kaelly*\n - O campo `server` é opcional e corresponde ao servidor de jogo desejado. Se não especificado, será usado o servidor de jogo definido para a guilda do Discord (veja `config`). *__Exemplo__:Imagiro*"
             },
             "source": "Os dados coletados são usados apenas para o meu funcionamento correto.",
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_get_PT.webp",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_PT.webp"
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_set_PT.webp",
+                "user": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/align_user_PT.webp"
             }
         },
         "success": "O livro de alinhamentos foi atualizado!",
@@ -233,11 +235,13 @@
             "overview": "gerencia o diretório de artesãos",
             "detailed": {
                 "get": "exibe o diretório de jogadores artesãos do seu servidor Discord\n   - O campo `job` é obrigatório e corresponde a uma profissão no jogo. *__Exemplo__: Lenhador*\n - O campo `server` é opcional e corresponde ao servidor de jogo desejado. Se não especificado, será usado o servidor de jogo definido para a guilda do Discord (veja `config`). *__Exemplo__: Imagiro*",
-                "set": "registra sua profissão no diretório, independentemente do servidor Discord; este registro não pode ser feito para outras pessoas.\n    - O campo `job` é obrigatório e corresponde a uma profissão no jogo. *__Exemplo__: Lenhador*\n - O campo `level` é obrigatório e corresponde ao nível de alinhamento entre 0 e 200, sendo 0 a remoção do diretório. *__Exemplo__: 200*\n - O campo `server` é opcional e corresponde ao servidor de jogo desejado. Se não especificado, será usado o servidor de jogo definido para a guilda do Discord (veja `config`). *__Exemplo__: Imagiro*"
+                "set": "registra sua profissão no diretório, independentemente do servidor Discord; este registro não pode ser feito para outras pessoas.\n    - O campo `job` é obrigatório e corresponde a uma profissão no jogo. *__Exemplo__: Lenhador*\n - O campo `level` é obrigatório e corresponde ao nível de alinhamento entre 0 e 200, sendo 0 a remoção do diretório. *__Exemplo__: 200*\n - O campo `server` é opcional e corresponde ao servidor de jogo desejado. Se não especificado, será usado o servidor de jogo definido para a guilda do Discord (veja `config`). *__Exemplo__: Imagiro*",
+                "user": "exibe as profissões de um membro do seu servidor Discord\n   - O campo `member` é opcional e corresponde a um membro do servidor Discord. Se não especificado, suas próprias profissões serão exibidas. *__Exemplo__: @Kaelly*\n - O campo `server` é opcional e corresponde ao servidor de jogo desejado. Se não especificado, será usado o servidor de jogo definido para a guilda do Discord (veja `config`). *__Exemplo__: Imagiro*"
             },
             "tutorial": {
                 "get": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_get_PT.webp",
-                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_PT.webp"
+                "set": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_set_PT.webp",
+                "user": "https://raw.githubusercontent.com/kaellybot/kaelly-cdn/refs/heads/main/kaellybot/tutorials/job_user_PT.webp"
             },
             "source": "Os dados coletados são usados apenas para o meu funcionamento correto."
         },
